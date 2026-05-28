@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF Universidad · Aprendizaje Profundo</title>
+    <meta
+      name="description"
+      content="Material interactivo de la asignatura Aprendizaje Profundo — CUNEF Universidad. Sesiones por tema con esquemas, ejemplos y código."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c;
+        --ink-soft: #3b4080;
+        --ink-mute: #7c80a6;
+        --paper: #ffffff;
+        --paper-warm: #f0ebdd;
+        --paper-deep: #101340;
+        --accent: #ff5700;
+        --accent-deep: #c8410f;
+        --gold: #fe961f;
+        --line: #e2ded0;
+        --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif;
+        --sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", Menlo, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scrollbar-gutter: stable;
+      }
+
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        background-image:
+          radial-gradient(
+            ellipse at 16% 10%,
+            rgba(26, 31, 108, 0.06) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 88% 92%,
+            rgba(255, 87, 0, 0.05) 0%,
+            transparent 55%
+          );
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 20px 32px;
+        font-size: 13px;
+      }
+      .bar-logo {
+        height: 30px;
+        width: auto;
+        display: block;
+      }
+      .bar-sub {
+        color: var(--ink-mute);
+      }
+
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 24px 28px 72px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .head {
+        margin-bottom: 10px;
+      }
+      .kicker {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 22px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--accent);
+      }
+      .head h1 {
+        font-family: var(--serif);
+        font-weight: 400;
+        font-size: clamp(40px, 6.5vw, 84px);
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+        margin-bottom: 22px;
+      }
+      .head h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .head p {
+        font-size: clamp(16px, 1.7vw, 20px);
+        line-height: 1.55;
+        color: var(--ink-soft);
+        max-width: 60ch;
+      }
+
+      .meta-row {
+        display: flex;
+        gap: 28px;
+        margin-top: 26px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-mute);
+        letter-spacing: 0.04em;
+        flex-wrap: wrap;
+      }
+      .meta-row span strong {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .picker {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .picker-two {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      @media (max-width: 720px) {
+        .picker-two {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 36px 34px 30px;
+        border: 1.5px solid var(--line);
+        border-radius: 14px;
+        background: #fbfaf6;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition:
+          transform 0.22s ease,
+          border-color 0.22s ease,
+          box-shadow 0.22s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent);
+        box-shadow: 0 18px 46px rgba(26, 31, 108, 0.12);
+      }
+      .card-tag {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-deep);
+      }
+      .card h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(26px, 3.2vw, 36px);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+      }
+      .card h2 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .card p {
+        font-size: 15px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        flex: 1;
+      }
+      .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-mute);
+        letter-spacing: 0.03em;
+        margin-top: 4px;
+      }
+      .card-meta .sep {
+        color: var(--line);
+      }
+      .card-go {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ink);
+      }
+      .card-go .arrow {
+        color: var(--accent);
+        transition: transform 0.22s ease;
+      }
+      .card:hover .card-go .arrow {
+        transform: translateX(6px);
+      }
+
+      .card-orn {
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        color: var(--accent);
+        opacity: 0.08;
+        pointer-events: none;
+        transition: opacity 0.22s ease;
+      }
+      .card:hover .card-orn {
+        opacity: 0.18;
+      }
+      .card-orn svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .card-tema1 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #f4f1e7 100%);
+      }
+      .card-tema2 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #eef0f6 100%);
+      }
+      .card-tema3 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #f4e8e2 100%);
+      }
+      .card-tema4 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #e9eef1 100%);
+      }
+
+      .level-band {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 52px 0 14px;
+      }
+      .level-band .level-name {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        white-space: nowrap;
+      }
+      .level-band .level-rule {
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+      .level-title {
+        font-family: var(--serif);
+        font-weight: 400;
+        font-size: clamp(28px, 4.2vw, 46px);
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin: 0 0 26px;
+      }
+      .level-title em {
+        font-style: italic;
+        color: var(--accent);
+      }
+
+      .card-soon {
+        background: repeating-linear-gradient(
+          135deg,
+          #fbfaf6 0,
+          #fbfaf6 14px,
+          #f5f1e7 14px,
+          #f5f1e7 28px
+        );
+        cursor: default;
+        opacity: 0.85;
+      }
+      .card-soon:hover {
+        transform: none;
+        border-color: var(--line);
+        box-shadow: none;
+      }
+      .card-soon:hover .card-orn {
+        opacity: 0.08;
+      }
+      .card-soon .card-go {
+        color: var(--ink-mute);
+      }
+      .card-soon .card-go .arrow {
+        color: var(--ink-mute);
+      }
+      .card-soon:hover .card-go .arrow {
+        transform: none;
+      }
+
+      footer {
+        text-align: center;
+        padding: 0 28px 28px;
+        font-size: 12px;
+        color: var(--ink-mute);
+        font-family: var(--mono);
+        letter-spacing: 0.04em;
+      }
+
+      /* Intro splash */
+      html.intro-lock,
+      html.intro-lock body {
+        overflow: hidden;
+      }
+
+      .intro {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: var(--paper-deep);
+        background-image:
+          radial-gradient(
+            ellipse at 22% 18%,
+            rgba(255, 87, 0, 0.16) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 82% 84%,
+            rgba(110, 120, 220, 0.18) 0%,
+            transparent 58%
+          );
+        cursor: pointer;
+        transform: translateY(0);
+        transition: transform 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+        will-change: transform;
+      }
+      .intro::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 4px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.5s ease 0.05s;
+      }
+      .intro.lift {
+        transform: translateY(-100%);
+      }
+      .intro.lift::after {
+        transform: scaleX(1);
+      }
+
+      .intro-lockup {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: clamp(14px, 3vw, 30px);
+        padding: 0 24px;
+        flex-wrap: nowrap;
+      }
+      .intro.lift .intro-lockup {
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+
+      .intro-cunef {
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: clamp(28px, 6.5vw, 72px);
+        letter-spacing: 0.06em;
+        color: #fff;
+        opacity: 0;
+        transform: translateX(-46px);
+        animation: introInLeft 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s
+          forwards;
+      }
+      .intro-topic {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 500;
+        font-size: clamp(30px, 7vw, 78px);
+        letter-spacing: -0.01em;
+        color: var(--paper-warm);
+        opacity: 0;
+        transform: translateX(46px);
+        animation: introInRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s
+          forwards;
+        line-height: 0.95;
+      }
+      .intro-x {
+        font-family: var(--serif);
+        font-size: clamp(24px, 4.5vw, 52px);
+        line-height: 1;
+        color: var(--accent);
+        opacity: 0;
+        transform: scale(0) rotate(-90deg);
+        animation: introPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.62s
+          forwards;
+      }
+      .intro-rule {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: -18px;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent) 18%,
+          var(--gold) 82%,
+          transparent
+        );
+        transform: scaleX(0);
+        transform-origin: center;
+        animation: introSweep 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.85s forwards;
+      }
+
+      @keyframes introInLeft {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes introInRight {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes introPop {
+        to {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+      }
+      @keyframes introSweep {
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      .intro-skip {
+        position: absolute;
+        bottom: 34px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(240, 235, 221, 0.45);
+        opacity: 0;
+        animation: introHint 0.6s ease 1.3s forwards;
+      }
+      @keyframes introHint {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .head {
+        opacity: 1;
+        transform: none;
+      }
+      body.intro-armed .head {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      body.intro-reveal .head {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+          opacity 0.7s ease 0.15s,
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .intro {
+          display: none;
+        }
+        body.intro-armed .head {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+    <noscript>
+      <style>
+        .intro {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <!-- INTRO SPLASH -->
+    <div class="intro" id="introSplash" role="presentation">
+      <div class="intro-lockup">
+        <span class="intro-cunef">CUNEF</span>
+        <span class="intro-x" aria-hidden="true">×</span>
+        <span class="intro-topic">Aprendizaje<br />Profundo</span>
+        <span class="intro-rule" aria-hidden="true"></span>
+      </div>
+      <span class="intro-skip">Pulsa para entrar</span>
+    </div>
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var overlay = document.getElementById("introSplash");
+        var reduce = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        var played = false;
+        try {
+          played = sessionStorage.getItem("apIntro") === "1";
+        } catch (e) {}
+        if (played || reduce) {
+          if (overlay && overlay.parentNode)
+            overlay.parentNode.removeChild(overlay);
+          return;
+        }
+        root.classList.add("intro-lock");
+        document.body.classList.add("intro-armed");
+        var lifted = false;
+        function lift() {
+          if (lifted) return;
+          lifted = true;
+          clearTimeout(timer);
+          overlay.classList.add("lift");
+          root.classList.remove("intro-lock");
+          document.body.classList.add("intro-reveal");
+          try {
+            sessionStorage.setItem("apIntro", "1");
+          } catch (e) {}
+          overlay.addEventListener("transitionend", function (ev) {
+            if (ev.propertyName === "transform" && overlay.parentNode)
+              overlay.parentNode.removeChild(overlay);
+          });
+        }
+        var timer = setTimeout(lift, 2000);
+        overlay.addEventListener("click", lift);
+        window.addEventListener("keydown", lift, { once: true });
+      })();
+    </script>
+
+    <header class="bar">
+      <img
+        class="bar-logo"
+        src="./assets/cunef-logo.png"
+        alt="CUNEF Universidad"
+      />
+      <span class="bar-sub">· Aprendizaje Profundo</span>
+    </header>
+
+    <main>
+      <div class="head">
+        <span class="kicker">CUNEF Universidad · Asignatura</span>
+        <h1>Aprendizaje<br /><em>Profundo</em>.</h1>
+        <p>
+          Material interactivo de la asignatura, organizado por temas. Cada
+          sesión es una presentación navegable con esquemas, ejemplos y código
+          para entender qué hay detrás de las redes neuronales modernas.
+        </p>
+        <div class="meta-row">
+          <span><strong>Profesor</strong> · Dr. César Byron Guevara</span>
+          <span><strong>Curso</strong> · 2025–2026</span>
+          <span
+            ><strong>Sesiones</strong> · navegables a pantalla completa</span
+          >
+        </div>
+      </div>
+
+      <!-- ===== TEMA 1 ===== -->
+      <div class="level-band">
+        <span class="level-name">Tema 1 · Introducción</span>
+        <span class="level-rule" aria-hidden="true"></span>
+      </div>
+      <h2 class="level-title">
+        Qué es el <em>deep learning</em> y la primera neurona.
+      </h2>
+
+      <div class="picker">
+        <a class="card card-tema1" href="./sesion1.html">
+          <div class="card-orn" aria-hidden="true">
+            <svg viewBox="0 0 400 400">
+              <circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle
+                cx="200"
+                cy="200"
+                r="120"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle cx="200" cy="200" r="60" fill="currentColor" />
+            </svg>
+          </div>
+          <span class="card-tag">La sesión</span>
+          <h2>De la inteligencia artificial al <em>perceptrón</em></h2>
+          <p>
+            IA, ML y deep learning explicados desde cero. Representaciones,
+            capas profundas, el bucle de entrenamiento y la primera neurona
+            artificial. Funciones de activación y de pérdida para entender cómo
+            aprende una red.
+          </p>
+          <div class="card-meta">
+            <span>20 diapositivas</span>
+            <span class="sep">·</span>
+            <span>~50 minutos</span>
+            <span class="sep">·</span>
+            <span>incluye perceptrón simple</span>
+          </div>
+          <span class="card-go"
+            >Entrar a la sesión <span class="arrow">→</span></span
+          >
+        </a>
+      </div>
+
+      <!-- ===== TEMA 2 ===== -->
+      <div class="level-band">
+        <span class="level-name">Tema 2 · Perceptrón multicapa</span>
+        <span class="level-rule" aria-hidden="true"></span>
+      </div>
+      <h2 class="level-title">Del MLP a la <em>retropropagación</em>.</h2>
+
+      <div class="picker">
+        <div class="card card-tema2 card-soon" aria-disabled="true">
+          <div class="card-orn" aria-hidden="true">
+            <svg viewBox="0 0 400 400">
+              <circle cx="80" cy="100" r="20" fill="currentColor" />
+              <circle cx="80" cy="200" r="20" fill="currentColor" />
+              <circle cx="80" cy="300" r="20" fill="currentColor" />
+              <circle cx="200" cy="140" r="20" fill="currentColor" />
+              <circle cx="200" cy="260" r="20" fill="currentColor" />
+              <circle cx="320" cy="200" r="20" fill="currentColor" />
+              <path
+                d="M80 100L200 140M80 100L200 260M80 200L200 140M80 200L200 260M80 300L200 140M80 300L200 260M200 140L320 200M200 260L320 200"
+                stroke="currentColor"
+                stroke-width="1.5"
+                fill="none"
+              />
+            </svg>
+          </div>
+          <span class="card-tag">La sesión</span>
+          <h2>Capas ocultas y <em>backpropagation</em></h2>
+          <p>
+            El siguiente paso del perceptrón: redes con capas ocultas,
+            entrenamiento por descenso del gradiente y la base matemática que
+            hace posible aprender funciones arbitrarias.
+          </p>
+          <div class="card-meta"><span>Próximamente</span></div>
+          <span class="card-go"
+            >Aún no disponible <span class="arrow">→</span></span
+          >
+        </div>
+      </div>
+
+      <!-- ===== TEMA 3 ===== -->
+      <div class="level-band">
+        <span class="level-name">Tema 3 · Base matemática</span>
+        <span class="level-rule" aria-hidden="true"></span>
+      </div>
+      <h2 class="level-title">Tensores, gradientes y <em>descenso</em>.</h2>
+
+      <div class="picker">
+        <div class="card card-tema3 card-soon" aria-disabled="true">
+          <div class="card-orn" aria-hidden="true">
+            <svg viewBox="0 0 400 400">
+              <path
+                d="M60 320 Q200 80 340 320"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+              />
+              <circle cx="200" cy="200" r="14" fill="currentColor" />
+              <path
+                d="M200 200 L240 240"
+                stroke="currentColor"
+                stroke-width="3"
+              />
+              <path d="M232 230 L250 248 L218 244" fill="currentColor" />
+            </svg>
+          </div>
+          <span class="card-tag">La sesión</span>
+          <h2>Optimización y <em>derivadas</em></h2>
+          <p>
+            La matemática mínima imprescindible para entrenar redes: álgebra
+            lineal con NumPy, derivadas parciales, regla de la cadena y por qué
+            el descenso del gradiente funciona.
+          </p>
+          <div class="card-meta"><span>Próximamente</span></div>
+          <span class="card-go"
+            >Aún no disponible <span class="arrow">→</span></span
+          >
+        </div>
+      </div>
+
+      <!-- ===== TEMA 4 ===== -->
+      <div class="level-band">
+        <span class="level-name">Tema 4 · Redes convolucionales</span>
+        <span class="level-rule" aria-hidden="true"></span>
+      </div>
+      <h2 class="level-title">Visión por computador con <em>CNN</em>.</h2>
+
+      <div class="picker">
+        <div class="card card-tema4 card-soon" aria-disabled="true">
+          <div class="card-orn" aria-hidden="true">
+            <svg viewBox="0 0 400 400">
+              <rect
+                x="60"
+                y="100"
+                width="80"
+                height="200"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <rect
+                x="160"
+                y="120"
+                width="80"
+                height="160"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <rect
+                x="260"
+                y="140"
+                width="80"
+                height="120"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="M140 200 L160 200 M240 200 L260 200"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+          </div>
+          <span class="card-tag">La sesión</span>
+          <h2>Filtros, pooling y <em>arquitecturas</em></h2>
+          <p>
+            Las redes convolucionales que revolucionaron la visión por
+            computador: convolución, pooling, padding, y las arquitecturas
+            clásicas (LeNet, AlexNet, VGG, ResNet).
+          </p>
+          <div class="card-meta"><span>Próximamente</span></div>
+          <span class="card-go"
+            >Aún no disponible <span class="arrow">→</span></span
+          >
+        </div>
+      </div>
+    </main>
+
+    <footer>CUNEF Universidad · Aprendizaje Profundo · cunef.edu</footer>
+  </body>
+</html>
