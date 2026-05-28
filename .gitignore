@@ -7,3 +7,4 @@ node_modules/
 
 # Material fuente de la asignatura (no se publica)
 files/
+.vercel
