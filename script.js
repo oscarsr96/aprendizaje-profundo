@@ -77,10 +77,19 @@ document.addEventListener("keydown", (e) => {
   // Ignorar si el foco está en un input
   if (e.target.matches("input, textarea")) return;
 
-  if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+  if (
+    e.key === "ArrowRight" ||
+    e.key === "ArrowDown" ||
+    e.key === " " ||
+    e.key === "PageDown"
+  ) {
     e.preventDefault();
     next();
-  } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+  } else if (
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowUp" ||
+    e.key === "PageUp"
+  ) {
     e.preventDefault();
     prev();
   } else if (e.key === "Home") {
