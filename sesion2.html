@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 1 · Práctica</title>
+    <meta
+      name="description"
+      content="Tema 1 de Aprendizaje Profundo en CUNEF. Introducción al deep learning en Python: primeros pasos con las librerías y tu primera red neuronal con Keras."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 1 · Práctica</span>
+      </a>
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span
+        ><span id="slideTotal">0</span>
+      </div>
+      <button
+        class="topbar-pdf"
+        id="pdfBtn"
+        type="button"
+        title="Descargar como PDF (P)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- ============================================================ -->
+      <!-- 00 — PORTADA -->
+      <!-- ============================================================ -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block">
+              <span class="meta-label">Asignatura</span>
+              <span class="meta-val">Aprendizaje Profundo</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Tema</span>
+              <span class="meta-val">1 · Práctica</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Duración</span>
+              <span class="meta-val">~50 minutos</span>
+            </div>
+          </div>
+          <h1 class="cover-title">
+            Primeros pasos<br />
+            en <em>Python</em>.
+          </h1>
+          <p class="cover-sub">
+            Del concepto al código: qué librerías usa el deep learning, cómo se
+            representan los datos como <em>tensores</em> y cómo entrenar tu
+            primera red neuronal de principio a fin con Keras.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <rect
+              x="60"
+              y="60"
+              width="280"
+              height="280"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="0.5"
+            />
+            <rect
+              x="100"
+              y="100"
+              width="200"
+              height="200"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="0.5"
+            />
+            <circle
+              cx="200"
+              cy="200"
+              r="60"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="0.5"
+            />
+            <path
+              d="M60 200 H340 M200 60 V340"
+              stroke="currentColor"
+              stroke-width="0.5"
+            />
+          </svg>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 01 — AGENDA -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a hacer.</h2>
+          <ol class="agenda">
+            <li>
+              <span class="agenda-num">01</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title"
+                  >El ecosistema <em>Python</em> para deep learning</span
+                >
+                <span class="agenda-desc"
+                  >Por qué Python, las librerías clave y cómo se montan en un
+                  entorno.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">02</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title">NumPy y los tensores</span>
+                <span class="agenda-desc"
+                  >Cómo se representan los datos: escalares, vectores, matrices
+                  y operaciones vectorizadas.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">03</span>
+              <span class="agenda-time">20&prime;</span>
+              <div>
+                <span class="agenda-title">Tu primera red neuronal</span>
+                <span class="agenda-desc"
+                  >MNIST de principio a fin con Keras: datos, modelo, compilar,
+                  entrenar y evaluar.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">04</span>
+              <span class="agenda-time">5&prime;</span>
+              <div>
+                <span class="agenda-title">Errores comunes y consejos</span>
+                <span class="agenda-desc"
+                  >Los tropiezos típicos del primer modelo y cómo
+                  evitarlos.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">05</span>
+              <span class="agenda-time">5&prime;</span>
+              <div>
+                <span class="agenda-title">Ideas para llevarte</span>
+                <span class="agenda-desc"
+                  >El esqueleto que se repite en casi cualquier proyecto de deep
+                  learning.</span
+                >
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 02 — DIVISOR 1 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Ecosistema">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">El ecosistema<br /><em>Python</em>.</h2>
+          <p class="divider-sub">
+            Antes de escribir una red conviene saber qué herramientas hay sobre
+            la mesa y para qué sirve cada una.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 03 — Por qué Python -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Por qué Python">
+        <div class="slide-inner">
+          <span class="kicker">El lenguaje del deep learning</span>
+          <h2 class="h2">¿Por qué <em>Python</em>?</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Python no es el lenguaje más rápido, pero se ha convertido en el
+                estándar de hecho del machine learning por una razón:
+                <em>pega muy bien las piezas</em>.
+              </p>
+              <p class="lead">
+                Escribes código sencillo y legible, mientras el trabajo pesado
+                lo hacen librerías escritas en C/C++ y CUDA que aprovechan la
+                CPU y la <em>GPU</em>. Tú piensas; la máquina calcula.
+              </p>
+            </div>
+            <ul class="compare-list">
+              <li>Sintaxis simple: prototipas una idea en minutos.</li>
+              <li>El mayor ecosistema de librerías científicas que existe.</li>
+              <li>
+                Frameworks maduros (TensorFlow, PyTorch) con toda la comunidad
+                detrás.
+              </li>
+              <li>
+                Cuadernos interactivos (Jupyter, Colab) para experimentar y ver
+                resultados al instante.
+              </li>
+              <li>Gratis para usar GPU en la nube con Google Colab.</li>
+            </ul>
+          </div>
+          <p class="note">
+            Idea clave: en deep learning casi nunca programas las operaciones
+            matemáticas a mano. Llamas a librerías que ya las tienen
+            optimizadas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 04 — Las librerías -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Librerías">
+        <div class="slide-inner">
+          <span class="kicker">El kit de herramientas</span>
+          <h2 class="h2">Las <em>librerías</em> que vas a usar.</h2>
+          <div class="files-grid">
+            <div class="file-card">
+              <span class="file-ico">NUMPY</span>
+              <h3>NumPy</h3>
+              <p>
+                La base de todo. Arrays n-dimensionales (tensores) y operaciones
+                matemáticas vectorizadas y rápidas.
+              </p>
+            </div>
+            <div class="file-card">
+              <span class="file-ico">PANDAS</span>
+              <h3>pandas</h3>
+              <p>
+                Carga y limpieza de datos tabulares: leer CSV, filtrar, agrupar.
+                El paso previo casi siempre.
+              </p>
+            </div>
+            <div class="file-card">
+              <span class="file-ico">PLT</span>
+              <h3>Matplotlib</h3>
+              <p>
+                Visualización: ver los datos, dibujar la curva de pérdida y
+                entender qué está pasando.
+              </p>
+            </div>
+            <div class="file-card">
+              <span class="file-ico">SKLEARN</span>
+              <h3>scikit-learn</h3>
+              <p>
+                ML clásico y utilidades: dividir en train/test, escalar datos,
+                métricas de evaluación.
+              </p>
+            </div>
+            <div class="file-card">
+              <span class="file-ico">TF·KERAS</span>
+              <h3>TensorFlow / Keras</h3>
+              <p>
+                El framework de deep learning. Keras es su API de alto nivel:
+                construir y entrenar redes con pocas líneas.
+              </p>
+            </div>
+            <div class="file-card">
+              <span class="file-ico">TORCH</span>
+              <h3>PyTorch</h3>
+              <p>
+                La alternativa, dominante en investigación. Más explícito. Hoy
+                usaremos Keras, pero conviene sonarte.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 05 — Montar el entorno -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Entorno">
+        <div class="slide-inner">
+          <span class="kicker">Primer arranque</span>
+          <h2 class="h2">Instalar e <em>importar</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Con un solo comando instalas el stack. En Google Colab ya viene
+                todo preinstalado: abres un cuaderno y a programar.
+              </p>
+              <p class="lead">
+                La convención es importar siempre con los mismos alias
+                (<code>np</code>, <code>pd</code>, <code>plt</code>). Verás ese
+                patrón en todo el código del mundo.
+              </p>
+            </div>
+            <div class="code-block">
+              <span class="c-com"
+                ># 1) Instalar (terminal / celda de Colab)</span
+              ><br />
+              pip install tensorflow numpy pandas matplotlib<br /><br />
+              <span class="c-com"># 2) Importar con los alias de siempre</span
+              ><br />
+              <span class="c-kw">import</span> numpy
+              <span class="c-kw">as</span> np<br />
+              <span class="c-kw">import</span> pandas
+              <span class="c-kw">as</span> pd<br />
+              <span class="c-kw">import</span> matplotlib.pyplot
+              <span class="c-kw">as</span> plt<br />
+              <span class="c-kw">import</span> tensorflow
+              <span class="c-kw">as</span> tf<br />
+              <span class="c-kw">from</span> tensorflow
+              <span class="c-kw">import</span> keras<br /><br />
+              <span class="c-com"># 3) Comprobar versión</span><br />
+              <span class="c-kw">print</span>(tf.__version__)
+              <span class="c-com"># → 2.x</span>
+            </div>
+          </div>
+          <p class="note">
+            Consejo: trabaja siempre dentro de un <em>entorno virtual</em> (venv
+            o conda) o en Colab. Así cada proyecto tiene sus propias versiones y
+            no se pisan entre sí.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 06 — DIVISOR 2 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Tensores">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">NumPy y los<br /><em>tensores</em>.</h2>
+          <p class="divider-sub">
+            Todo lo que entra y sale de una red neuronal es un tensor. Entender
+            la pieza básica te ahorra la mitad de los errores.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 07 — Qué es un tensor -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Qué es un tensor">
+        <div class="slide-inner">
+          <span class="kicker">La pieza básica de los datos</span>
+          <h2 class="h2">Un <em>tensor</em> es un array.</h2>
+          <p class="lead">
+            "Tensor" suena complejo, pero es solo un array de números con un
+            número de dimensiones (su <em>rango</em>). Una imagen, una tabla o
+            un sonido se representan así.
+          </p>
+          <div class="two-col">
+            <ul class="compare-list">
+              <li>
+                <strong>0D · escalar</strong> — un número suelto: <code>7</code>
+              </li>
+              <li>
+                <strong>1D · vector</strong> — una lista: <code>[1, 2, 3]</code>
+              </li>
+              <li>
+                <strong>2D · matriz</strong> — una tabla: filas × columnas
+              </li>
+              <li>
+                <strong>3D</strong> — una imagen en color: alto × ancho ×
+                canales
+              </li>
+              <li><strong>4D</strong> — un lote de imágenes</li>
+            </ul>
+            <div class="code-block">
+              <span class="c-kw">import</span> numpy
+              <span class="c-kw">as</span> np<br /><br />
+              escalar = np.array(<span class="c-str">7</span>)<br />
+              vector&nbsp;&nbsp;= np.array([<span class="c-str">1</span>,
+              <span class="c-str">2</span>, <span class="c-str">3</span>])<br />
+              matriz&nbsp;&nbsp;= np.array([[<span class="c-str">1</span>,
+              <span class="c-str">2</span>], [<span class="c-str">3</span>,
+              <span class="c-str">4</span>]])<br /><br />
+              <span class="c-kw">print</span>(matriz.shape)
+              <span class="c-com"># (2, 2)</span><br />
+              <span class="c-kw">print</span>(matriz.ndim)
+              <span class="c-com"># 2 → es 2D</span><br />
+              <span class="c-kw">print</span>(matriz.dtype)
+              <span class="c-com"># int64</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 08 — Operaciones vectorizadas -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Vectorización">
+        <div class="slide-inner">
+          <span class="kicker">Por qué NumPy es rápido</span>
+          <h2 class="h2">Operaciones <em>vectorizadas</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En lugar de recorrer los números con un bucle, NumPy aplica la
+                operación a todo el array de una vez, en código compilado. Es
+                más corto de escribir y mucho más rápido.
+              </p>
+              <p class="lead">
+                Las redes neuronales son, por dentro, sumas y
+                <em>multiplicaciones de matrices</em> a gran escala. Por eso
+                esto importa tanto.
+              </p>
+            </div>
+            <div class="code-block">
+              a = np.array([<span class="c-str">1</span>,
+              <span class="c-str">2</span>, <span class="c-str">3</span>])<br />
+              b = np.array([<span class="c-str">10</span>,
+              <span class="c-str">20</span>,
+              <span class="c-str">30</span>])<br /><br />
+              a + b
+              <span class="c-com"># [11, 22, 33]</span><br />
+              a * <span class="c-str">2</span>
+              <span class="c-com"># [2, 4, 6]</span><br />
+              a @ b
+              <span class="c-com"># 140 (producto escalar)</span><br /><br />
+              <span class="c-com"># Sin bucles, sin esfuerzo:</span><br />
+              X = np.random.randn(<span class="c-str">1000</span>,
+              <span class="c-str">784</span>)<br />
+              W = np.random.randn(<span class="c-str">784</span>,
+              <span class="c-str">128</span>)<br />
+              salida = X @ W
+              <span class="c-com"># (1000, 128)</span>
+            </div>
+          </div>
+          <p class="note">
+            Esa última línea (<code>X @ W</code>) es exactamente lo que hace una
+            capa densa por dentro: multiplicar las entradas por los pesos.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 09 — DIVISOR 3 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Primera red">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Tu primera<br /><em>red neuronal</em>.</h2>
+          <p class="divider-sub">
+            Vamos a clasificar dígitos manuscritos (MNIST), el "hola mundo" del
+            deep learning, de principio a fin.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 10 — El problema y los datos -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Los datos">
+        <div class="slide-inner">
+          <span class="kicker">Paso 1 · Los datos</span>
+          <h2 class="h2">El dataset <em>MNIST</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                70.000 imágenes de dígitos escritos a mano (0–9), en blanco y
+                negro de 28×28 píxeles. La tarea: dada una imagen, predecir qué
+                dígito es.
+              </p>
+              <p class="lead">
+                Keras lo trae listo. Viene ya dividido en
+                <em>entrenamiento</em> (60.000) y <em>test</em> (10.000), con
+                sus etiquetas.
+              </p>
+            </div>
+            <div class="code-block">
+              <span class="c-kw">from</span> tensorflow.keras.datasets
+              <span class="c-kw">import</span> mnist<br /><br />
+              (X_train, y_train), (X_test, y_test) = \<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;mnist.load_data()<br /><br />
+              X_train.shape
+              <span class="c-com"># (60000, 28, 28)</span><br />
+              y_train[<span class="c-str">0</span>]
+              <span class="c-com"># 5 (la etiqueta)</span><br />
+              X_train.max()
+              <span class="c-com"># 255 (intensidad del píxel)</span>
+            </div>
+          </div>
+          <p class="note">
+            Regla de oro: el modelo solo aprende del conjunto de
+            <em>entrenamiento</em>. El de <em>test</em> se reserva para medir si
+            de verdad generaliza a datos que nunca ha visto.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 11 — Preprocesado -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Preprocesado">
+        <div class="slide-inner">
+          <span class="kicker">Paso 2 · Preparar los datos</span>
+          <h2 class="h2">Aplanar y <em>normalizar</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Dos transformaciones antes de entrenar. Primero
+                <em>aplanamos</em> cada imagen de 28×28 a un vector de 784
+                números, porque nuestra primera red espera un vector de entrada.
+              </p>
+              <p class="lead">
+                Segundo, <em>normalizamos</em>: dividimos entre 255 para que
+                cada píxel quede entre 0 y 1. Las redes entrenan mucho mejor con
+                valores pequeños y centrados.
+              </p>
+            </div>
+            <div class="code-block">
+              <span class="c-com"># 28x28 = 784 → vector; 0-255 → 0-1</span
+              ><br />
+              X_train = X_train.reshape(<span class="c-str">60000</span>,
+              <span class="c-str">784</span>)<br />
+              X_train = X_train.astype(<span class="c-str">"float32"</span>) /
+              <span class="c-str">255</span><br /><br />
+              X_test = X_test.reshape(<span class="c-str">10000</span>,
+              <span class="c-str">784</span>)<br />
+              X_test = X_test.astype(<span class="c-str">"float32"</span>) /
+              <span class="c-str">255</span><br /><br />
+              X_train.shape
+              <span class="c-com"># (60000, 784)</span><br />
+              X_train.min(), X_train.max()
+              <span class="c-com"># 0.0, 1.0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 12 — Definir el modelo -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Definir modelo">
+        <div class="slide-inner">
+          <span class="kicker">Paso 3 · El modelo</span>
+          <h2 class="h2">Apilar <em>capas</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un modelo <code>Sequential</code> es una pila de capas. Aquí dos
+                capas <code>Dense</code> (totalmente conectadas):
+              </p>
+              <ul class="compare-list">
+                <li>
+                  Una capa oculta de <strong>128 neuronas</strong> con
+                  <code>relu</code> (no linealidad).
+                </li>
+                <li>
+                  Una capa de salida de <strong>10 neuronas</strong> con
+                  <code>softmax</code> → una probabilidad por dígito.
+                </li>
+              </ul>
+            </div>
+            <div class="code-block">
+              <span class="c-kw">from</span> tensorflow.keras
+              <span class="c-kw">import</span> layers, models<br /><br />
+              model = models.Sequential([<br />
+              &nbsp;&nbsp;layers.Dense(<span class="c-str">128</span>,
+              activation=<span class="c-str">"relu"</span>,<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input_shape=(<span
+                class="c-str"
+                >784</span
+              >,)),<br />
+              &nbsp;&nbsp;layers.Dense(<span class="c-str">10</span>,
+              activation=<span class="c-str">"softmax"</span>),<br />
+              ])<br /><br />
+              model.summary()
+              <span class="c-com"># resumen de capas y parámetros</span>
+            </div>
+          </div>
+          <p class="note">
+            <code>relu</code> en las capas ocultas y <code>softmax</code> en la
+            salida multiclase es la combinación por defecto. Si esto te suena de
+            la sesión anterior, es justo el perceptrón llevado a varias capas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 13 — Compilar -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Compilar">
+        <div class="slide-inner">
+          <span class="kicker">Paso 4 · Compilar</span>
+          <h2 class="h2">Las tres <em>decisiones</em>.</h2>
+          <p class="lead">
+            Compilar es decirle al modelo <em>cómo</em> va a aprender. Son las
+            tres piezas del bucle de entrenamiento que vimos en teoría.
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>optimizer</h4>
+              <div class="fn-formula">"adam"</div>
+              <p>
+                Cómo ajusta los pesos para reducir el error. Adam es una opción
+                robusta por defecto.
+              </p>
+              <span class="fn-use">→ el "cómo corregir"</span>
+            </div>
+            <div class="fn-card">
+              <h4>loss</h4>
+              <div class="fn-formula">sparse_categorical_crossentropy</div>
+              <p>
+                Mide cuánto se equivoca. La adecuada para clasificación
+                multiclase con etiquetas enteras.
+              </p>
+              <span class="fn-use">→ el "cuánto me equivoco"</span>
+            </div>
+            <div class="fn-card">
+              <h4>metrics</h4>
+              <div class="fn-formula">["accuracy"]</div>
+              <p>
+                Lo que miramos los humanos para juzgar el modelo. No se usa para
+                entrenar, solo para informar.
+              </p>
+              <span class="fn-use">→ el "cómo voy"</span>
+            </div>
+          </div>
+          <div class="code-block" style="margin-top: 20px">
+            model.compile(<br />
+            &nbsp;&nbsp;optimizer=<span class="c-str">"adam"</span>,<br />
+            &nbsp;&nbsp;loss=<span class="c-str"
+              >"sparse_categorical_crossentropy"</span
+            >,<br />
+            &nbsp;&nbsp;metrics=[<span class="c-str">"accuracy"</span>],<br />
+            )
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 14 — Entrenar -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Entrenar">
+        <div class="slide-inner">
+          <span class="kicker">Paso 5 · Entrenar</span>
+          <h2 class="h2">Una línea: <em>fit</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                <code>fit</code> ejecuta el bucle de entrenamiento por ti:
+                forward → pérdida → ajuste, repetido sobre lotes
+                (<em>batches</em>) durante varias pasadas completas
+                (<em>epochs</em>).
+              </p>
+              <ul class="compare-list">
+                <li>
+                  <strong>epochs=5</strong> — 5 pasadas por todos los datos.
+                </li>
+                <li>
+                  <strong>batch_size=128</strong> — ajusta los pesos cada 128
+                  ejemplos.
+                </li>
+                <li>
+                  <strong>validation_split=0.1</strong> — reserva un 10% para
+                  vigilar que no se sobreajuste.
+                </li>
+              </ul>
+            </div>
+            <div class="code-block">
+              history = model.fit(<br />
+              &nbsp;&nbsp;X_train, y_train,<br />
+              &nbsp;&nbsp;epochs=<span class="c-str">5</span>,<br />
+              &nbsp;&nbsp;batch_size=<span class="c-str">128</span>,<br />
+              &nbsp;&nbsp;validation_split=<span class="c-str">0.1</span>,<br />
+              )<br /><br />
+              <span class="c-com"># Epoch 1/5 loss: 0.34 acc: 0.90</span><br />
+              <span class="c-com"># ...</span><br />
+              <span class="c-com"># Epoch 5/5 loss: 0.07 acc: 0.98</span>
+            </div>
+          </div>
+          <p class="note">
+            Verás la pérdida bajar y la precisión subir época a época. Eso es,
+            literalmente, la red aprendiendo.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 15 — Evaluar y predecir -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Evaluar">
+        <div class="slide-inner">
+          <span class="kicker">Paso 6 · Evaluar y predecir</span>
+          <h2 class="h2">¿De verdad <em>generaliza</em>?</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El momento de la verdad: medimos el modelo sobre el conjunto de
+                <em>test</em>, que no ha visto nunca. Si la precisión sigue
+                alta, ha aprendido de verdad y no se ha limitado a memorizar.
+              </p>
+              <p class="lead">
+                Con <code>predict</code> obtenemos, para una imagen nueva, las
+                10 probabilidades; <code>argmax</code> nos da el dígito más
+                probable.
+              </p>
+            </div>
+            <div class="code-block">
+              <span class="c-com"># Evaluar sobre datos nuevos</span><br />
+              test_loss, test_acc = model.evaluate(X_test, y_test)<br />
+              <span class="c-kw">print</span>(<span class="c-str"
+                >f"Precisión test: {test_acc:.3f}"</span
+              >)<br />
+              <span class="c-com"># → ~0.975</span><br /><br />
+              <span class="c-com"># Predecir un dígito concreto</span><br />
+              probs = model.predict(X_test[:<span class="c-str">1</span>])<br />
+              probs.argmax()
+              <span class="c-com"># → 7 (el dígito predicho)</span>
+            </div>
+          </div>
+          <p class="note">
+            Si la precisión en entrenamiento fuera muy alta y la de test mucho
+            más baja, tendríamos <em>sobreajuste</em>: el modelo memoriza en vez
+            de generalizar. Lo veremos en próximos temas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 16 — Código completo -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Código completo">
+        <div class="slide-inner">
+          <span class="kicker">Todo junto</span>
+          <h2 class="h2">Tu primera red, <em>completa</em>.</h2>
+          <div class="code-block">
+            <span class="c-kw">import</span> tensorflow
+            <span class="c-kw">as</span> tf<br />
+            <span class="c-kw">from</span> tensorflow.keras
+            <span class="c-kw">import</span> layers, models, datasets<br /><br />
+            <span class="c-com"># 1 · Datos</span><br />
+            (X_train, y_train), (X_test, y_test) = datasets.mnist.load_data()<br />
+            X_train = X_train.reshape(<span class="c-str">60000</span>,
+            <span class="c-str">784</span>).astype(<span class="c-str"
+              >"float32"</span
+            >) / <span class="c-str">255</span><br />
+            X_test&nbsp;&nbsp;= X_test.reshape(<span class="c-str">10000</span>,
+            <span class="c-str">784</span>).astype(<span class="c-str"
+              >"float32"</span
+            >) / <span class="c-str">255</span><br /><br />
+            <span class="c-com"># 2 · Modelo</span><br />
+            model = models.Sequential([<br />
+            &nbsp;&nbsp;layers.Dense(<span class="c-str">128</span>,
+            activation=<span class="c-str">"relu"</span>, input_shape=(<span
+              class="c-str"
+              >784</span
+            >,)),<br />
+            &nbsp;&nbsp;layers.Dense(<span class="c-str">10</span>,
+            activation=<span class="c-str">"softmax"</span>),<br />
+            ])<br /><br />
+            <span class="c-com"># 3 · Compilar</span><br />
+            model.compile(optimizer=<span class="c-str">"adam"</span>,<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loss=<span
+              class="c-str"
+              >"sparse_categorical_crossentropy"</span
+            >,<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;metrics=[<span
+              class="c-str"
+              >"accuracy"</span
+            >])<br /><br />
+            <span class="c-com"># 4 · Entrenar y evaluar</span><br />
+            model.fit(X_train, y_train, epochs=<span class="c-str">5</span>,
+            batch_size=<span class="c-str">128</span>)<br />
+            model.evaluate(X_test, y_test)
+            <span class="c-com"># ~97% de acierto</span>
+          </div>
+          <p class="note">
+            Menos de 15 líneas para clasificar dígitos con un 97% de acierto.
+            Ese es el poder de las librerías modernas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 17 — DIVISOR 4 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Errores comunes">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">Errores<br /><em>comunes</em>.</h2>
+          <p class="divider-sub">
+            Casi todos los tropiezos del primer modelo se repiten. Reconocerlos
+            te ahorra horas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 18 — Errores comunes -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Consejos">
+        <div class="slide-inner">
+          <span class="kicker">Lo que falla la primera vez</span>
+          <h2 class="h2">Cuatro <em>tropiezos</em> típicos.</h2>
+          <div class="recipe">
+            <div class="recipe-step">
+              <span class="recipe-letter">1</span>
+              <div>
+                <h3>No normalizar</h3>
+                <p>
+                  Entrenar con píxeles de 0 a 255 hace que la red apenas
+                  aprenda. <em>Divide entre 255.</em>
+                </p>
+              </div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-letter">2</span>
+              <div>
+                <h3>Shapes que no encajan</h3>
+                <p>
+                  El error más frecuente. Imprime siempre <code>.shape</code>:
+                  la entrada del modelo debe coincidir con tus datos.
+                </p>
+              </div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-letter">3</span>
+              <div>
+                <h3>Loss equivocada</h3>
+                <p>
+                  Clasificación ≠ regresión. Con etiquetas enteras usa
+                  <em>sparse_categorical_crossentropy</em>, no MSE.
+                </p>
+              </div>
+            </div>
+            <div class="recipe-step">
+              <span class="recipe-letter">4</span>
+              <div>
+                <h3>Evaluar con datos de entrenamiento</h3>
+                <p>
+                  Da una nota engañosamente alta. Mide siempre sobre el
+                  <em>test</em>, datos que el modelo no ha visto.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 19 — Ideas para llevarte -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen de la práctica</span>
+          <h2 class="h2">Tres ideas para <em>llevarte</em>.</h2>
+          <div class="train-loop">
+            <div class="tl-step">
+              <span class="tl-num">01 · Librerías</span>
+              <h4>No reinventes la rueda</h4>
+              <p>
+                Python pega piezas; NumPy y Keras hacen el cálculo pesado. Tú
+                diseñas el experimento.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">02 · Tensores</span>
+              <h4>Todo es un array</h4>
+              <p>
+                Datos, pesos y predicciones son tensores. Vigilar las
+                <code>.shape</code> evita la mayoría de los errores.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">03 · La receta</span>
+              <h4>Siempre el mismo esqueleto</h4>
+              <p>
+                Datos → modelo → compilar → <code>fit</code> →
+                <code>evaluate</code>. Casi cualquier proyecto sigue ese guion.
+              </p>
+            </div>
+          </div>
+          <p class="callout" style="margin-top: 28px">
+            Ya sabes <em>qué</em> es el deep learning y ahora también
+            <em>cómo</em> se programa. El resto del curso es profundizar en cada
+            una de estas piezas.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 20 — CIERRE -->
+      <!-- ============================================================ -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 1 · Práctica</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">
+            Para practicar por tu cuenta antes del próximo tema:
+          </p>
+          <ul class="proj-list">
+            <li>
+              <strong>Reto 1</strong> — Cambia <code>epochs</code> y el número
+              de neuronas y observa cómo varía la precisión.
+            </li>
+            <li>
+              <strong>Reto 2</strong> — Dibuja con Matplotlib la curva de
+              pérdida guardada en <code>history.history["loss"]</code>.
+            </li>
+            <li>
+              <strong>Chollet, F.</strong> — <em>Deep Learning with Python</em>,
+              cap. 2 (el ejemplo de MNIST paso a paso).
+            </li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./index.html">
+              <span class="close-cta-eyebrow">Volver al inicio</span>
+              <span class="close-cta-title"
+                >Ver todos los temas
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">Tema 2, 3 y 4 en preparación.</span>
+            </a>
+            <a class="close-cta" href="./sesion1.html">
+              <span class="close-cta-eyebrow">Repasar la teoría</span>
+              <span class="close-cta-title"
+                >De la IA al perceptrón
+                <span class="close-cta-arrow">↺</span></span
+              >
+              <span class="close-cta-note"
+                >La sesión conceptual del Tema 1.</span
+              >
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- CONTROLES FLOTANTES -->
+    <div class="controls">
+      <button
+        class="ctrl"
+        id="prevBtn"
+        type="button"
+        title="Anterior (←)"
+        aria-label="Slide anterior"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="ctrl"
+        id="nextBtn"
+        type="button"
+        title="Siguiente (→)"
+        aria-label="Slide siguiente"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 6l6 6-6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- AYUDA -->
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
