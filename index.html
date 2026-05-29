@@ -145,10 +145,51 @@
       .picker-two {
         grid-template-columns: repeat(2, 1fr);
       }
+      .picker-three {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
       @media (max-width: 720px) {
         .picker-two {
           grid-template-columns: 1fr;
         }
+        .picker-three {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (min-width: 721px) and (max-width: 960px) {
+        .picker-three {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* Tarjetas compactas para la fila de 3 */
+      .picker-three .card {
+        gap: 10px;
+        padding: 26px 24px 22px;
+        border-radius: 12px;
+      }
+      .picker-three .card h2 {
+        font-size: clamp(20px, 2.4vw, 25px);
+      }
+      .picker-three .card p {
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+      .picker-three .card-meta {
+        flex-wrap: wrap;
+        font-size: 11px;
+        row-gap: 2px;
+      }
+      .picker-three .card-go {
+        font-size: 13px;
+        margin-top: 10px;
+      }
+      .picker-three .card-orn {
+        width: 130px;
+        height: 130px;
+        top: -28px;
+        right: -28px;
       }
 
       .card {
@@ -612,7 +653,7 @@
         De la <em>teoría</em> al primer modelo en Python.
       </h2>
 
-      <div class="picker picker-two">
+      <div class="picker picker-three">
         <a class="card card-tema1" href="./sesion1.html">
           <div class="card-orn" aria-hidden="true">
             <svg viewBox="0 0 400 400">
