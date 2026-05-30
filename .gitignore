@@ -10,3 +10,7 @@ GuiaDocente_2026-27_G008_G227_ES (1).pdf
 
 # Artefactos de Playwright MCP (capturas de verificación)
 .playwright-mcp/
+
+# Config y artefactos locales de Claude Code
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
