@@ -33,6 +33,43 @@
       .bar-sub {
         color: var(--ink-mute, #7c80a6);
       }
+      /* styles.css fija html,body a overflow:hidden (modo diapositiva);
+         esta página necesita scroll normal. */
+      html,
+      body {
+        height: auto;
+        overflow-y: auto;
+      }
+      .mat-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .mat-tab {
+        font: 600 0.85rem var(--sans, system-ui);
+        color: var(--ink-soft, #3b4080);
+        background: var(--paper, #fff);
+        border: 1px solid var(--line, #e2ded0);
+        border-radius: 999px;
+        padding: 0.4rem 0.95rem;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .mat-tab:hover {
+        border-color: var(--accent, #ff5700);
+      }
+      .mat-tab.is-active {
+        background: var(--ink, #1a1f6c);
+        color: #fff;
+        border-color: var(--ink, #1a1f6c);
+      }
+      .mat-group[hidden] {
+        display: none;
+      }
       .mat-main {
         max-width: 880px;
         margin: 0 auto;
@@ -186,21 +223,50 @@
         function encPath(p) {
           return p.split("/").map(encodeURIComponent).join("/");
         }
+        function groupRank(id) {
+          var m = /^tema-(\d+)$/.exec(id);
+          if (m) return parseInt(m[1], 10);
+          return id === "general" ? 999 : 500;
+        }
+        function shortLabel(g) {
+          var m = /^tema-(\d+)$/.exec(g.id);
+          if (m) return "Tema " + m[1];
+          if (g.id === "general") return "General";
+          return g.title;
+        }
         function render(data) {
-          var groups = (data && data.groups) || [];
+          var groups = ((data && data.groups) || [])
+            .slice()
+            .sort(function (a, b) {
+              return groupRank(a.id) - groupRank(b.id);
+            });
           if (!groups.length) {
             mount.innerHTML =
               '<p class="mat-empty">Aún no hay materiales publicados.</p>';
             return;
           }
-          var html = "";
+          var tabs =
+            '<div class="mat-tabs" role="tablist">' +
+            '<button type="button" class="mat-tab is-active" data-target="all">Todos</button>';
+          var sections = "";
           groups.forEach(function (g) {
-            html += '<section class="mat-group"><h2>' + esc(g.title) + "</h2>";
-            html += '<ul class="mat-list">';
+            tabs +=
+              '<button type="button" class="mat-tab" data-target="' +
+              esc(g.id) +
+              '">' +
+              esc(shortLabel(g)) +
+              "</button>";
+            sections +=
+              '<section class="mat-group" data-group="' +
+              esc(g.id) +
+              '"><h2>' +
+              esc(g.title) +
+              "</h2>";
+            sections += '<ul class="mat-list">';
             g.files.forEach(function (f) {
               var label =
                 EXT_LABEL[f.ext] || (f.ext ? f.ext.toUpperCase() : "Archivo");
-              html +=
+              sections +=
                 '<li class="mat-item"><a href="/' +
                 encPath(f.path) +
                 '" target="_blank" rel="noopener">' +
@@ -214,9 +280,27 @@
                 fmtSize(f.size) +
                 "</span></a></li>";
             });
-            html += "</ul></section>";
+            sections += "</ul></section>";
           });
-          mount.innerHTML = html;
+          tabs += "</div>";
+          mount.innerHTML = tabs + sections;
+
+          var tabEls = mount.querySelectorAll(".mat-tab");
+          var sectionEls = mount.querySelectorAll(".mat-group");
+          mount
+            .querySelector(".mat-tabs")
+            .addEventListener("click", function (e) {
+              var btn = e.target.closest(".mat-tab");
+              if (!btn) return;
+              var target = btn.getAttribute("data-target");
+              tabEls.forEach(function (t) {
+                t.classList.toggle("is-active", t === btn);
+              });
+              sectionEls.forEach(function (s) {
+                s.hidden =
+                  target !== "all" && s.getAttribute("data-group") !== target;
+              });
+            });
         }
         fetch("/files-manifest.json", { cache: "no-cache" })
           .then(function (r) {
