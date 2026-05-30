@@ -1,0 +1,268 @@
+{
+  "groups": [
+    {
+      "id": "general",
+      "title": "General",
+      "files": [
+        {
+          "name": "Aprendizaje Profundo - Guía Docente.pdf",
+          "path": "files/general/Aprendizaje Profundo - Guía Docente.pdf",
+          "ext": "pdf",
+          "size": 138101
+        },
+        {
+          "name": "Brain Tumor.zip",
+          "path": "files/general/Brain Tumor.zip",
+          "ext": "zip",
+          "size": 872531
+        },
+        {
+          "name": "MLP_Heart.ipynb",
+          "path": "files/general/MLP_Heart.ipynb",
+          "ext": "ipynb",
+          "size": 354797
+        },
+        {
+          "name": "MLP_Wine.ipynb",
+          "path": "files/general/MLP_Wine.ipynb",
+          "ext": "ipynb",
+          "size": 684104
+        }
+      ]
+    },
+    {
+      "id": "tema-1",
+      "title": "Tema 1 · Introducción",
+      "files": [
+        {
+          "name": "1_Introduccion_al_deep_learning.ipynb",
+          "path": "files/tema-1/1_Introduccion_al_deep_learning.ipynb",
+          "ext": "ipynb",
+          "size": 643135
+        },
+        {
+          "name": "1_Introduccion_al_deep_learning.pdf",
+          "path": "files/tema-1/1_Introduccion_al_deep_learning.pdf",
+          "ext": "pdf",
+          "size": 362951
+        },
+        {
+          "name": "1. Introducción.pptx",
+          "path": "files/tema-1/1. Introducción.pptx",
+          "ext": "pptx",
+          "size": 10798959
+        },
+        {
+          "name": "1.2. Perceptrón simple.pptx",
+          "path": "files/tema-1/1.2. Perceptrón simple.pptx",
+          "ext": "pptx",
+          "size": 6660016
+        },
+        {
+          "name": "CUNEF_Actividad_1_Redes_Neuronales_Artificiales_ANN.ipynb",
+          "path": "files/tema-1/CUNEF_Actividad_1_Redes_Neuronales_Artificiales_ANN.ipynb",
+          "ext": "ipynb",
+          "size": 17648
+        },
+        {
+          "name": "Ejercicio Aprendizaje Neurona OR.pdf",
+          "path": "files/tema-1/Ejercicio Aprendizaje Neurona OR.pdf",
+          "ext": "pdf",
+          "size": 17891
+        },
+        {
+          "name": "Ejercicio entrenamiento neurona - solución.pdf",
+          "path": "files/tema-1/Ejercicio entrenamiento neurona - solución.pdf",
+          "ext": "pdf",
+          "size": 84114
+        },
+        {
+          "name": "Ejercicio entrenamiento neurona.pdf",
+          "path": "files/tema-1/Ejercicio entrenamiento neurona.pdf",
+          "ext": "pdf",
+          "size": 32672
+        },
+        {
+          "name": "Ejercicio neurona.pdf",
+          "path": "files/tema-1/Ejercicio neurona.pdf",
+          "ext": "pdf",
+          "size": 44282
+        },
+        {
+          "name": "Ejercicios cortos entrenamiento neuronas.pdf",
+          "path": "files/tema-1/Ejercicios cortos entrenamiento neuronas.pdf",
+          "ext": "pdf",
+          "size": 46039
+        },
+        {
+          "name": "ejercicios_perceptrones_simples.html",
+          "path": "files/tema-1/ejercicios_perceptrones_simples.html",
+          "ext": "html",
+          "size": 68762
+        }
+      ]
+    },
+    {
+      "id": "tema-2",
+      "title": "Tema 2 · Base matemática",
+      "files": [
+        {
+          "name": "descenso_gradiente_interactivo.html",
+          "path": "files/tema-2/descenso_gradiente_interactivo.html",
+          "ext": "html",
+          "size": 101263
+        },
+        {
+          "name": "descenso_gradiente.html",
+          "path": "files/tema-2/descenso_gradiente.html",
+          "ext": "html",
+          "size": 142005
+        },
+        {
+          "name": "Tema_2_1_Neuronas_solucion_(1).ipynb",
+          "path": "files/tema-2/Tema_2_1_Neuronas_solucion_(1).ipynb",
+          "ext": "ipynb",
+          "size": 538474
+        },
+        {
+          "name": "Tema_2_1_Neuronas_solucion.ipynb",
+          "path": "files/tema-2/Tema_2_1_Neuronas_solucion.ipynb",
+          "ext": "ipynb",
+          "size": 564135
+        },
+        {
+          "name": "Tema_2_1_Neuronas.ipynb",
+          "path": "files/tema-2/Tema_2_1_Neuronas.ipynb",
+          "ext": "ipynb",
+          "size": 13464
+        },
+        {
+          "name": "TEMA_2_Base_Matemática (1).ipynb",
+          "path": "files/tema-2/TEMA_2_Base_Matemática (1).ipynb",
+          "ext": "ipynb",
+          "size": 2325765
+        },
+        {
+          "name": "TEMA_2_Base_Matemática (2).ipynb",
+          "path": "files/tema-2/TEMA_2_Base_Matemática (2).ipynb",
+          "ext": "ipynb",
+          "size": 2305597
+        },
+        {
+          "name": "Test tema 2.pdf",
+          "path": "files/tema-2/Test tema 2.pdf",
+          "ext": "pdf",
+          "size": 76543
+        },
+        {
+          "name": "vertopal.com_TEMA_2_Base_Matemática (1).pdf",
+          "path": "files/tema-2/vertopal.com_TEMA_2_Base_Matemática (1).pdf",
+          "ext": "pdf",
+          "size": 723962
+        }
+      ]
+    },
+    {
+      "id": "tema-3",
+      "title": "Tema 3 · Perceptrón multicapa (MLP)",
+      "files": [
+        {
+          "name": "2. Perceptrón multicapa.pptx",
+          "path": "files/tema-3/2. Perceptrón multicapa.pptx",
+          "ext": "pptx",
+          "size": 1058143
+        },
+        {
+          "name": "Ejercicio_MLP_Region_Rectangular.pdf",
+          "path": "files/tema-3/Ejercicio_MLP_Region_Rectangular.pdf",
+          "ext": "pdf",
+          "size": 3337
+        },
+        {
+          "name": "Ejercicio_Red_Neuronal_Triangulo.pdf",
+          "path": "files/tema-3/Ejercicio_Red_Neuronal_Triangulo.pdf",
+          "ext": "pdf",
+          "size": 3213
+        },
+        {
+          "name": "perceptrones_multicapa.html",
+          "path": "files/tema-3/perceptrones_multicapa.html",
+          "ext": "html",
+          "size": 108961
+        },
+        {
+          "name": "Práctica 3 (1).pdf",
+          "path": "files/tema-3/Práctica 3 (1).pdf",
+          "ext": "pdf",
+          "size": 54285
+        },
+        {
+          "name": "Práctica 3 (2).pdf",
+          "path": "files/tema-3/Práctica 3 (2).pdf",
+          "ext": "pdf",
+          "size": 69088
+        },
+        {
+          "name": "Práctica 3.pdf",
+          "path": "files/tema-3/Práctica 3.pdf",
+          "ext": "pdf",
+          "size": 71044
+        }
+      ]
+    },
+    {
+      "id": "tema-4",
+      "title": "Tema 4 · CNN",
+      "files": [
+        {
+          "name": "4. CNN.pptx",
+          "path": "files/tema-4/4. CNN.pptx",
+          "ext": "pptx",
+          "size": 1619086
+        },
+        {
+          "name": "Actividad_2_Redes_Neuronales_Convolucionales_CNN.ipynb",
+          "path": "files/tema-4/Actividad_2_Redes_Neuronales_Convolucionales_CNN.ipynb",
+          "ext": "ipynb",
+          "size": 79488
+        },
+        {
+          "name": "CNN_ejercicios.pdf",
+          "path": "files/tema-4/CNN_ejercicios.pdf",
+          "ext": "pdf",
+          "size": 22022
+        },
+        {
+          "name": "data_augmentation.html",
+          "path": "files/tema-4/data_augmentation.html",
+          "ext": "html",
+          "size": 114945
+        },
+        {
+          "name": "Ejercicios Python CNN.pdf",
+          "path": "files/tema-4/Ejercicios Python CNN.pdf",
+          "ext": "pdf",
+          "size": 226233
+        },
+        {
+          "name": "fashion_mnist_dashboard.html",
+          "path": "files/tema-4/fashion_mnist_dashboard.html",
+          "ext": "html",
+          "size": 42074
+        },
+        {
+          "name": "test_CNN_medio.pdf",
+          "path": "files/tema-4/test_CNN_medio.pdf",
+          "ext": "pdf",
+          "size": 5943
+        },
+        {
+          "name": "test_CNN.pdf",
+          "path": "files/tema-4/test_CNN.pdf",
+          "ext": "pdf",
+          "size": 5549
+        }
+      ]
+    }
+  ]
+}
