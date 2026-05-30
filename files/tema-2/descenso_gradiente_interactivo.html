@@ -1,0 +1,3100 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descenso del Gradiente &mdash; Material Interactivo</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 15px;
+        line-height: 1.7;
+        color: #1a1a1a;
+        background: #fff8f0;
+      }
+      .page-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 28px 60px;
+        background: #ffffff;
+        box-shadow: 0 4px 32px rgba(255, 102, 0, 0.1);
+      }
+      /* ---------- Header ---------- */
+      .doc-header {
+        background: linear-gradient(
+          135deg,
+          #ff6600 0%,
+          #ff8c00 60%,
+          #ffa500 100%
+        );
+        color: #fff;
+        border-radius: 10px;
+        padding: 32px 36px 24px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+      .doc-header::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+      }
+      .doc-header::after {
+        content: "";
+        position: absolute;
+        bottom: -60px;
+        left: -20px;
+        width: 240px;
+        height: 240px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+      .institution {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        opacity: 0.88;
+        margin-bottom: 8px;
+      }
+      .doc-title {
+        font-size: 34px;
+        font-weight: 700;
+        font-family: "Arial", sans-serif;
+        line-height: 1.15;
+        margin-bottom: 6px;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      }
+      .doc-subtitle {
+        font-size: 15px;
+        font-style: italic;
+        opacity: 0.92;
+        margin-bottom: 14px;
+      }
+      .doc-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .meta-chip {
+        background: rgba(255, 255, 255, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      /* ---------- Nav ---------- */
+      .demo-nav {
+        background: #fff3e0;
+        border: 2px solid #ffb347;
+        border-radius: 10px;
+        padding: 16px 22px;
+        margin-bottom: 28px;
+      }
+      .demo-nav-title {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #ff6600;
+        margin-bottom: 10px;
+      }
+      .demo-nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 8px 16px;
+      }
+      .demo-nav a {
+        color: #b54000;
+        text-decoration: none;
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        padding: 4px 8px;
+        border-left: 3px solid #ff8c00;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.5);
+        transition: all 0.15s;
+      }
+      .demo-nav a:hover {
+        background: #ffe0b2;
+        color: #ff6600;
+      }
+      .demo-nav a .nav-num {
+        display: inline-block;
+        width: 20px;
+        font-weight: 700;
+        color: #ff6600;
+      }
+      /* ---------- Intro ---------- */
+      .intro-block {
+        border: 2px solid #ffb347;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 28px;
+        background: #fffdf9;
+      }
+      .intro-block h2 {
+        font-family: "Arial", sans-serif;
+        color: #ff6600;
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      .intro-block p {
+        margin-bottom: 8px;
+      }
+      /* ---------- Demo Section ---------- */
+      .demo {
+        border: 2px solid #ffb347;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        overflow: hidden;
+      }
+      .demo-header {
+        background: linear-gradient(90deg, #ff6600, #ff8c00);
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .demo-num {
+        background: rgba(255, 255, 255, 0.25);
+        border: 2px solid rgba(255, 255, 255, 0.55);
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        border-radius: 20px;
+        padding: 3px 13px;
+        white-space: nowrap;
+      }
+      .demo-title {
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+      .demo-body {
+        padding: 22px 24px;
+        background: #fff;
+      }
+      .demo-intro {
+        background: #fff8ee;
+        border-left: 4px solid #ff8c00;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        border-radius: 4px;
+      }
+      .demo-try {
+        background: #ffe8cc;
+        border: 1.5px dashed #ff8c00;
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-top: 14px;
+        font-size: 13.5px;
+        color: #7a3500;
+      }
+      .demo-try strong {
+        color: #c0392b;
+      }
+      /* ---------- Controls ---------- */
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 20px;
+        margin-top: 14px;
+        padding: 14px 16px;
+        background: #fff8ee;
+        border-radius: 6px;
+        border: 1px solid #ffd599;
+      }
+      .control-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .control-row label {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        color: #a04000;
+        letter-spacing: 0.5px;
+      }
+      .control-row input[type="range"] {
+        width: 100%;
+        accent-color: #ff6600;
+      }
+      .control-row .value {
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        color: #ff6600;
+        font-weight: 700;
+      }
+      .buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .btn {
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #ff6600, #ff8c00);
+        color: #fff;
+        letter-spacing: 0.5px;
+        transition:
+          transform 0.1s,
+          box-shadow 0.1s;
+        box-shadow: 0 2px 6px rgba(255, 102, 0, 0.25);
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(255, 102, 0, 0.35);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn.secondary {
+        background: #fff;
+        color: #ff6600;
+        border: 2px solid #ff8c00;
+      }
+      .btn.secondary:hover {
+        background: #fff3e0;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      /* ---------- Info panels ---------- */
+      .info-panel {
+        margin-top: 12px;
+        padding: 12px 16px;
+        background: #2d2a24;
+        color: #ffd599;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.8;
+      }
+      .info-panel .k {
+        color: #ffb347;
+      }
+      .info-panel .v {
+        color: #fff;
+        font-weight: 700;
+      }
+      .info-panel .highlight {
+        color: #4ade80;
+      }
+      .info-panel .warn {
+        color: #f87171;
+      }
+      /* ---------- Canvas layouts ---------- */
+      .canvas-wrap {
+        display: flex;
+        justify-content: center;
+        background: #fff8f0;
+        border-radius: 8px;
+        padding: 8px;
+        border: 1px solid #ffd599;
+      }
+      .canvas-wrap canvas {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      .three-panel {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .panel {
+        background: #fff8f0;
+        border: 2px solid #ffd599;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+      }
+      .panel.good {
+        border-color: #4ade80;
+        background: #f0fdf4;
+      }
+      .panel.warn {
+        border-color: #fb923c;
+        background: #fff7ed;
+      }
+      .panel.bad {
+        border-color: #f87171;
+        background: #fef2f2;
+      }
+      .panel h5 {
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: #7a3500;
+      }
+      .panel .tag {
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 10px;
+        display: inline-block;
+      }
+      .panel.good .tag {
+        background: #4ade80;
+        color: #064e3b;
+      }
+      .panel.warn .tag {
+        background: #fb923c;
+        color: #7c2d12;
+      }
+      .panel.bad .tag {
+        background: #f87171;
+        color: #7f1d1d;
+      }
+      .panel .stat {
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        margin-top: 4px;
+        color: #555;
+      }
+      /* ---------- Tables ---------- */
+      .mini-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        margin-top: 10px;
+        max-height: 180px;
+        overflow-y: auto;
+        display: block;
+      }
+      .mini-table thead {
+        background: #ff8c00;
+        color: #fff;
+        position: sticky;
+        top: 0;
+      }
+      .mini-table th,
+      .mini-table td {
+        padding: 5px 8px;
+        border: 1px solid #ffd599;
+        text-align: center;
+      }
+      .mini-table tr:nth-child(even) {
+        background: #fff8ee;
+      }
+      /* ---------- Formula ---------- */
+      .formula {
+        background: #fff8ee;
+        border: 1.5px solid #ffb347;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin: 10px 0;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        text-align: center;
+        color: #7a3500;
+      }
+      .inline-math {
+        font-family: "Courier New", monospace;
+        background: #fff3e0;
+        padding: 1px 6px;
+        border-radius: 3px;
+        color: #b54000;
+        font-size: 13px;
+      }
+      /* ---------- Legend ---------- */
+      .legend {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        margin-top: 8px;
+        color: #555;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        display: inline-block;
+      }
+      /* ---------- Two-col ---------- */
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 760px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        .three-panel {
+          grid-template-columns: 1fr;
+        }
+        .controls {
+          grid-template-columns: 1fr;
+        }
+        .doc-title {
+          font-size: 26px;
+        }
+      }
+      /* ---------- Quiz ---------- */
+      .quiz-question {
+        background: #fff8ee;
+        border: 1.5px solid #ffd599;
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+      }
+      .quiz-question .qnum {
+        display: inline-block;
+        background: #ff6600;
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        font-weight: 800;
+        font-size: 12px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        margin-bottom: 6px;
+        letter-spacing: 1px;
+      }
+      .quiz-question .qtext {
+        font-weight: 700;
+        color: #7a3500;
+        margin-bottom: 10px;
+      }
+      .quiz-option {
+        display: block;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: "Arial", sans-serif;
+        font-size: 13.5px;
+        border: 1.5px solid transparent;
+        transition: background 0.15s;
+      }
+      .quiz-option:hover {
+        background: #ffe8cc;
+      }
+      .quiz-option input {
+        margin-right: 8px;
+        accent-color: #ff6600;
+      }
+      .quiz-option.correct {
+        background: #dcfce7;
+        border-color: #4ade80;
+        color: #065f46;
+      }
+      .quiz-option.incorrect {
+        background: #fee2e2;
+        border-color: #f87171;
+        color: #7f1d1d;
+      }
+      .quiz-feedback {
+        margin-top: 8px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 13px;
+        font-style: italic;
+        display: none;
+      }
+      .quiz-feedback.show {
+        display: block;
+      }
+      .quiz-feedback.right {
+        background: #dcfce7;
+        color: #065f46;
+        border-left: 3px solid #4ade80;
+      }
+      .quiz-feedback.wrong {
+        background: #fef2f2;
+        color: #7f1d1d;
+        border-left: 3px solid #f87171;
+      }
+      .quiz-score {
+        margin-top: 16px;
+        padding: 18px;
+        background: linear-gradient(135deg, #ff6600, #ff8c00);
+        color: #fff;
+        border-radius: 8px;
+        text-align: center;
+        font-family: "Arial", sans-serif;
+        display: none;
+      }
+      .quiz-score.show {
+        display: block;
+      }
+      .quiz-score .score-num {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .quiz-score .score-msg {
+        font-size: 14px;
+        margin-top: 6px;
+        opacity: 0.95;
+      }
+      /* ---------- Radio group ---------- */
+      .radio-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .radio-group label {
+        background: #fff;
+        border: 1.5px solid #ffd599;
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-family: "Arial", sans-serif;
+        font-size: 12.5px;
+        cursor: pointer;
+        color: #7a3500;
+        transition: all 0.15s;
+      }
+      .radio-group label:hover {
+        background: #fff3e0;
+      }
+      .radio-group input {
+        display: none;
+      }
+      .radio-group input:checked + span {
+      }
+      .radio-group label.checked {
+        background: linear-gradient(135deg, #ff6600, #ff8c00);
+        color: #fff;
+        border-color: #ff6600;
+      }
+      /* ---------- Footer ---------- */
+      .foot {
+        margin-top: 30px;
+        padding: 18px;
+        text-align: center;
+        color: #999;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        border-top: 2px solid #ffd599;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ===== HEADER ===== -->
+      <header class="doc-header">
+        <div class="institution">
+          CUNEF Universidad &mdash; Grado en Ciencia de Datos &amp; IA
+        </div>
+        <div class="doc-title">Descenso del Gradiente</div>
+        <div class="doc-subtitle">
+          Material interactivo para entender la optimizacion de redes neuronales
+        </div>
+        <div class="doc-meta">
+          <span class="meta-chip">6 demos interactivas</span>
+          <span class="meta-chip">Nivel basico</span>
+          <span class="meta-chip">Aprendizaje Profundo</span>
+          <span class="meta-chip">Curso 2025-2026</span>
+        </div>
+      </header>
+
+      <!-- ===== NAV ===== -->
+      <nav class="demo-nav">
+        <div class="demo-nav-title">Recorrido de la clase</div>
+        <div class="demo-nav-grid">
+          <a href="#d1"
+            ><span class="nav-num">1.</span> Descenso 1D: la parabola que
+            rueda</a
+          >
+          <a href="#d2"
+            ><span class="nav-num">2.</span> El efecto del learning rate</a
+          >
+          <a href="#d3"
+            ><span class="nav-num">3.</span> Paisaje 2D: minimos y curvas de
+            nivel</a
+          >
+          <a href="#d4"
+            ><span class="nav-num">4.</span> BGD vs SGD vs Mini-Batch</a
+          >
+          <a href="#d5"
+            ><span class="nav-num">5.</span> Una neurona aprende en vivo</a
+          >
+          <a href="#d6"
+            ><span class="nav-num">6.</span> Quiz final: comprueba lo
+            aprendido</a
+          >
+        </div>
+      </nav>
+
+      <!-- ===== INTRO ===== -->
+      <div class="intro-block">
+        <h2>&iquest;Que es el descenso del gradiente?</h2>
+        <p>
+          Cuando una red neuronal "aprende", lo que en realidad hace es
+          <strong>ajustar sus pesos</strong> para minimizar una
+          <strong>funcion de perdida</strong> (que mide cuanto se equivoca). El
+          descenso del gradiente es el algoritmo que guia ese ajuste: en cada
+          paso, mira la pendiente de la perdida en el punto actual y se mueve en
+          la direccion en la que la perdida baja mas rapido.
+        </p>
+        <p>
+          <strong>Analogia:</strong> imagina que estas en una montana con los
+          ojos vendados y quieres bajar al valle. En cada paso, palpas el suelo
+          para ver hacia donde baja mas, y das un paso en esa direccion. Repites
+          hasta que el suelo sea plano. Eso es el descenso del gradiente.
+        </p>
+        <p>
+          En este material vas a <strong>experimentar</strong> con las
+          decisiones que toma el algoritmo. Mueve sliders, prueba learning rates
+          locos y observa que ocurre. La intuicion que desarrolles aqui te
+          servira el resto del curso.
+        </p>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 1: 1D VISUALIZER ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d1">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 01</span>
+          <span class="demo-title">Descenso 1D: la parabola que rueda</span>
+        </div>
+        <div class="demo-body">
+          <div class="demo-intro">
+            Minimizamos <span class="inline-math">f(x) = (x - 2)&sup2;</span>,
+            cuyo minimo esta en <span class="inline-math">x* = 2</span>. El
+            gradiente (la derivada) es
+            <span class="inline-math">f'(x) = 2(x - 2)</span>. La regla de
+            actualizacion es:
+            <div class="formula">
+              <strong
+                >x<sub>t+1</sub> = x<sub>t</sub> &minus; &eta; &middot;
+                f'(x<sub>t</sub>)</strong
+              >
+            </div>
+            Mueve los sliders y pulsa <strong>Ejecutar</strong>. La bola baja la
+            parabola en cada iteracion.
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="c1" width="820" height="360"></canvas>
+          </div>
+
+          <div class="controls">
+            <div class="control-row">
+              <label
+                >Learning rate &eta;
+                <span class="value" id="v1lr">0.40</span></label
+              >
+              <input
+                type="range"
+                id="s1lr"
+                min="0.01"
+                max="1.10"
+                step="0.01"
+                value="0.40"
+              />
+            </div>
+            <div class="control-row">
+              <label
+                >Punto inicial x&#8320;
+                <span class="value" id="v1x0">-1.50</span></label
+              >
+              <input
+                type="range"
+                id="s1x0"
+                min="-4"
+                max="6"
+                step="0.1"
+                value="-1.5"
+              />
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="btn" id="b1run">&#9654; Ejecutar</button>
+            <button class="btn secondary" id="b1step">Paso a paso</button>
+            <button class="btn secondary" id="b1reset">Reset</button>
+          </div>
+
+          <div class="info-panel" id="i1">
+            <span class="k">iteracion:</span>
+            <span class="v" id="i1iter">0</span> &nbsp;&nbsp;
+            <span class="k">x:</span>
+            <span class="v" id="i1x">-1.500</span> &nbsp;&nbsp;
+            <span class="k">f(x):</span>
+            <span class="v" id="i1f">12.250</span> &nbsp;&nbsp;
+            <span class="k">f'(x):</span>
+            <span class="v" id="i1g">-7.000</span> &nbsp;&nbsp;
+            <span class="k">paso:</span>
+            <span class="v" id="i1step">+2.800</span>
+          </div>
+
+          <div class="demo-try">
+            <strong>Experimenta:</strong> &iquest;Que pasa con
+            <span class="inline-math">&eta; = 0.02</span>? &iquest;Y con
+            <span class="inline-math">&eta; = 1.05</span>? Prueba
+            <span class="inline-math">&eta; = 1.00</span> exacto.
+            &iquest;Converge o se queda oscilando?
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 2: LR COMPARISON ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d2">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 02</span>
+          <span class="demo-title"
+            >El efecto del learning rate: 3 velocidades en paralelo</span
+          >
+        </div>
+        <div class="demo-body">
+          <div class="demo-intro">
+            Misma funcion <span class="inline-math">f(x) = (x - 2)&sup2;</span>,
+            mismo punto inicial <span class="inline-math">x&#8320; = -2</span>.
+            Solo cambia <strong>&eta;</strong>. Pulsa
+            <strong>Ejecutar</strong> y observa las tres trayectorias
+            simultaneas.
+          </div>
+
+          <div class="three-panel">
+            <div class="panel bad">
+              <h5>&eta; = 0.02 <span class="tag">muy lento</span></h5>
+              <canvas id="c2a" width="260" height="200"></canvas>
+              <div class="stat" id="s2a">iter: 0 &mdash; x: -2.000</div>
+            </div>
+            <div class="panel good">
+              <h5>&eta; = 0.40 <span class="tag">ideal</span></h5>
+              <canvas id="c2b" width="260" height="200"></canvas>
+              <div class="stat" id="s2b">iter: 0 &mdash; x: -2.000</div>
+            </div>
+            <div class="panel warn">
+              <h5>&eta; = 1.05 <span class="tag">diverge</span></h5>
+              <canvas id="c2c" width="260" height="200"></canvas>
+              <div class="stat" id="s2c">iter: 0 &mdash; x: -2.000</div>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="btn" id="b2run">
+              &#9654; Ejecutar las 3 en paralelo
+            </button>
+            <button class="btn secondary" id="b2reset">Reset</button>
+          </div>
+
+          <div class="demo-try">
+            <strong>Lectura clave:</strong> el learning rate es
+            <em>el</em> hiperparametro a ajustar. Pequeno &rarr; aprende muy
+            despacio. Demasiado grande &rarr; oscila o diverge. Encontrar el
+            correcto es la mitad del trabajo al entrenar una red.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 3: 2D SURFACE ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d3">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 03</span>
+          <span class="demo-title"
+            >Paisaje 2D: &iquest;convexo o con minimos locales?</span
+          >
+        </div>
+        <div class="demo-body">
+          <div class="demo-intro">
+            En redes reales tenemos <strong>millones de parametros</strong>.
+            Para visualizar, usamos solo dos. El mapa de calor representa el
+            valor de la perdida: <strong>oscuro = alto</strong> (malo),
+            <strong>claro = bajo</strong> (bueno).
+            <strong>Haz click en el mapa</strong> para fijar el punto inicial y
+            pulsa <strong>Ejecutar</strong>.
+          </div>
+
+          <div class="two-col">
+            <div>
+              <div class="canvas-wrap">
+                <canvas id="c3" width="440" height="440"></canvas>
+              </div>
+              <div class="legend">
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #ff6600"></span
+                  >Trayectoria del descenso
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #4ade80"></span
+                  >Minimo(s)
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #c0392b"></span
+                  >Punto inicial
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="control-row">
+                <label>Funcion de perdida</label>
+                <div class="radio-group" id="g3func">
+                  <label class="checked"
+                    ><input
+                      type="radio"
+                      name="f3"
+                      value="convex"
+                      checked
+                    /><span>Convexa (un unico minimo)</span></label
+                  >
+                  <label
+                    ><input type="radio" name="f3" value="nonconvex" /><span
+                      >No convexa (2 minimos locales)</span
+                    ></label
+                  >
+                </div>
+              </div>
+
+              <div class="controls">
+                <div class="control-row">
+                  <label
+                    >Learning rate &eta;
+                    <span class="value" id="v3lr">0.10</span></label
+                  >
+                  <input
+                    type="range"
+                    id="s3lr"
+                    min="0.01"
+                    max="0.30"
+                    step="0.01"
+                    value="0.10"
+                  />
+                </div>
+                <div class="control-row">
+                  <label>Velocidad animacion</label>
+                  <input
+                    type="range"
+                    id="s3sp"
+                    min="30"
+                    max="300"
+                    step="10"
+                    value="80"
+                  />
+                </div>
+              </div>
+
+              <div class="buttons">
+                <button class="btn" id="b3run">&#9654; Ejecutar</button>
+                <button class="btn secondary" id="b3reset">Reset</button>
+              </div>
+
+              <div class="info-panel">
+                <span class="k">inicio:</span>
+                <span class="v" id="i3start">click en el mapa</span><br />
+                <span class="k">iter:</span>
+                <span class="v" id="i3iter">0</span> &nbsp;
+                <span class="k">pos:</span> <span class="v" id="i3pos">--</span
+                ><br />
+                <span class="k">perdida:</span>
+                <span class="v" id="i3loss">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-try">
+            <strong>Prueba clave:</strong> en modo "no convexa", inicia desde
+            distintos puntos. &iquest;Siempre llegas al mismo minimo?
+            &iquest;Como afecta el punto inicial? Este es uno de los grandes
+            retos del aprendizaje profundo: la <strong>inicializacion</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 4: BGD vs SGD vs MINIBATCH ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d4">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 04</span>
+          <span class="demo-title"
+            >BGD vs SGD vs Mini-Batch: &iquest;cuantos datos miro en cada
+            paso?</span
+          >
+        </div>
+        <div class="demo-body">
+          <!-- === TEORIA 1: El problema === -->
+          <div class="demo-intro">
+            <h3 style="margin-top: 0">
+              El problema: &iquest;y si tengo 10 millones de ejemplos?
+            </h3>
+            <p>
+              Hasta ahora, en cada paso hemos calculado el gradiente sobre
+              <em>todos</em> los datos. Pero una red real se entrena con
+              <strong>millones de imagenes</strong>. Calcular el gradiente
+              exacto en cada paso significaria procesar los 10 millones antes de
+              cada actualizacion. Seria <strong>prohibitivamente lento</strong>.
+            </p>
+            <p style="margin-bottom: 0">
+              La idea clave:
+              <strong>no hace falta un gradiente perfecto</strong>, basta con
+              una buena aproximacion. Si uso solo una <em>muestra</em> de los
+              datos, el gradiente estimado sera "parecido" al real y el
+              algoritmo seguira bajando. Esto abre tres estrategias:
+            </p>
+          </div>
+
+          <!-- === ANALOGIA === -->
+          <div
+            style="
+              background: #fff3e0;
+              border-left: 4px solid #ff6600;
+              padding: 12px 16px;
+              margin: 14px 0;
+              border-radius: 4px;
+            "
+          >
+            <strong style="color: #ff6600">Analogia de la encuesta:</strong>
+            Imagina que quieres saber la intencion de voto de Espana (47
+            millones). Tienes 3 opciones:
+            <ul style="margin-top: 6px; padding-left: 22px; font-size: 13.5px">
+              <li>
+                <strong>Preguntar a los 47 millones</strong> (BGD) &rarr;
+                resultado exacto, pero tardas meses.
+              </li>
+              <li>
+                <strong>Preguntar a 1 persona al azar</strong> (SGD) &rarr;
+                inmediato, pero muy poco fiable.
+              </li>
+              <li>
+                <strong>Preguntar a 1.000 personas</strong> (mini-batch) &rarr;
+                rapido y suficientemente fiable. Es lo que hacen los sondeos
+                reales.
+              </li>
+            </ul>
+          </div>
+
+          <!-- === ESQUEMA VISUAL === -->
+          <h3>&iquest;Como procesa los datos cada metodo?</h3>
+          <div class="canvas-wrap" style="padding: 14px">
+            <svg
+              width="800"
+              height="280"
+              viewBox="0 0 800 280"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <style>
+                .dot-all {
+                  fill: #ff6600;
+                }
+                .dot-sel {
+                  fill: #c0392b;
+                  stroke: #fff;
+                  stroke-width: 1.5;
+                }
+                .dot-off {
+                  fill: #ddd;
+                }
+                .tlabel {
+                  font: bold 13px Arial;
+                  fill: #7a3500;
+                }
+                .tsub {
+                  font: 11px Arial;
+                  fill: #555;
+                }
+              </style>
+              <!-- Fila BGD -->
+              <text x="14" y="40" class="tlabel">Batch GD</text>
+              <text x="14" y="56" class="tsub">usa los 100</text>
+              <g transform="translate(120,30)">
+                <!-- 100 puntos -->
+                <g id="gridBGD"></g>
+                <text x="540" y="22" class="tsub">
+                  &rarr; 1 gradiente medio (exacto)
+                </text>
+              </g>
+              <!-- Fila SGD -->
+              <text x="14" y="135" class="tlabel">SGD</text>
+              <text x="14" y="151" class="tsub">1 punto aleatorio</text>
+              <g transform="translate(120,125)">
+                <g id="gridSGD"></g>
+                <text x="540" y="22" class="tsub">
+                  &rarr; 1 gradiente ruidoso por paso
+                </text>
+              </g>
+              <!-- Fila MiniBatch -->
+              <text x="14" y="230" class="tlabel">Mini-Batch</text>
+              <text x="14" y="246" class="tsub">k = 10 aleatorios</text>
+              <g transform="translate(120,220)">
+                <g id="gridMB"></g>
+                <text x="540" y="22" class="tsub">
+                  &rarr; gradiente aproximado, rapido
+                </text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- === TABLA COMPARATIVA === -->
+          <h3>Comparativa</h3>
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 13px;
+              margin: 8px 0 16px;
+            "
+          >
+            <thead>
+              <tr style="background: #ff8c00; color: #fff">
+                <th
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffb347;
+                    text-align: left;
+                  "
+                >
+                  Metodo
+                </th>
+                <th style="padding: 8px; border: 1px solid #ffb347">
+                  Ejemplos por paso
+                </th>
+                <th style="padding: 8px; border: 1px solid #ffb347">
+                  Coste / paso
+                </th>
+                <th style="padding: 8px; border: 1px solid #ffb347">
+                  Ruido del gradiente
+                </th>
+                <th style="padding: 8px; border: 1px solid #ffb347">
+                  Converge
+                </th>
+                <th style="padding: 8px; border: 1px solid #ffb347">
+                  Uso practico
+                </th>
+              </tr>
+            </thead>
+            <tbody style="font-family: Arial, sans-serif">
+              <tr style="background: #fff8ee">
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  <strong style="color: #ff6600">Batch GD</strong>
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  N (todos)
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Muy alto
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Cero (exacto)
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Suave, directa
+                </td>
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  Solo datasets pequenos
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  <strong style="color: #3b82f6">SGD</strong>
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  1
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Minimo
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Muy alto
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Oscilante
+                </td>
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  Raro hoy en dia
+                </td>
+              </tr>
+              <tr style="background: #fff8ee">
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  <strong style="color: #10b981">Mini-Batch</strong>
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  k (32, 64, 128...)
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Bajo
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Moderado
+                </td>
+                <td
+                  style="
+                    padding: 8px;
+                    border: 1px solid #ffd599;
+                    text-align: center;
+                  "
+                >
+                  Estable, rapida
+                </td>
+                <td style="padding: 8px; border: 1px solid #ffd599">
+                  <strong>Estandar de la industria</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- === CONCEPTOS CLAVE === -->
+          <div
+            style="
+              background: #fff8ee;
+              border: 1.5px solid #ffb347;
+              border-radius: 6px;
+              padding: 12px 16px;
+              margin-bottom: 16px;
+            "
+          >
+            <strong style="color: #ff6600">Vocabulario imprescindible:</strong>
+            <ul style="margin-top: 6px; padding-left: 22px; font-size: 13.5px">
+              <li>
+                <strong>Iteracion (o paso):</strong> una actualizacion de los
+                pesos. Procesa <em>un</em> batch.
+              </li>
+              <li>
+                <strong>Epoca:</strong> una pasada completa por todo el dataset.
+                Con N=100 y batch=10 &rarr; 10 iteraciones = 1 epoca.
+              </li>
+              <li>
+                <strong>Batch size (k):</strong> cuantos ejemplos usa cada
+                iteracion. Hiperparametro clave.
+              </li>
+            </ul>
+          </div>
+
+          <!-- === EXPERIMENTO INTERACTIVO === -->
+          <h3>Experimento: ejecuta los 3 simultaneamente</h3>
+          <p style="font-size: 13.5px; margin-bottom: 10px">
+            Ajustamos una <strong>neurona lineal</strong>
+            <span class="inline-math">y = w&middot;x + b</span> a 100 puntos
+            generados como <span class="inline-math">y = 2x + 1 + ruido</span>.
+            Los tres metodos
+            <strong>parten de los mismos pesos iniciales</strong> (w=0, b=0) y
+            usan el mismo learning rate. El optimo teorico es
+            <span class="inline-math">w=2, b=1</span> (marca verde en los
+            graficos).
+          </p>
+
+          <div class="controls" style="grid-template-columns: 1fr 1fr 1fr">
+            <div class="control-row">
+              <label
+                >Tamano de mini-batch (k)
+                <span class="value" id="v4k">10</span></label
+              >
+              <input
+                type="range"
+                id="s4k"
+                min="2"
+                max="50"
+                step="1"
+                value="10"
+              />
+            </div>
+            <div class="control-row">
+              <label
+                >Learning rate &eta;
+                <span class="value" id="v4lr">0.005</span></label
+              >
+              <input
+                type="range"
+                id="s4lr"
+                min="0.001"
+                max="0.020"
+                step="0.001"
+                value="0.005"
+              />
+            </div>
+            <div class="control-row">
+              <label
+                >N&uacute;mero de iteraciones
+                <span class="value" id="v4it">80</span></label
+              >
+              <input
+                type="range"
+                id="s4it"
+                min="30"
+                max="200"
+                step="10"
+                value="80"
+              />
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="btn" id="b4run">
+              &#9654; Ejecutar entrenamiento
+            </button>
+            <button class="btn secondary" id="b4step">Paso a paso</button>
+            <button class="btn secondary" id="b4reset">
+              Reset con nuevos datos
+            </button>
+          </div>
+
+          <!-- === GRAFICOS: 3 paneles === -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 12px;
+              margin-top: 16px;
+            "
+          >
+            <div>
+              <h4
+                style="
+                  text-align: center;
+                  font-size: 13px;
+                  color: #7a3500;
+                  margin-bottom: 4px;
+                "
+              >
+                1&nbsp;&middot; Datos y rectas aprendidas
+              </h4>
+              <div class="canvas-wrap">
+                <canvas id="c4a" width="440" height="300"></canvas>
+              </div>
+              <p
+                style="
+                  text-align: center;
+                  font-size: 11.5px;
+                  color: #666;
+                  margin-top: 4px;
+                "
+              >
+                Las 3 rectas deberian acercarse a la recta verde ideal.
+              </p>
+            </div>
+
+            <div>
+              <h4
+                style="
+                  text-align: center;
+                  font-size: 13px;
+                  color: #7a3500;
+                  margin-bottom: 4px;
+                "
+              >
+                2&nbsp;&middot; Trayectoria en el espacio de parametros (w, b)
+              </h4>
+              <div class="canvas-wrap">
+                <canvas id="c4c" width="440" height="300"></canvas>
+              </div>
+              <p
+                style="
+                  text-align: center;
+                  font-size: 11.5px;
+                  color: #666;
+                  margin-top: 4px;
+                "
+              >
+                El <strong>camino</strong> que sigue cada metodo hacia el minimo
+                (&#9734;).
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-top: 12px">
+            <h4
+              style="
+                text-align: center;
+                font-size: 13px;
+                color: #7a3500;
+                margin-bottom: 4px;
+              "
+            >
+              3&nbsp;&middot; Evolucion del error (MSE) por iteracion
+            </h4>
+            <div class="canvas-wrap">
+              <canvas id="c4b" width="900" height="260"></canvas>
+            </div>
+            <p
+              style="
+                text-align: center;
+                font-size: 11.5px;
+                color: #666;
+                margin-top: 4px;
+              "
+            >
+              Cuanto mas abajo y mas suave, mejor. Observa el
+              <strong>ruido</strong> de SGD (azul) frente a la suavidad de BGD
+              (naranja).
+            </p>
+          </div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #ff6600"></span>Batch
+              GD (N=100)
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #3b82f6"></span>SGD
+              (k=1)
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background: #10b981"></span
+              >Mini-Batch (k variable)
+            </div>
+            <div class="legend-item">
+              <span
+                class="legend-dot"
+                style="background: #4ade80; border-radius: 50%"
+              ></span
+              >Optimo (w=2, b=1)
+            </div>
+          </div>
+
+          <div class="demo-try">
+            <strong>Preguntas para pensar:</strong>
+            <ol style="margin-top: 6px; padding-left: 22px">
+              <li>
+                En el grafico 2 (espacio de parametros), &iquest;cual de los
+                tres caminos es mas recto? &iquest;Cual es el mas "tembloroso"?
+              </li>
+              <li>
+                Prueba <strong>k = 2</strong> y luego <strong>k = 50</strong>.
+                &iquest;Como cambia la suavidad del mini-batch?
+              </li>
+              <li>
+                Sube el learning rate a <strong>0.02</strong>. &iquest;Que
+                metodo se vuelve mas inestable primero?
+              </li>
+            </ol>
+            <p style="margin-top: 8px; margin-bottom: 0">
+              <strong style="color: #c0392b">Take-away:</strong> en la practica
+              se usa <strong>siempre mini-batch</strong> (k = 32, 64, 128,
+              256...). Es el estandar en PyTorch, TensorFlow y JAX. BGD es
+              inviable con datasets grandes; SGD puro es demasiado ruidoso.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 5: SINGLE NEURON ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d5">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 05</span>
+          <span class="demo-title">Una neurona lineal aprende en vivo</span>
+        </div>
+        <div class="demo-body">
+          <div class="demo-intro">
+            Neurona minima:
+            <span class="inline-math">y_pred = w &middot; x + b</span>. Aprende
+            a predecir <span class="inline-math">y = 2x + 1</span> a partir de 8
+            ejemplos. Empezamos con pesos aleatorios y ves como
+            <strong>cada paso del gradiente mueve la recta</strong> hacia el
+            ajuste ideal.
+            <div class="formula" style="margin-top: 10px">
+              &nabla;<sub>w</sub>L = (y_pred &minus; y) &middot; x
+              &nbsp;&nbsp;&nbsp; &nabla;<sub>b</sub>L = (y_pred &minus; y)
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <div class="canvas-wrap">
+                <canvas id="c5" width="440" height="340"></canvas>
+              </div>
+            </div>
+            <div>
+              <div class="info-panel" style="margin-top: 0">
+                <span class="k">Parametros actuales:</span><br />
+                &nbsp;&nbsp;w = <span class="v" id="i5w">0.000</span>
+                <span style="color: #888">(ideal: 2.000)</span><br />
+                &nbsp;&nbsp;b = <span class="v" id="i5b">0.000</span>
+                <span style="color: #888">(ideal: 1.000)</span><br />
+                <br />
+                <span class="k">Perdida (MSE):</span>
+                <span class="v" id="i5loss">--</span><br />
+                <span class="k">Iteraciones:</span>
+                <span class="v" id="i5iter">0</span>
+              </div>
+              <div class="control-row" style="margin-top: 10px">
+                <label
+                  >Learning rate &eta;
+                  <span class="value" id="v5lr">0.02</span></label
+                >
+                <input
+                  type="range"
+                  id="s5lr"
+                  min="0.001"
+                  max="0.08"
+                  step="0.001"
+                  value="0.02"
+                />
+              </div>
+              <div class="buttons">
+                <button class="btn" id="b5step">+1 paso</button>
+                <button class="btn" id="b5step10">+10 pasos</button>
+                <button class="btn" id="b5run">&#9654; Auto</button>
+                <button class="btn secondary" id="b5reset">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-try">
+            <strong>Reflexion:</strong> una red neuronal profunda son
+            <em>millones</em> de neuronas como esta conectadas en capas,
+            entrenadas exactamente con la misma logica. El algoritmo de
+            <strong>retropropagacion</strong> solo sirve para calcular los
+            gradientes de cada peso de forma eficiente.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- ===== DEMO 6: QUIZ ===== -->
+      <!-- ============================================================ -->
+      <section class="demo" id="d6">
+        <div class="demo-header">
+          <span class="demo-num">DEMO 06</span>
+          <span class="demo-title"
+            >Quiz final: 5 preguntas para fijar conceptos</span
+          >
+        </div>
+        <div class="demo-body">
+          <div class="demo-intro">
+            Responde las 5 preguntas. Recibiras feedback inmediato y tu
+            puntuacion al final.
+          </div>
+
+          <div id="quiz">
+            <div class="quiz-question" data-q="1" data-ans="b">
+              <span class="qnum">PREGUNTA 1</span>
+              <div class="qtext">
+                &iquest;En que direccion apunta el vector gradiente &nabla;f?
+              </div>
+              <label class="quiz-option"
+                ><input type="radio" name="q1" value="a" />Hacia el minimo mas
+                cercano</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q1" value="b" />Hacia la direccion de
+                mayor crecimiento de la funcion</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q1" value="c" />En una direccion
+                aleatoria</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q1" value="d" />Siempre hacia arriba
+                en el eje Y</label
+              >
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question" data-q="2" data-ans="b">
+              <span class="qnum">PREGUNTA 2</span>
+              <div class="qtext">
+                Si la tasa de aprendizaje &eta; es demasiado grande, lo tipico
+                es que...
+              </div>
+              <label class="quiz-option"
+                ><input type="radio" name="q2" value="a" />Converge mucho mas
+                rapido al minimo</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q2" value="b" />Puede oscilar o
+                directamente divergir</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q2" value="c" />Hace que la funcion
+                sea convexa</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q2" value="d" />No tiene ningun
+                efecto practico</label
+              >
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question" data-q="3" data-ans="c">
+              <span class="qnum">PREGUNTA 3</span>
+              <div class="qtext">
+                &iquest;Cual es la diferencia principal entre Batch GD y SGD?
+              </div>
+              <label class="quiz-option"
+                ><input type="radio" name="q3" value="a" />SGD no usa
+                gradientes</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q3" value="b" />BGD solo funciona con
+                redes convolucionales</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q3" value="c" />BGD usa todos los
+                ejemplos por paso; SGD usa solo uno</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q3" value="d" />SGD requiere mas
+                memoria que BGD</label
+              >
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question" data-q="4" data-ans="c">
+              <span class="qnum">PREGUNTA 4</span>
+              <div class="qtext">
+                &iquest;Por que en la practica se usa casi siempre mini-batch en
+                lugar de BGD puro?
+              </div>
+              <label class="quiz-option"
+                ><input type="radio" name="q4" value="a" />Porque mini-batch
+                garantiza el minimo global</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q4" value="b" />Porque no necesita
+                calcular gradientes</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q4" value="c" />Porque combina
+                eficiencia de calculo (GPU, vectorizacion) con estabilidad del
+                gradiente</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q4" value="d" />Porque solo
+                mini-batch funciona con funciones no convexas</label
+              >
+              <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-question" data-q="5" data-ans="c">
+              <span class="qnum">PREGUNTA 5</span>
+              <div class="qtext">
+                Si el gradiente en un punto es <em>exactamente</em> cero
+                (&nabla;f = 0), podemos afirmar que:
+              </div>
+              <label class="quiz-option"
+                ><input type="radio" name="q5" value="a" />Seguro estamos en el
+                minimo global</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q5" value="b" />Hay un bug en el
+                codigo</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q5" value="c" />Estamos en un punto
+                critico: podria ser minimo local, maximo o punto de silla</label
+              >
+              <label class="quiz-option"
+                ><input type="radio" name="q5" value="d" />El learning rate es
+                cero</label
+              >
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="btn" id="bQ">Ver resultados</button>
+            <button class="btn secondary" id="bQreset">Reiniciar quiz</button>
+          </div>
+
+          <div class="quiz-score" id="qscore">
+            <div class="score-num"><span id="qScoreN">0</span> / 5</div>
+            <div class="score-msg" id="qScoreMsg"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="foot">
+        CUNEF Universidad &mdash; Material interactivo de Aprendizaje Profundo
+        &mdash; Curso 2025-2026
+      </div>
+    </div>
+
+    <script>
+      /* ============================================================
+   UTILIDADES COMUNES
+   ============================================================ */
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
+
+      function drawAxes(ctx, w, h, xMin, xMax, yMin, yMax, xLabel, yLabel) {
+        const m = { l: 40, r: 14, t: 14, b: 32 };
+        const plotW = w - m.l - m.r,
+          plotH = h - m.t - m.b;
+        const sx = (x) => m.l + ((x - xMin) / (xMax - xMin)) * plotW;
+        const sy = (y) => m.t + (1 - (y - yMin) / (yMax - yMin)) * plotH;
+        ctx.save();
+        ctx.strokeStyle = "#e5e5e5";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let gx = Math.ceil(xMin); gx <= xMax; gx++) {
+          ctx.moveTo(sx(gx), m.t);
+          ctx.lineTo(sx(gx), h - m.b);
+        }
+        for (
+          let gy = Math.ceil(yMin);
+          gy <= yMax;
+          gy += Math.max(1, Math.floor((yMax - yMin) / 10))
+        ) {
+          ctx.moveTo(m.l, sy(gy));
+          ctx.lineTo(w - m.r, sy(gy));
+        }
+        ctx.stroke();
+        ctx.strokeStyle = "#444";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(m.l, m.t);
+        ctx.lineTo(m.l, h - m.b);
+        ctx.lineTo(w - m.r, h - m.b);
+        ctx.stroke();
+        ctx.fillStyle = "#777";
+        ctx.font = "11px Arial";
+        ctx.textAlign = "center";
+        for (let gx = Math.ceil(xMin); gx <= xMax; gx++) {
+          if (Math.abs(gx) < 0.01) continue;
+          ctx.fillText(gx, sx(gx), h - m.b + 14);
+        }
+        ctx.textAlign = "right";
+        const yStep = Math.max(1, Math.floor((yMax - yMin) / 6));
+        for (let gy = Math.ceil(yMin); gy <= yMax; gy += yStep) {
+          ctx.fillText(gy.toFixed(0), m.l - 4, sy(gy) + 4);
+        }
+        ctx.fillStyle = "#555";
+        ctx.font = "bold 11px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(xLabel, (m.l + w - m.r) / 2, h - 4);
+        ctx.save();
+        ctx.translate(12, (m.t + h - m.b) / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText(yLabel, 0, 0);
+        ctx.restore();
+        ctx.restore();
+        return { sx, sy, m, plotW, plotH };
+      }
+
+      /* ============================================================
+   DEMO 1: 1D gradient descent
+   ============================================================ */
+      const D1 = {
+        f: (x) => (x - 2) ** 2,
+        df: (x) => 2 * (x - 2),
+        lr: 0.4,
+        x0: -1.5,
+        x: -1.5,
+        iter: 0,
+        history: [-1.5],
+        timer: null,
+      };
+      const c1 = document.getElementById("c1");
+      const ctx1 = c1.getContext("2d");
+
+      function draw1() {
+        const w = c1.width,
+          h = c1.height;
+        ctx1.clearRect(0, 0, w, h);
+        ctx1.fillStyle = "#FFF8F0";
+        ctx1.fillRect(0, 0, w, h);
+
+        const xMin = -4,
+          xMax = 6,
+          yMin = -2,
+          yMax = 16;
+        const { sx, sy } = drawAxes(
+          ctx1,
+          w,
+          h,
+          xMin,
+          xMax,
+          yMin,
+          yMax,
+          "x",
+          "f(x)",
+        );
+
+        // Parabola
+        ctx1.strokeStyle = "#FF8C00";
+        ctx1.lineWidth = 2.5;
+        ctx1.beginPath();
+        for (let i = 0; i <= 200; i++) {
+          const xv = xMin + (i / 200) * (xMax - xMin);
+          const yv = D1.f(xv);
+          const px = sx(xv),
+            py = sy(clamp(yv, yMin, yMax));
+          if (i === 0) ctx1.moveTo(px, py);
+          else ctx1.lineTo(px, py);
+        }
+        ctx1.stroke();
+
+        // Minimo
+        ctx1.fillStyle = "#4ade80";
+        ctx1.beginPath();
+        ctx1.arc(sx(2), sy(0), 6, 0, 2 * Math.PI);
+        ctx1.fill();
+        ctx1.fillStyle = "#065f46";
+        ctx1.font = "bold 11px Arial";
+        ctx1.textAlign = "center";
+        ctx1.fillText("minimo (2, 0)", sx(2), sy(0) + 22);
+
+        // Historial (trayectoria)
+        ctx1.strokeStyle = "rgba(192, 57, 43, 0.35)";
+        ctx1.lineWidth = 1.5;
+        ctx1.setLineDash([4, 3]);
+        ctx1.beginPath();
+        for (let i = 0; i < D1.history.length; i++) {
+          const xv = D1.history[i];
+          const yv = D1.f(xv);
+          const px = sx(xv),
+            py = sy(clamp(yv, yMin, yMax));
+          if (i === 0) ctx1.moveTo(px, py);
+          else ctx1.lineTo(px, py);
+        }
+        ctx1.stroke();
+        ctx1.setLineDash([]);
+
+        // Puntos historicos
+        ctx1.fillStyle = "rgba(192, 57, 43, 0.4)";
+        for (let i = 0; i < D1.history.length - 1; i++) {
+          const xv = D1.history[i];
+          const yv = D1.f(xv);
+          ctx1.beginPath();
+          ctx1.arc(sx(xv), sy(clamp(yv, yMin, yMax)), 3, 0, 2 * Math.PI);
+          ctx1.fill();
+        }
+
+        // Punto actual + tangente
+        const xv = D1.x;
+        const yv = D1.f(xv);
+        const gv = D1.df(xv);
+        ctx1.strokeStyle = "#3b82f6";
+        ctx1.lineWidth = 1.8;
+        ctx1.setLineDash([5, 4]);
+        ctx1.beginPath();
+        const tx1 = xv - 1.2,
+          tx2 = xv + 1.2;
+        ctx1.moveTo(sx(tx1), sy(yv + gv * (tx1 - xv)));
+        ctx1.lineTo(sx(tx2), sy(yv + gv * (tx2 - xv)));
+        ctx1.stroke();
+        ctx1.setLineDash([]);
+
+        // Flecha del paso (proximo)
+        const xNext = xv - D1.lr * gv;
+        ctx1.strokeStyle = "#c0392b";
+        ctx1.lineWidth = 2.5;
+        ctx1.beginPath();
+        ctx1.moveTo(sx(xv), sy(yv));
+        ctx1.lineTo(sx(xNext), sy(D1.f(xNext)));
+        ctx1.stroke();
+
+        // Bola
+        ctx1.fillStyle = "#FF6600";
+        ctx1.strokeStyle = "#7a3500";
+        ctx1.lineWidth = 2;
+        ctx1.beginPath();
+        ctx1.arc(sx(xv), sy(yv), 9, 0, 2 * Math.PI);
+        ctx1.fill();
+        ctx1.stroke();
+
+        // Etiqueta tangente
+        ctx1.fillStyle = "#3b82f6";
+        ctx1.font = "11px Arial";
+        ctx1.textAlign = "left";
+        ctx1.fillText("tangente (pendiente = f'(x))", sx(xv) + 12, sy(yv) - 10);
+
+        // Info
+        document.getElementById("i1iter").textContent = D1.iter;
+        document.getElementById("i1x").textContent = xv.toFixed(4);
+        document.getElementById("i1f").textContent = yv.toFixed(4);
+        document.getElementById("i1g").textContent = gv.toFixed(4);
+        const stp = -D1.lr * gv;
+        const sEl = document.getElementById("i1step");
+        sEl.textContent = (stp >= 0 ? "+" : "") + stp.toFixed(4);
+        sEl.className = "v";
+        if (Math.abs(gv) < 0.001) sEl.classList.add("highlight");
+        if (Math.abs(xv - 2) > 50) sEl.classList.add("warn");
+      }
+
+      function step1() {
+        if (Math.abs(D1.x - 2) > 1e4) return false;
+        const g = D1.df(D1.x);
+        D1.x = D1.x - D1.lr * g;
+        D1.iter++;
+        D1.history.push(D1.x);
+        if (D1.history.length > 120) D1.history.shift();
+        draw1();
+        return Math.abs(g) > 1e-5;
+      }
+
+      function run1() {
+        stopAll1();
+        const id = setInterval(() => {
+          const cont = step1();
+          if (!cont || D1.iter > 500) {
+            clearInterval(id);
+            D1.timer = null;
+          }
+        }, 80);
+        D1.timer = id;
+      }
+
+      function stopAll1() {
+        if (D1.timer) {
+          clearInterval(D1.timer);
+          D1.timer = null;
+        }
+      }
+
+      function reset1() {
+        stopAll1();
+        D1.x = D1.x0;
+        D1.iter = 0;
+        D1.history = [D1.x0];
+        draw1();
+      }
+
+      document.getElementById("s1lr").addEventListener("input", (e) => {
+        D1.lr = parseFloat(e.target.value);
+        document.getElementById("v1lr").textContent = D1.lr.toFixed(2);
+        draw1();
+      });
+      document.getElementById("s1x0").addEventListener("input", (e) => {
+        D1.x0 = parseFloat(e.target.value);
+        document.getElementById("v1x0").textContent = D1.x0.toFixed(2);
+        reset1();
+      });
+      document.getElementById("b1run").addEventListener("click", run1);
+      document.getElementById("b1step").addEventListener("click", () => {
+        stopAll1();
+        step1();
+      });
+      document.getElementById("b1reset").addEventListener("click", reset1);
+      reset1();
+
+      /* ============================================================
+   DEMO 2: LR comparison
+   ============================================================ */
+      function makePanel(canvasId, lr, statId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext("2d");
+        const stat = document.getElementById(statId);
+        const state = { x: -2, iter: 0, history: [-2], lr: lr, id: null };
+
+        function f(x) {
+          return (x - 2) ** 2;
+        }
+        function df(x) {
+          return 2 * (x - 2);
+        }
+
+        function draw() {
+          const w = canvas.width,
+            h = canvas.height;
+          ctx.clearRect(0, 0, w, h);
+          ctx.fillStyle = "#FFF8F0";
+          ctx.fillRect(0, 0, w, h);
+
+          const xMin = -4,
+            xMax = 8,
+            yMin = -1,
+            yMax = 20;
+          const mL = 26,
+            mR = 8,
+            mT = 8,
+            mB = 20;
+          const plotW = w - mL - mR,
+            plotH = h - mT - mB;
+          const sx = (x) => mL + ((x - xMin) / (xMax - xMin)) * plotW;
+          const sy = (y) => mT + (1 - (y - yMin) / (yMax - yMin)) * plotH;
+
+          ctx.strokeStyle = "#ccc";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(mL, mT);
+          ctx.lineTo(mL, h - mB);
+          ctx.lineTo(w - mR, h - mB);
+          ctx.stroke();
+
+          ctx.strokeStyle = "#FF8C00";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i <= 150; i++) {
+            const xv = xMin + (i / 150) * (xMax - xMin);
+            const yv = clamp(f(xv), yMin, yMax);
+            if (i === 0) ctx.moveTo(sx(xv), sy(yv));
+            else ctx.lineTo(sx(xv), sy(yv));
+          }
+          ctx.stroke();
+
+          // Minimo
+          ctx.fillStyle = "#4ade80";
+          ctx.beginPath();
+          ctx.arc(sx(2), sy(0), 4, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Trayectoria
+          ctx.strokeStyle = "rgba(192,57,43,0.4)";
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 2]);
+          ctx.beginPath();
+          for (let i = 0; i < state.history.length; i++) {
+            const xv = state.history[i];
+            const yv = clamp(f(xv), yMin, yMax);
+            if (i === 0) ctx.moveTo(sx(xv), sy(yv));
+            else ctx.lineTo(sx(xv), sy(yv));
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Punto actual
+          ctx.fillStyle = "#FF6600";
+          ctx.strokeStyle = "#7a3500";
+          ctx.lineWidth = 1.5;
+          const cx = sx(clamp(state.x, xMin, xMax));
+          const cy = sy(clamp(f(state.x), yMin, yMax));
+          ctx.beginPath();
+          ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.stroke();
+
+          stat.textContent = `iter: ${state.iter} — x: ${state.x.toFixed(3)}`;
+        }
+
+        function step() {
+          if (Math.abs(state.x) > 1e6) return false;
+          const g = df(state.x);
+          state.x = state.x - state.lr * g;
+          state.iter++;
+          state.history.push(state.x);
+          if (state.history.length > 50) state.history.shift();
+          draw();
+          return Math.abs(g) > 1e-5 && state.iter < 60;
+        }
+
+        function run() {
+          if (state.id) clearInterval(state.id);
+          state.id = setInterval(() => {
+            const c = step();
+            if (!c) {
+              clearInterval(state.id);
+              state.id = null;
+            }
+          }, 120);
+        }
+
+        function reset() {
+          if (state.id) {
+            clearInterval(state.id);
+            state.id = null;
+          }
+          state.x = -2;
+          state.iter = 0;
+          state.history = [-2];
+          draw();
+        }
+
+        draw();
+        return { run, reset };
+      }
+
+      const p2a = makePanel("c2a", 0.02, "s2a");
+      const p2b = makePanel("c2b", 0.4, "s2b");
+      const p2c = makePanel("c2c", 1.05, "s2c");
+
+      document.getElementById("b2run").addEventListener("click", () => {
+        p2a.reset();
+        p2b.reset();
+        p2c.reset();
+        setTimeout(() => {
+          p2a.run();
+          p2b.run();
+          p2c.run();
+        }, 50);
+      });
+      document.getElementById("b2reset").addEventListener("click", () => {
+        p2a.reset();
+        p2b.reset();
+        p2c.reset();
+      });
+
+      /* ============================================================
+   DEMO 3: 2D surface
+   ============================================================ */
+      const D3 = {
+        mode: "convex",
+        lr: 0.1,
+        speed: 80,
+        x: null,
+        y: null,
+        history: [],
+        iter: 0,
+        timer: null,
+        // Range: x, y in [-3.5, 3.5]
+        xMin: -3.5,
+        xMax: 3.5,
+        yMin: -3.5,
+        yMax: 3.5,
+      };
+      const c3 = document.getElementById("c3");
+      const ctx3 = c3.getContext("2d");
+
+      function f3(x, y) {
+        if (D3.mode === "convex") {
+          return 0.5 * (x * x + y * y);
+        } else {
+          // Dos minimos locales en (±1.8, 0)
+          return 0.12 * (x * x - 3.24) * (x * x - 3.24) + 0.5 * y * y;
+        }
+      }
+      function df3(x, y) {
+        if (D3.mode === "convex") {
+          return [x, y];
+        } else {
+          return [0.48 * x * (x * x - 3.24), y];
+        }
+      }
+
+      function drawSurface3() {
+        const w = c3.width,
+          h = c3.height;
+        const img = ctx3.createImageData(w, h);
+        const data = img.data;
+        // Find range of f
+        let fMin = Infinity,
+          fMax = -Infinity;
+        for (let py = 0; py < h; py++) {
+          for (let px = 0; px < w; px++) {
+            const x = D3.xMin + (px / w) * (D3.xMax - D3.xMin);
+            const y = D3.yMin + (1 - py / h) * (D3.yMax - D3.yMin);
+            const v = f3(x, y);
+            if (v < fMin) fMin = v;
+            if (v > fMax) fMax = v;
+          }
+        }
+        const fRange = fMax - fMin;
+        for (let py = 0; py < h; py++) {
+          for (let px = 0; px < w; px++) {
+            const x = D3.xMin + (px / w) * (D3.xMax - D3.xMin);
+            const y = D3.yMin + (1 - py / h) * (D3.yMax - D3.yMin);
+            const v = f3(x, y);
+            const t = Math.pow((v - fMin) / fRange, 0.5); // oscuro = alto
+            // Paleta naranja: de crema clara (bajo) a naranja oscuro (alto)
+            const r = Math.round(lerp(255, 140, t));
+            const g = Math.round(lerp(245, 50, t));
+            const b = Math.round(lerp(220, 10, t));
+            const band = Math.floor(t * 10);
+            const bandNext = Math.floor((t + 0.005) * 10);
+            const idx = (py * w + px) * 4;
+            if (band !== bandNext) {
+              // Linea de contorno
+              data[idx] = 80;
+              data[idx + 1] = 40;
+              data[idx + 2] = 10;
+            } else {
+              data[idx] = r;
+              data[idx + 1] = g;
+              data[idx + 2] = b;
+            }
+            data[idx + 3] = 255;
+          }
+        }
+        ctx3.putImageData(img, 0, 0);
+      }
+
+      function draw3() {
+        const w = c3.width,
+          h = c3.height;
+        drawSurface3();
+
+        // Marcar minimos
+        const minima =
+          D3.mode === "convex"
+            ? [[0, 0]]
+            : [
+                [-1.8, 0],
+                [1.8, 0],
+              ];
+        for (const [mx, my] of minima) {
+          const px = ((mx - D3.xMin) / (D3.xMax - D3.xMin)) * w;
+          const py = (1 - (my - D3.yMin) / (D3.yMax - D3.yMin)) * h;
+          ctx3.fillStyle = "#4ade80";
+          ctx3.strokeStyle = "#065f46";
+          ctx3.lineWidth = 2;
+          ctx3.beginPath();
+          ctx3.arc(px, py, 7, 0, 2 * Math.PI);
+          ctx3.fill();
+          ctx3.stroke();
+        }
+
+        // Trayectoria
+        if (D3.history.length > 0) {
+          ctx3.strokeStyle = "#FF6600";
+          ctx3.lineWidth = 2.2;
+          ctx3.beginPath();
+          for (let i = 0; i < D3.history.length; i++) {
+            const [x, y] = D3.history[i];
+            const px = ((x - D3.xMin) / (D3.xMax - D3.xMin)) * w;
+            const py = (1 - (y - D3.yMin) / (D3.yMax - D3.yMin)) * h;
+            if (i === 0) ctx3.moveTo(px, py);
+            else ctx3.lineTo(px, py);
+          }
+          ctx3.stroke();
+
+          // Puntos
+          for (let i = 0; i < D3.history.length; i++) {
+            const [x, y] = D3.history[i];
+            const px = ((x - D3.xMin) / (D3.xMax - D3.xMin)) * w;
+            const py = (1 - (y - D3.yMin) / (D3.yMax - D3.yMin)) * h;
+            ctx3.fillStyle = i === 0 ? "#c0392b" : "#FF8C00";
+            ctx3.beginPath();
+            ctx3.arc(px, py, i === 0 ? 6 : 3, 0, 2 * Math.PI);
+            ctx3.fill();
+          }
+        } else if (D3.x !== null) {
+          const px = ((D3.x - D3.xMin) / (D3.xMax - D3.xMin)) * w;
+          const py = (1 - (D3.y - D3.yMin) / (D3.yMax - D3.yMin)) * h;
+          ctx3.fillStyle = "#c0392b";
+          ctx3.beginPath();
+          ctx3.arc(px, py, 6, 0, 2 * Math.PI);
+          ctx3.fill();
+        }
+
+        // Hint
+        if (D3.x === null) {
+          ctx3.fillStyle = "rgba(255,255,255,0.85)";
+          ctx3.fillRect(w / 2 - 120, h / 2 - 18, 240, 36);
+          ctx3.strokeStyle = "#FF6600";
+          ctx3.strokeRect(w / 2 - 120, h / 2 - 18, 240, 36);
+          ctx3.fillStyle = "#FF6600";
+          ctx3.font = "bold 13px Arial";
+          ctx3.textAlign = "center";
+          ctx3.fillText("Click para fijar punto inicial", w / 2, h / 2 + 5);
+        }
+      }
+
+      function step3() {
+        const [gx, gy] = df3(D3.x, D3.y);
+        D3.x -= D3.lr * gx;
+        D3.y -= D3.lr * gy;
+        D3.iter++;
+        D3.history.push([D3.x, D3.y]);
+        if (D3.history.length > 300) D3.history.shift();
+        const loss = f3(D3.x, D3.y);
+        document.getElementById("i3iter").textContent = D3.iter;
+        document.getElementById("i3pos").textContent =
+          `(${D3.x.toFixed(2)}, ${D3.y.toFixed(2)})`;
+        document.getElementById("i3loss").textContent = loss.toFixed(4);
+        draw3();
+        return Math.hypot(gx, gy) > 1e-4;
+      }
+
+      function run3() {
+        if (D3.x === null) return;
+        if (D3.timer) clearInterval(D3.timer);
+        D3.timer = setInterval(() => {
+          const c = step3();
+          if (!c || D3.iter > 500) {
+            clearInterval(D3.timer);
+            D3.timer = null;
+          }
+        }, D3.speed);
+      }
+
+      function reset3() {
+        if (D3.timer) {
+          clearInterval(D3.timer);
+          D3.timer = null;
+        }
+        D3.history = [];
+        D3.iter = 0;
+        if (D3.x !== null) {
+          D3.history.push([D3.x, D3.y]);
+        }
+        document.getElementById("i3iter").textContent = "0";
+        document.getElementById("i3pos").textContent =
+          D3.x !== null ? `(${D3.x.toFixed(2)}, ${D3.y.toFixed(2)})` : "--";
+        document.getElementById("i3loss").textContent =
+          D3.x !== null ? f3(D3.x, D3.y).toFixed(4) : "--";
+        draw3();
+      }
+
+      c3.addEventListener("click", (e) => {
+        if (D3.timer) {
+          clearInterval(D3.timer);
+          D3.timer = null;
+        }
+        const rect = c3.getBoundingClientRect();
+        const scale = c3.width / rect.width;
+        const px = (e.clientX - rect.left) * scale;
+        const py = (e.clientY - rect.top) * scale;
+        D3.x = D3.xMin + (px / c3.width) * (D3.xMax - D3.xMin);
+        D3.y = D3.yMin + (1 - py / c3.height) * (D3.yMax - D3.yMin);
+        D3.history = [[D3.x, D3.y]];
+        D3.iter = 0;
+        document.getElementById("i3start").textContent =
+          `(${D3.x.toFixed(2)}, ${D3.y.toFixed(2)})`;
+        document.getElementById("i3pos").textContent =
+          `(${D3.x.toFixed(2)}, ${D3.y.toFixed(2)})`;
+        document.getElementById("i3loss").textContent = f3(D3.x, D3.y).toFixed(
+          4,
+        );
+        document.getElementById("i3iter").textContent = "0";
+        draw3();
+      });
+
+      document.getElementById("s3lr").addEventListener("input", (e) => {
+        D3.lr = parseFloat(e.target.value);
+        document.getElementById("v3lr").textContent = D3.lr.toFixed(2);
+      });
+      document.getElementById("s3sp").addEventListener("input", (e) => {
+        D3.speed = parseInt(e.target.value);
+      });
+
+      document.querySelectorAll("#g3func input").forEach((inp) => {
+        inp.addEventListener("change", () => {
+          D3.mode = inp.value;
+          document
+            .querySelectorAll("#g3func label")
+            .forEach((l) => l.classList.remove("checked"));
+          inp.parentElement.classList.add("checked");
+          D3.x = null;
+          D3.y = null;
+          D3.history = [];
+          D3.iter = 0;
+          document.getElementById("i3start").textContent = "click en el mapa";
+          document.getElementById("i3pos").textContent = "--";
+          document.getElementById("i3loss").textContent = "--";
+          document.getElementById("i3iter").textContent = "0";
+          draw3();
+        });
+      });
+
+      document.getElementById("b3run").addEventListener("click", run3);
+      document.getElementById("b3reset").addEventListener("click", reset3);
+      draw3();
+
+      /* ============================================================
+   DEMO 4: BGD vs SGD vs MiniBatch
+   ============================================================ */
+      const D4 = {
+        data: [],
+        wBGD: 0,
+        bBGD: 0,
+        lossBGD: [],
+        pathBGD: [[0, 0]],
+        wSGD: 0,
+        bSGD: 0,
+        lossSGD: [],
+        pathSGD: [[0, 0]],
+        wMB: 0,
+        bMB: 0,
+        lossMB: [],
+        pathMB: [[0, 0]],
+        iter: 0,
+        timer: null,
+        k: 10,
+        lr: 0.005,
+        maxIter: 80,
+      };
+      const c4a = document.getElementById("c4a");
+      const c4b = document.getElementById("c4b");
+      const c4c = document.getElementById("c4c");
+      const ctx4a = c4a.getContext("2d");
+      const ctx4b = c4b.getContext("2d");
+      const ctx4c = c4c.getContext("2d");
+
+      // Render del esquema SVG (3 filas de puntos)
+      (function renderSchematic() {
+        const cols = 20,
+          rows = 5,
+          dx = 26,
+          dy = 14;
+        const total = cols * rows; // 100
+        function makeDots(gid, selector) {
+          const g = document.getElementById(gid);
+          if (!g) return;
+          for (let i = 0; i < total; i++) {
+            const r = Math.floor(i / cols),
+              c = i % cols;
+            const cx = c * dx,
+              cy = r * dy;
+            const sel = selector(i);
+            const cls =
+              sel === "all" ? "dot-all" : sel === "sel" ? "dot-sel" : "dot-off";
+            const rad = sel === "sel" ? 4 : 3;
+            g.insertAdjacentHTML(
+              "beforeend",
+              `<circle cx="${cx}" cy="${cy}" r="${rad}" class="${cls}"/>`,
+            );
+          }
+        }
+        // BGD: todos seleccionados
+        makeDots("gridBGD", () => "all");
+        // SGD: solo 1 al azar
+        const sIdx = Math.floor(Math.random() * total);
+        makeDots("gridSGD", (i) => (i === sIdx ? "sel" : "off"));
+        // Mini-batch: 10 al azar
+        const mbSet = new Set();
+        while (mbSet.size < 10) mbSet.add(Math.floor(Math.random() * total));
+        makeDots("gridMB", (i) => (mbSet.has(i) ? "sel" : "off"));
+      })();
+
+      function genData4() {
+        D4.data = [];
+        for (let i = 0; i < 100; i++) {
+          const x = Math.random() * 10;
+          const noise =
+            (Math.random() +
+              Math.random() +
+              Math.random() +
+              Math.random() -
+              2) *
+            2.5;
+          const y = 2 * x + 1 + noise;
+          D4.data.push({ x, y });
+        }
+      }
+
+      function mse(w, b) {
+        let s = 0;
+        for (const p of D4.data) {
+          const e = w * p.x + b - p.y;
+          s += e * e;
+        }
+        return s / D4.data.length;
+      }
+
+      function gradBatch(w, b, batch) {
+        let gw = 0,
+          gb = 0;
+        for (const p of batch) {
+          const e = w * p.x + b - p.y;
+          gw += e * p.x;
+          gb += e;
+        }
+        return [(2 * gw) / batch.length, (2 * gb) / batch.length];
+      }
+
+      function draw4a() {
+        const w = c4a.width,
+          h = c4a.height;
+        ctx4a.clearRect(0, 0, w, h);
+        ctx4a.fillStyle = "#FFF8F0";
+        ctx4a.fillRect(0, 0, w, h);
+        const xMin = 0,
+          xMax = 10,
+          yMin = -5,
+          yMax = 25;
+        const { sx, sy } = drawAxes(
+          ctx4a,
+          w,
+          h,
+          xMin,
+          xMax,
+          yMin,
+          yMax,
+          "x",
+          "y",
+        );
+        // Datos
+        ctx4a.fillStyle = "rgba(136,136,136,0.7)";
+        for (const p of D4.data) {
+          ctx4a.beginPath();
+          ctx4a.arc(sx(p.x), sy(clamp(p.y, yMin, yMax)), 2.5, 0, 2 * Math.PI);
+          ctx4a.fill();
+        }
+        // Recta ideal
+        ctx4a.strokeStyle = "rgba(74,222,128,0.85)";
+        ctx4a.lineWidth = 2;
+        ctx4a.setLineDash([6, 4]);
+        ctx4a.beginPath();
+        ctx4a.moveTo(sx(0), sy(1));
+        ctx4a.lineTo(sx(10), sy(21));
+        ctx4a.stroke();
+        ctx4a.setLineDash([]);
+        ctx4a.fillStyle = "#065f46";
+        ctx4a.font = "bold 10px Arial";
+        ctx4a.textAlign = "right";
+        ctx4a.fillText("ideal y = 2x + 1", sx(10) - 6, sy(21) - 4);
+
+        // Rectas aprendidas
+        function drawLine(w_, b_, color, dash, width) {
+          ctx4a.strokeStyle = color;
+          ctx4a.lineWidth = width || 2.2;
+          if (dash) ctx4a.setLineDash(dash);
+          ctx4a.beginPath();
+          ctx4a.moveTo(sx(xMin), sy(clamp(w_ * xMin + b_, yMin, yMax)));
+          ctx4a.lineTo(sx(xMax), sy(clamp(w_ * xMax + b_, yMin, yMax)));
+          ctx4a.stroke();
+          ctx4a.setLineDash([]);
+        }
+        drawLine(D4.wBGD, D4.bBGD, "#FF6600");
+        drawLine(D4.wSGD, D4.bSGD, "#3b82f6", [4, 3]);
+        drawLine(D4.wMB, D4.bMB, "#10b981", [2, 2]);
+      }
+
+      function draw4c() {
+        const w = c4c.width,
+          h = c4c.height;
+        ctx4c.clearRect(0, 0, w, h);
+        // Paisaje de la MSE en (w, b)
+        const wMin = -0.5,
+          wMax = 3.5,
+          bMin = -3,
+          bMax = 5;
+        const mL = 40,
+          mR = 14,
+          mT = 14,
+          mB = 32;
+        const plotW = w - mL - mR,
+          plotH = h - mT - mB;
+        const sxP = (v) => mL + ((v - wMin) / (wMax - wMin)) * plotW;
+        const syP = (v) => mT + (1 - (v - bMin) / (bMax - bMin)) * plotH;
+        // Heatmap de MSE en baja resolucion
+        const step = 4;
+        let fMin = Infinity,
+          fMax = -Infinity;
+        const grid = [];
+        for (let py = 0; py < plotH; py += step) {
+          const row = [];
+          for (let px = 0; px < plotW; px += step) {
+            const wv = wMin + (px / plotW) * (wMax - wMin);
+            const bv = bMin + (1 - py / plotH) * (bMax - bMin);
+            const v = mse(wv, bv);
+            row.push(v);
+            if (v < fMin) fMin = v;
+            if (v > fMax) fMax = v;
+          }
+          grid.push(row);
+        }
+        const fRange = Math.log(1 + fMax - fMin);
+        for (let py = 0; py < grid.length; py++) {
+          for (let px = 0; px < grid[py].length; px++) {
+            const t = Math.log(1 + grid[py][px] - fMin) / fRange;
+            const r = Math.round(lerp(255, 140, t));
+            const g = Math.round(lerp(245, 50, t));
+            const b = Math.round(lerp(220, 10, t));
+            ctx4c.fillStyle = `rgb(${r},${g},${b})`;
+            ctx4c.fillRect(mL + px * step, mT + py * step, step, step);
+          }
+        }
+        // Ejes + etiquetas
+        ctx4c.strokeStyle = "#444";
+        ctx4c.lineWidth = 1.2;
+        ctx4c.strokeRect(mL, mT, plotW, plotH);
+        ctx4c.fillStyle = "#555";
+        ctx4c.font = "11px Arial";
+        ctx4c.textAlign = "center";
+        for (let wv = 0; wv <= 3; wv++) {
+          ctx4c.fillText(wv.toFixed(0), sxP(wv), h - mB + 14);
+        }
+        ctx4c.textAlign = "right";
+        for (let bv = -2; bv <= 4; bv += 2) {
+          ctx4c.fillText(bv.toFixed(0), mL - 4, syP(bv) + 4);
+        }
+        ctx4c.fillStyle = "#555";
+        ctx4c.font = "bold 11px Arial";
+        ctx4c.textAlign = "center";
+        ctx4c.fillText("w", (mL + w - mR) / 2, h - 4);
+        ctx4c.save();
+        ctx4c.translate(12, (mT + h - mB) / 2);
+        ctx4c.rotate(-Math.PI / 2);
+        ctx4c.fillText("b", 0, 0);
+        ctx4c.restore();
+
+        // Optimo (w=2, b=1)
+        ctx4c.fillStyle = "#4ade80";
+        ctx4c.strokeStyle = "#065f46";
+        ctx4c.lineWidth = 2;
+        ctx4c.beginPath();
+        // Estrella
+        const ox = sxP(2),
+          oy = syP(1);
+        ctx4c.beginPath();
+        for (let k = 0; k < 10; k++) {
+          const ang = -Math.PI / 2 + (k * Math.PI) / 5;
+          const rad = k % 2 === 0 ? 8 : 3.5;
+          const xx = ox + Math.cos(ang) * rad;
+          const yy = oy + Math.sin(ang) * rad;
+          if (k === 0) ctx4c.moveTo(xx, yy);
+          else ctx4c.lineTo(xx, yy);
+        }
+        ctx4c.closePath();
+        ctx4c.fill();
+        ctx4c.stroke();
+
+        // Dibuja una trayectoria
+        function drawPath(path, color, width) {
+          if (path.length < 2) return;
+          ctx4c.strokeStyle = color;
+          ctx4c.lineWidth = width || 1.8;
+          ctx4c.beginPath();
+          for (let i = 0; i < path.length; i++) {
+            const [wv, bv] = path[i];
+            const px = sxP(clamp(wv, wMin, wMax));
+            const py = syP(clamp(bv, bMin, bMax));
+            if (i === 0) ctx4c.moveTo(px, py);
+            else ctx4c.lineTo(px, py);
+          }
+          ctx4c.stroke();
+          // Punto final
+          const [fw, fb] = path[path.length - 1];
+          ctx4c.fillStyle = color;
+          ctx4c.beginPath();
+          ctx4c.arc(
+            sxP(clamp(fw, wMin, wMax)),
+            syP(clamp(fb, bMin, bMax)),
+            4,
+            0,
+            2 * Math.PI,
+          );
+          ctx4c.fill();
+        }
+        drawPath(D4.pathSGD, "#3b82f6", 1.3);
+        drawPath(D4.pathMB, "#10b981", 1.8);
+        drawPath(D4.pathBGD, "#FF6600", 2.4);
+
+        // Punto de inicio
+        ctx4c.fillStyle = "#c0392b";
+        ctx4c.beginPath();
+        ctx4c.arc(sxP(0), syP(0), 5, 0, 2 * Math.PI);
+        ctx4c.fill();
+        ctx4c.fillStyle = "#c0392b";
+        ctx4c.font = "10px Arial";
+        ctx4c.textAlign = "left";
+        ctx4c.fillText("inicio (0,0)", sxP(0) + 8, syP(0) + 4);
+      }
+
+      function draw4b() {
+        const w = c4b.width,
+          h = c4b.height;
+        ctx4b.clearRect(0, 0, w, h);
+        ctx4b.fillStyle = "#FFF8F0";
+        ctx4b.fillRect(0, 0, w, h);
+        const iters = Math.max(
+          D4.lossBGD.length,
+          D4.lossSGD.length,
+          D4.lossMB.length,
+          1,
+        );
+        let maxL = 1;
+        for (const arr of [D4.lossBGD, D4.lossSGD, D4.lossMB]) {
+          for (const v of arr) if (v > maxL && isFinite(v)) maxL = v;
+        }
+        maxL = Math.min(maxL, 150);
+        const xMin = 0,
+          xMax = Math.max(iters - 1, 1),
+          yMin = 0,
+          yMax = maxL;
+        const { sx, sy } = drawAxes(
+          ctx4b,
+          w,
+          h,
+          xMin,
+          xMax,
+          yMin,
+          yMax,
+          "iteracion",
+          "MSE",
+        );
+        function drawCurve(arr, color, width) {
+          if (arr.length < 2) return;
+          ctx4b.strokeStyle = color;
+          ctx4b.lineWidth = width || 1.8;
+          ctx4b.beginPath();
+          for (let i = 0; i < arr.length; i++) {
+            const yv = clamp(arr[i], yMin, yMax);
+            const px = sx(i),
+              py = sy(yv);
+            if (i === 0) ctx4b.moveTo(px, py);
+            else ctx4b.lineTo(px, py);
+          }
+          ctx4b.stroke();
+        }
+        drawCurve(D4.lossSGD, "#3b82f6", 1.4);
+        drawCurve(D4.lossMB, "#10b981", 2.0);
+        drawCurve(D4.lossBGD, "#FF6600", 2.4);
+      }
+
+      function step4() {
+        const lr = D4.lr;
+        // BGD: todos
+        const [gwB, gbB] = gradBatch(D4.wBGD, D4.bBGD, D4.data);
+        D4.wBGD -= lr * gwB;
+        D4.bBGD -= lr * gbB;
+        D4.lossBGD.push(mse(D4.wBGD, D4.bBGD));
+        D4.pathBGD.push([D4.wBGD, D4.bBGD]);
+
+        // SGD: 1 punto
+        const p = D4.data[Math.floor(Math.random() * D4.data.length)];
+        const [gwS, gbS] = gradBatch(D4.wSGD, D4.bSGD, [p]);
+        D4.wSGD -= lr * gwS;
+        D4.bSGD -= lr * gbS;
+        D4.lossSGD.push(mse(D4.wSGD, D4.bSGD));
+        D4.pathSGD.push([D4.wSGD, D4.bSGD]);
+
+        // Mini-batch: k puntos
+        const batch = [];
+        for (let i = 0; i < D4.k; i++)
+          batch.push(D4.data[Math.floor(Math.random() * D4.data.length)]);
+        const [gwM, gbM] = gradBatch(D4.wMB, D4.bMB, batch);
+        D4.wMB -= lr * gwM;
+        D4.bMB -= lr * gbM;
+        D4.lossMB.push(mse(D4.wMB, D4.bMB));
+        D4.pathMB.push([D4.wMB, D4.bMB]);
+
+        D4.iter++;
+        draw4a();
+        draw4b();
+        draw4c();
+      }
+
+      function reset4(regen) {
+        if (D4.timer) {
+          clearInterval(D4.timer);
+          D4.timer = null;
+        }
+        if (regen || D4.data.length === 0) genData4();
+        D4.wBGD = 0;
+        D4.bBGD = 0;
+        D4.wSGD = 0;
+        D4.bSGD = 0;
+        D4.wMB = 0;
+        D4.bMB = 0;
+        D4.lossBGD = [];
+        D4.lossSGD = [];
+        D4.lossMB = [];
+        D4.pathBGD = [[0, 0]];
+        D4.pathSGD = [[0, 0]];
+        D4.pathMB = [[0, 0]];
+        D4.iter = 0;
+        draw4a();
+        draw4b();
+        draw4c();
+      }
+
+      function run4() {
+        reset4(false);
+        D4.timer = setInterval(() => {
+          step4();
+          if (D4.iter >= D4.maxIter) {
+            clearInterval(D4.timer);
+            D4.timer = null;
+          }
+        }, 70);
+      }
+
+      document.getElementById("s4k").addEventListener("input", (e) => {
+        D4.k = parseInt(e.target.value);
+        document.getElementById("v4k").textContent = D4.k;
+      });
+      document.getElementById("s4lr").addEventListener("input", (e) => {
+        D4.lr = parseFloat(e.target.value);
+        document.getElementById("v4lr").textContent = D4.lr.toFixed(3);
+      });
+      document.getElementById("s4it").addEventListener("input", (e) => {
+        D4.maxIter = parseInt(e.target.value);
+        document.getElementById("v4it").textContent = D4.maxIter;
+      });
+      document.getElementById("b4run").addEventListener("click", run4);
+      document.getElementById("b4step").addEventListener("click", () => {
+        if (D4.timer) {
+          clearInterval(D4.timer);
+          D4.timer = null;
+        }
+        step4();
+      });
+      document
+        .getElementById("b4reset")
+        .addEventListener("click", () => reset4(true));
+      reset4(true);
+
+      /* ============================================================
+   DEMO 5: Single Neuron
+   ============================================================ */
+      const D5 = {
+        data: [
+          { x: 1, y: 3.1 },
+          { x: 2, y: 4.9 },
+          { x: 3, y: 7.2 },
+          { x: 4, y: 9.1 },
+          { x: 5, y: 10.8 },
+          { x: 6, y: 13.2 },
+          { x: 7, y: 15.1 },
+          { x: 8, y: 17.0 },
+        ],
+        w: 0,
+        b: 0,
+        lr: 0.02,
+        iter: 0,
+        timer: null,
+      };
+      const c5 = document.getElementById("c5");
+      const ctx5 = c5.getContext("2d");
+
+      function init5() {
+        D5.w = (Math.random() - 0.5) * 2;
+        D5.b = (Math.random() - 0.5) * 2;
+        D5.iter = 0;
+        draw5();
+      }
+
+      function loss5(w, b) {
+        let s = 0;
+        for (const p of D5.data) {
+          const e = w * p.x + b - p.y;
+          s += e * e;
+        }
+        return s / D5.data.length;
+      }
+
+      function step5() {
+        let gw = 0,
+          gb = 0;
+        for (const p of D5.data) {
+          const e = D5.w * p.x + D5.b - p.y;
+          gw += e * p.x;
+          gb += e;
+        }
+        gw = (2 * gw) / D5.data.length;
+        gb = (2 * gb) / D5.data.length;
+        D5.w -= D5.lr * gw;
+        D5.b -= D5.lr * gb;
+        D5.iter++;
+        draw5();
+      }
+
+      function draw5() {
+        const w = c5.width,
+          h = c5.height;
+        ctx5.clearRect(0, 0, w, h);
+        ctx5.fillStyle = "#FFF8F0";
+        ctx5.fillRect(0, 0, w, h);
+        const xMin = 0,
+          xMax = 10,
+          yMin = 0,
+          yMax = 22;
+        const { sx, sy } = drawAxes(
+          ctx5,
+          w,
+          h,
+          xMin,
+          xMax,
+          yMin,
+          yMax,
+          "x",
+          "y",
+        );
+
+        // Recta ideal
+        ctx5.strokeStyle = "rgba(74, 222, 128, 0.7)";
+        ctx5.lineWidth = 1.5;
+        ctx5.setLineDash([5, 4]);
+        ctx5.beginPath();
+        ctx5.moveTo(sx(0), sy(1));
+        ctx5.lineTo(sx(10), sy(21));
+        ctx5.stroke();
+        ctx5.setLineDash([]);
+        ctx5.fillStyle = "#065f46";
+        ctx5.font = "10px Arial";
+        ctx5.textAlign = "right";
+        ctx5.fillText("ideal: y = 2x + 1", sx(10) - 4, sy(21) - 4);
+
+        // Datos con errores
+        for (const p of D5.data) {
+          const yp = D5.w * p.x + D5.b;
+          // Linea de error
+          ctx5.strokeStyle = "rgba(192,57,43,0.35)";
+          ctx5.lineWidth = 1;
+          ctx5.beginPath();
+          ctx5.moveTo(sx(p.x), sy(p.y));
+          ctx5.lineTo(sx(p.x), sy(clamp(yp, yMin, yMax)));
+          ctx5.stroke();
+          // Punto real
+          ctx5.fillStyle = "#333";
+          ctx5.beginPath();
+          ctx5.arc(sx(p.x), sy(p.y), 4, 0, 2 * Math.PI);
+          ctx5.fill();
+        }
+
+        // Recta aprendida
+        ctx5.strokeStyle = "#FF6600";
+        ctx5.lineWidth = 2.5;
+        ctx5.beginPath();
+        ctx5.moveTo(sx(0), sy(clamp(D5.b, yMin, yMax)));
+        ctx5.lineTo(sx(10), sy(clamp(D5.w * 10 + D5.b, yMin, yMax)));
+        ctx5.stroke();
+
+        ctx5.fillStyle = "#FF6600";
+        ctx5.font = "bold 11px Arial";
+        ctx5.textAlign = "left";
+        ctx5.fillText(
+          `y = ${D5.w.toFixed(2)}x + ${D5.b.toFixed(2)}`,
+          sx(0.3),
+          sy(21),
+        );
+
+        // Info
+        document.getElementById("i5w").textContent = D5.w.toFixed(3);
+        document.getElementById("i5b").textContent = D5.b.toFixed(3);
+        document.getElementById("i5loss").textContent = loss5(
+          D5.w,
+          D5.b,
+        ).toFixed(3);
+        document.getElementById("i5iter").textContent = D5.iter;
+      }
+
+      document.getElementById("s5lr").addEventListener("input", (e) => {
+        D5.lr = parseFloat(e.target.value);
+        document.getElementById("v5lr").textContent = D5.lr.toFixed(3);
+      });
+      document.getElementById("b5step").addEventListener("click", () => {
+        if (D5.timer) {
+          clearInterval(D5.timer);
+          D5.timer = null;
+        }
+        step5();
+      });
+      document.getElementById("b5step10").addEventListener("click", () => {
+        if (D5.timer) {
+          clearInterval(D5.timer);
+          D5.timer = null;
+        }
+        for (let i = 0; i < 10; i++) step5();
+      });
+      document.getElementById("b5run").addEventListener("click", () => {
+        if (D5.timer) {
+          clearInterval(D5.timer);
+          D5.timer = null;
+          return;
+        }
+        D5.timer = setInterval(() => {
+          step5();
+          if (D5.iter > 300) {
+            clearInterval(D5.timer);
+            D5.timer = null;
+          }
+        }, 80);
+      });
+      document.getElementById("b5reset").addEventListener("click", () => {
+        if (D5.timer) {
+          clearInterval(D5.timer);
+          D5.timer = null;
+        }
+        init5();
+      });
+      init5();
+
+      /* ============================================================
+   DEMO 6: Quiz
+   ============================================================ */
+      const FEEDBACK = {
+        1: {
+          right:
+            "Correcto. El gradiente siempre apunta hacia el maximo crecimiento; por eso en descenso usamos -&nabla;f.",
+          wrong:
+            "No. El gradiente apunta hacia donde la funcion CRECE mas. Para bajar, usamos la direccion opuesta: -&nabla;f.",
+        },
+        2: {
+          right:
+            "Correcto. Con pasos demasiado grandes saltamos sobre el minimo y nos alejamos cada vez mas (divergencia).",
+          wrong:
+            'Recuerda la demo 2: con &eta; demasiado grande la bola "saltaba" por encima del valle y se alejaba.',
+        },
+        3: {
+          right:
+            'Correcto. BGD usa el dataset completo por paso; SGD usa uno solo (de ahi el nombre "estocastico").',
+          wrong:
+            "BGD = Batch Gradient Descent usa TODOS los ejemplos por paso. SGD = Stochastic usa 1 punto al azar.",
+        },
+        4: {
+          right:
+            "Correcto. Mini-batch combina estabilidad del gradiente con eficiencia de hardware (GPU).",
+          wrong:
+            "Mini-batch es el estandar porque balancea estabilidad (mejor que SGD) y eficiencia (GPU procesa lotes en paralelo).",
+        },
+        5: {
+          right:
+            "Correcto. &nabla;f = 0 solo nos dice que estamos en un punto critico: puede ser min local, max o silla.",
+          wrong:
+            'Un gradiente cero es un "punto critico" pero no garantiza que sea un minimo: podria ser un maximo o un punto de silla.',
+        },
+      };
+
+      document.querySelectorAll(".quiz-question").forEach((q) => {
+        const ans = q.dataset.ans;
+        const qid = q.dataset.q;
+        const feedback = q.querySelector(".quiz-feedback");
+        q.querySelectorAll("input").forEach((inp) => {
+          inp.addEventListener("change", () => {
+            q.querySelectorAll(".quiz-option").forEach((opt) => {
+              opt.classList.remove("correct", "incorrect");
+            });
+            const chosen = inp.value;
+            const chosenLabel = inp.closest(".quiz-option");
+            if (chosen === ans) {
+              chosenLabel.classList.add("correct");
+              feedback.className = "quiz-feedback show right";
+              feedback.innerHTML =
+                "<strong>&#10003; Bien:</strong> " + FEEDBACK[qid].right;
+            } else {
+              chosenLabel.classList.add("incorrect");
+              feedback.className = "quiz-feedback show wrong";
+              feedback.innerHTML =
+                "<strong>&#10007; Revisa:</strong> " + FEEDBACK[qid].wrong;
+              // resaltar correcta
+              q.querySelectorAll(".quiz-option").forEach((opt) => {
+                const i = opt.querySelector("input");
+                if (i && i.value === ans) opt.classList.add("correct");
+              });
+            }
+          });
+        });
+      });
+
+      document.getElementById("bQ").addEventListener("click", () => {
+        let score = 0;
+        document.querySelectorAll(".quiz-question").forEach((q) => {
+          const ans = q.dataset.ans;
+          const checked = q.querySelector("input:checked");
+          if (checked && checked.value === ans) score++;
+        });
+        const sc = document.getElementById("qscore");
+        document.getElementById("qScoreN").textContent = score;
+        let msg = "";
+        if (score === 5)
+          msg =
+            "Dominas el descenso del gradiente. Ya puedes pasar a optimizadores avanzados (Momentum, Adam).";
+        else if (score >= 4)
+          msg = "Muy bien. Revisa las que fallaste y vuelve a probar.";
+        else if (score >= 2)
+          msg = "Vas por buen camino. Relee las demos 1-5 y vuelve al quiz.";
+        else
+          msg =
+            "Empieza por las demos 1 y 2 para construir intuicion, luego vuelve al quiz.";
+        document.getElementById("qScoreMsg").textContent = msg;
+        sc.classList.add("show");
+        sc.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      document.getElementById("bQreset").addEventListener("click", () => {
+        document.querySelectorAll(".quiz-question").forEach((q) => {
+          q.querySelectorAll("input").forEach((i) => (i.checked = false));
+          q.querySelectorAll(".quiz-option").forEach((o) =>
+            o.classList.remove("correct", "incorrect"),
+          );
+          const fb = q.querySelector(".quiz-feedback");
+          fb.className = "quiz-feedback";
+          fb.textContent = "";
+        });
+        document.getElementById("qscore").classList.remove("show");
+      });
+    </script>
+  </body>
+</html>

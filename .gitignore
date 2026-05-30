@@ -5,6 +5,4 @@ node_modules/
 .env.local
 *.log
 
-# Material fuente de la asignatura (no se publica)
-files/
 .vercel

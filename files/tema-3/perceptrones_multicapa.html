@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perceptrones Multicapa (MLP) — Aprendizaje Profundo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #fff8f0;
+      padding: 0;
+    }
+
+    .page-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 36px 60px;
+      background: #ffffff;
+      box-shadow: 0 4px 32px rgba(255,102,0,0.10);
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────────── */
+    .doc-header {
+      background: linear-gradient(135deg, #FF6600 0%, #FF8C00 60%, #FFA500 100%);
+      color: #fff;
+      border-radius: 10px;
+      padding: 36px 40px 28px;
+      margin-bottom: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+    .doc-header::after {
+      content: '';
+      position: absolute;
+      bottom: -50px; left: -20px;
+      width: 220px; height: 220px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .institution {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.88;
+      margin-bottom: 10px;
+    }
+    .doc-title {
+      font-size: 34px;
+      font-weight: 700;
+      font-family: 'Arial', sans-serif;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+    .doc-subtitle {
+      font-size: 16px;
+      font-style: italic;
+      opacity: 0.92;
+      margin-bottom: 18px;
+    }
+    .doc-meta {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .meta-chip {
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Table of Contents ───────────────────────────────────────────── */
+    .toc {
+      background: #FFF3E0;
+      border: 2px solid #FFB347;
+      border-radius: 10px;
+      padding: 22px 28px;
+      margin-bottom: 36px;
+    }
+    .toc-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #FF6600;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #FFB347;
+      padding-bottom: 8px;
+    }
+    .toc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+    }
+    .toc a {
+      color: #b54000;
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      display: block;
+      padding: 3px 0;
+      border-bottom: 1px dotted #FFD599;
+      transition: color 0.2s;
+    }
+    .toc a:hover { color: #FF6600; }
+    .toc a .toc-num {
+      display: inline-block;
+      width: 22px;
+      font-weight: 700;
+      color: #FF8C00;
+    }
+
+    /* ─── Section ─────────────────────────────────────────────────────── */
+    .section {
+      border: 2px solid #FFB347;
+      border-radius: 10px;
+      margin-bottom: 38px;
+      overflow: hidden;
+      page-break-inside: avoid;
+    }
+    .section-header {
+      background: linear-gradient(90deg, #FF6600, #FF8C00);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-num {
+      background: rgba(255,255,255,0.25);
+      border: 2px solid rgba(255,255,255,0.55);
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 20px;
+      padding: 3px 13px;
+      white-space: nowrap;
+    }
+    .section-title {
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .section-body {
+      padding: 26px 28px;
+      background: #fff;
+    }
+
+    /* ─── Sub-section label ───────────────────────────────────────────── */
+    .sub-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #FF6600;
+      margin-top: 22px;
+      margin-bottom: 7px;
+      border-bottom: 1px solid #FFD599;
+      padding-bottom: 3px;
+    }
+    .sub-label:first-child { margin-top: 0; }
+
+    h3 {
+      font-family: 'Arial', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #7a3500;
+      margin: 18px 0 8px;
+    }
+
+    p { margin-bottom: 10px; }
+    ul, ol { margin-left: 22px; margin-bottom: 10px; }
+    li { margin-bottom: 4px; }
+
+    /* ─── Formula block ───────────────────────────────────────────────── */
+    .formula-block {
+      background: #FFF8EE;
+      border: 1.5px solid #FFB347;
+      border-radius: 8px;
+      padding: 16px 22px;
+      margin: 14px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #7a3500;
+      text-align: center;
+      line-height: 2.2;
+    }
+    .formula-block .formula-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FF8C00;
+      display: block;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+    .math {
+      font-family: 'Courier New', monospace;
+      background: #FFF3E0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: #b54000;
+      font-size: 13.5px;
+    }
+
+    /* ─── Tables ──────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13.5px;
+    }
+    thead tr {
+      background: linear-gradient(90deg, #FF6600, #FF8C00);
+      color: #fff;
+    }
+    thead th {
+      padding: 10px 14px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-align: center;
+    }
+    tbody tr:nth-child(odd)  { background: #FFF8F0; }
+    tbody tr:nth-child(even) { background: #ffffff; }
+    tbody tr:hover           { background: #FFEDD5; }
+    tbody td {
+      padding: 8px 14px;
+      text-align: center;
+      border-bottom: 1px solid #FFE0B2;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    tbody td.label-cell {
+      font-family: 'Arial', sans-serif;
+      font-weight: 600;
+      color: #7a3500;
+      text-align: left;
+    }
+
+    /* ─── Hint / Note box ─────────────────────────────────────────────── */
+    .hint-box {
+      background: #FFF9F0;
+      border: 1.5px dashed #FFA500;
+      border-radius: 8px;
+      padding: 13px 18px;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: #5a3000;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .hint-icon { font-size: 18px; line-height: 1.4; flex-shrink: 0; }
+
+    /* ─── Code Block ──────────────────────────────────────────────────── */
+    .code-block {
+      background: #1a1a1a;
+      color: #f8f8f2;
+      border-radius: 8px;
+      padding: 20px 22px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      margin: 16px 0;
+      overflow-x: auto;
+      border-left: 4px solid #FF6600;
+    }
+    .code-block .kw  { color: #FF8C00; font-weight: bold; }
+    .code-block .fn  { color: #FFD580; }
+    .code-block .cm  { color: #75715e; font-style: italic; }
+    .code-block .st  { color: #a6e22e; }
+    .code-block .nb  { color: #ae81ff; }
+    .code-block .cl  { color: #66d9ef; font-weight: bold; }
+    .code-block .op  { color: #f92672; }
+
+    /* ─── SVG container ───────────────────────────────────────────────── */
+    .svg-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 18px 0;
+      overflow-x: auto;
+    }
+
+    /* ─── Step box ────────────────────────────────────────────────────── */
+    .step-box {
+      background: #FFF8EE;
+      border-left: 4px solid #FF8C00;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 10px 0;
+    }
+    .step-num {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FF6600;
+      margin-bottom: 4px;
+    }
+
+    /* ─── Two-col layout ──────────────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 14px 0;
+    }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } .toc-grid { grid-template-columns: 1fr; } }
+
+    /* ─── Key concept card ────────────────────────────────────────────── */
+    .concept-card {
+      background: #FFF3E0;
+      border: 1.5px solid #FFB347;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .concept-card .card-title {
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #FF6600;
+      margin-bottom: 6px;
+    }
+    .concept-card p { font-size: 13.5px; margin-bottom: 0; }
+
+    /* ─── Footer ──────────────────────────────────────────────────────── */
+    .doc-footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #FFD599;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      color: #7a5030;
+      line-height: 1.7;
+    }
+    .doc-footer strong { color: #FF6600; }
+
+    /* ─── Print ───────────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; }
+      .page-wrapper { box-shadow: none; padding: 20px; }
+      .section { page-break-inside: avoid; }
+      .toc a { color: #b54000; }
+    }
+
+    /* ─── Highlight span ──────────────────────────────────────────────── */
+    .hl { color: #FF6600; font-weight: 700; }
+    .tag-pill {
+      display: inline-block;
+      background: #FFE0B2;
+      color: #7a3500;
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-family: 'Arial', sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════ HEADER -->
+  <header class="doc-header">
+    <div class="institution">CUNEF Universidad &nbsp;·&nbsp; Aprendizaje Profundo</div>
+    <div class="doc-title">Perceptrones Multicapa (MLP)</div>
+    <div class="doc-subtitle">Arquitectura, Propagación, Retropropagación y Optimización en Redes Neuronales</div>
+    <div class="doc-meta">
+      <span class="meta-chip">Grado / Posgrado</span>
+      <span class="meta-chip">Tema 3 — Redes Neuronales</span>
+      <span class="meta-chip">Febrero 2026</span>
+      <span class="meta-chip">Nivel: Intermedio-Avanzado</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════ TOC -->
+  <nav class="toc">
+    <div class="toc-title">Indice de Contenidos</div>
+    <div class="toc-grid">
+      <a href="#s1"><span class="toc-num">1.</span> Introduccion y Motivacion</a>
+      <a href="#s7"><span class="toc-num">7.</span> Descenso del Gradiente</a>
+      <a href="#s2"><span class="toc-num">2.</span> Arquitectura del MLP</a>
+      <a href="#s8"><span class="toc-num">8.</span> Regularizacion y Generalizacion</a>
+      <a href="#s3"><span class="toc-num">3.</span> Propagacion hacia Adelante</a>
+      <a href="#s9"><span class="toc-num">9.</span> Ejemplo Completo: XOR</a>
+      <a href="#s4"><span class="toc-num">4.</span> Funciones de Activacion</a>
+      <a href="#s10"><span class="toc-num">10.</span> Implementacion en Python</a>
+      <a href="#s5"><span class="toc-num">5.</span> Funcion de Perdida</a>
+      <a href="#s11"><span class="toc-num">11.</span> Resumen y Conceptos Clave</a>
+      <a href="#s6"><span class="toc-num">6.</span> Retropropagacion</a>
+      <a href="#refs"><span class="toc-num">&#8250;</span> Referencias Bibliograficas</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════ SECTION 1 -->
+  <section class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">TEMA 1</span>
+      <span class="section-title">Introduccion y Motivacion</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Limitaciones del Perceptron Simple</div>
+      <p>El perceptron simple, propuesto por Frank Rosenblatt en 1958, es capaz de aprender <strong>funciones linealmente separables</strong>: aquellas en las que existe un hiperplano que divide correctamente las clases en el espacio de entrada. Sin embargo, problemas aparentemente sencillos como la funcion logica <span class="math">XOR</span> demuestran su incapacidad fundamental.</p>
+
+      <!-- XOR SVG diagram -->
+      <div class="svg-wrap">
+        <svg width="480" height="210" viewBox="0 0 480 210" xmlns="http://www.w3.org/2000/svg">
+          <rect width="480" height="210" rx="10" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+          <!-- grid -->
+          <line x1="80" y1="160" x2="360" y2="160" stroke="#ccc" stroke-width="1"/>
+          <line x1="80" y1="60" x2="360" y2="60" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="80" y1="60" x2="80" y2="160" stroke="#ccc" stroke-width="1"/>
+          <line x1="360" y1="60" x2="360" y2="160" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+          <!-- axes -->
+          <line x1="60" y1="170" x2="380" y2="170" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="60" y1="180" x2="60" y2="40" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#888"/>
+            </marker>
+          </defs>
+          <text x="385" y="174" font-size="12" fill="#888" font-family="Arial">x&#8321;</text>
+          <text x="48" y="38" font-size="12" fill="#888" font-family="Arial">x&#8322;</text>
+          <!-- class 0 points (blue circle) -->
+          <circle cx="80" cy="160" r="10" fill="#4488FF" stroke="#fff" stroke-width="2"/>
+          <text x="76" y="164" font-size="11" fill="#fff" font-weight="bold" font-family="Arial">0</text>
+          <circle cx="360" cy="60" r="10" fill="#4488FF" stroke="#fff" stroke-width="2"/>
+          <text x="356" y="64" font-size="11" fill="#fff" font-weight="bold" font-family="Arial">0</text>
+          <!-- class 1 points (orange) -->
+          <circle cx="80" cy="60" r="10" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+          <text x="76" y="64" font-size="11" fill="#fff" font-weight="bold" font-family="Arial">1</text>
+          <circle cx="360" cy="160" r="10" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+          <text x="356" y="164" font-size="11" fill="#fff" font-weight="bold" font-family="Arial">1</text>
+          <!-- axis labels -->
+          <text x="75" y="185" font-size="11" fill="#555" font-family="Arial" text-anchor="middle">(0,0)</text>
+          <text x="360" y="185" font-size="11" fill="#555" font-family="Arial" text-anchor="middle">(1,0)</text>
+          <text x="42" y="164" font-size="11" fill="#555" font-family="Arial" text-anchor="middle">(0,0)</text>
+          <text x="42" y="64" font-size="11" fill="#555" font-family="Arial" text-anchor="middle">(0,1)</text>
+          <!-- No linear separator text -->
+          <text x="420" y="90" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">XOR</text>
+          <text x="420" y="108" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">No es</text>
+          <text x="420" y="122" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">linealmente</text>
+          <text x="420" y="136" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">separable</text>
+          <!-- legend -->
+          <circle cx="90" cy="20" r="7" fill="#FF6600"/>
+          <text x="102" y="24" font-size="11" fill="#555" font-family="Arial">Clase 1 (XOR=1)</text>
+          <circle cx="230" cy="20" r="7" fill="#4488FF"/>
+          <text x="242" y="24" font-size="11" fill="#555" font-family="Arial">Clase 0 (XOR=0)</text>
+        </svg>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#9888;</span>
+        <div>El <strong>problema XOR</strong> fue utilizado por Minsky y Papert en 1969 para demostrar que el perceptron simple no puede resolver problemas no linealmente separables. Esto genero el primer "invierno de la IA" hasta el redescubrimiento de la retropropagacion.</div>
+      </div>
+
+      <div class="sub-label">Solucion: Capas Ocultas</div>
+      <p>La solucion al problema de la linealidad consiste en <strong>apilar multiples capas de perceptrones</strong>. Las capas intermedias (ocultas) aprenden <em>representaciones internas</em> del problema — transformaciones no lineales del espacio de entrada que hacen que el problema resulte linealmente separable en las capas superiores.</p>
+      <p>Intuitivamente, cada capa oculta <em>reescribe</em> los datos en un nuevo espacio de caracteristicas. Para XOR, una capa oculta con dos neuronas puede crear una nueva base donde las cuatro combinaciones de entrada se distribuyen de forma separable.</p>
+
+      <div class="sub-label">Contexto Historico</div>
+      <div class="two-col">
+        <div class="concept-card">
+          <div class="card-title">1969 — Minsky y Papert</div>
+          <p>Demuestran las limitaciones del perceptron simple en su libro "Perceptrons". Señalan que un perceptron de una sola capa no puede resolver XOR, frenando la investigacion en redes neuronales durante mas de una decada.</p>
+        </div>
+        <div class="concept-card">
+          <div class="card-title">1986 — Rumelhart, Hinton y Williams</div>
+          <p>Publican "Learning representations by back-propagating errors" en <em>Nature</em>. Presentan el algoritmo de <strong>retropropagacion del gradiente</strong>, que permite entrenar redes multicapa de manera eficiente, relanzando el campo del aprendizaje profundo.</p>
+        </div>
+        <div class="concept-card">
+          <div class="card-title">Teorema de Aproximacion Universal</div>
+          <p>Hornik (1991) demuestra que un MLP con una sola capa oculta suficientemente grande y funciones de activacion no lineales puede aproximar <em>cualquier funcion continua</em> con precision arbitraria.</p>
+        </div>
+        <div class="concept-card">
+          <div class="card-title">2006 en adelante — Deep Learning</div>
+          <p>Hinton y Salakhutdinov introducen el preentrenamiento no supervisado. LeCun, Bengio y Hinton (Premio Turing 2018) consolidan el aprendizaje profundo como paradigma dominante en inteligencia artificial.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 2 -->
+  <section class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">TEMA 2</span>
+      <span class="section-title">Arquitectura del Perceptron Multicapa</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Componentes de la Arquitectura</div>
+      <p>Un <strong>Perceptron Multicapa (MLP)</strong> esta compuesto por tres tipos de capas organizadas de forma secuencial:</p>
+      <ul>
+        <li><strong>Capa de entrada</strong>: recibe el vector de caracteristicas <span class="math">x &#8712; &#8477;<sup>n</sup></span>. No realiza computo; simplemente distribuye las señales.</li>
+        <li><strong>Capas ocultas</strong>: una o mas capas intermedias que aprenden representaciones jerarquicas. Cada neurona aplica una transformacion afin seguida de una funcion de activacion no lineal.</li>
+        <li><strong>Capa de salida</strong>: produce la prediccion final. Su estructura depende de la tarea (regresion, clasificacion binaria, clasificacion multiclase).</li>
+      </ul>
+
+      <!-- MLP Architecture SVG -->
+      <div class="svg-wrap">
+        <svg width="700" height="320" viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+          <rect width="700" height="320" rx="10" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- connection lines - input to hidden1 -->
+          <g stroke="#FFB347" stroke-width="0.8" opacity="0.6">
+            <!-- from x1(160,60) -->
+            <line x1="172" y1="60" x2="288" y2="60"/>
+            <line x1="172" y1="60" x2="288" y2="110"/>
+            <line x1="172" y1="60" x2="288" y2="160"/>
+            <line x1="172" y1="60" x2="288" y2="210"/>
+            <!-- from x2(160,120) -->
+            <line x1="172" y1="120" x2="288" y2="60"/>
+            <line x1="172" y1="120" x2="288" y2="110"/>
+            <line x1="172" y1="120" x2="288" y2="160"/>
+            <line x1="172" y1="120" x2="288" y2="210"/>
+            <!-- from x3(160,180) -->
+            <line x1="172" y1="180" x2="288" y2="60"/>
+            <line x1="172" y1="180" x2="288" y2="110"/>
+            <line x1="172" y1="180" x2="288" y2="160"/>
+            <line x1="172" y1="180" x2="288" y2="210"/>
+          </g>
+
+          <!-- hidden1 to hidden2 -->
+          <g stroke="#FF8C00" stroke-width="0.8" opacity="0.5">
+            <line x1="312" y1="60" x2="428" y2="60"/>
+            <line x1="312" y1="60" x2="428" y2="110"/>
+            <line x1="312" y1="60" x2="428" y2="160"/>
+            <line x1="312" y1="60" x2="428" y2="210"/>
+            <line x1="312" y1="110" x2="428" y2="60"/>
+            <line x1="312" y1="110" x2="428" y2="110"/>
+            <line x1="312" y1="110" x2="428" y2="160"/>
+            <line x1="312" y1="110" x2="428" y2="210"/>
+            <line x1="312" y1="160" x2="428" y2="60"/>
+            <line x1="312" y1="160" x2="428" y2="110"/>
+            <line x1="312" y1="160" x2="428" y2="160"/>
+            <line x1="312" y1="160" x2="428" y2="210"/>
+            <line x1="312" y1="210" x2="428" y2="60"/>
+            <line x1="312" y1="210" x2="428" y2="110"/>
+            <line x1="312" y1="210" x2="428" y2="160"/>
+            <line x1="312" y1="210" x2="428" y2="210"/>
+          </g>
+
+          <!-- hidden2 to output -->
+          <g stroke="#FF6600" stroke-width="0.9" opacity="0.5">
+            <line x1="452" y1="60" x2="568" y2="110"/>
+            <line x1="452" y1="60" x2="568" y2="170"/>
+            <line x1="452" y1="110" x2="568" y2="110"/>
+            <line x1="452" y1="110" x2="568" y2="170"/>
+            <line x1="452" y1="160" x2="568" y2="110"/>
+            <line x1="452" y1="160" x2="568" y2="170"/>
+            <line x1="452" y1="210" x2="568" y2="110"/>
+            <line x1="452" y1="210" x2="568" y2="170"/>
+          </g>
+
+          <!-- Input neurons -->
+          <g>
+            <circle cx="160" cy="60" r="20" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+            <text x="160" y="65" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">x&#8321;</text>
+            <circle cx="160" cy="120" r="20" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+            <text x="160" y="125" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">x&#8322;</text>
+            <circle cx="160" cy="180" r="20" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+            <text x="160" y="185" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">x&#8323;</text>
+          </g>
+
+          <!-- Hidden Layer 1 neurons -->
+          <g>
+            <circle cx="300" cy="60" r="20" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+            <text x="300" y="65" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#185;&#8321;</text>
+            <circle cx="300" cy="110" r="20" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+            <text x="300" y="115" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#185;&#8322;</text>
+            <circle cx="300" cy="160" r="20" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+            <text x="300" y="165" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#185;&#8323;</text>
+            <circle cx="300" cy="210" r="20" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+            <text x="300" y="215" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#185;&#8324;</text>
+          </g>
+
+          <!-- Hidden Layer 2 neurons -->
+          <g>
+            <circle cx="440" cy="60" r="20" fill="#FFA500" stroke="#fff" stroke-width="2"/>
+            <text x="440" y="65" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#178;&#8321;</text>
+            <circle cx="440" cy="110" r="20" fill="#FFA500" stroke="#fff" stroke-width="2"/>
+            <text x="440" y="115" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#178;&#8322;</text>
+            <circle cx="440" cy="160" r="20" fill="#FFA500" stroke="#fff" stroke-width="2"/>
+            <text x="440" y="165" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#178;&#8323;</text>
+            <circle cx="440" cy="210" r="20" fill="#FFA500" stroke="#fff" stroke-width="2"/>
+            <text x="440" y="215" font-size="11" fill="#fff" font-family="Arial" text-anchor="middle">h&#178;&#8324;</text>
+          </g>
+
+          <!-- Output neurons -->
+          <g>
+            <circle cx="580" cy="110" r="20" fill="#b54000" stroke="#fff" stroke-width="2"/>
+            <text x="580" y="115" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">y&#8321;</text>
+            <circle cx="580" cy="170" r="20" fill="#b54000" stroke="#fff" stroke-width="2"/>
+            <text x="580" y="175" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">y&#8322;</text>
+          </g>
+
+          <!-- Layer labels -->
+          <text x="160" y="255" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Capa de</text>
+          <text x="160" y="270" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Entrada</text>
+          <text x="160" y="285" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">n = 3</text>
+
+          <text x="300" y="255" font-size="12" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">Capa Oculta</text>
+          <text x="300" y="270" font-size="12" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">num. 1</text>
+          <text x="300" y="285" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">4 neuronas</text>
+
+          <text x="440" y="255" font-size="12" fill="#FFA500" font-weight="bold" font-family="Arial" text-anchor="middle">Capa Oculta</text>
+          <text x="440" y="270" font-size="12" fill="#FFA500" font-weight="bold" font-family="Arial" text-anchor="middle">num. 2</text>
+          <text x="440" y="285" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">4 neuronas</text>
+
+          <text x="580" y="255" font-size="12" fill="#b54000" font-weight="bold" font-family="Arial" text-anchor="middle">Capa de</text>
+          <text x="580" y="270" font-size="12" fill="#b54000" font-weight="bold" font-family="Arial" text-anchor="middle">Salida</text>
+          <text x="580" y="285" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">2 neuronas</text>
+
+          <!-- W labels on arrows -->
+          <text x="232" y="78" font-size="11" fill="#FF6600" font-style="italic" font-family="Arial">W&#185;</text>
+          <text x="372" y="78" font-size="11" fill="#FF8C00" font-style="italic" font-family="Arial">W&#178;</text>
+          <text x="512" y="120" font-size="11" fill="#b54000" font-style="italic" font-family="Arial">W&#179;</text>
+
+          <!-- Title -->
+          <text x="350" y="308" font-size="12" fill="#7a3500" font-family="Arial" text-anchor="middle" font-style="italic">MLP: 3 entradas — 2 capas ocultas (4 neuronas c/u) — 2 salidas</text>
+        </svg>
+      </div>
+
+      <div class="sub-label">Notacion Matematica</div>
+      <p>Utilizamos la siguiente notacion estandar para describir un MLP de <span class="math">L</span> capas:</p>
+      <div class="formula-block">
+        <span class="formula-label">Notacion por capas</span>
+        <strong>W<sup>(l)</sup></strong> &#8712; &#8477;<sup>n<sub>l</sub> &times; n<sub>l-1</sub></sup> — Matriz de pesos de la capa l<br>
+        <strong>b<sup>(l)</sup></strong> &#8712; &#8477;<sup>n<sub>l</sub></sup> — Vector de sesgos (bias) de la capa l<br>
+        <strong>z<sup>(l)</sup></strong> = W<sup>(l)</sup> a<sup>(l-1)</sup> + b<sup>(l)</sup> — Pre-activacion de la capa l<br>
+        <strong>a<sup>(l)</sup></strong> = f<sup>(l)</sup>(z<sup>(l)</sup>) — Activacion de la capa l (aplicando f elemento a elemento)
+      </div>
+
+      <div class="sub-label">Capas Totalmente Conectadas (Dense)</div>
+      <p>En un MLP clasico, <strong>cada neurona de una capa se conecta con todas las neuronas de la capa anterior</strong>. Esta conectividad completa se denomina <em>fully connected</em> o <em>dense</em>. Si la capa <span class="math">l-1</span> tiene <span class="math">n<sub>l-1</sub></span> neuronas y la capa <span class="math">l</span> tiene <span class="math">n<sub>l</sub></span>, entonces la matriz <span class="math">W<sup>(l)</sup></span> contiene <span class="math">n<sub>l</sub> &times; n<sub>l-1</sub></span> parametros entrenables, mas <span class="math">n<sub>l</sub></span> sesgos.</p>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Numero de parametros:</strong> Para un MLP con capas de tamaños [3, 4, 4, 2], el total de parametros es: (3×4 + 4) + (4×4 + 4) + (4×2 + 2) = 16 + 20 + 10 = <strong>46 parametros</strong>. En redes profundas modernas, este numero puede superar los miles de millones.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 3 -->
+  <section class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">TEMA 3</span>
+      <span class="section-title">Propagacion hacia Adelante (Forward Propagation)</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Formulacion Matematica</div>
+      <p>La propagacion hacia adelante consiste en calcular, capa por capa, las activaciones desde la entrada hasta la salida. Para cada capa <span class="math">l = 1, 2, ..., L</span>:</p>
+      <div class="formula-block">
+        <span class="formula-label">Propagacion capa a capa</span>
+        z<sup>(l)</sup> = W<sup>(l)</sup> &middot; a<sup>(l-1)</sup> + b<sup>(l)</sup><br>
+        a<sup>(l)</sup> = f<sup>(l)</sup>(z<sup>(l)</sup>)<br>
+        <span style="font-size:12px; color:#888; font-family:'Arial',sans-serif;">donde a<sup>(0)</sup> = x (vector de entrada) y y&#770; = a<sup>(L)</sup> (prediccion)</span>
+      </div>
+
+      <div class="sub-label">Notacion Matricial para Batches</div>
+      <p>En la practica, procesamos multiples ejemplos simultaneamente. Si <span class="math">m</span> es el tamaño del batch y organizamos los ejemplos en columnas, la propagacion se extiende de forma directa:</p>
+      <div class="formula-block">
+        <span class="formula-label">Formulacion en batch (m ejemplos)</span>
+        X &#8712; &#8477;<sup>n<sub>0</sub> &times; m</sup>,&nbsp;&nbsp; Z<sup>(l)</sup> = W<sup>(l)</sup> A<sup>(l-1)</sup> + b<sup>(l)</sup> <span style="color:#888;font-size:12px;">(broadcasting)</span><br>
+        A<sup>(l)</sup> = f<sup>(l)</sup>(Z<sup>(l)</sup>) &#8712; &#8477;<sup>n<sub>l</sub> &times; m</sup>
+      </div>
+
+      <div class="sub-label">Ejemplo Numerico Detallado</div>
+      <p>Consideremos una red con <strong>2 entradas, 1 capa oculta con 2 neuronas y 1 salida</strong>. Usamos la funcion sigmoide como activacion. Los parametros son:</p>
+
+      <div class="formula-block">
+        <span class="formula-label">Arquitectura: [2 → 2 → 1], activacion sigmoide</span>
+        W<sup>(1)</sup> = [[1, 2], [3, 1]],&nbsp;&nbsp; b<sup>(1)</sup> = [0, 0]<br>
+        W<sup>(2)</sup> = [[1, -1]],&nbsp;&nbsp; b<sup>(2)</sup> = [0]<br>
+        Entrada: x = [0.5, 0.8]&#7488;
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Paso 1 — Pre-activacion capa oculta</div>
+        <div class="formula-block" style="margin:8px 0; text-align:left; padding: 10px 16px;">
+          z<sup>(1)</sup><sub>1</sub> = 1&times;0.5 + 2&times;0.8 + 0 = 0.5 + 1.6 = <strong>2.1</strong><br>
+          z<sup>(1)</sup><sub>2</sub> = 3&times;0.5 + 1&times;0.8 + 0 = 1.5 + 0.8 = <strong>2.3</strong>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">Paso 2 — Activacion capa oculta (sigmoide)</div>
+        <div class="formula-block" style="margin:8px 0; text-align:left; padding: 10px 16px;">
+          a<sup>(1)</sup><sub>1</sub> = &sigma;(2.1) = 1/(1 + e<sup>-2.1</sup>) &approx; <strong>0.8909</strong><br>
+          a<sup>(1)</sup><sub>2</sub> = &sigma;(2.3) = 1/(1 + e<sup>-2.3</sup>) &approx; <strong>0.9089</strong>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">Paso 3 — Pre-activacion capa de salida</div>
+        <div class="formula-block" style="margin:8px 0; text-align:left; padding: 10px 16px;">
+          z<sup>(2)</sup> = 1&times;0.8909 + (-1)&times;0.9089 + 0 = 0.8909 - 0.9089 = <strong>-0.018</strong>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">Paso 4 — Activacion capa de salida (sigmoide)</div>
+        <div class="formula-block" style="margin:8px 0; text-align:left; padding: 10px 16px;">
+          y&#770; = a<sup>(2)</sup> = &sigma;(-0.018) = 1/(1 + e<sup>0.018</sup>) &approx; <strong>0.4955</strong>
+        </div>
+      </div>
+
+      <p style="margin-top:10px;">La red produce una prediccion de aproximadamente <span class="math">0.4955</span>, lo que significa que asigna probabilidad del 49.55% a la clase positiva. Esto evidencia la necesidad de entrenamiento: con pesos aleatorios, la red predice de forma arbitraria.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 4 -->
+  <section class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">TEMA 4</span>
+      <span class="section-title">Funciones de Activacion</span>
+    </div>
+    <div class="section-body">
+
+      <p>Las funciones de activacion introducen la <strong>no linealidad</strong> esencial para que los MLPs aprendan funciones complejas. Sin ellas, una red multicapa colapsaria en una simple transformacion lineal.</p>
+
+      <div class="sub-label">Sigmoide (&sigma;)</div>
+      <div class="two-col">
+        <div>
+          <div class="formula-block" style="text-align:left;">
+            <span class="formula-label">Formula</span>
+            &sigma;(z) = 1 / (1 + e<sup>-z</sup>)<br>
+            &sigma;'(z) = &sigma;(z) &middot; (1 - &sigma;(z))<br>
+            Rango: (0, 1)
+          </div>
+          <p><strong>Propiedades:</strong> Salida interpretable como probabilidad. Suave y diferenciable en todo su dominio. Saturacion en valores extremos.</p>
+          <p><strong>Problema del gradiente evanescente:</strong> cuando <span class="math">|z|</span> es grande, <span class="math">&sigma;'(z) &approx; 0</span>, los gradientes se vuelven practicamente nulos en capas profundas.</p>
+        </div>
+        <div class="svg-wrap" style="margin:0;">
+          <svg width="240" height="160" viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="240" height="160" rx="6" fill="#FFF8EE" stroke="#FFB347" stroke-width="1"/>
+            <line x1="20" y1="80" x2="220" y2="80" stroke="#ccc" stroke-width="1"/>
+            <line x1="120" y1="10" x2="120" y2="150" stroke="#ccc" stroke-width="1"/>
+            <text x="222" y="84" font-size="10" fill="#888" font-family="Arial">z</text>
+            <text x="108" y="14" font-size="10" fill="#888" font-family="Arial">1.0</text>
+            <text x="108" y="148" font-size="10" fill="#888" font-family="Arial">0.0</text>
+            <!-- sigmoid curve: z from -5 to 5 -->
+            <path d="M20,148 C40,148 50,140 60,130 C70,120 80,108 90,100 C100,92 110,83 120,80 C130,77 140,68 150,60 C160,52 170,28 180,20 C190,14 200,12 220,12" fill="none" stroke="#FF6600" stroke-width="2.5"/>
+            <!-- 0.5 line -->
+            <line x1="20" y1="80" x2="220" y2="80" stroke="#FF8C00" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+            <text x="22" y="77" font-size="9" fill="#FF8C00" font-family="Arial">0.5</text>
+            <text x="100" y="155" font-size="10" fill="#FF6600" font-weight="bold" font-family="Arial">Sigmoide</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-label">Tangente Hiperbolica (tanh)</div>
+      <div class="two-col">
+        <div>
+          <div class="formula-block" style="text-align:left;">
+            <span class="formula-label">Formula</span>
+            tanh(z) = (e<sup>z</sup> - e<sup>-z</sup>) / (e<sup>z</sup> + e<sup>-z</sup>)<br>
+            tanh'(z) = 1 - tanh&sup2;(z)<br>
+            Rango: (-1, 1)
+          </div>
+          <p><strong>Ventaja sobre sigmoide:</strong> centrada en cero. Esto facilita el entrenamiento porque los gradientes pueden ser positivos o negativos, evitando actualizaciones sistematicamente sesgadas.</p>
+          <p>Sigue sufriendo del problema del gradiente evanescente en valores extremos, aunque con derivada maxima mayor (1 vs 0.25).</p>
+        </div>
+        <div class="svg-wrap" style="margin:0;">
+          <svg width="240" height="160" viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="240" height="160" rx="6" fill="#FFF8EE" stroke="#FFB347" stroke-width="1"/>
+            <line x1="20" y1="80" x2="220" y2="80" stroke="#ccc" stroke-width="1"/>
+            <line x1="120" y1="10" x2="120" y2="150" stroke="#ccc" stroke-width="1"/>
+            <text x="222" y="84" font-size="10" fill="#888" font-family="Arial">z</text>
+            <text x="102" y="18" font-size="9" fill="#888" font-family="Arial">+1</text>
+            <text x="102" y="148" font-size="9" fill="#888" font-family="Arial">-1</text>
+            <!-- tanh curve -->
+            <path d="M20,140 C40,138 55,128 70,110 C85,92 95,82 120,80 C145,78 155,68 170,50 C185,32 200,22 220,20" fill="none" stroke="#FF8C00" stroke-width="2.5"/>
+            <line x1="20" y1="20" x2="220" y2="20" stroke="#aaa" stroke-width="0.8" stroke-dasharray="3,3"/>
+            <line x1="20" y1="140" x2="220" y2="140" stroke="#aaa" stroke-width="0.8" stroke-dasharray="3,3"/>
+            <text x="100" y="155" font-size="10" fill="#FF8C00" font-weight="bold" font-family="Arial">Tanh</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-label">ReLU (Rectified Linear Unit)</div>
+      <div class="two-col">
+        <div>
+          <div class="formula-block" style="text-align:left;">
+            <span class="formula-label">Formula</span>
+            ReLU(z) = max(0, z)<br>
+            ReLU'(z) = 1 si z &gt; 0, 0 si z &lt; 0<br>
+            Rango: [0, +&#8734;)
+          </div>
+          <p><strong>Ventajas:</strong> computacionalmente eficiente, no sufre gradiente evanescente para valores positivos, induce esparcidad en las activaciones (muchas neuronas en cero).</p>
+          <p><strong>Dying ReLU:</strong> si una neurona recibe siempre entradas negativas, su gradiente es cero y nunca se actualiza. El uso de tasas de aprendizaje elevadas puede provocar este problema.</p>
+        </div>
+        <div class="svg-wrap" style="margin:0;">
+          <svg width="240" height="160" viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="240" height="160" rx="6" fill="#FFF8EE" stroke="#FFB347" stroke-width="1"/>
+            <line x1="20" y1="130" x2="220" y2="130" stroke="#ccc" stroke-width="1"/>
+            <line x1="120" y1="10" x2="120" y2="150" stroke="#ccc" stroke-width="1"/>
+            <text x="222" y="134" font-size="10" fill="#888" font-family="Arial">z</text>
+            <!-- ReLU: flat 0 for z<0, linear for z>0 -->
+            <polyline points="20,130 120,130 220,30" fill="none" stroke="#FFA500" stroke-width="2.5"/>
+            <text x="95" y="155" font-size="10" fill="#FFA500" font-weight="bold" font-family="Arial">ReLU</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="sub-label">Leaky ReLU y Variantes</div>
+      <p>Para mitigar el problema del Dying ReLU, existen varias alternativas:</p>
+      <ul>
+        <li><strong>Leaky ReLU:</strong> <span class="math">f(z) = z si z &gt; 0, &alpha;z si z &#8804; 0</span>, con &alpha; = 0.01 tipicamente.</li>
+        <li><strong>ELU (Exponential Linear Unit):</strong> <span class="math">f(z) = z si z &gt; 0, &alpha;(e<sup>z</sup>-1) si z &#8804; 0</span>. Salidas negativas con media cero.</li>
+        <li><strong>SELU (Scaled ELU):</strong> normalizacion automatica en redes profundas.</li>
+        <li><strong>GELU (Gaussian Error Linear Unit):</strong> usado en transformers modernos (BERT, GPT).</li>
+      </ul>
+
+      <div class="sub-label">Softmax</div>
+      <p>La funcion Softmax se usa exclusivamente en la <strong>capa de salida para clasificacion multiclase</strong>. Convierte un vector de puntuaciones en una distribucion de probabilidad:</p>
+      <div class="formula-block">
+        <span class="formula-label">Softmax — clasificacion multiclase (K clases)</span>
+        Softmax(z<sub>k</sub>) = e<sup>z<sub>k</sub></sup> / &sum;<sub>j=1</sub><sup>K</sup> e<sup>z<sub>j</sub></sup><br>
+        <span style="font-size:12px; color:#888; font-family:'Arial',sans-serif;">Todas las salidas suman 1: &sum; Softmax(z<sub>k</sub>) = 1</span>
+      </div>
+
+      <div class="sub-label">Tabla Comparativa de Funciones de Activacion</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Funcion</th>
+              <th>Formula</th>
+              <th>Rango</th>
+              <th>Derivada max.</th>
+              <th>Ventaja principal</th>
+              <th>Inconveniente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="label-cell">Sigmoide</td><td>1/(1+e<sup>-z</sup>)</td><td>(0, 1)</td><td>0.25</td><td>Probabilidad interpretable</td><td>Grad. evanescente</td></tr>
+            <tr><td class="label-cell">Tanh</td><td>(e<sup>z</sup>-e<sup>-z</sup>)/(e<sup>z</sup>+e<sup>-z</sup>)</td><td>(-1, 1)</td><td>1.0</td><td>Centrada en cero</td><td>Grad. evanescente</td></tr>
+            <tr><td class="label-cell">ReLU</td><td>max(0, z)</td><td>[0, +&infin;)</td><td>1.0</td><td>Rapida, sin saturacion (+)</td><td>Dying ReLU</td></tr>
+            <tr><td class="label-cell">Leaky ReLU</td><td>z si z&gt;0, 0.01z si no</td><td>(-&infin;, +&infin;)</td><td>1.0</td><td>Evita Dying ReLU</td><td>&alpha; a ajustar</td></tr>
+            <tr><td class="label-cell">ELU</td><td>z si z&gt;0, &alpha;(e<sup>z</sup>-1) si no</td><td>(-&alpha;, +&infin;)</td><td>1.0</td><td>Media &approx; 0, suave</td><td>Costosa computac.</td></tr>
+            <tr><td class="label-cell">Softmax</td><td>e<sup>z<sub>k</sub></sup>/&sum;e<sup>z<sub>j</sub></sup></td><td>(0, 1) sum=1</td><td>—</td><td>Distribucion probabilidad</td><td>Solo en salida</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 5 -->
+  <section class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">TEMA 5</span>
+      <span class="section-title">Funcion de Perdida (Loss Function)</span>
+    </div>
+    <div class="section-body">
+
+      <p>La funcion de perdida (o funcion de coste) cuantifica <strong>como de lejos esta la prediccion de la red del valor real</strong>. El objetivo del entrenamiento es minimizar esta funcion respecto a los parametros de la red.</p>
+
+      <div class="sub-label">Error Cuadratico Medio (MSE) — Regresion</div>
+      <div class="formula-block">
+        <span class="formula-label">Mean Squared Error — para tareas de regresion</span>
+        L<sub>MSE</sub> = (1/m) &sum;<sub>i=1</sub><sup>m</sup> (y<sub>i</sub> - y&#770;<sub>i</sub>)<sup>2</sup>
+      </div>
+      <p>El MSE penaliza en mayor medida los errores grandes (por el cuadrado). Es diferenciable en todo su dominio y convexo para modelos lineales, pero no necesariamente para redes neuronales.</p>
+      <ul>
+        <li><strong>Sensible a outliers:</strong> errores grandes tienen impacto cuadratico en la perdida.</li>
+        <li>Alternativa: <strong>MAE</strong> (Error Absoluto Medio), mas robusta a valores extremos.</li>
+        <li>Alternativa: <strong>Huber Loss</strong>, combinacion de MSE y MAE.</li>
+      </ul>
+
+      <div class="sub-label">Entropia Cruzada Binaria — Clasificacion Binaria</div>
+      <div class="formula-block">
+        <span class="formula-label">Binary Cross-Entropy — para clasificacion con 2 clases</span>
+        L<sub>BCE</sub> = -(1/m) &sum;<sub>i=1</sub><sup>m</sup> [ y<sub>i</sub> log(y&#770;<sub>i</sub>) + (1-y<sub>i</sub>) log(1-y&#770;<sub>i</sub>) ]
+      </div>
+      <p>Derivada directamente de la maxima verosimilitud bajo el modelo de Bernoulli. Cuando <span class="math">y&#770; &rarr; 0</span> y el verdadero es <span class="math">y = 1</span>, la perdida tiende a infinito — lo que fuerza a la red a corregir predicciones confiadas pero incorrectas.</p>
+
+      <div class="sub-label">Entropia Cruzada Categorica — Clasificacion Multiclase</div>
+      <div class="formula-block">
+        <span class="formula-label">Categorical Cross-Entropy — con Softmax en la salida (K clases)</span>
+        L<sub>CE</sub> = -(1/m) &sum;<sub>i=1</sub><sup>m</sup> &sum;<sub>k=1</sub><sup>K</sup> y<sub>ik</sub> log(y&#770;<sub>ik</sub>)
+      </div>
+      <p>Con codificacion <em>one-hot</em>, la formula simplifica a <span class="math">L = -(1/m) &sum;<sub>i</sub> log(y&#770;<sub>i,verdadero</sub>)</span>: solo el logaritmo de la probabilidad asignada a la clase correcta importa.</p>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Eleccion de la funcion de perdida:</strong> La combinacion Softmax + Entropia Cruzada es <em>numericamente mas estable</em> que calcularlos por separado. Los frameworks modernos (TensorFlow, PyTorch) implementan esta combinacion de forma conjunta en funciones como <code>CrossEntropyLoss</code> o <code>sparse_categorical_crossentropy</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 6 -->
+  <section class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">TEMA 6</span>
+      <span class="section-title">Retropropagacion (Backpropagation)</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">La Regla de la Cadena</div>
+      <p>La retropropagacion es una aplicacion eficiente de la <strong>regla de la cadena del calculo diferencial</strong> a grafos computacionales. Para una funcion compuesta <span class="math">L = L(a(z(w)))</span>:</p>
+      <div class="formula-block">
+        <span class="formula-label">Regla de la cadena</span>
+        &part;L / &part;w = (&part;L / &part;a) &middot; (&part;a / &part;z) &middot; (&part;z / &part;w)
+      </div>
+
+      <!-- Computational graph SVG -->
+      <div class="svg-wrap">
+        <svg width="660" height="200" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="660" height="200" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- Forward pass nodes -->
+          <defs>
+            <marker id="farr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#FF8C00"/>
+            </marker>
+            <marker id="barr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#4488FF"/>
+            </marker>
+          </defs>
+
+          <!-- Forward arrows -->
+          <line x1="90" y1="80" x2="178" y2="80" stroke="#FF8C00" stroke-width="2" marker-end="url(#farr)"/>
+          <line x1="228" y1="80" x2="318" y2="80" stroke="#FF8C00" stroke-width="2" marker-end="url(#farr)"/>
+          <line x1="368" y1="80" x2="458" y2="80" stroke="#FF8C00" stroke-width="2" marker-end="url(#farr)"/>
+          <line x1="508" y1="80" x2="598" y2="80" stroke="#FF8C00" stroke-width="2" marker-end="url(#farr)"/>
+
+          <!-- Backward arrows -->
+          <line x1="598" y1="100" x2="508" y2="100" stroke="#4488FF" stroke-width="2" marker-end="url(#barr)" stroke-dasharray="5,3"/>
+          <line x1="458" y1="100" x2="368" y2="100" stroke="#4488FF" stroke-width="2" marker-end="url(#barr)" stroke-dasharray="5,3"/>
+          <line x1="318" y1="100" x2="228" y2="100" stroke="#4488FF" stroke-width="2" marker-end="url(#barr)" stroke-dasharray="5,3"/>
+          <line x1="178" y1="100" x2="90" y2="100" stroke="#4488FF" stroke-width="2" marker-end="url(#barr)" stroke-dasharray="5,3"/>
+
+          <!-- Nodes -->
+          <rect x="20" y="60" width="70" height="40" rx="6" fill="#FF6600" />
+          <text x="55" y="85" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">W, b</text>
+
+          <rect x="178" y="60" width="50" height="40" rx="6" fill="#FF8C00"/>
+          <text x="203" y="85" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">z = Wx+b</text>
+
+          <rect x="318" y="60" width="50" height="40" rx="6" fill="#FFA500"/>
+          <text x="343" y="85" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">a = f(z)</text>
+
+          <rect x="458" y="60" width="50" height="40" rx="6" fill="#FFB347"/>
+          <text x="483" y="85" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">L(a, y)</text>
+
+          <rect x="598" y="60" width="50" height="40" rx="6" fill="#b54000"/>
+          <text x="623" y="85" font-size="13" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Perdida</text>
+
+          <!-- Labels -->
+          <text x="135" y="68" font-size="10" fill="#FF8C00" font-family="Arial" text-anchor="middle">adelante</text>
+          <text x="135" y="116" font-size="10" fill="#4488FF" font-family="Arial" text-anchor="middle">atras</text>
+
+          <!-- Gradient labels -->
+          <text x="415" y="116" font-size="10" fill="#4488FF" font-family="Arial" text-anchor="middle">&part;L/&part;a</text>
+          <text x="275" y="116" font-size="10" fill="#4488FF" font-family="Arial" text-anchor="middle">&part;L/&part;z</text>
+          <text x="135" y="116" font-size="10" fill="#4488FF" font-family="Arial" text-anchor="middle">&part;L/&part;W</text>
+
+          <text x="330" y="165" font-size="12" fill="#7a3500" font-family="Arial" text-anchor="middle" font-style="italic">Grafo computacional: la retropropagacion recorre el grafo hacia atras aplicando la regla de la cadena</text>
+
+          <!-- Legend -->
+          <line x1="60" y1="148" x2="100" y2="148" stroke="#FF8C00" stroke-width="2"/>
+          <text x="105" y="152" font-size="11" fill="#FF8C00" font-family="Arial">Propagacion adelante</text>
+          <line x1="200" y1="148" x2="240" y2="148" stroke="#4488FF" stroke-width="2" stroke-dasharray="5,3"/>
+          <text x="245" y="152" font-size="11" fill="#4488FF" font-family="Arial">Retropropagacion (gradientes)</text>
+        </svg>
+      </div>
+
+      <div class="sub-label">Derivacion Paso a Paso — Red de 2 Capas</div>
+      <p>Para nuestra red ejemplo [2 &rarr; 2 &rarr; 1] con sigmoide y perdida MSE, calculamos los gradientes desde la salida hacia la entrada:</p>
+
+      <div class="step-box">
+        <div class="step-num">Paso 1 — Gradiente de la perdida respecto a la salida</div>
+        <div class="formula-block" style="margin:8px 0; padding:10px 16px; text-align:left;">
+          L = (y - y&#770;)<sup>2</sup><br>
+          &part;L/&part;y&#770; = -2(y - y&#770;) = -2(y - a<sup>(2)</sup>)
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Paso 2 — Gradiente a traves de la activacion de salida</div>
+        <div class="formula-block" style="margin:8px 0; padding:10px 16px; text-align:left;">
+          &part;L/&part;z<sup>(2)</sup> = (&part;L/&part;a<sup>(2)</sup>) &middot; &sigma;'(z<sup>(2)</sup>)<br>
+          &sigma;'(z<sup>(2)</sup>) = a<sup>(2)</sup>(1 - a<sup>(2)</sup>) = 0.4955 &times; 0.5045 &approx; 0.2498
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Paso 3 — Gradiente respecto a W<sup>(2)</sup> y b<sup>(2)</sup></div>
+        <div class="formula-block" style="margin:8px 0; padding:10px 16px; text-align:left;">
+          &part;L/&part;W<sup>(2)</sup> = (&part;L/&part;z<sup>(2)</sup>) &middot; (a<sup>(1)</sup>)&#7488;<br>
+          &part;L/&part;b<sup>(2)</sup> = &part;L/&part;z<sup>(2)</sup>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Paso 4 — Propagacion del gradiente a la capa oculta</div>
+        <div class="formula-block" style="margin:8px 0; padding:10px 16px; text-align:left;">
+          &part;L/&part;a<sup>(1)</sup> = (W<sup>(2)</sup>)&#7488; &middot; (&part;L/&part;z<sup>(2)</sup>)<br>
+          &part;L/&part;z<sup>(1)</sup> = &part;L/&part;a<sup>(1)</sup> &#8857; f'(z<sup>(1)</sup>) <span style="color:#888; font-size:12px;">(producto elemento a elemento)</span>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">Paso 5 — Gradiente respecto a W<sup>(1)</sup> y b<sup>(1)</sup></div>
+        <div class="formula-block" style="margin:8px 0; padding:10px 16px; text-align:left;">
+          &part;L/&part;W<sup>(1)</sup> = (&part;L/&part;z<sup>(1)</sup>) &middot; x&#7488;<br>
+          &part;L/&part;b<sup>(1)</sup> = &part;L/&part;z<sup>(1)</sup>
+        </div>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128214;</span>
+        <div><strong>Regla general para cualquier capa l:</strong> El gradiente que llega a la capa <span class="math">l</span> es <span class="math">&delta;<sup>(l)</sup> = (W<sup>(l+1)</sup>)&#7488; &delta;<sup>(l+1)</sup> &#8857; f'(z<sup>(l)</sup>)</span>. Este <strong>delta</strong> representa el "error" que cada neurona ha contribuido a la perdida total.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 7 -->
+  <section class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">TEMA 7</span>
+      <span class="section-title">Descenso del Gradiente (Gradient Descent)</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Regla de Actualizacion</div>
+      <p>Una vez calculados los gradientes mediante retropropagacion, actualizamos todos los parametros de la red en la <strong>direccion opuesta al gradiente</strong>, ya que el gradiente apunta hacia el maximo crecimiento de la perdida:</p>
+      <div class="formula-block">
+        <span class="formula-label">Regla de actualizacion del descenso del gradiente</span>
+        W<sup>(l)</sup> &larr; W<sup>(l)</sup> &minus; &eta; &middot; &part;L/&part;W<sup>(l)</sup><br>
+        b<sup>(l)</sup> &larr; b<sup>(l)</sup> &minus; &eta; &middot; &part;L/&part;b<sup>(l)</sup><br>
+        <span style="font-size:12px; color:#888; font-family:'Arial',sans-serif;">donde &eta; (eta) es la tasa de aprendizaje (learning rate)</span>
+      </div>
+
+      <div class="sub-label">Efecto de la Tasa de Aprendizaje</div>
+      <!-- Gradient descent SVG -->
+      <div class="svg-wrap">
+        <svg width="600" height="220" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="600" height="220" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- Left: too small lr -->
+          <text x="100" y="22" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">&#951; muy pequeño</text>
+          <ellipse cx="100" cy="120" rx="80" ry="60" fill="none" stroke="#FFD599" stroke-width="1.5"/>
+          <ellipse cx="100" cy="120" rx="55" ry="40" fill="none" stroke="#FFB347" stroke-width="1.5"/>
+          <ellipse cx="100" cy="120" rx="30" ry="22" fill="none" stroke="#FF8C00" stroke-width="1.5"/>
+          <circle cx="100" cy="120" r="6" fill="#FF6600"/>
+          <!-- tiny steps -->
+          <circle cx="168" cy="88" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="148" cy="99" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="130" cy="107" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="118" cy="113" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="108" cy="117" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <text x="100" y="200" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">Convergencia muy lenta</text>
+
+          <!-- Middle: good lr -->
+          <text x="300" y="22" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">&#951; optimo</text>
+          <ellipse cx="300" cy="120" rx="80" ry="60" fill="none" stroke="#FFD599" stroke-width="1.5"/>
+          <ellipse cx="300" cy="120" rx="55" ry="40" fill="none" stroke="#FFB347" stroke-width="1.5"/>
+          <ellipse cx="300" cy="120" rx="30" ry="22" fill="none" stroke="#FF8C00" stroke-width="1.5"/>
+          <circle cx="300" cy="120" r="6" fill="#FF6600"/>
+          <circle cx="368" cy="88" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="338" cy="105" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="312" cy="115" r="5" fill="#4488FF" stroke="#fff" stroke-width="1"/>
+          <circle cx="301" cy="120" r="5" fill="#00cc00" stroke="#fff" stroke-width="1.5"/>
+          <text x="300" y="200" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">Convergencia rapida</text>
+
+          <!-- Right: too large lr -->
+          <text x="500" y="22" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">&#951; muy grande</text>
+          <ellipse cx="500" cy="120" rx="80" ry="60" fill="none" stroke="#FFD599" stroke-width="1.5"/>
+          <ellipse cx="500" cy="120" rx="55" ry="40" fill="none" stroke="#FFB347" stroke-width="1.5"/>
+          <ellipse cx="500" cy="120" rx="30" ry="22" fill="none" stroke="#FF8C00" stroke-width="1.5"/>
+          <circle cx="500" cy="120" r="6" fill="#FF6600"/>
+          <!-- oscillating steps -->
+          <circle cx="568" cy="88" r="5" fill="#ff4444" stroke="#fff" stroke-width="1"/>
+          <circle cx="435" cy="155" r="5" fill="#ff4444" stroke="#fff" stroke-width="1"/>
+          <circle cx="575" cy="82" r="5" fill="#ff4444" stroke="#fff" stroke-width="1"/>
+          <circle cx="428" cy="162" r="5" fill="#ff4444" stroke="#fff" stroke-width="1"/>
+          <line x1="568" y1="88" x2="435" y2="155" stroke="#ff4444" stroke-width="1.2" stroke-dasharray="3,2"/>
+          <line x1="435" y1="155" x2="575" y2="82" stroke="#ff4444" stroke-width="1.2" stroke-dasharray="3,2"/>
+          <line x1="575" y1="82" x2="428" y2="162" stroke="#ff4444" stroke-width="1.2" stroke-dasharray="3,2"/>
+          <text x="500" y="200" font-size="11" fill="#888" font-family="Arial" text-anchor="middle">Divergencia u oscilacion</text>
+
+          <!-- center label -->
+          <text x="300" y="215" font-size="11" fill="#7a3500" font-family="Arial" text-anchor="middle" font-style="italic">Curvas de nivel de la funcion de perdida — efecto del learning rate</text>
+        </svg>
+      </div>
+
+      <div class="sub-label">Variantes del Descenso del Gradiente</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Variante</th><th>Batch size</th><th>Actualizacion</th><th>Pros</th><th>Contras</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="label-cell">Batch GD</td><td>m (total)</td><td>1 por epoca</td><td>Gradiente exacto, estable</td><td>Lento, memoria elevada</td></tr>
+            <tr><td class="label-cell">SGD Estocastico</td><td>1</td><td>m por epoca</td><td>Rapido, puede escapar minimos</td><td>Ruidoso, oscila</td></tr>
+            <tr><td class="label-cell">Mini-batch GD</td><td>32-512</td><td>m/B por epoca</td><td>Balance ruido/estabilidad</td><td>Hiperparametro B a ajustar</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-label">Optimizadores Avanzados</div>
+      <div class="two-col">
+        <div class="concept-card">
+          <div class="card-title">Adam (Adaptive Moment Estimation)</div>
+          <p>Combina Momentum y RMSProp. Mantiene una media movil exponencial de los gradientes (primer momento) y sus cuadrados (segundo momento). Tasa de aprendizaje adaptativa por parametro. Es el optimizador por defecto en la mayoria de aplicaciones.</p>
+          <div class="formula-block" style="font-size:12px; padding:8px 12px; margin-top:8px; text-align:left;">
+            m<sub>t</sub> = &beta;<sub>1</sub>m<sub>t-1</sub> + (1-&beta;<sub>1</sub>)g<sub>t</sub><br>
+            v<sub>t</sub> = &beta;<sub>2</sub>v<sub>t-1</sub> + (1-&beta;<sub>2</sub>)g<sub>t</sub>&sup2;<br>
+            W &larr; W &minus; &eta; &middot; m&#770;<sub>t</sub> / (&radic;v&#770;<sub>t</sub> + &epsilon;)
+          </div>
+        </div>
+        <div class="concept-card">
+          <div class="card-title">RMSProp</div>
+          <p>Adapta la tasa de aprendizaje de cada parametro dividiendo por la raiz cuadrada de una media movil de los cuadrados de los gradientes recientes. Especialmente util para redes recurrentes (RNN).</p>
+          <div class="formula-block" style="font-size:12px; padding:8px 12px; margin-top:8px; text-align:left;">
+            v<sub>t</sub> = &beta;v<sub>t-1</sub> + (1-&beta;)g<sub>t</sub>&sup2;<br>
+            W &larr; W &minus; (&eta; / &radic;(v<sub>t</sub> + &epsilon;)) &middot; g<sub>t</sub>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128270;</span>
+        <div><strong>Valores tipicos de hiperparametros:</strong> Learning rate &eta; &isin; [0.0001, 0.01]; para Adam: &beta;<sub>1</sub>=0.9, &beta;<sub>2</sub>=0.999, &epsilon;=10<sup>-8</sup>. El mini-batch mas comun es de 32 o 64 ejemplos.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 8 -->
+  <section class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">TEMA 8</span>
+      <span class="section-title">Regularizacion y Generalizacion</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Sobreajuste vs Subajuste</div>
+      <p>El objetivo del aprendizaje automatico no es memorizar los datos de entrenamiento, sino <strong>generalizar</strong> a ejemplos nuevos no vistos. Los dos extremos del espectro son:</p>
+
+      <!-- Overfitting SVG -->
+      <div class="svg-wrap">
+        <svg width="660" height="200" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="660" height="200" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- Underfitting -->
+          <text x="110" y="20" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Subajuste (Underfitting)</text>
+          <!-- data points -->
+          <circle cx="40" cy="150" r="4" fill="#FF6600"/><circle cx="60" cy="130" r="4" fill="#FF6600"/>
+          <circle cx="80" cy="120" r="4" fill="#FF6600"/><circle cx="100" cy="100" r="4" fill="#FF6600"/>
+          <circle cx="120" cy="110" r="4" fill="#FF6600"/><circle cx="140" cy="85" r="4" fill="#FF6600"/>
+          <circle cx="160" cy="70" r="4" fill="#FF6600"/><circle cx="180" cy="60" r="4" fill="#FF6600"/>
+          <!-- too simple model (straight line) -->
+          <line x1="30" y1="155" x2="195" y2="55" stroke="#4488FF" stroke-width="2.5"/>
+          <text x="110" y="185" font-size="11" fill="#4488FF" font-family="Arial" text-anchor="middle">Modelo demasiado simple</text>
+
+          <!-- Good fit -->
+          <text x="330" y="20" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Ajuste Adecuado</text>
+          <circle cx="260" cy="150" r="4" fill="#FF6600"/><circle cx="280" cy="130" r="4" fill="#FF6600"/>
+          <circle cx="300" cy="120" r="4" fill="#FF6600"/><circle cx="320" cy="100" r="4" fill="#FF6600"/>
+          <circle cx="340" cy="110" r="4" fill="#FF6600"/><circle cx="360" cy="85" r="4" fill="#FF6600"/>
+          <circle cx="380" cy="70" r="4" fill="#FF6600"/><circle cx="400" cy="60" r="4" fill="#FF6600"/>
+          <!-- good curve -->
+          <path d="M250,155 Q290,125 330,105 Q360,88 410,55" fill="none" stroke="#00aa44" stroke-width="2.5"/>
+          <text x="330" y="185" font-size="11" fill="#00aa44" font-family="Arial" text-anchor="middle">Generalizacion correcta</text>
+
+          <!-- Overfitting -->
+          <text x="560" y="20" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Sobreajuste (Overfitting)</text>
+          <circle cx="480" cy="150" r="4" fill="#FF6600"/><circle cx="500" cy="130" r="4" fill="#FF6600"/>
+          <circle cx="520" cy="120" r="4" fill="#FF6600"/><circle cx="540" cy="100" r="4" fill="#FF6600"/>
+          <circle cx="560" cy="110" r="4" fill="#FF6600"/><circle cx="580" cy="85" r="4" fill="#FF6600"/>
+          <circle cx="600" cy="70" r="4" fill="#FF6600"/><circle cx="620" cy="60" r="4" fill="#FF6600"/>
+          <!-- overfit wiggly curve -->
+          <path d="M470,155 C485,150 492,130 500,130 C508,130 512,155 520,120 C528,90 535,115 540,100 C545,85 553,130 560,110 C567,90 572,75 580,85 C588,95 595,55 620,55" fill="none" stroke="#ff4444" stroke-width="2.5"/>
+          <text x="555" y="185" font-size="11" fill="#ff4444" font-family="Arial" text-anchor="middle">Memoriza el ruido</text>
+        </svg>
+      </div>
+
+      <div class="sub-label">Dropout</div>
+      <p>El <strong>Dropout</strong> (Srivastava et al., 2014) es una tecnica de regularizacion que, durante el entrenamiento, <em>desactiva aleatoriamente</em> una fraccion <span class="math">p</span> de neuronas en cada iteracion. Esto impide que la red dependa de neuronas especificas, forzando representaciones mas distribuidas y robustas.</p>
+
+      <!-- Dropout SVG -->
+      <div class="svg-wrap">
+        <svg width="500" height="160" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="160" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- Full network -->
+          <text x="105" y="20" font-size="12" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">Sin Dropout</text>
+          <g stroke="#FFB347" stroke-width="0.9" opacity="0.5">
+            <line x1="50" y1="50" x2="130" y2="50"/><line x1="50" y1="50" x2="130" y2="80"/>
+            <line x1="50" y1="50" x2="130" y2="110"/><line x1="50" y1="80" x2="130" y2="50"/>
+            <line x1="50" y1="80" x2="130" y2="80"/><line x1="50" y1="80" x2="130" y2="110"/>
+            <line x1="50" y1="110" x2="130" y2="50"/><line x1="50" y1="110" x2="130" y2="80"/>
+            <line x1="50" y1="110" x2="130" y2="110"/>
+            <line x1="152" y1="50" x2="200" y2="80"/><line x1="152" y1="80" x2="200" y2="80"/>
+            <line x1="152" y1="110" x2="200" y2="80"/>
+          </g>
+          <circle cx="40" cy="50" r="12" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="40" cy="80" r="12" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="40" cy="110" r="12" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="140" cy="50" r="12" fill="#FF8C00" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="140" cy="80" r="12" fill="#FF8C00" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="140" cy="110" r="12" fill="#FF8C00" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="210" cy="80" r="12" fill="#b54000" stroke="#fff" stroke-width="1.5"/>
+
+          <!-- With dropout -->
+          <text x="360" y="20" font-size="12" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">Con Dropout (p=0.33)</text>
+          <g stroke="#FFB347" stroke-width="0.9" opacity="0.5">
+            <line x1="310" y1="50" x2="390" y2="80"/>
+            <line x1="310" y1="110" x2="390" y2="80"/>
+            <line x1="412" y1="80" x2="460" y2="80"/>
+          </g>
+          <circle cx="300" cy="50" r="12" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <!-- dropped neuron -->
+          <circle cx="300" cy="80" r="12" fill="#ddd" stroke="#aaa" stroke-width="1.5"/>
+          <text x="300" y="84" font-size="14" fill="#aaa" text-anchor="middle" font-family="Arial">&#10005;</text>
+          <circle cx="300" cy="110" r="12" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="400" cy="80" r="12" fill="#FF8C00" stroke="#fff" stroke-width="1.5"/>
+          <!-- dropped neuron -->
+          <circle cx="400" cy="50" r="12" fill="#ddd" stroke="#aaa" stroke-width="1.5"/>
+          <text x="400" y="54" font-size="14" fill="#aaa" text-anchor="middle" font-family="Arial">&#10005;</text>
+          <circle cx="400" cy="110" r="12" fill="#ddd" stroke="#aaa" stroke-width="1.5"/>
+          <text x="400" y="114" font-size="14" fill="#aaa" text-anchor="middle" font-family="Arial">&#10005;</text>
+          <circle cx="470" cy="80" r="12" fill="#b54000" stroke="#fff" stroke-width="1.5"/>
+
+          <text x="250" y="150" font-size="11" fill="#7a3500" font-family="Arial" text-anchor="middle" font-style="italic">Neuronas marcadas con X son desactivadas en esa iteracion</text>
+        </svg>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#9888;</span>
+        <div><strong>Importante:</strong> Durante la <em>inferencia</em> (prediccion), el Dropout se desactiva y todas las neuronas estan activas. Los pesos se escalan por <span class="math">(1-p)</span> para compensar, o equivalentemente se multiplican las activaciones por <span class="math">1/(1-p)</span> durante el entrenamiento (<em>inverted dropout</em>).</div>
+      </div>
+
+      <div class="sub-label">Regularizacion L1 y L2</div>
+      <div class="formula-block">
+        <span class="formula-label">Terminos de regularizacion añadidos a la funcion de perdida</span>
+        L1 (Lasso):&nbsp;&nbsp; L<sub>reg</sub> = L + &lambda; &sum;<sub>i</sub> |w<sub>i</sub>|<br>
+        L2 (Ridge / Weight Decay):&nbsp;&nbsp; L<sub>reg</sub> = L + &lambda; &sum;<sub>i</sub> w<sub>i</sub>&sup2;
+      </div>
+      <ul>
+        <li><strong>L2 (mas comun):</strong> penaliza los pesos grandes uniformemente. El gradiente añadido es <span class="math">2&lambda;w</span>, lo que "decae" los pesos hacia cero en cada actualizacion.</li>
+        <li><strong>L1:</strong> induce esparcidad — muchos pesos se vuelven exactamente cero. Equivalente a la seleccion automatica de caracteristicas.</li>
+      </ul>
+
+      <div class="sub-label">Early Stopping</div>
+      <p>El <strong>early stopping</strong> (parada temprana) monitorea la perdida en el conjunto de validacion durante el entrenamiento. Cuando esta deja de mejorar durante un numero de epocas consecutivas (llamado <em>patience</em>), se detiene el entrenamiento y se recuperan los pesos del mejor modelo encontrado.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════ SECTION 9 -->
+  <section class="section" id="s9">
+    <div class="section-header">
+      <span class="section-num">TEMA 9</span>
+      <span class="section-title">Ejemplo Completo: Clasificacion XOR</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Definicion del Problema</div>
+      <p>La funcion XOR es el ejemplo canónico de problema no lineal. Con una red [2 &rarr; 2 &rarr; 1] podemos resolverlo exactamente. Utilizaremos los siguientes pesos <strong>ya entrenados</strong> para ilustrar como el MLP crea una nueva representacion del espacio de entrada:</p>
+
+      <div class="formula-block">
+        <span class="formula-label">Dataset XOR completo</span>
+        x = [0,0] &rarr; y = 0 &nbsp;|&nbsp; x = [0,1] &rarr; y = 1<br>
+        x = [1,0] &rarr; y = 1 &nbsp;|&nbsp; x = [1,1] &rarr; y = 0
+      </div>
+
+      <!-- XOR MLP architecture SVG -->
+      <div class="svg-wrap">
+        <svg width="520" height="200" viewBox="0 0 520 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="520" height="200" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- connections -->
+          <g stroke="#FFB347" stroke-width="1.2" opacity="0.7">
+            <line x1="105" y1="70" x2="235" y2="70"/>
+            <line x1="105" y1="70" x2="235" y2="130"/>
+            <line x1="105" y1="130" x2="235" y2="70"/>
+            <line x1="105" y1="130" x2="235" y2="130"/>
+            <line x1="265" y1="70" x2="395" y2="100"/>
+            <line x1="265" y1="130" x2="395" y2="100"/>
+          </g>
+
+          <!-- weight labels on arrows -->
+          <text x="162" y="62" font-size="10" fill="#FF6600" font-family="Arial">20,-20</text>
+          <text x="155" y="140" font-size="10" fill="#FF6600" font-family="Arial">20,-20</text>
+          <text x="318" y="90" font-size="10" fill="#b54000" font-family="Arial">20,20</text>
+
+          <!-- Input neurons -->
+          <circle cx="90" cy="70" r="22" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+          <text x="90" y="75" font-size="14" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">x&#8321;</text>
+          <circle cx="90" cy="130" r="22" fill="#FF6600" stroke="#fff" stroke-width="2"/>
+          <text x="90" y="135" font-size="14" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">x&#8322;</text>
+
+          <!-- Hidden neurons -->
+          <circle cx="250" cy="70" r="22" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+          <text x="250" y="67" font-size="9" fill="#fff" font-family="Arial" text-anchor="middle">b=-10</text>
+          <text x="250" y="79" font-size="9" fill="#fff" font-family="Arial" text-anchor="middle">h&#8321;</text>
+          <circle cx="250" cy="130" r="22" fill="#FF8C00" stroke="#fff" stroke-width="2"/>
+          <text x="250" y="127" font-size="9" fill="#fff" font-family="Arial" text-anchor="middle">b=30</text>
+          <text x="250" y="139" font-size="9" fill="#fff" font-family="Arial" text-anchor="middle">h&#8322;</text>
+
+          <!-- Output neuron -->
+          <circle cx="410" cy="100" r="22" fill="#b54000" stroke="#fff" stroke-width="2"/>
+          <text x="410" y="97" font-size="9" fill="#fff" font-family="Arial" text-anchor="middle">b=-30</text>
+          <text x="410" y="109" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">y&#770;</text>
+
+          <!-- Layer labels -->
+          <text x="90" y="170" font-size="11" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Entrada</text>
+          <text x="250" y="170" font-size="11" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">Oculta</text>
+          <text x="410" y="170" font-size="11" fill="#b54000" font-weight="bold" font-family="Arial" text-anchor="middle">Salida</text>
+
+          <!-- Bias labels -->
+          <text x="470" y="90" font-size="11" fill="#7a3500" font-family="Arial">Activacion:</text>
+          <text x="470" y="105" font-size="11" fill="#7a3500" font-family="Arial">Sigmoide</text>
+          <text x="470" y="120" font-size="11" fill="#7a3500" font-family="Arial">umbral &gt;0.5</text>
+        </svg>
+      </div>
+
+      <div class="sub-label">Propagacion hacia Adelante con Pesos Entrenados</div>
+      <p>Usamos pesos representativos para el XOR. La neurona <span class="math">h&#8321;</span> detecta OR (al menos uno activo) y la neurona <span class="math">h&#8322;</span> detecta NAND (no ambos activos). La combinacion en la salida implementa XOR:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Entrada (x&#8321;, x&#8322;)</th><th>h&#8321; (OR)</th><th>h&#8322; (NAND)</th><th>Salida y&#770;</th><th>XOR real</th><th>Correcto?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>(0, 0)</td><td>~0.00</td><td>~1.00</td><td>~0.00</td><td>0</td><td>&#10003;</td></tr>
+            <tr><td>(0, 1)</td><td>~1.00</td><td>~1.00</td><td>~1.00</td><td>1</td><td>&#10003;</td></tr>
+            <tr><td>(1, 0)</td><td>~1.00</td><td>~1.00</td><td>~1.00</td><td>1</td><td>&#10003;</td></tr>
+            <tr><td>(1, 1)</td><td>~1.00</td><td>~0.00</td><td>~0.00</td><td>0</td><td>&#10003;</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-label">Nueva Representacion y Frontera de Decision</div>
+      <p>La clave esta en que la capa oculta transforma el espacio de entrada no separable en un nuevo espacio donde los datos <strong>si son linealmente separables</strong>:</p>
+
+      <!-- Decision boundary SVG -->
+      <div class="svg-wrap">
+        <svg width="580" height="220" viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg">
+          <rect width="580" height="220" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+
+          <!-- Original space -->
+          <text x="110" y="18" font-size="12" fill="#FF6600" font-weight="bold" font-family="Arial" text-anchor="middle">Espacio Original (no separable)</text>
+          <line x1="40" y1="180" x2="200" y2="180" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+          <line x1="40" y1="180" x2="40" y2="30" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+          <defs>
+            <marker id="a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#888"/>
+            </marker>
+          </defs>
+          <text x="205" y="184" font-size="10" fill="#888" font-family="Arial">x&#8321;</text>
+          <text x="30" y="28" font-size="10" fill="#888" font-family="Arial">x&#8322;</text>
+          <!-- class 0 -->
+          <circle cx="50" cy="170" r="10" fill="#4488FF" stroke="#fff" stroke-width="1.5"/>
+          <text x="50" y="174" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">0</text>
+          <circle cx="190" cy="50" r="10" fill="#4488FF" stroke="#fff" stroke-width="1.5"/>
+          <text x="190" y="54" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">0</text>
+          <!-- class 1 -->
+          <circle cx="50" cy="50" r="10" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <text x="50" y="54" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">1</text>
+          <circle cx="190" cy="170" r="10" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <text x="190" y="174" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">1</text>
+          <!-- no linear sep -->
+          <text x="110" y="205" font-size="10" fill="#ff4444" font-family="Arial" text-anchor="middle">Sin separacion lineal posible</text>
+
+          <!-- Arrow between spaces -->
+          <text x="270" y="105" font-size="22" fill="#FF8C00" font-family="Arial" text-anchor="middle">&#8594;</text>
+          <text x="270" y="120" font-size="9" fill="#888" font-family="Arial" text-anchor="middle">Capa oculta</text>
+
+          <!-- Hidden space -->
+          <text x="430" y="18" font-size="12" fill="#FF8C00" font-weight="bold" font-family="Arial" text-anchor="middle">Espacio Oculto (separable)</text>
+          <line x1="320" y1="180" x2="550" y2="180" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+          <line x1="320" y1="180" x2="320" y2="30" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+          <text x="555" y="184" font-size="10" fill="#888" font-family="Arial">h&#8321;</text>
+          <text x="308" y="28" font-size="10" fill="#888" font-family="Arial">h&#8322;</text>
+          <!-- (0,0)->h1~0,h2~1 -->
+          <circle cx="330" cy="80" r="10" fill="#4488FF" stroke="#fff" stroke-width="1.5"/>
+          <text x="330" y="84" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">0</text>
+          <!-- (1,1)->h1~1,h2~0 -->
+          <circle cx="530" cy="165" r="10" fill="#4488FF" stroke="#fff" stroke-width="1.5"/>
+          <text x="530" y="169" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">0</text>
+          <!-- (0,1)->h1~1,h2~1 -->
+          <circle cx="530" cy="80" r="10" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <text x="530" y="84" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">1</text>
+          <!-- (1,0)->h1~1,h2~1 -->
+          <circle cx="430" cy="80" r="10" fill="#FF6600" stroke="#fff" stroke-width="1.5"/>
+          <text x="430" y="84" font-size="10" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">1</text>
+          <!-- Decision boundary line -->
+          <line x1="370" y1="30" x2="540" y2="160" stroke="#00aa44" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="430" y="205" font-size="10" fill="#00aa44" font-family="Arial" text-anchor="middle">Frontera de decision lineal</text>
+        </svg>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div>La clave conceptual del MLP: las capas ocultas <strong>transforman el espacio de representacion</strong> hasta que el problema se vuelve linealmente separable. Cada capa aprende a "doblar" o "estirar" el espacio de entrada de forma util para la tarea.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 10 -->
+  <section class="section" id="s10">
+    <div class="section-header">
+      <span class="section-num">TEMA 10</span>
+      <span class="section-title">Implementacion en Python (desde cero con NumPy)</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Clase MLP Completa</div>
+      <p>A continuacion se presenta una implementacion completa de un MLP desde cero usando unicamente NumPy, entrenado para resolver XOR. Incluye propagacion hacia adelante, retropropagacion y descenso del gradiente.</p>
+
+      <div class="code-block">
+<span class="cm"># ================================================================</span>
+<span class="cm"># MLP desde cero con NumPy — Resolucion del problema XOR</span>
+<span class="cm"># Aprendizaje Profundo — CUNEF Universidad</span>
+<span class="cm"># ================================================================</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Funciones de activacion ──────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">sigmoid</span>(z):
+    <span class="cm">"""Funcion sigmoide y su derivada."""</span>
+    <span class="kw">return</span> <span class="nb">1.0</span> / (<span class="nb">1.0</span> + np.<span class="fn">exp</span>(-z))
+
+<span class="kw">def</span> <span class="fn">sigmoid_deriv</span>(z):
+    s = <span class="fn">sigmoid</span>(z)
+    <span class="kw">return</span> s * (<span class="nb">1</span> - s)
+
+<span class="kw">def</span> <span class="fn">relu</span>(z):
+    <span class="kw">return</span> np.<span class="fn">maximum</span>(<span class="nb">0</span>, z)
+
+<span class="kw">def</span> <span class="fn">relu_deriv</span>(z):
+    <span class="kw">return</span> (z &gt; <span class="nb">0</span>).astype(<span class="fn">float</span>)
+
+<span class="cm"># ── Clase Principal del MLP ──────────────────────────────────────</span>
+<span class="kw">class</span> <span class="cl">MLP</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, capas, tasa_aprendizaje=<span class="nb">0.1</span>, activacion=<span class="st">'sigmoid'</span>):
+        <span class="cm">"""
+        Inicializa el MLP.
+        capas: lista con numero de neuronas por capa, ej. [2, 4, 1]
+        tasa_aprendizaje: eta (learning rate)
+        activacion: 'sigmoid' o 'relu'
+        """</span>
+        self.capas = capas
+        self.lr = tasa_aprendizaje
+        self.L = <span class="fn">len</span>(capas) - <span class="nb">1</span>  <span class="cm"># numero de capas con pesos</span>
+
+        <span class="cm"># Seleccionar funcion de activacion</span>
+        <span class="kw">if</span> activacion == <span class="st">'sigmoid'</span>:
+            self.f  = sigmoid
+            self.df = sigmoid_deriv
+        <span class="kw">else</span>:
+            self.f  = relu
+            self.df = relu_deriv
+
+        <span class="cm"># Inicializacion aleatoria de pesos (Xavier / He simplificado)</span>
+        self.W = {}
+        self.b = {}
+        <span class="kw">for</span> l <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">1</span>, self.L + <span class="nb">1</span>):
+            escala = np.<span class="fn">sqrt</span>(<span class="nb">2.0</span> / capas[l - <span class="nb">1</span>])
+            self.W[l] = np.random.<span class="fn">randn</span>(capas[l], capas[l-<span class="nb">1</span>]) * escala
+            self.b[l] = np.<span class="fn">zeros</span>((capas[l], <span class="nb">1</span>))
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, X):
+        <span class="cm">"""
+        Propagacion hacia adelante.
+        X: matriz de entrada (n_entradas x m_ejemplos)
+        Devuelve: prediccion final y caches intermedios.
+        """</span>
+        self.cache_z = {}   <span class="cm"># pre-activaciones</span>
+        self.cache_a = {}   <span class="cm"># activaciones</span>
+        self.cache_a[<span class="nb">0</span>] = X
+
+        <span class="kw">for</span> l <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">1</span>, self.L + <span class="nb">1</span>):
+            z = self.W[l] @ self.cache_a[l-<span class="nb">1</span>] + self.b[l]
+            self.cache_z[l] = z
+
+            <span class="cm"># Ultima capa: sigmoide para clasificacion binaria</span>
+            <span class="kw">if</span> l == self.L:
+                self.cache_a[l] = sigmoid(z)
+            <span class="kw">else</span>:
+                self.cache_a[l] = self.f(z)
+
+        <span class="kw">return</span> self.cache_a[self.L]
+
+    <span class="kw">def</span> <span class="fn">backward</span>(self, Y):
+        <span class="cm">"""
+        Retropropagacion del gradiente.
+        Y: etiquetas reales (1 x m_ejemplos)
+        Devuelve: gradientes de W y b para cada capa.
+        """</span>
+        m = Y.shape[<span class="nb">1</span>]
+        grads_W = {}
+        grads_b = {}
+
+        <span class="cm"># Gradiente de la perdida BCE respecto a la salida</span>
+        dA = -(Y / self.cache_a[self.L] -
+               (<span class="nb">1</span> - Y) / (<span class="nb">1</span> - self.cache_a[self.L] + <span class="nb">1e-8</span>))
+
+        <span class="kw">for</span> l <span class="kw">in</span> <span class="fn">reversed</span>(<span class="fn">range</span>(<span class="nb">1</span>, self.L + <span class="nb">1</span>)):
+            <span class="cm"># Multiplicar por derivada de activacion</span>
+            dZ = dA * sigmoid_deriv(self.cache_z[l]) \
+                 <span class="kw">if</span> l == self.L \
+                 <span class="kw">else</span> dA * self.df(self.cache_z[l])
+
+            <span class="cm"># Gradientes de pesos y sesgos</span>
+            grads_W[l] = (dZ @ self.cache_a[l-<span class="nb">1</span>].T) / m
+            grads_b[l] = np.<span class="fn">mean</span>(dZ, axis=<span class="nb">1</span>, keepdims=<span class="nb">True</span>)
+
+            <span class="cm"># Propagar hacia la capa anterior</span>
+            dA = self.W[l].T @ dZ
+
+        <span class="kw">return</span> grads_W, grads_b
+
+    <span class="kw">def</span> <span class="fn">actualizar</span>(self, grads_W, grads_b):
+        <span class="cm">"""Descenso del gradiente: w = w - lr * grad_w"""</span>
+        <span class="kw">for</span> l <span class="kw">in</span> <span class="fn">range</span>(<span class="nb">1</span>, self.L + <span class="nb">1</span>):
+            self.W[l] -= self.lr * grads_W[l]
+            self.b[l] -= self.lr * grads_b[l]
+
+    <span class="kw">def</span> <span class="fn">perdida_bce</span>(self, Y, Y_pred):
+        <span class="cm">"""Entropia cruzada binaria."""</span>
+        m = Y.shape[<span class="nb">1</span>]
+        eps = <span class="nb">1e-8</span>
+        <span class="kw">return</span> -np.<span class="fn">mean</span>(
+            Y * np.<span class="fn">log</span>(Y_pred + eps) +
+            (<span class="nb">1</span> - Y) * np.<span class="fn">log</span>(<span class="nb">1</span> - Y_pred + eps)
+        )
+
+    <span class="kw">def</span> <span class="fn">entrenar</span>(self, X, Y, epocas=<span class="nb">10000</span>, verbose=<span class="nb">True</span>):
+        <span class="cm">"""Bucle de entrenamiento completo."""</span>
+        historial_perdida = []
+
+        <span class="kw">for</span> epoca <span class="kw">in</span> <span class="fn">range</span>(epocas):
+            <span class="cm"># Paso adelante</span>
+            Y_pred = self.<span class="fn">forward</span>(X)
+
+            <span class="cm"># Calcular perdida</span>
+            L = self.<span class="fn">perdida_bce</span>(Y, Y_pred)
+            historial_perdida.<span class="fn">append</span>(L)
+
+            <span class="cm"># Retropropagacion</span>
+            grads_W, grads_b = self.<span class="fn">backward</span>(Y)
+
+            <span class="cm"># Actualizar parametros</span>
+            self.<span class="fn">actualizar</span>(grads_W, grads_b)
+
+            <span class="cm"># Mostrar progreso cada 1000 epocas</span>
+            <span class="kw">if</span> verbose <span class="kw">and</span> (epoca % <span class="nb">1000</span> == <span class="nb">0</span>):
+                <span class="fn">print</span>(<span class="st">f"Epoca {epoca:5d} | Perdida: {L:.6f}"</span>)
+
+        <span class="kw">return</span> historial_perdida
+
+    <span class="kw">def</span> <span class="fn">predecir</span>(self, X, umbral=<span class="nb">0.5</span>):
+        <span class="cm">"""Prediccion binaria con umbral."""</span>
+        probs = self.<span class="fn">forward</span>(X)
+        <span class="kw">return</span> (probs &gt;= umbral).astype(<span class="fn">int</span>)
+
+
+<span class="cm"># ── Entrenamiento en XOR ─────────────────────────────────────────</span>
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    np.random.<span class="fn">seed</span>(<span class="nb">42</span>)  <span class="cm"># reproducibilidad</span>
+
+    <span class="cm"># Dataset XOR: columnas = ejemplos</span>
+    X = np.<span class="fn">array</span>([[<span class="nb">0</span>, <span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">1</span>],
+                   [<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>, <span class="nb">1</span>]], dtype=<span class="fn">float</span>)
+    Y = np.<span class="fn">array</span>([[<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">1</span>, <span class="nb">0</span>]], dtype=<span class="fn">float</span>)
+
+    <span class="cm"># Crear y entrenar el MLP: 2 entradas, 4 ocultas, 1 salida</span>
+    red = <span class="cl">MLP</span>(capas=[<span class="nb">2</span>, <span class="nb">4</span>, <span class="nb">1</span>],
+               tasa_aprendizaje=<span class="nb">0.5</span>,
+               activacion=<span class="st">'sigmoid'</span>)
+
+    historial = red.<span class="fn">entrenar</span>(X, Y, epocas=<span class="nb">10000</span>, verbose=<span class="nb">True</span>)
+
+    <span class="cm"># Evaluacion final</span>
+    predicciones = red.<span class="fn">predecir</span>(X)
+    <span class="fn">print</span>(<span class="st">"\n=== Resultados Finales ==="</span>)
+    <span class="fn">print</span>(<span class="st">f"Predicciones: {predicciones.flatten()}"</span>)
+    <span class="fn">print</span>(<span class="st">f"Etiquetas:    {Y.flatten().astype(int)}"</span>)
+    precision = np.<span class="fn">mean</span>(predicciones == Y) * <span class="nb">100</span>
+    <span class="fn">print</span>(<span class="st">f"Precision:    {precision:.1f}%"</span>)
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128270;</span>
+        <div><strong>Salida esperada al ejecutar:</strong> Tras ~5000-10000 epocas con lr=0.5, la red converge a precision del 100% en XOR. La perdida desciende de ~0.69 (prediccion aleatoria) a valores proximos a 0. Para replicar: <code>python mlp_xor.py</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ SECTION 11 -->
+  <section class="section" id="s11">
+    <div class="section-header">
+      <span class="section-num">TEMA 11</span>
+      <span class="section-title">Resumen y Conceptos Clave</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">Tabla Resumen de Conceptos</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Concepto</th><th>Descripcion</th><th>Formula / Nota clave</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="label-cell">Perceptron Multicapa</td><td>Red neuronal con capas entrada, ocultas y salida</td><td>a<sup>(L)</sup> = f(W<sup>(L)</sup>...f(W<sup>(1)</sup>x)...)</td></tr>
+            <tr><td class="label-cell">Forward Propagation</td><td>Calculo de prediccion de entrada a salida</td><td>z<sup>(l)</sup> = W<sup>(l)</sup>a<sup>(l-1)</sup> + b<sup>(l)</sup></td></tr>
+            <tr><td class="label-cell">Funcion de Activacion</td><td>Introduce no linealidad en cada neurona</td><td>ReLU(z) = max(0,z) — mas comun</td></tr>
+            <tr><td class="label-cell">Funcion de Perdida</td><td>Mide error entre prediccion y etiqueta real</td><td>BCE = -[y log(y&#770;) + (1-y)log(1-y&#770;)]</td></tr>
+            <tr><td class="label-cell">Backpropagation</td><td>Calculo eficiente de gradientes via regla cadena</td><td>&delta;<sup>(l)</sup> = (W<sup>(l+1)</sup>)&#7488;&delta;<sup>(l+1)</sup> &#8857; f'(z<sup>(l)</sup>)</td></tr>
+            <tr><td class="label-cell">Descenso Gradiente</td><td>Actualizacion iterativa de parametros</td><td>W &larr; W - &eta; &part;L/&part;W</td></tr>
+            <tr><td class="label-cell">Learning Rate (&eta;)</td><td>Controla el tamaño del paso en la actualizacion</td><td>Tipico: 0.001 (Adam), 0.01-0.1 (SGD)</td></tr>
+            <tr><td class="label-cell">Dropout</td><td>Regularizacion: desactiva neuronas aleatoriamente</td><td>p = 0.2-0.5 tipico</td></tr>
+            <tr><td class="label-cell">L2 Regularizacion</td><td>Penaliza pesos grandes para evitar sobreajuste</td><td>L + &lambda;&sum;w<sup>2</sup>; &lambda; tipico: 10<sup>-4</sup></td></tr>
+            <tr><td class="label-cell">Batch size</td><td>Num. de ejemplos procesados por actualizacion</td><td>32, 64, 128 son valores comunes</td></tr>
+            <tr><td class="label-cell">Epoca (Epoch)</td><td>Una pasada completa por el dataset de entrenamiento</td><td>Tipico: 50-500 epocas</td></tr>
+            <tr><td class="label-cell">Early Stopping</td><td>Detiene entrenamiento cuando val. loss no mejora</td><td>patience = 10-20 epocas</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-label">Tarjeta de Referencia de Formulas</div>
+      <div class="two-col">
+        <div class="formula-block" style="text-align:left; line-height:2;">
+          <span class="formula-label">Propagacion hacia adelante</span>
+          z<sup>(l)</sup> = W<sup>(l)</sup>a<sup>(l-1)</sup> + b<sup>(l)</sup><br>
+          a<sup>(l)</sup> = f<sup>(l)</sup>(z<sup>(l)</sup>)<br>
+          y&#770; = a<sup>(L)</sup>
+        </div>
+        <div class="formula-block" style="text-align:left; line-height:2;">
+          <span class="formula-label">Retropropagacion</span>
+          &delta;<sup>(L)</sup> = &part;L/&part;z<sup>(L)</sup><br>
+          &delta;<sup>(l)</sup> = (W<sup>(l+1)</sup>)&#7488;&delta;<sup>(l+1)</sup> &#8857; f'(z<sup>(l)</sup>)<br>
+          &part;L/&part;W<sup>(l)</sup> = &delta;<sup>(l)</sup>(a<sup>(l-1)</sup>)&#7488;
+        </div>
+        <div class="formula-block" style="text-align:left; line-height:2;">
+          <span class="formula-label">Funciones de activacion</span>
+          &sigma;(z) = 1/(1+e<sup>-z</sup>)<br>
+          tanh(z) = (e<sup>z</sup>-e<sup>-z</sup>)/(e<sup>z</sup>+e<sup>-z</sup>)<br>
+          ReLU(z) = max(0, z)
+        </div>
+        <div class="formula-block" style="text-align:left; line-height:2;">
+          <span class="formula-label">Funciones de perdida</span>
+          MSE = (1/m)&sum;(y-y&#770;)&sup2;<br>
+          BCE = -(1/m)&sum;[y log y&#770; + (1-y)log(1-y&#770;)]<br>
+          CE = -(1/m)&sum;<sub>k</sub> y<sub>k</sub> log(y&#770;<sub>k</sub>)
+        </div>
+      </div>
+
+      <div class="sub-label">Hiperparametros Tipicos en la Practica</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Hiperparametro</th><th>Valor tipico</th><th>Notas</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="label-cell">Num. capas ocultas</td><td>1-5</td><td>Mas capas para tareas complejas; empezar con 2</td></tr>
+            <tr><td class="label-cell">Neuronas por capa</td><td>32 - 512</td><td>Potencias de 2; usar validacion para elegir</td></tr>
+            <tr><td class="label-cell">Learning rate (Adam)</td><td>0.001</td><td>Raramente cambiar si se usa Adam</td></tr>
+            <tr><td class="label-cell">Learning rate (SGD)</td><td>0.01 - 0.1</td><td>Con schedule de decaimiento</td></tr>
+            <tr><td class="label-cell">Batch size</td><td>32 - 256</td><td>Batches mas grandes: gradiente mas estable</td></tr>
+            <tr><td class="label-cell">Epocas</td><td>50 - 500</td><td>Usar early stopping para determinar numero optimo</td></tr>
+            <tr><td class="label-cell">Dropout rate</td><td>0.2 - 0.5</td><td>0.5 para capas densas grandes; 0.1-0.2 para pequeñas</td></tr>
+            <tr><td class="label-cell">L2 lambda (&lambda;)</td><td>10<sup>-4</sup> - 10<sup>-2</sup></td><td>Busqueda en escala logaritmica</td></tr>
+            <tr><td class="label-cell">Inicializacion</td><td>He / Xavier</td><td>He para ReLU; Xavier para sigmoide/tanh</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-label">Diagrama de Flujo del Entrenamiento de un MLP</div>
+      <div class="svg-wrap">
+        <svg width="640" height="130" viewBox="0 0 640 130" xmlns="http://www.w3.org/2000/svg">
+          <rect width="640" height="130" rx="8" fill="#FFF8EE" stroke="#FFB347" stroke-width="1.5"/>
+          <defs>
+            <marker id="fa" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L7,3 z" fill="#FF8C00"/>
+            </marker>
+          </defs>
+
+          <!-- Boxes -->
+          <rect x="10"  y="45" width="90" height="36" rx="6" fill="#FF6600"/>
+          <text x="55"  y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Inicializar</text>
+          <text x="55"  y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">pesos W, b</text>
+
+          <rect x="120" y="45" width="90" height="36" rx="6" fill="#FF8C00"/>
+          <text x="165" y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Forward</text>
+          <text x="165" y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">Propagation</text>
+
+          <rect x="230" y="45" width="90" height="36" rx="6" fill="#FFA500"/>
+          <text x="275" y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Calcular</text>
+          <text x="275" y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">Perdida L</text>
+
+          <rect x="340" y="45" width="90" height="36" rx="6" fill="#FF8C00"/>
+          <text x="385" y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Backward</text>
+          <text x="385" y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">Propagation</text>
+
+          <rect x="450" y="45" width="90" height="36" rx="6" fill="#FF6600"/>
+          <text x="495" y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Actualizar</text>
+          <text x="495" y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">W, b con GD</text>
+
+          <rect x="560" y="45" width="68" height="36" rx="6" fill="#b54000"/>
+          <text x="594" y="67" font-size="11" fill="#fff" font-weight="bold" font-family="Arial" text-anchor="middle">Converge?</text>
+          <text x="594" y="79" font-size="10" fill="#fff" font-family="Arial" text-anchor="middle">Si / No</text>
+
+          <!-- Arrows -->
+          <line x1="100" y1="63" x2="118" y2="63" stroke="#FF8C00" stroke-width="1.8" marker-end="url(#fa)"/>
+          <line x1="210" y1="63" x2="228" y2="63" stroke="#FF8C00" stroke-width="1.8" marker-end="url(#fa)"/>
+          <line x1="320" y1="63" x2="338" y2="63" stroke="#FF8C00" stroke-width="1.8" marker-end="url(#fa)"/>
+          <line x1="430" y1="63" x2="448" y2="63" stroke="#FF8C00" stroke-width="1.8" marker-end="url(#fa)"/>
+          <line x1="540" y1="63" x2="558" y2="63" stroke="#FF8C00" stroke-width="1.8" marker-end="url(#fa)"/>
+
+          <!-- Loop back arrow -->
+          <path d="M594,81 L594,110 L165,110 L165,81" fill="none" stroke="#4488FF" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#fa)"/>
+          <text x="380" y="122" font-size="10" fill="#4488FF" font-family="Arial" text-anchor="middle">Siguiente epoca (si no converge)</text>
+
+          <!-- Si label -->
+          <text x="610" y="40" font-size="10" fill="#00aa44" font-weight="bold" font-family="Arial">FIN</text>
+        </svg>
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#127891;</span>
+        <div><strong>Resumen del MLP en una frase:</strong> Un Perceptron Multicapa aprende a aproximar funciones complejas mediante la composicion de transformaciones afines y no lineales, ajustadas iterativamente a traves del descenso del gradiente guiado por la retropropagacion del error.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ FOOTER / REFERENCES -->
+  <footer class="doc-footer" id="refs">
+    <div style="font-family:'Arial',sans-serif; font-size:13px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:#FF6600; margin-bottom:12px; border-bottom:2px solid #FFD599; padding-bottom:8px;">
+      Referencias Bibliograficas
+    </div>
+    <ol style="margin-left:20px; line-height:2.2; font-size:13px;">
+      <li><strong>Rumelhart, D. E., Hinton, G. E., &amp; Williams, R. J.</strong> (1986). Learning representations by back-propagating errors. <em>Nature, 323</em>(6088), 533–536.</li>
+      <li><strong>Hornik, K., Stinchcombe, M., &amp; White, H.</strong> (1989). Multilayer feedforward networks are universal approximators. <em>Neural Networks, 2</em>(5), 359–366.</li>
+      <li><strong>LeCun, Y., Bengio, Y., &amp; Hinton, G.</strong> (2015). Deep learning. <em>Nature, 521</em>(7553), 436–444.</li>
+      <li><strong>Goodfellow, I., Bengio, Y., &amp; Courville, A.</strong> (2016). <em>Deep Learning</em>. MIT Press. Disponible en: <span style="color:#FF6600;">deeplearningbook.org</span></li>
+      <li><strong>Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., &amp; Salakhutdinov, R.</strong> (2014). Dropout: A simple way to prevent neural networks from overfitting. <em>JMLR, 15</em>(1), 1929–1958.</li>
+      <li><strong>Kingma, D. P., &amp; Ba, J.</strong> (2014). Adam: A method for stochastic optimization. <em>arXiv:1412.6980</em>.</li>
+      <li><strong>He, K., Zhang, X., Ren, S., &amp; Sun, J.</strong> (2015). Delving deep into rectifiers: Surpassing human-level performance on ImageNet classification. <em>ICCV 2015</em>.</li>
+      <li><strong>Minsky, M., &amp; Papert, S.</strong> (1969). <em>Perceptrons: An Introduction to Computational Geometry</em>. MIT Press.</li>
+    </ol>
+    <div style="margin-top:20px; padding-top:12px; border-top:1px solid #FFD599; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <span><strong>CUNEF Universidad</strong> — Aprendizaje Profundo — Febrero 2026</span>
+      <span>Documento elaborado con fines academicos. Todos los diagramas son originales.</span>
+    </div>
+  </footer>
+
+</div><!-- end page-wrapper -->
+</body>
+</html>

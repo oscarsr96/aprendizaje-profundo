@@ -1,0 +1,3276 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Augmentation — Aprendizaje Profundo · CUNEF</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 15px;
+        line-height: 1.75;
+        color: #1a1a1a;
+        background: #fff8f0;
+      }
+      .page-wrapper {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 40px 36px 60px;
+        background: #ffffff;
+        box-shadow: 0 4px 32px rgba(255, 102, 0, 0.1);
+      }
+
+      /* Header */
+      .doc-header {
+        background: linear-gradient(
+          135deg,
+          #ff6600 0%,
+          #ff8c00 60%,
+          #ffa500 100%
+        );
+        color: #fff;
+        border-radius: 10px;
+        padding: 36px 40px 28px;
+        margin-bottom: 36px;
+        position: relative;
+        overflow: hidden;
+      }
+      .doc-header::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 220px;
+        height: 220px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+      }
+      .doc-header::after {
+        content: "";
+        position: absolute;
+        bottom: -70px;
+        left: -30px;
+        width: 260px;
+        height: 260px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+      }
+      .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        z-index: 2;
+      }
+      .institution {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        opacity: 0.9;
+        margin-bottom: 10px;
+      }
+      .logo-box {
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+      .logo-box img {
+        height: 40px;
+        display: block;
+      }
+      .doc-title {
+        font-size: 40px;
+        font-weight: 800;
+        font-family: "Arial", sans-serif;
+        line-height: 1.1;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+        position: relative;
+        z-index: 2;
+      }
+      .doc-subtitle {
+        font-size: 17px;
+        font-style: italic;
+        opacity: 0.94;
+        margin-bottom: 18px;
+        max-width: 720px;
+        position: relative;
+        z-index: 2;
+      }
+      .doc-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        position: relative;
+        z-index: 2;
+      }
+      .meta-chip {
+        background: rgba(255, 255, 255, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      /* TOC */
+      .toc {
+        background: #fff3e0;
+        border: 2px solid #ffb347;
+        border-radius: 10px;
+        padding: 22px 28px;
+        margin-bottom: 36px;
+      }
+      .toc-title {
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #ff6600;
+        margin-bottom: 14px;
+        border-bottom: 2px solid #ffb347;
+        padding-bottom: 8px;
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px 24px;
+      }
+      .toc a {
+        color: #b54000;
+        text-decoration: none;
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        display: block;
+        padding: 3px 0;
+        border-bottom: 1px dotted #ffd599;
+        transition:
+          color 0.2s,
+          padding-left 0.2s;
+      }
+      .toc a:hover {
+        color: #ff6600;
+        padding-left: 4px;
+      }
+      .toc a .toc-num {
+        display: inline-block;
+        width: 26px;
+        font-weight: 700;
+        color: #ff8c00;
+      }
+
+      /* Sections */
+      .section {
+        border: 2px solid #ffb347;
+        border-radius: 10px;
+        margin-bottom: 38px;
+        overflow: hidden;
+      }
+      .section-header {
+        background: linear-gradient(90deg, #ff6600, #ff8c00);
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .section-num {
+        background: rgba(255, 255, 255, 0.25);
+        border: 2px solid rgba(255, 255, 255, 0.55);
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        border-radius: 20px;
+        padding: 3px 13px;
+        white-space: nowrap;
+      }
+      .section-title {
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+      .section-body {
+        padding: 26px 28px;
+        background: #fff;
+      }
+      .sub-label {
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #ff6600;
+        margin-top: 24px;
+        margin-bottom: 7px;
+        border-bottom: 1px solid #ffd599;
+        padding-bottom: 3px;
+      }
+      .sub-label:first-child {
+        margin-top: 0;
+      }
+      h3 {
+        font-family: "Arial", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: #7a3500;
+        margin: 18px 0 8px;
+      }
+      p {
+        margin-bottom: 10px;
+      }
+      ul,
+      ol {
+        margin-left: 22px;
+        margin-bottom: 10px;
+      }
+      li {
+        margin-bottom: 4px;
+      }
+
+      .hint-box {
+        background: #fff9f0;
+        border: 1.5px dashed #ffa500;
+        border-radius: 8px;
+        padding: 13px 18px;
+        margin-top: 16px;
+        font-size: 13.5px;
+        color: #5a3000;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .hint-icon {
+        font-size: 18px;
+        line-height: 1.4;
+        flex-shrink: 0;
+      }
+
+      .warning-box {
+        background: #fff0f0;
+        border: 1.5px solid #e04040;
+        border-left: 5px solid #c02020;
+        border-radius: 8px;
+        padding: 13px 18px;
+        margin: 14px 0;
+        font-size: 13.5px;
+        color: #5a0000;
+      }
+      .warning-box strong {
+        color: #b02020;
+      }
+
+      .math {
+        font-family: "Courier New", monospace;
+        background: #fff3e0;
+        border-radius: 4px;
+        padding: 1px 6px;
+        color: #b54000;
+        font-size: 13.5px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin: 14px 0;
+      }
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+        margin: 14px 0;
+      }
+      .card {
+        background: #fff8ee;
+        border: 1.5px solid #ffd09a;
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .card-title {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #ff6600;
+        margin-bottom: 8px;
+      }
+
+      /* Interactive widgets */
+      .widget {
+        background: linear-gradient(180deg, #fff8ee 0%, #ffffff 100%);
+        border: 2px solid #ffb347;
+        border-radius: 12px;
+        padding: 22px;
+        margin: 18px 0;
+        box-shadow: 0 4px 14px rgba(255, 140, 0, 0.08);
+      }
+      .widget-title {
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #ff6600;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .widget-title::before {
+        content: "▸";
+        color: #ff8c00;
+        font-size: 14px;
+      }
+
+      .controls-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 20px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .control {
+        display: flex;
+        flex-direction: column;
+        min-width: 180px;
+        flex: 1;
+      }
+      .control-label {
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #7a3500;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .control-value {
+        color: #ff6600;
+        font-family: "Courier New", monospace;
+        font-weight: 700;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #ffd599 0%, #ff8c00 100%);
+        outline: none;
+        cursor: pointer;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ff6600;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(255, 102, 0, 0.4);
+        cursor: pointer;
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ff6600;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(255, 102, 0, 0.4);
+        cursor: pointer;
+      }
+      select,
+      button,
+      .btn {
+        font-family: "Arial", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 1.5px solid #ffb347;
+        background: #fff;
+        color: #7a3500;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      button:hover,
+      .btn:hover {
+        background: #fff3e0;
+        border-color: #ff8c00;
+      }
+      button.primary {
+        background: linear-gradient(135deg, #ff6600, #ff8c00);
+        color: #fff;
+        border-color: #ff6600;
+      }
+      button.primary:hover {
+        background: linear-gradient(135deg, #e05500, #ff7700);
+      }
+      button.toggle.active {
+        background: #ff6600;
+        color: #fff;
+        border-color: #ff6600;
+      }
+      .canvas-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 14px;
+        align-items: center;
+      }
+      .canvas-panel {
+        background: #fff;
+        border: 2px solid #ffd09a;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+      }
+      .canvas-panel-label {
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #7a3500;
+        margin-bottom: 8px;
+      }
+      .canvas-panel canvas {
+        display: block;
+        margin: 0 auto;
+        border-radius: 6px;
+        background: #f5f0e8;
+        max-width: 100%;
+        height: auto;
+      }
+      .canvas-panel.original {
+        border-color: #ffb347;
+      }
+      .canvas-panel.augmented {
+        border-color: #ff6600;
+        box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.15);
+      }
+
+      /* Technique gallery */
+      .tech-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+      .tech-card {
+        background: #fff;
+        border: 2px solid #ffd09a;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          border-color 0.15s;
+        cursor: pointer;
+      }
+      .tech-card:hover {
+        transform: translateY(-3px);
+        border-color: #ff6600;
+        box-shadow: 0 6px 14px rgba(255, 102, 0, 0.18);
+      }
+      .tech-card canvas {
+        display: block;
+        margin: 0 auto 8px;
+        border-radius: 4px;
+        background: #f5f0e8;
+      }
+      .tech-card .tech-name {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        color: #ff6600;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+      .tech-card .tech-desc {
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        color: #7a3500;
+        line-height: 1.4;
+      }
+
+      /* Chart */
+      .chart-wrap {
+        background: #fff;
+        border: 2px solid #ffd09a;
+        border-radius: 10px;
+        padding: 16px;
+        margin-top: 14px;
+      }
+      .chart-legend {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        margin-top: 10px;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .legend-dot {
+        display: inline-block;
+        width: 14px;
+        height: 4px;
+        border-radius: 2px;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+
+      /* Code */
+      .code-tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 2px solid #ffb347;
+        margin-top: 14px;
+      }
+      .code-tab {
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 8px 16px;
+        background: #fff3e0;
+        border: 2px solid #ffb347;
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+        color: #7a3500;
+        cursor: pointer;
+        margin-bottom: -2px;
+      }
+      .code-tab.active {
+        background: #1a1a1a;
+        color: #ff8c00;
+        border-color: #1a1a1a;
+      }
+      .code-block {
+        background: #1a1a1a;
+        color: #f8f8f2;
+        border-radius: 0 8px 8px 8px;
+        padding: 20px 22px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.75;
+        overflow-x: auto;
+        border-left: 4px solid #ff6600;
+      }
+      .code-block.hidden {
+        display: none;
+      }
+      .code-block .kw {
+        color: #ff8c00;
+        font-weight: bold;
+      }
+      .code-block .fn {
+        color: #ffd580;
+      }
+      .code-block .cm {
+        color: #75715e;
+        font-style: italic;
+      }
+      .code-block .st {
+        color: #a6e22e;
+      }
+      .code-block .nb {
+        color: #ae81ff;
+      }
+      .code-block .cl {
+        color: #66d9ef;
+        font-weight: bold;
+      }
+
+      /* Quiz */
+      .quiz-question {
+        background: #fff8ee;
+        border: 2px solid #ffd09a;
+        border-radius: 10px;
+        padding: 18px 22px;
+        margin-bottom: 14px;
+      }
+      .quiz-question.correct {
+        border-color: #3ba55c;
+        background: #eefaf0;
+      }
+      .quiz-question.incorrect {
+        border-color: #d04040;
+        background: #fff0ee;
+      }
+      .quiz-q {
+        font-family: "Arial", sans-serif;
+        font-weight: 700;
+        color: #7a3500;
+        margin-bottom: 12px;
+      }
+      .quiz-q .q-num {
+        display: inline-block;
+        background: #ff6600;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-right: 8px;
+        letter-spacing: 0.5px;
+      }
+      .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .quiz-option {
+        font-family: "Arial", sans-serif;
+        font-size: 13.5px;
+        padding: 9px 14px;
+        background: #fff;
+        border: 1.5px solid #ffd09a;
+        border-radius: 6px;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .quiz-option:hover:not(:disabled) {
+        background: #fff3e0;
+        border-color: #ff8c00;
+      }
+      .quiz-option.selected-correct {
+        background: #d5f2dc;
+        border-color: #3ba55c;
+        color: #1e5e34;
+        font-weight: 700;
+      }
+      .quiz-option.selected-wrong {
+        background: #fadcd9;
+        border-color: #d04040;
+        color: #7a0000;
+        font-weight: 700;
+      }
+      .quiz-option.reveal-correct {
+        background: #eefaf0;
+        border-color: #3ba55c;
+      }
+      .quiz-option:disabled {
+        cursor: default;
+      }
+      .quiz-feedback {
+        margin-top: 10px;
+        font-size: 13px;
+        padding: 10px 14px;
+        border-radius: 6px;
+        display: none;
+      }
+      .quiz-feedback.show {
+        display: block;
+      }
+      .quiz-feedback.good {
+        background: #e3f4e7;
+        color: #1e5e34;
+        border-left: 4px solid #3ba55c;
+      }
+      .quiz-feedback.bad {
+        background: #fadcd9;
+        color: #7a1a1a;
+        border-left: 4px solid #d04040;
+      }
+
+      .score-box {
+        background: linear-gradient(135deg, #ff6600, #ff8c00);
+        color: #fff;
+        border-radius: 10px;
+        padding: 18px 22px;
+        text-align: center;
+        margin-top: 16px;
+        font-family: "Arial", sans-serif;
+      }
+      .score-big {
+        font-size: 34px;
+        font-weight: 800;
+        display: block;
+        margin: 4px 0;
+      }
+
+      /* Cutout canvas */
+      .cutout-canvas {
+        cursor: crosshair !important;
+      }
+
+      /* Footer */
+      .doc-footer {
+        margin-top: 40px;
+        text-align: center;
+        font-family: "Arial", sans-serif;
+        font-size: 12px;
+        color: #7a3500;
+        padding: 20px;
+        border-top: 2px solid #ffd09a;
+      }
+      .doc-footer strong {
+        color: #ff6600;
+      }
+
+      /* SMOTE scatter */
+      .scatter-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+        align-items: center;
+      }
+      .pill {
+        display: inline-block;
+        font-family: "Arial", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+      }
+      .pill-majority {
+        background: #e3f2fd;
+        color: #0d47a1;
+        border: 1px solid #90caf9;
+      }
+      .pill-minority {
+        background: #fff3e0;
+        color: #b54000;
+        border: 1px solid #ffb347;
+      }
+
+      /* Text aug */
+      .text-sample {
+        background: #fff;
+        border: 1.5px solid #ffd09a;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-family: "Georgia", serif;
+        font-size: 14px;
+        line-height: 1.7;
+        margin-top: 10px;
+        transition: background 0.2s;
+      }
+      .text-sample.highlight {
+        background: #fff8ee;
+      }
+      .text-sample mark {
+        background: #ffe082;
+        color: #7a3500;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 780px) {
+        .two-col,
+        .three-col {
+          grid-template-columns: 1fr;
+        }
+        .canvas-pair {
+          grid-template-columns: 1fr;
+        }
+        .toc-grid {
+          grid-template-columns: 1fr;
+        }
+        .header-top {
+          flex-direction: column;
+          gap: 12px;
+        }
+        .doc-title {
+          font-size: 30px;
+        }
+        .page-wrapper {
+          padding: 24px 18px 40px;
+        }
+      }
+
+      /* Print */
+      @media print {
+        body {
+          background: #fff;
+        }
+        .page-wrapper {
+          box-shadow: none;
+          max-width: 100%;
+          padding: 0;
+        }
+        .widget,
+        button,
+        input[type="range"] {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ========== HEADER ========== -->
+      <header class="doc-header">
+        <div class="header-top">
+          <div>
+            <div class="institution">
+              CUNEF Universidad · Aprendizaje Profundo
+            </div>
+          </div>
+          <div class="logo-box">
+            <img src="logo_cunef.png" alt="Logo CUNEF" />
+          </div>
+        </div>
+        <h1 class="doc-title">Data Augmentation</h1>
+        <div class="doc-subtitle">
+          Cómo multiplicar tus datos sin multiplicar tu presupuesto: una guía
+          interactiva para entender, visualizar y aplicar aumento de datos en
+          redes neuronales.
+        </div>
+        <div class="doc-meta">
+          <span class="meta-chip">Nivel: Intermedio</span>
+          <span class="meta-chip"
+            >Prerrequisitos: Redes neuronales básicas</span
+          >
+          <span class="meta-chip">Duración: ~45 min</span>
+          <span class="meta-chip">Interactivo</span>
+        </div>
+      </header>
+
+      <!-- ========== TOC ========== -->
+      <nav class="toc">
+        <div class="toc-title">Contenido del material</div>
+        <div class="toc-grid">
+          <a href="#s1"
+            ><span class="toc-num">1.</span> El problema: overfitting y datos
+            escasos</a
+          >
+          <a href="#s2"
+            ><span class="toc-num">2.</span> ¿Qué es Data Augmentation?</a
+          >
+          <a href="#s3"
+            ><span class="toc-num">3.</span> Playground interactivo</a
+          >
+          <a href="#s4"
+            ><span class="toc-num">4.</span> Galería de técnicas básicas</a
+          >
+          <a href="#s5"><span class="toc-num">5.</span> Técnicas avanzadas</a>
+          <a href="#s6"
+            ><span class="toc-num">6.</span> Augmentation en texto</a
+          >
+          <a href="#s7"
+            ><span class="toc-num">7.</span> Datos tabulares: SMOTE</a
+          >
+          <a href="#s8"
+            ><span class="toc-num">8.</span> Cuándo NO usar augmentation</a
+          >
+          <a href="#s9"
+            ><span class="toc-num">9.</span> Código en 3 frameworks</a
+          >
+          <a href="#s10"><span class="toc-num">10.</span> Quiz final</a>
+        </div>
+      </nav>
+
+      <!-- ========== SECCIÓN 1 ========== -->
+      <section class="section" id="s1">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 1</span>
+          <h2 class="section-title">
+            El problema: overfitting cuando hay pocos datos
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Imagina que entrenas un clasificador de gatos vs perros con solo
+            <strong>200 imágenes</strong>. La red neuronal, que tiene millones
+            de parámetros, puede <em>memorizar</em> cada píxel de cada foto. En
+            training alcanza 99% de acierto… pero en test un patético 68%.
+          </p>
+
+          <p>
+            Esto es <strong>overfitting</strong>: el modelo aprende los datos de
+            entrenamiento en vez de aprender el concepto. Mira lo que pasa en el
+            entrenamiento de una red pequeña cuando no tenemos suficientes
+            datos:
+          </p>
+
+          <div class="widget">
+            <div class="widget-title">Interactivo: curvas de entrenamiento</div>
+            <p style="font-size: 13.5px; margin-bottom: 8px">
+              Activa/desactiva <strong>data augmentation</strong> y observa cómo
+              cambia la brecha entre train y validation:
+            </p>
+            <div class="controls-row">
+              <button id="btnAugOff" class="toggle active">
+                Sin augmentation
+              </button>
+              <button id="btnAugOn" class="toggle">Con augmentation</button>
+              <button id="btnReplayChart" class="primary">
+                ↻ Reiniciar animación
+              </button>
+            </div>
+            <div class="chart-wrap">
+              <svg
+                id="overfitChart"
+                viewBox="0 0 640 300"
+                style="width: 100%; height: auto"
+              ></svg>
+              <div class="chart-legend">
+                <span
+                  ><span class="legend-dot" style="background: #ff6600"></span
+                  >Training loss</span
+                >
+                <span
+                  ><span class="legend-dot" style="background: #3ba55c"></span
+                  >Validation loss</span
+                >
+              </div>
+            </div>
+            <div class="hint-box">
+              <span class="hint-icon">💡</span>
+              <div>
+                Sin augmentation la validation loss <em>sube</em> mientras la
+                training loss <em>baja</em> → la red memoriza. Con augmentation
+                las dos curvas bajan juntas: el modelo
+                <strong>generaliza</strong>.
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-label">
+            Las tres formas de combatir el overfitting
+          </div>
+          <div class="three-col">
+            <div class="card">
+              <div class="card-title">① Más datos</div>
+              <p style="font-size: 13px">
+                La solución ideal, pero etiquetar datos cuesta tiempo y dinero.
+                A veces es imposible (imágenes médicas raras, defectos
+                industriales…).
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">② Regularización</div>
+              <p style="font-size: 13px">
+                Dropout, weight decay, early stopping… Todo ayuda, pero no
+                elimina la causa: la falta de variabilidad en los datos.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">③ Data Augmentation</div>
+              <p style="font-size: 13px">
+                Creamos <strong>datos sintéticos plausibles</strong> a partir de
+                los que ya tenemos. Gratis, potente y a menudo es la técnica que
+                más impacto tiene.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 2 ========== -->
+      <section class="section" id="s2">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 2</span>
+          <h2 class="section-title">¿Qué es Data Augmentation? La intuición</h2>
+        </div>
+        <div class="section-body">
+          <p>
+            <strong>Data Augmentation</strong> (aumento de datos) es el proceso
+            de generar nuevas muestras de entrenamiento aplicando
+            transformaciones a las existentes, de forma que
+            <em>la etiqueta se conserve</em>.
+          </p>
+
+          <p>
+            Un gato girado 15° sigue siendo un gato. Un "7" al que le añades un
+            poco de ruido sigue siendo un "7". La red neuronal ve
+            <em>muchas variantes</em> del mismo concepto y aprende a ser
+            <strong>invariante</strong> a lo que no debería importar (rotación,
+            iluminación, posición…) y <strong>sensible</strong> a lo que sí
+            importa (forma, estructura).
+          </p>
+
+          <div class="sub-label">La idea formal</div>
+
+          <p>
+            Sea un dataset
+            <span class="math">D = {(x₁, y₁), …, (xₙ, yₙ)}</span> y una familia
+            de transformaciones <span class="math">T</span> tales que
+            <span class="math">T(x)</span> preserva la etiqueta. El dataset
+            aumentado es:
+          </p>
+
+          <p style="text-align: center; margin: 14px 0">
+            <span class="math" style="font-size: 16px"
+              >D' = { (T(xᵢ), yᵢ) : T ∈ T, i = 1…n }</span
+            >
+          </p>
+
+          <p>
+            En la práctica,
+            <strong
+              >aplicamos T aleatoriamente cada vez que la imagen entra a la
+              red</strong
+            >
+            durante el training. Así, cada época, la red ve una versión
+            ligeramente distinta. El dataset efectivo se vuelve
+            <em>prácticamente infinito</em>.
+          </p>
+
+          <div class="hint-box">
+            <span class="hint-icon">🧠</span>
+            <div>
+              <strong>Regla de oro</strong>: una transformación válida es
+              aquella que <strong>no cambia la etiqueta correcta</strong>. Si
+              giras 90° un "6", se convierte en un "9" → eso <em>rompe</em> la
+              etiqueta.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 3: PLAYGROUND ========== -->
+      <section class="section" id="s3">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 3</span>
+          <h2 class="section-title">
+            Playground interactivo — mueve los sliders
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Elige una imagen de ejemplo y combina transformaciones. Observa cómo
+            se apila cada efecto:
+          </p>
+
+          <div class="widget">
+            <div class="widget-title">Tu laboratorio de augmentation</div>
+
+            <div class="controls-row" style="margin-bottom: 18px">
+              <div class="control" style="min-width: 200px">
+                <div class="control-label"><span>Imagen base</span></div>
+                <select id="baseImageSelect">
+                  <option value="cat">Gatete 🐱</option>
+                  <option value="digit">Dígito "7" (MNIST-like)</option>
+                  <option value="house">Casita 🏠</option>
+                  <option value="arrow">Flecha →</option>
+                </select>
+              </div>
+              <button id="btnRandomAug" class="primary">🎲 Aleatorizar</button>
+              <button id="btnResetAug">↺ Reset</button>
+            </div>
+
+            <div class="canvas-pair">
+              <div class="canvas-panel original">
+                <div class="canvas-panel-label">Original</div>
+                <canvas id="canvasOriginal" width="220" height="220"></canvas>
+              </div>
+              <div class="canvas-panel augmented">
+                <div class="canvas-panel-label">Augmentada</div>
+                <canvas id="canvasAugmented" width="220" height="220"></canvas>
+              </div>
+            </div>
+
+            <div class="controls-row" style="margin-top: 22px">
+              <div class="control">
+                <div class="control-label">
+                  <span>Rotación</span
+                  ><span class="control-value" id="valRot">0°</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderRot"
+                  min="-45"
+                  max="45"
+                  value="0"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Zoom</span
+                  ><span class="control-value" id="valZoom">1.00×</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderZoom"
+                  min="70"
+                  max="140"
+                  value="100"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Desplazamiento X</span
+                  ><span class="control-value" id="valTx">0 px</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderTx"
+                  min="-40"
+                  max="40"
+                  value="0"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Desplazamiento Y</span
+                  ><span class="control-value" id="valTy">0 px</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderTy"
+                  min="-40"
+                  max="40"
+                  value="0"
+                  step="1"
+                />
+              </div>
+            </div>
+            <div class="controls-row">
+              <div class="control">
+                <div class="control-label">
+                  <span>Brillo</span
+                  ><span class="control-value" id="valBri">0%</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderBri"
+                  min="-60"
+                  max="60"
+                  value="0"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Contraste</span
+                  ><span class="control-value" id="valCon">100%</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderCon"
+                  min="40"
+                  max="200"
+                  value="100"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Ruido gaussiano</span
+                  ><span class="control-value" id="valNoise">0</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderNoise"
+                  min="0"
+                  max="60"
+                  value="0"
+                  step="1"
+                />
+              </div>
+              <div class="control">
+                <div class="control-label">
+                  <span>Volteo horizontal</span
+                  ><span class="control-value" id="valFlip">NO</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderFlip"
+                  min="0"
+                  max="1"
+                  value="0"
+                  step="1"
+                />
+              </div>
+            </div>
+
+            <div class="hint-box" style="margin-top: 18px">
+              <span class="hint-icon">🎯</span>
+              <div>
+                Prueba a girar un <em>"7"</em> 40°. Sigue siendo un 7. Ahora
+                voltea horizontalmente: ¿sigue siéndolo? Depende de tu
+                definición… por eso
+                <strong>flip horizontal está desactivado en MNIST</strong> en la
+                mayoría de papers.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 4: GALERÍA ========== -->
+      <section class="section" id="s4">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 4</span>
+          <h2 class="section-title">
+            Galería de técnicas básicas para imágenes
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Las transformaciones más usadas (la "dieta básica" de cualquier
+            pipeline de visión por computador). Cada tarjeta muestra el efecto
+            aplicado sobre la misma imagen base:
+          </p>
+
+          <div class="widget" style="padding: 18px 20px">
+            <div class="widget-title">Galería en vivo</div>
+            <div class="tech-gallery" id="techGallery"></div>
+            <div class="hint-box" style="margin-top: 16px">
+              <span class="hint-icon">🔁</span>
+              <div>
+                Cada transformación se aplica con parámetros aleatorios. Recarga
+                la página (o pulsa el botón) para ver otras muestras.
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 10px">
+              <button id="btnRerollGallery" class="primary">
+                🎲 Regenerar galería
+              </button>
+            </div>
+          </div>
+
+          <div class="sub-label">Cheatsheet: qué hace cada una</div>
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">Flip horizontal/vertical</div>
+              <p style="font-size: 13px">
+                Refleja la imagen. Seguro para gatos/coches/caras desde arriba;
+                <strong>peligroso</strong> para texto, dígitos o asimetrías
+                semánticas (izquierda vs derecha).
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Rotation</div>
+              <p style="font-size: 13px">
+                Rota un ángulo aleatorio en un rango (típicamente ±15-30°).
+                Cuidado con los bordes: rellena con cero, reflejo o extensión.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Random crop / zoom</div>
+              <p style="font-size: 13px">
+                Recorta una región aleatoria y la reescala. Enseña a la red a
+                reconocer el objeto aunque esté parcialmente fuera de cuadro.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Color jitter</div>
+              <p style="font-size: 13px">
+                Altera brillo, contraste, saturación y tono. Simula distintas
+                cámaras y condiciones de luz.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Gaussian noise</div>
+              <p style="font-size: 13px">
+                Añade ruido aleatorio a cada píxel. Mejora robustez frente a
+                sensores ruidosos y ataques adversariales.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Blur</div>
+              <p style="font-size: 13px">
+                Suaviza la imagen (Gaussian blur, motion blur). Útil cuando en
+                test esperas imágenes ligeramente desenfocadas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 5: AVANZADAS ========== -->
+      <section class="section" id="s5">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 5</span>
+          <h2 class="section-title">
+            Técnicas avanzadas: Mixup, CutMix y Cutout
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            A partir de 2017 surgieron técnicas que van más allá de "transformar
+            una sola imagen". Sorprendentemente, funcionan aún mejor:
+          </p>
+
+          <!-- MIXUP -->
+          <div class="widget">
+            <div class="widget-title">
+              Mixup — interpolación lineal entre muestras
+            </div>
+            <p style="font-size: 13.5px">
+              Mixup combina dos imágenes <span class="math">xₐ, x_b</span> y sus
+              etiquetas <span class="math">yₐ, y_b</span>:
+            </p>
+            <p style="text-align: center; margin: 10px 0">
+              <span class="math" style="font-size: 15px"
+                >x' = λ·xₐ + (1-λ)·x_b</span
+              >
+              &nbsp;&nbsp;
+              <span class="math" style="font-size: 15px"
+                >y' = λ·yₐ + (1-λ)·y_b</span
+              >
+            </p>
+
+            <div class="canvas-pair" style="grid-template-columns: 1fr 1fr 1fr">
+              <div class="canvas-panel">
+                <div class="canvas-panel-label">Imagen A (gato)</div>
+                <canvas id="mixA" width="180" height="180"></canvas>
+              </div>
+              <div class="canvas-panel augmented">
+                <div class="canvas-panel-label">Mixup resultado</div>
+                <canvas id="mixOut" width="180" height="180"></canvas>
+                <div
+                  id="mixLabel"
+                  style="
+                    font-family: Arial;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #ff6600;
+                    margin-top: 6px;
+                  "
+                >
+                  label: —
+                </div>
+              </div>
+              <div class="canvas-panel">
+                <div class="canvas-panel-label">Imagen B (casa)</div>
+                <canvas id="mixB" width="180" height="180"></canvas>
+              </div>
+            </div>
+
+            <div class="controls-row" style="margin-top: 14px">
+              <div class="control" style="min-width: 280px">
+                <div class="control-label">
+                  <span>λ (peso de A)</span
+                  ><span class="control-value" id="valLambda">0.50</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderLambda"
+                  min="0"
+                  max="100"
+                  value="50"
+                  step="1"
+                />
+              </div>
+            </div>
+            <div class="hint-box">
+              <span class="hint-icon">🤔</span>
+              <div>
+                ¿Una imagen "mitad gato mitad casa" con etiqueta "0.5 gato + 0.5
+                casa"? Suena raro, pero <strong>regulariza la red</strong>: la
+                obliga a comportarse linealmente entre muestras y evita
+                predicciones demasiado confiadas.
+              </div>
+            </div>
+          </div>
+
+          <!-- CUTMIX -->
+          <div class="widget">
+            <div class="widget-title">
+              CutMix — recorta y pega un parche de otra imagen
+            </div>
+            <p style="font-size: 13.5px">
+              En vez de mezclar todos los píxeles (como Mixup),
+              <strong>pega un rectángulo</strong> de la imagen B sobre A. La
+              etiqueta se pondera por el área ocupada.
+            </p>
+            <div class="canvas-pair" style="grid-template-columns: 1fr 1fr">
+              <div class="canvas-panel">
+                <div class="canvas-panel-label">Aleatorio automático</div>
+                <canvas id="cutmixOut" width="220" height="220"></canvas>
+                <div
+                  id="cutmixLabel"
+                  style="
+                    font-family: Arial;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #ff6600;
+                    margin-top: 6px;
+                  "
+                >
+                  —
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  gap: 10px;
+                "
+              >
+                <button id="btnCutmix" class="primary">
+                  🎲 Generar CutMix
+                </button>
+                <p style="font-size: 12.5px; color: #7a3500">
+                  Cada click genera un nuevo parche aleatorio. La etiqueta se
+                  recalcula proporcionalmente al área del parche.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CUTOUT -->
+          <div class="widget">
+            <div class="widget-title">
+              Cutout — haz click para tapar regiones
+            </div>
+            <p style="font-size: 13.5px">
+              Cutout tapa un rectángulo con ceros (o gris medio). Fuerza a la
+              red a <strong>no depender de una sola región</strong> y aprender
+              features más distribuidas.
+            </p>
+            <div
+              class="canvas-pair"
+              style="grid-template-columns: 1fr 1fr; align-items: start"
+            >
+              <div class="canvas-panel augmented">
+                <div class="canvas-panel-label">Haz click sobre la imagen</div>
+                <canvas
+                  id="cutoutCanvas"
+                  class="cutout-canvas"
+                  width="260"
+                  height="260"
+                ></canvas>
+              </div>
+              <div>
+                <div
+                  class="controls-row"
+                  style="flex-direction: column; align-items: flex-start"
+                >
+                  <div class="control">
+                    <div class="control-label">
+                      <span>Tamaño del parche</span
+                      ><span class="control-value" id="valCutoutSize"
+                        >60 px</span
+                      >
+                    </div>
+                    <input
+                      type="range"
+                      id="sliderCutoutSize"
+                      min="20"
+                      max="120"
+                      value="60"
+                      step="2"
+                      style="width: 240px"
+                    />
+                  </div>
+                  <button id="btnCutoutReset">↺ Limpiar parches</button>
+                  <button id="btnCutoutRandom" class="primary">
+                    🎲 5 cutouts aleatorios
+                  </button>
+                </div>
+                <p style="font-size: 12.5px; color: #7a3500; margin-top: 12px">
+                  <strong>Variantes</strong>: <em>Random erasing</em> usa
+                  valores aleatorios en vez de ceros. <em>GridMask</em> aplica
+                  una cuadrícula de cutouts.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-label">
+            ¿Por qué estas técnicas funcionan tan bien?
+          </div>
+          <ul>
+            <li>
+              <strong>Regularización implícita</strong>: al forzar a la red a no
+              sobreajustarse a un solo ejemplo, actúa como un dropout espacial.
+            </li>
+            <li>
+              <strong>Smoothing de etiquetas</strong>: Mixup evita predicciones
+              "demasiado seguras" que son frágiles.
+            </li>
+            <li>
+              <strong>Robustez</strong>: redes entrenadas con CutMix son más
+              resistentes a oclusiones parciales en test.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 6: TEXTO ========== -->
+      <section class="section" id="s6">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 6</span>
+          <h2 class="section-title">Data Augmentation en texto (NLP)</h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Augmentar texto es más delicado: cambiar una palabra puede cambiar
+            el sentido de la frase. Aún así, hay técnicas útiles:
+          </p>
+
+          <div class="widget">
+            <div class="widget-title">Frase base</div>
+            <div id="textOriginal" class="text-sample">
+              El restaurante es excelente y el servicio fue muy rápido esta
+              noche.
+            </div>
+            <div class="controls-row" style="margin-top: 14px">
+              <button id="btnSynonym" class="toggle">Sinónimos</button>
+              <button id="btnBackTranslate" class="toggle">
+                Back-translation
+              </button>
+              <button id="btnInsert" class="toggle">Inserción aleatoria</button>
+              <button id="btnDelete" class="toggle">
+                Eliminación aleatoria
+              </button>
+              <button id="btnSwap" class="toggle">Swap de palabras</button>
+            </div>
+            <div
+              id="textAugmented"
+              class="text-sample highlight"
+              style="margin-top: 14px"
+            >
+              <em style="color: #7a3500"
+                >Activa una técnica arriba para ver la transformación…</em
+              >
+            </div>
+            <div
+              id="textAugExplain"
+              style="
+                margin-top: 10px;
+                font-size: 12.5px;
+                color: #7a3500;
+                font-family: Arial;
+              "
+            ></div>
+          </div>
+
+          <div class="sub-label">Técnicas populares en NLP</div>
+          <div class="two-col">
+            <div class="card">
+              <div class="card-title">EDA (Easy Data Augmentation)</div>
+              <p style="font-size: 13px">
+                4 operaciones simples: synonym replacement, random insertion,
+                random swap, random deletion. Baseline sorprendentemente
+                efectivo.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Back-translation</div>
+              <p style="font-size: 13px">
+                Traduces es → en → es. Obtienes una paráfrasis semánticamente
+                equivalente pero léxicamente distinta. Excelente para
+                clasificación.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Mask-filling con BERT</div>
+              <p style="font-size: 13px">
+                Enmascaras una palabra y usas un modelo como BERT para predecir
+                alternativas que encajen en el contexto.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">Paraphrasing con LLMs</div>
+              <p style="font-size: 13px">
+                Pides a un modelo generativo: "reescribe esta frase". Muy
+                potente, pero caro y puede introducir sesgos.
+              </p>
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <strong>⚠️ Cuidado en tareas sensibles al significado exacto</strong
+            >: en NER, sentiment analysis fino o tareas con negación, incluso un
+            sinónimo puede cambiar la etiqueta ("bueno" → "aceptable" ≠ "bueno"
+            → "excelente").
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 7: TABULAR ========== -->
+      <section class="section" id="s7">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 7</span>
+          <h2 class="section-title">
+            Datos tabulares: SMOTE y el problema del desbalance
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            En datasets tabulares (fraude, diagnóstico médico, churn…) el
+            problema típico es el <strong>desbalance de clases</strong>: el 98%
+            de los datos son "no fraude" y solo el 2% son "fraude". Una red
+            ingenua predice siempre "no fraude" y acierta un 98% — inútil.
+          </p>
+
+          <p>
+            <strong>SMOTE</strong> (Synthetic Minority Over-sampling Technique)
+            genera muestras sintéticas de la clase minoritaria interpolando
+            entre vecinos próximos:
+          </p>
+
+          <div class="widget">
+            <div class="widget-title">SMOTE en vivo</div>
+            <div class="scatter-controls">
+              <span class="pill pill-majority">● Clase mayoritaria</span>
+              <span class="pill pill-minority">● Clase minoritaria</span>
+              <span
+                class="pill"
+                style="
+                  background: #fff0d0;
+                  color: #b54000;
+                  border: 1px dashed #ff8c00;
+                "
+                >× Muestras sintéticas</span
+              >
+            </div>
+            <div class="canvas-panel" style="border-color: #ffb347">
+              <canvas id="smoteCanvas" width="720" height="340"></canvas>
+            </div>
+            <div class="controls-row" style="margin-top: 14px">
+              <div class="control" style="min-width: 200px">
+                <div class="control-label">
+                  <span>k vecinos</span
+                  ><span class="control-value" id="valK">5</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderK"
+                  min="1"
+                  max="10"
+                  value="5"
+                  step="1"
+                />
+              </div>
+              <div class="control" style="min-width: 200px">
+                <div class="control-label">
+                  <span>Cantidad de sintéticas</span
+                  ><span class="control-value" id="valSmoteN">0</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderSmoteN"
+                  min="0"
+                  max="120"
+                  value="0"
+                  step="2"
+                />
+              </div>
+              <button id="btnSmoteReset">↻ Regenerar puntos base</button>
+            </div>
+            <div class="hint-box">
+              <span class="hint-icon">📐</span>
+              <div>
+                Para cada minoritaria <span class="math">xᵢ</span>, elige un
+                vecino <span class="math">xⱼ</span> y crea un punto en
+                <span class="math">xᵢ + α·(xⱼ - xᵢ)</span> con α aleatorio en
+                [0,1]. Es data augmentation lineal en el espacio de features.
+              </div>
+            </div>
+          </div>
+
+          <div class="sub-label">Variantes importantes</div>
+          <ul>
+            <li>
+              <strong>Borderline-SMOTE</strong>: solo genera muestras cerca de
+              la frontera de decisión (donde realmente ayudan).
+            </li>
+            <li>
+              <strong>ADASYN</strong>: genera más muestras donde la
+              clasificación es más difícil.
+            </li>
+            <li>
+              <strong>SMOTE-NC</strong>: variante para features categóricas
+              mezcladas con numéricas.
+            </li>
+            <li>
+              <strong>GAN-based</strong>: redes generativas producen muestras
+              tabulares sintéticas (CTGAN, TVAE).
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 8: CUÁNDO NO ========== -->
+      <section class="section" id="s8">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 8</span>
+          <h2 class="section-title">
+            Cuándo NO usar Data Augmentation (o cómo meter la pata)
+          </h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Augmentation no es gratis. Aplicada mal,
+            <strong>empeora el modelo</strong>. Aquí los errores clásicos:
+          </p>
+
+          <div class="two-col">
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ Flip en texto / dígitos</strong><br />
+              Un "6" volteado es un "9". "casa" invertida deja de ser una
+              palabra. Respeta la semántica.
+            </div>
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ Rotación fuerte en caras / matrículas</strong><br />
+              Las caras tienen una orientación canónica. Una cara girada 180°
+              casi nunca aparece en producción — no es una augmentation
+              "realista".
+            </div>
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ Color jitter en detección de tumores</strong><br />
+              El color puede ser una pista diagnóstica. Alterarlo introduce
+              señal espuria.
+            </div>
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ Augmentation en validation/test</strong><br />
+              Solo se augmenta el <strong>training set</strong>. Validation y
+              test deben reflejar la distribución real de despliegue.
+            </div>
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ Demasiada intensidad</strong><br />
+              Rotar 180° un gato boca abajo puede ser válido, pero mezclado con
+              zoom extremo y ruido masivo, la red ya no aprende del concepto.
+            </div>
+            <div class="warning-box" style="margin: 0">
+              <strong>❌ No revisar las muestras</strong><br />
+              Siempre <strong>visualiza</strong> un batch de imágenes
+              augmentadas. Si tú no reconoces la clase, la red tampoco podrá.
+            </div>
+          </div>
+
+          <div class="sub-label">El proceso correcto</div>
+          <ol>
+            <li>
+              Entrena un modelo base <em>sin</em> augmentation → fija tu
+              baseline.
+            </li>
+            <li>
+              Añade augmentations <strong>de una en una</strong> y mide
+              validation accuracy.
+            </li>
+            <li>
+              Visualiza al menos 16 muestras augmentadas antes de entrenar.
+            </li>
+            <li>
+              Ajusta la intensidad hasta que la curva de validation deje de
+              bajar.
+            </li>
+            <li>
+              Si todo falla, prueba AutoAugment o RandAugment (búsqueda
+              automática de pipelines).
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 9: CÓDIGO ========== -->
+      <section class="section" id="s9">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 9</span>
+          <h2 class="section-title">Código en 3 frameworks</h2>
+        </div>
+        <div class="section-body">
+          <p>
+            Los mismos 5 augmentations básicos (flip, rotation, crop, color
+            jitter, normalize) en los frameworks más usados:
+          </p>
+
+          <div class="code-tabs" id="codeTabs">
+            <div class="code-tab active" data-tab="pytorch">
+              PyTorch / torchvision
+            </div>
+            <div class="code-tab" data-tab="keras">Keras / TF</div>
+            <div class="code-tab" data-tab="album">Albumentations</div>
+          </div>
+
+          <div class="code-block" id="code-pytorch">
+            <span class="cm"
+              ># PyTorch: torchvision.transforms.v2 (API moderna)</span
+            >
+            <span class="kw">from</span> torchvision.transforms
+            <span class="kw">import</span> v2
+            <span class="kw">import</span> torch train_tf = v2.<span class="cl"
+              >Compose</span
+            >([ v2.<span class="fn">RandomResizedCrop</span>(size=<span
+              class="nb"
+              >224</span
+            >, scale=(<span class="nb">0.7</span>,
+            <span class="nb">1.0</span>)), v2.<span class="fn"
+              >RandomHorizontalFlip</span
+            >(p=<span class="nb">0.5</span>), v2.<span class="fn"
+              >RandomRotation</span
+            >(degrees=<span class="nb">15</span>), v2.<span class="fn"
+              >ColorJitter</span
+            >(brightness=<span class="nb">0.2</span>, contrast=<span class="nb"
+              >0.2</span
+            >, saturation=<span class="nb">0.2</span>), v2.<span class="fn"
+              >ToDtype</span
+            >(torch.float32, scale=<span class="kw">True</span>), v2.<span
+              class="fn"
+              >Normalize</span
+            >(mean=[<span class="nb">0.485</span>,
+            <span class="nb">0.456</span>, <span class="nb">0.406</span>],
+            std=[<span class="nb">0.229</span>, <span class="nb">0.224</span>,
+            <span class="nb">0.225</span>]), ])
+
+            <span class="cm"># En val/test: SIN augmentation aleatoria</span>
+            val_tf = v2.<span class="cl">Compose</span>([ v2.<span class="fn"
+              >Resize</span
+            >(<span class="nb">256</span>), v2.<span class="fn">CenterCrop</span
+            >(<span class="nb">224</span>), v2.<span class="fn">ToDtype</span
+            >(torch.float32, scale=<span class="kw">True</span>), v2.<span
+              class="fn"
+              >Normalize</span
+            >(mean=[<span class="nb">0.485</span>,
+            <span class="nb">0.456</span>, <span class="nb">0.406</span>],
+            std=[<span class="nb">0.229</span>, <span class="nb">0.224</span>,
+            <span class="nb">0.225</span>]), ]) train_ds =
+            <span class="cl">ImageFolder</span>(<span class="st"
+              >"data/train"</span
+            >, transform=train_tf) val_ds =
+            <span class="cl">ImageFolder</span>(<span class="st"
+              >"data/val"</span
+            >, transform=val_tf)
+          </div>
+
+          <div class="code-block hidden" id="code-keras">
+            <span class="cm"
+              ># Keras: capas de augmentation integradas en el modelo</span
+            >
+            <span class="kw">import</span> tensorflow
+            <span class="kw">as</span> tf
+            <span class="kw">from</span> tensorflow.keras
+            <span class="kw">import</span> layers data_aug = tf.keras.<span
+              class="cl"
+              >Sequential</span
+            >([ layers.<span class="fn">RandomFlip</span>(<span class="st"
+              >"horizontal"</span
+            >), layers.<span class="fn">RandomRotation</span>(<span class="nb"
+              >0.1</span
+            >), <span class="cm"># ±10% × 2π rad</span> layers.<span class="fn"
+              >RandomZoom</span
+            >(<span class="nb">0.2</span>), layers.<span class="fn"
+              >RandomContrast</span
+            >(<span class="nb">0.2</span>), layers.<span class="fn"
+              >RandomBrightness</span
+            >(<span class="nb">0.2</span>), ], name=<span class="st"
+              >"augmentation"</span
+            >) model = tf.keras.<span class="cl">Sequential</span>([
+            layers.<span class="fn">Rescaling</span>(<span class="nb">1.</span
+            >/<span class="nb">255</span>), data_aug,
+            <span class="cm"># solo activa en training</span> layers.<span
+              class="fn"
+              >Conv2D</span
+            >(<span class="nb">32</span>, <span class="nb">3</span>,
+            activation=<span class="st">"relu"</span>), layers.<span class="fn"
+              >MaxPooling2D</span
+            >(),
+            <span class="cm"># ... resto del modelo</span>
+            layers.<span class="fn">Dense</span>(num_classes, activation=<span
+              class="st"
+              >"softmax"</span
+            >), ])
+
+            <span class="cm"
+              ># Las capas Random* se comportan como identidad en inference —
+              perfecto</span
+            >
+            model.<span class="fn">compile</span>(optimizer=<span class="st"
+              >"adam"</span
+            >, loss=<span class="st">"sparse_categorical_crossentropy"</span>)
+            model.<span class="fn">fit</span>(train_ds, validation_data=val_ds,
+            epochs=<span class="nb">30</span>)
+          </div>
+
+          <div class="code-block hidden" id="code-album">
+            <span class="cm"
+              ># Albumentations: la librería más rápida y completa</span
+            >
+            <span class="kw">import</span> albumentations
+            <span class="kw">as</span> A
+            <span class="kw">from</span> albumentations.pytorch
+            <span class="kw">import</span> ToTensorV2 train_tf = A.<span
+              class="cl"
+              >Compose</span
+            >([ A.<span class="fn">RandomResizedCrop</span>(height=<span
+              class="nb"
+              >224</span
+            >, width=<span class="nb">224</span>, scale=(<span class="nb"
+              >0.7</span
+            >, <span class="nb">1.0</span>)), A.<span class="fn"
+              >HorizontalFlip</span
+            >(p=<span class="nb">0.5</span>), A.<span class="fn">Rotate</span
+            >(limit=<span class="nb">15</span>, p=<span class="nb">0.5</span>),
+            A.<span class="fn">ColorJitter</span>(brightness=<span class="nb"
+              >0.2</span
+            >, contrast=<span class="nb">0.2</span>, p=<span class="nb"
+              >0.5</span
+            >), A.<span class="fn">GaussNoise</span>(var_limit=(<span class="nb"
+              >5</span
+            >, <span class="nb">30</span>), p=<span class="nb">0.3</span>),
+            A.<span class="fn">CoarseDropout</span>(max_holes=<span class="nb"
+              >8</span
+            >, max_height=<span class="nb">32</span>, max_width=<span class="nb"
+              >32</span
+            >, p=<span class="nb">0.5</span>),
+            <span class="cm"># cutout</span> A.<span class="fn">Normalize</span
+            >(mean=(<span class="nb">0.485</span>,
+            <span class="nb">0.456</span>, <span class="nb">0.406</span>),
+            std=(<span class="nb">0.229</span>, <span class="nb">0.224</span>,
+            <span class="nb">0.225</span>)),
+            <span class="fn">ToTensorV2</span>(), ])
+
+            <span class="cm"
+              ># Uso: augmented = train_tf(image=np_image)["image"]</span
+            >
+
+            <span class="cm"
+              ># Mixup manual (Albumentations no lo incluye como transform
+              estándar)</span
+            >
+            <span class="kw">def</span> <span class="fn">mixup</span>(x1, y1,
+            x2, y2, alpha=<span class="nb">0.2</span>): lam = np.random.<span
+              class="fn"
+              >beta</span
+            >(alpha, alpha) x = lam * x1 + (<span class="nb">1</span> - lam) *
+            x2 y = lam * y1 + (<span class="nb">1</span> - lam) * y2
+            <span class="kw">return</span> x, y
+          </div>
+
+          <div class="hint-box" style="margin-top: 16px">
+            <span class="hint-icon">⚡</span>
+            <div>
+              <strong>Recomendación</strong>: para proyectos serios de visión,
+              usa <strong>Albumentations</strong> (hasta 3× más rápida que
+              torchvision) con el dataset en PyTorch. Para prototipos rápidos,
+              las capas de Keras son las más cómodas.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECCIÓN 10: QUIZ ========== -->
+      <section class="section" id="s10">
+        <div class="section-header">
+          <span class="section-num">SECCIÓN 10</span>
+          <h2 class="section-title">Quiz final — pon a prueba lo aprendido</h2>
+        </div>
+        <div class="section-body">
+          <p>
+            6 preguntas. Lee con calma, pulsa tu respuesta y observa el
+            feedback. Al final verás tu puntuación.
+          </p>
+          <div id="quizContainer"></div>
+          <div id="scoreBox"></div>
+          <div style="text-align: center; margin-top: 14px">
+            <button id="btnResetQuiz">↺ Reiniciar quiz</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CIERRE ========== -->
+      <section class="section">
+        <div class="section-header">
+          <span class="section-num">CIERRE</span>
+          <h2 class="section-title">Resumen ejecutivo</h2>
+        </div>
+        <div class="section-body">
+          <ol>
+            <li>
+              <strong>Data augmentation</strong> genera nuevas muestras
+              aplicando transformaciones que preservan la etiqueta.
+            </li>
+            <li>
+              Es la forma <strong>más barata</strong> de combatir el overfitting
+              cuando tienes pocos datos.
+            </li>
+            <li>
+              Las técnicas básicas (flip, rotation, crop, color jitter, noise)
+              funcionan en casi cualquier problema de visión.
+            </li>
+            <li>
+              Las avanzadas (Mixup, CutMix, Cutout) añaden aún más
+              regularización.
+            </li>
+            <li>
+              En NLP las más usadas son <strong>EDA</strong> y
+              <strong>back-translation</strong>.
+            </li>
+            <li>
+              En tabular, <strong>SMOTE</strong> y sus variantes atacan el
+              desbalance de clases.
+            </li>
+            <li>
+              La regla de oro: <strong>visualiza siempre</strong> un batch
+              augmentado. Si tú no reconoces la clase, la red tampoco.
+            </li>
+          </ol>
+
+          <div class="hint-box" style="margin-top: 18px">
+            <span class="hint-icon">📚</span>
+            <div>
+              <strong>Para ir más allá</strong>: busca
+              <em>AutoAugment</em> (Google, 2019), <em>RandAugment</em>,
+              <em>TrivialAugment</em> y los papers originales de
+              <em>Mixup</em> (Zhang et al., 2017) y <em>CutMix</em> (Yun et al.,
+              2019).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="doc-footer">
+        <strong>CUNEF Universidad</strong> · Aprendizaje Profundo · Material
+        docente interactivo<br />
+        Hecho con HTML + Canvas + SVG puro. Sin dependencias externas.
+      </div>
+    </div>
+
+    <!-- ============================================================
+     JAVASCRIPT INTERACTIVIDAD
+     ============================================================ -->
+    <script>
+      /* ===============================================================
+   1) PINTORES DE IMÁGENES BASE (procedurales sobre canvas)
+   =============================================================== */
+      function paintCat(ctx, w, h) {
+        ctx.save();
+        ctx.fillStyle = "#f5f0e8";
+        ctx.fillRect(0, 0, w, h);
+        const cx = w / 2,
+          cy = h / 2 + h * 0.03;
+        const r = Math.min(w, h) * 0.3;
+        // cabeza
+        ctx.fillStyle = "#E89B5C";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        // orejas
+        ctx.beginPath();
+        ctx.moveTo(cx - r * 0.75, cy - r * 0.55);
+        ctx.lineTo(cx - r * 0.35, cy - r * 1.2);
+        ctx.lineTo(cx - r * 0.05, cy - r * 0.55);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx + r * 0.05, cy - r * 0.55);
+        ctx.lineTo(cx + r * 0.35, cy - r * 1.2);
+        ctx.lineTo(cx + r * 0.75, cy - r * 0.55);
+        ctx.closePath();
+        ctx.fill();
+        // orejas internas
+        ctx.fillStyle = "#F5C6A1";
+        ctx.beginPath();
+        ctx.moveTo(cx - r * 0.55, cy - r * 0.7);
+        ctx.lineTo(cx - r * 0.35, cy - r * 1.05);
+        ctx.lineTo(cx - r * 0.18, cy - r * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx + r * 0.18, cy - r * 0.7);
+        ctx.lineTo(cx + r * 0.35, cy - r * 1.05);
+        ctx.lineTo(cx + r * 0.55, cy - r * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        // ojos
+        ctx.fillStyle = "#1a1a1a";
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.35, cy - r * 0.1, r * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + r * 0.35, cy - r * 0.1, r * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.32, cy - r * 0.14, r * 0.035, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx + r * 0.38, cy - r * 0.14, r * 0.035, 0, Math.PI * 2);
+        ctx.fill();
+        // nariz
+        ctx.fillStyle = "#D8607E";
+        ctx.beginPath();
+        ctx.moveTo(cx - r * 0.1, cy + r * 0.12);
+        ctx.lineTo(cx + r * 0.1, cy + r * 0.12);
+        ctx.lineTo(cx, cy + r * 0.28);
+        ctx.closePath();
+        ctx.fill();
+        // boca
+        ctx.strokeStyle = "#4a2a0a";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + r * 0.28);
+        ctx.quadraticCurveTo(
+          cx - r * 0.18,
+          cy + r * 0.48,
+          cx - r * 0.3,
+          cy + r * 0.32,
+        );
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + r * 0.28);
+        ctx.quadraticCurveTo(
+          cx + r * 0.18,
+          cy + r * 0.48,
+          cx + r * 0.3,
+          cy + r * 0.32,
+        );
+        ctx.stroke();
+        // bigotes
+        ctx.strokeStyle = "#3a2510";
+        ctx.lineWidth = 1.2;
+        for (let i = -1; i <= 1; i++) {
+          ctx.beginPath();
+          ctx.moveTo(cx - r * 0.18, cy + r * 0.15 + i * 6);
+          ctx.lineTo(cx - r * 0.7, cy + r * 0.05 + i * 9);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx + r * 0.18, cy + r * 0.15 + i * 6);
+          ctx.lineTo(cx + r * 0.7, cy + r * 0.05 + i * 9);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      function paintDigit(ctx, w, h) {
+        ctx.save();
+        ctx.fillStyle = "#0b0b18";
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#f0f0f0";
+        ctx.strokeStyle = "#f0f0f0";
+        ctx.lineWidth = Math.max(w, h) * 0.08;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        // "7"
+        ctx.beginPath();
+        ctx.moveTo(w * 0.22, h * 0.25);
+        ctx.lineTo(w * 0.78, h * 0.25);
+        ctx.lineTo(w * 0.4, h * 0.82);
+        ctx.stroke();
+        // cross bar (estilo europeo)
+        ctx.beginPath();
+        ctx.moveTo(w * 0.38, h * 0.52);
+        ctx.lineTo(w * 0.6, h * 0.52);
+        ctx.stroke();
+        ctx.restore();
+      }
+      function paintHouse(ctx, w, h) {
+        ctx.save();
+        ctx.fillStyle = "#cfe6f5";
+        ctx.fillRect(0, 0, w, h);
+        // suelo
+        ctx.fillStyle = "#9cd28a";
+        ctx.fillRect(0, h * 0.8, w, h * 0.2);
+        // casa cuerpo
+        ctx.fillStyle = "#fff4db";
+        ctx.fillRect(w * 0.18, h * 0.42, w * 0.64, h * 0.42);
+        ctx.strokeStyle = "#4a3010";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(w * 0.18, h * 0.42, w * 0.64, h * 0.42);
+        // tejado
+        ctx.fillStyle = "#C84B3B";
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, h * 0.44);
+        ctx.lineTo(w * 0.5, h * 0.15);
+        ctx.lineTo(w * 0.9, h * 0.44);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // puerta
+        ctx.fillStyle = "#7a3a10";
+        ctx.fillRect(w * 0.42, h * 0.58, w * 0.16, h * 0.26);
+        ctx.fillStyle = "#FFD700";
+        ctx.beginPath();
+        ctx.arc(w * 0.55, h * 0.71, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        // ventanas
+        ctx.fillStyle = "#8ecbe8";
+        ctx.fillRect(w * 0.24, h * 0.5, w * 0.13, h * 0.13);
+        ctx.fillRect(w * 0.63, h * 0.5, w * 0.13, h * 0.13);
+        ctx.strokeRect(w * 0.24, h * 0.5, w * 0.13, h * 0.13);
+        ctx.strokeRect(w * 0.63, h * 0.5, w * 0.13, h * 0.13);
+        ctx.beginPath();
+        ctx.moveTo(w * 0.305, h * 0.5);
+        ctx.lineTo(w * 0.305, h * 0.63);
+        ctx.moveTo(w * 0.24, h * 0.565);
+        ctx.lineTo(w * 0.37, h * 0.565);
+        ctx.moveTo(w * 0.695, h * 0.5);
+        ctx.lineTo(w * 0.695, h * 0.63);
+        ctx.moveTo(w * 0.63, h * 0.565);
+        ctx.lineTo(w * 0.76, h * 0.565);
+        ctx.stroke();
+        // sol
+        ctx.fillStyle = "#FFD700";
+        ctx.beginPath();
+        ctx.arc(w * 0.85, h * 0.15, w * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      function paintArrow(ctx, w, h) {
+        ctx.save();
+        ctx.fillStyle = "#f5f0e8";
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "#FF6600";
+        ctx.strokeStyle = "#7a3500";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, h * 0.4);
+        ctx.lineTo(w * 0.55, h * 0.4);
+        ctx.lineTo(w * 0.55, h * 0.25);
+        ctx.lineTo(w * 0.9, h * 0.5);
+        ctx.lineTo(w * 0.55, h * 0.75);
+        ctx.lineTo(w * 0.55, h * 0.6);
+        ctx.lineTo(w * 0.1, h * 0.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      const PAINTERS = {
+        cat: paintCat,
+        digit: paintDigit,
+        house: paintHouse,
+        arrow: paintArrow,
+      };
+
+      /* ===============================================================
+   2) PLAYGROUND INTERACTIVO
+   =============================================================== */
+      const canvasOriginal = document.getElementById("canvasOriginal");
+      const canvasAugmented = document.getElementById("canvasAugmented");
+      const ctxO = canvasOriginal.getContext("2d");
+      const ctxA = canvasAugmented.getContext("2d");
+
+      const baseImageSelect = document.getElementById("baseImageSelect");
+      const sliders = {
+        rot: document.getElementById("sliderRot"),
+        zoom: document.getElementById("sliderZoom"),
+        tx: document.getElementById("sliderTx"),
+        ty: document.getElementById("sliderTy"),
+        bri: document.getElementById("sliderBri"),
+        con: document.getElementById("sliderCon"),
+        noise: document.getElementById("sliderNoise"),
+        flip: document.getElementById("sliderFlip"),
+      };
+      const valueLabels = {
+        rot: document.getElementById("valRot"),
+        zoom: document.getElementById("valZoom"),
+        tx: document.getElementById("valTx"),
+        ty: document.getElementById("valTy"),
+        bri: document.getElementById("valBri"),
+        con: document.getElementById("valCon"),
+        noise: document.getElementById("valNoise"),
+        flip: document.getElementById("valFlip"),
+      };
+
+      function drawOriginal() {
+        const kind = baseImageSelect.value;
+        PAINTERS[kind](ctxO, canvasOriginal.width, canvasOriginal.height);
+      }
+
+      function applyAugmentation() {
+        const w = canvasAugmented.width,
+          h = canvasAugmented.height;
+        const rot = +sliders.rot.value;
+        const zoom = +sliders.zoom.value / 100;
+        const tx = +sliders.tx.value;
+        const ty = +sliders.ty.value;
+        const bri = +sliders.bri.value;
+        const con = +sliders.con.value / 100;
+        const noise = +sliders.noise.value;
+        const flip = +sliders.flip.value === 1;
+
+        valueLabels.rot.textContent = rot + "°";
+        valueLabels.zoom.textContent = zoom.toFixed(2) + "×";
+        valueLabels.tx.textContent = tx + " px";
+        valueLabels.ty.textContent = ty + " px";
+        valueLabels.bri.textContent = (bri > 0 ? "+" : "") + bri + "%";
+        valueLabels.con.textContent = Math.round(con * 100) + "%";
+        valueLabels.noise.textContent = noise;
+        valueLabels.flip.textContent = flip ? "SÍ" : "NO";
+
+        ctxA.save();
+        ctxA.fillStyle = "#f5f0e8";
+        ctxA.fillRect(0, 0, w, h);
+
+        // Fill margins with reflection-ish background first (we just clear to bg)
+        ctxA.translate(w / 2 + tx, h / 2 + ty);
+        ctxA.rotate((rot * Math.PI) / 180);
+        ctxA.scale(zoom * (flip ? -1 : 1), zoom);
+        ctxA.translate(-w / 2, -h / 2);
+        // draw base onto augmented
+        const kind = baseImageSelect.value;
+        PAINTERS[kind](ctxA, w, h);
+        ctxA.restore();
+
+        // pixel-level: brightness + contrast + noise
+        if (bri !== 0 || con !== 1 || noise > 0) {
+          const img = ctxA.getImageData(0, 0, w, h);
+          const d = img.data;
+          const briAdd = bri * 2.55;
+          for (let i = 0; i < d.length; i += 4) {
+            for (let c = 0; c < 3; c++) {
+              let v = d[i + c];
+              // contrast around 128
+              v = (v - 128) * con + 128;
+              v += briAdd;
+              if (noise > 0) v += (Math.random() - 0.5) * noise * 2;
+              d[i + c] = Math.max(0, Math.min(255, v));
+            }
+          }
+          ctxA.putImageData(img, 0, 0);
+        }
+      }
+
+      function bindSliders() {
+        for (const k of Object.keys(sliders)) {
+          sliders[k].addEventListener("input", applyAugmentation);
+        }
+        baseImageSelect.addEventListener("change", () => {
+          drawOriginal();
+          applyAugmentation();
+        });
+      }
+
+      document.getElementById("btnRandomAug").addEventListener("click", () => {
+        sliders.rot.value = Math.round((Math.random() * 2 - 1) * 30);
+        sliders.zoom.value = Math.round(80 + Math.random() * 50);
+        sliders.tx.value = Math.round((Math.random() * 2 - 1) * 25);
+        sliders.ty.value = Math.round((Math.random() * 2 - 1) * 25);
+        sliders.bri.value = Math.round((Math.random() * 2 - 1) * 40);
+        sliders.con.value = Math.round(70 + Math.random() * 80);
+        sliders.noise.value = Math.round(Math.random() * 30);
+        sliders.flip.value = Math.random() < 0.5 ? 0 : 1;
+        applyAugmentation();
+      });
+      document.getElementById("btnResetAug").addEventListener("click", () => {
+        sliders.rot.value = 0;
+        sliders.zoom.value = 100;
+        sliders.tx.value = 0;
+        sliders.ty.value = 0;
+        sliders.bri.value = 0;
+        sliders.con.value = 100;
+        sliders.noise.value = 0;
+        sliders.flip.value = 0;
+        applyAugmentation();
+      });
+
+      /* ===============================================================
+   3) GALERÍA DE TÉCNICAS
+   =============================================================== */
+      const TECHNIQUES = [
+        { name: "Original", fn: (c) => drawBaseOn(c) },
+        {
+          name: "Flip horizontal",
+          fn: (c) => drawTransformed(c, { flip: true }),
+        },
+        {
+          name: "Rotation ±25°",
+          fn: (c) => drawTransformed(c, { rot: randRange(-25, 25) }),
+        },
+        {
+          name: "Random crop + zoom",
+          fn: (c) =>
+            drawTransformed(c, {
+              zoom: 1.2 + Math.random() * 0.3,
+              tx: randRange(-20, 20),
+              ty: randRange(-20, 20),
+            }),
+        },
+        {
+          name: "Brightness",
+          fn: (c) => drawTransformed(c, { bri: randRange(-40, 40) }),
+        },
+        {
+          name: "Contrast",
+          fn: (c) => drawTransformed(c, { con: 0.6 + Math.random() * 0.9 }),
+        },
+        {
+          name: "Gaussian noise",
+          fn: (c) => drawTransformed(c, { noise: 35 }),
+        },
+        { name: "Gaussian blur", fn: (c) => drawTransformed(c, { blur: 3 }) },
+        { name: "Cutout", fn: (c) => drawTransformed(c, { cutout: true }) },
+        { name: "Grayscale", fn: (c) => drawTransformed(c, { gray: true }) },
+      ];
+      function randRange(a, b) {
+        return a + Math.random() * (b - a);
+      }
+
+      function drawBaseOn(canvas) {
+        const c = canvas.getContext("2d");
+        const kind = baseImageSelect.value;
+        PAINTERS[kind](c, canvas.width, canvas.height);
+      }
+
+      function drawTransformed(canvas, opts) {
+        const c = canvas.getContext("2d");
+        const w = canvas.width,
+          h = canvas.height;
+        c.save();
+        c.fillStyle = "#f5f0e8";
+        c.fillRect(0, 0, w, h);
+        c.translate(
+          w / 2 + ((opts.tx || 0) * w) / 220,
+          h / 2 + ((opts.ty || 0) * h) / 220,
+        );
+        c.rotate(((opts.rot || 0) * Math.PI) / 180);
+        const zoom = opts.zoom || 1;
+        c.scale(zoom * (opts.flip ? -1 : 1), zoom);
+        c.translate(-w / 2, -h / 2);
+        const kind = baseImageSelect.value;
+        PAINTERS[kind](c, w, h);
+        c.restore();
+
+        // pixel-level effects
+        if (
+          opts.bri !== undefined ||
+          opts.con !== undefined ||
+          opts.noise ||
+          opts.gray
+        ) {
+          const img = c.getImageData(0, 0, w, h);
+          const d = img.data;
+          const briAdd = (opts.bri || 0) * 2.55;
+          const con = opts.con === undefined ? 1 : opts.con;
+          for (let i = 0; i < d.length; i += 4) {
+            if (opts.gray) {
+              const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+              d[i] = d[i + 1] = d[i + 2] = g;
+            }
+            for (let k = 0; k < 3; k++) {
+              let v = d[i + k];
+              v = (v - 128) * con + 128 + briAdd;
+              if (opts.noise) v += (Math.random() - 0.5) * opts.noise * 2;
+              d[i + k] = Math.max(0, Math.min(255, v));
+            }
+          }
+          c.putImageData(img, 0, 0);
+        }
+
+        // blur using CSS filter
+        if (opts.blur) {
+          c.filter = "blur(" + opts.blur + "px)";
+          c.drawImage(canvas, 0, 0);
+          c.filter = "none";
+        }
+
+        // cutout: draw a random black rectangle
+        if (opts.cutout) {
+          const cw = 35 + Math.random() * 45;
+          const ch = 35 + Math.random() * 45;
+          const cx = Math.random() * (w - cw);
+          const cy = Math.random() * (h - ch);
+          c.fillStyle = "#000";
+          c.fillRect(cx, cy, cw, ch);
+        }
+      }
+
+      function buildGallery() {
+        const gallery = document.getElementById("techGallery");
+        gallery.innerHTML = "";
+        TECHNIQUES.forEach((t) => {
+          const card = document.createElement("div");
+          card.className = "tech-card";
+          const cvs = document.createElement("canvas");
+          cvs.width = 130;
+          cvs.height = 130;
+          const name = document.createElement("div");
+          name.className = "tech-name";
+          name.textContent = t.name;
+          card.appendChild(cvs);
+          card.appendChild(name);
+          gallery.appendChild(card);
+          t.fn(cvs);
+        });
+      }
+      document
+        .getElementById("btnRerollGallery")
+        .addEventListener("click", buildGallery);
+
+      /* ===============================================================
+   4) CHART SVG — curvas de overfitting
+   =============================================================== */
+      const svgChart = document.getElementById("overfitChart");
+      let chartMode = "off"; // 'off' | 'on'
+      let chartAnim = null;
+
+      function buildChart(mode, animateFrom) {
+        while (svgChart.firstChild) svgChart.removeChild(svgChart.firstChild);
+        const W = 640,
+          H = 300;
+        const pad = { l: 48, r: 16, t: 18, b: 44 };
+        const innerW = W - pad.l - pad.r,
+          innerH = H - pad.t - pad.b;
+
+        // axes
+        const ns = "http://www.w3.org/2000/svg";
+        const ax = (x1, y1, x2, y2, stroke = "#b58a5a", sw = 1) => {
+          const el = document.createElementNS(ns, "line");
+          el.setAttribute("x1", x1);
+          el.setAttribute("y1", y1);
+          el.setAttribute("x2", x2);
+          el.setAttribute("y2", y2);
+          el.setAttribute("stroke", stroke);
+          el.setAttribute("stroke-width", sw);
+          svgChart.appendChild(el);
+        };
+        const text = (x, y, t, fs = 11, fill = "#7a3500", weight = 600) => {
+          const el = document.createElementNS(ns, "text");
+          el.setAttribute("x", x);
+          el.setAttribute("y", y);
+          el.setAttribute("fill", fill);
+          el.setAttribute("font-family", "Arial, sans-serif");
+          el.setAttribute("font-size", fs);
+          el.setAttribute("font-weight", weight);
+          el.textContent = t;
+          svgChart.appendChild(el);
+          return el;
+        };
+
+        // bg grid
+        for (let i = 0; i <= 5; i++) {
+          const y = pad.t + (innerH * i) / 5;
+          ax(pad.l, y, pad.l + innerW, y, "#FFE8CF", 1);
+        }
+        ax(pad.l, pad.t, pad.l, pad.t + innerH, "#b58a5a", 1.5);
+        ax(
+          pad.l,
+          pad.t + innerH,
+          pad.l + innerW,
+          pad.t + innerH,
+          "#b58a5a",
+          1.5,
+        );
+
+        // axis labels
+        text(
+          (pad.l + innerW) / 2 + pad.l / 2,
+          H - 10,
+          "Épocas",
+          12,
+          "#7a3500",
+          700,
+        );
+        const yLabel = document.createElementNS(ns, "text");
+        yLabel.setAttribute("x", 14);
+        yLabel.setAttribute("y", pad.t + innerH / 2);
+        yLabel.setAttribute("fill", "#7a3500");
+        yLabel.setAttribute("font-family", "Arial, sans-serif");
+        yLabel.setAttribute("font-size", 12);
+        yLabel.setAttribute("font-weight", 700);
+        yLabel.setAttribute(
+          "transform",
+          `rotate(-90, 14, ${pad.t + innerH / 2})`,
+        );
+        yLabel.setAttribute("text-anchor", "middle");
+        yLabel.textContent = "Loss";
+        svgChart.appendChild(yLabel);
+
+        text(pad.l - 6, pad.t + 4, "1.0", 10, "#888", 500);
+        text(pad.l - 6, pad.t + innerH + 4, "0.0", 10, "#888", 500);
+        text(pad.l - 6, pad.t + innerH / 2 + 4, "0.5", 10, "#888", 500);
+
+        // generate data
+        const N = 50;
+        const trainData = [],
+          valData = [];
+        for (let i = 0; i < N; i++) {
+          const t = i / (N - 1);
+          // training loss: always decreasing
+          const train =
+            0.95 * Math.exp(-3.2 * t) + 0.03 + 0.02 * Math.sin(i * 0.8);
+          let val;
+          if (mode === "off") {
+            // validation: bajada inicial y luego sube (overfitting)
+            val =
+              0.95 * Math.exp(-2.0 * t) +
+              0.02 +
+              Math.max(0, 0.55 * (t - 0.3)) * (0.5 + Math.random() * 0.2);
+            val += 0.03 * Math.sin(i * 1.3);
+          } else {
+            // with augmentation: ambas bajan juntas
+            val = 0.95 * Math.exp(-2.5 * t) + 0.08 + 0.04 * Math.sin(i * 1.1);
+          }
+          trainData.push(Math.max(0, Math.min(1, train)));
+          valData.push(Math.max(0, Math.min(1, val)));
+        }
+
+        const X = (i) => pad.l + (i / (N - 1)) * innerW;
+        const Y = (v) => pad.t + (1 - v) * innerH;
+
+        const mkPath = (data) => {
+          let d = "";
+          for (let i = 0; i < data.length; i++) {
+            d +=
+              (i === 0 ? "M" : "L") +
+              X(i).toFixed(1) +
+              "," +
+              Y(data[i]).toFixed(1) +
+              " ";
+          }
+          return d;
+        };
+
+        const trainPath = document.createElementNS(ns, "path");
+        trainPath.setAttribute("fill", "none");
+        trainPath.setAttribute("stroke", "#FF6600");
+        trainPath.setAttribute("stroke-width", 2.5);
+        trainPath.setAttribute("stroke-linecap", "round");
+        trainPath.setAttribute("d", mkPath(trainData));
+        svgChart.appendChild(trainPath);
+
+        const valPath = document.createElementNS(ns, "path");
+        valPath.setAttribute("fill", "none");
+        valPath.setAttribute("stroke", "#3BA55C");
+        valPath.setAttribute("stroke-width", 2.5);
+        valPath.setAttribute("stroke-linecap", "round");
+        valPath.setAttribute("d", mkPath(valData));
+        svgChart.appendChild(valPath);
+
+        // annotation on overfitting
+        if (mode === "off") {
+          const idx = 38;
+          const cx = X(idx),
+            cy = Y(valData[idx]);
+          const circ = document.createElementNS(ns, "circle");
+          circ.setAttribute("cx", cx);
+          circ.setAttribute("cy", cy);
+          circ.setAttribute("r", 5);
+          circ.setAttribute("fill", "none");
+          circ.setAttribute("stroke", "#C02020");
+          circ.setAttribute("stroke-width", 2);
+          svgChart.appendChild(circ);
+          text(cx - 45, cy - 14, "⚠️ overfitting", 11, "#C02020", 700);
+        } else {
+          text(X(25) - 40, Y(0.25) - 10, "✓ generaliza", 11, "#1e5e34", 700);
+        }
+
+        // animation: reveal paths
+        if (animateFrom) {
+          const trainLen = trainPath.getTotalLength();
+          const valLen = valPath.getTotalLength();
+          trainPath.style.strokeDasharray = trainLen;
+          trainPath.style.strokeDashoffset = trainLen;
+          valPath.style.strokeDasharray = valLen;
+          valPath.style.strokeDashoffset = valLen;
+          trainPath.style.transition = "stroke-dashoffset 1.6s ease-out";
+          valPath.style.transition = "stroke-dashoffset 1.6s ease-out";
+          requestAnimationFrame(() => {
+            trainPath.style.strokeDashoffset = 0;
+            valPath.style.strokeDashoffset = 0;
+          });
+        }
+      }
+
+      document.getElementById("btnAugOff").addEventListener("click", (e) => {
+        chartMode = "off";
+        document.getElementById("btnAugOff").classList.add("active");
+        document.getElementById("btnAugOn").classList.remove("active");
+        buildChart("off", true);
+      });
+      document.getElementById("btnAugOn").addEventListener("click", () => {
+        chartMode = "on";
+        document.getElementById("btnAugOn").classList.add("active");
+        document.getElementById("btnAugOff").classList.remove("active");
+        buildChart("on", true);
+      });
+      document
+        .getElementById("btnReplayChart")
+        .addEventListener("click", () => {
+          buildChart(chartMode, true);
+        });
+
+      /* ===============================================================
+   5) MIXUP
+   =============================================================== */
+      const mixA = document.getElementById("mixA");
+      const mixB = document.getElementById("mixB");
+      const mixOut = document.getElementById("mixOut");
+      const ctxMixA = mixA.getContext("2d");
+      const ctxMixB = mixB.getContext("2d");
+      const ctxMixOut = mixOut.getContext("2d");
+      paintCat(ctxMixA, mixA.width, mixA.height);
+      paintHouse(ctxMixB, mixB.width, mixB.height);
+
+      function updateMixup() {
+        const lambda = +document.getElementById("sliderLambda").value / 100;
+        document.getElementById("valLambda").textContent = lambda.toFixed(2);
+        const w = mixOut.width,
+          h = mixOut.height;
+        const a = ctxMixA.getImageData(0, 0, mixA.width, mixA.height);
+        const b = ctxMixB.getImageData(0, 0, mixB.width, mixB.height);
+        const out = ctxMixOut.createImageData(w, h);
+        for (let i = 0; i < out.data.length; i += 4) {
+          out.data[i] = lambda * a.data[i] + (1 - lambda) * b.data[i];
+          out.data[i + 1] =
+            lambda * a.data[i + 1] + (1 - lambda) * b.data[i + 1];
+          out.data[i + 2] =
+            lambda * a.data[i + 2] + (1 - lambda) * b.data[i + 2];
+          out.data[i + 3] = 255;
+        }
+        ctxMixOut.putImageData(out, 0, 0);
+        document.getElementById("mixLabel").textContent =
+          `label: ${lambda.toFixed(2)} gato + ${(1 - lambda).toFixed(2)} casa`;
+      }
+      document
+        .getElementById("sliderLambda")
+        .addEventListener("input", updateMixup);
+
+      /* ===============================================================
+   6) CUTMIX
+   =============================================================== */
+      const cutmixOut = document.getElementById("cutmixOut");
+      const ctxCutmix = cutmixOut.getContext("2d");
+      function generateCutmix() {
+        const w = cutmixOut.width,
+          h = cutmixOut.height;
+        // pintamos A (cat) primero
+        const tmpA = document.createElement("canvas");
+        tmpA.width = w;
+        tmpA.height = h;
+        const tmpB = document.createElement("canvas");
+        tmpB.width = w;
+        tmpB.height = h;
+        paintCat(tmpA.getContext("2d"), w, h);
+        paintHouse(tmpB.getContext("2d"), w, h);
+        ctxCutmix.drawImage(tmpA, 0, 0);
+        // random box
+        const bw = w * (0.25 + Math.random() * 0.35);
+        const bh = h * (0.25 + Math.random() * 0.35);
+        const bx = Math.random() * (w - bw);
+        const by = Math.random() * (h - bh);
+        // paste from B
+        ctxCutmix.save();
+        ctxCutmix.beginPath();
+        ctxCutmix.rect(bx, by, bw, bh);
+        ctxCutmix.clip();
+        ctxCutmix.drawImage(tmpB, 0, 0);
+        ctxCutmix.restore();
+        // border
+        ctxCutmix.strokeStyle = "#FF6600";
+        ctxCutmix.lineWidth = 2;
+        ctxCutmix.strokeRect(bx, by, bw, bh);
+        const areaRatio = (bw * bh) / (w * h);
+        const lambda = 1 - areaRatio;
+        document.getElementById("cutmixLabel").textContent =
+          `label: ${lambda.toFixed(2)} gato + ${areaRatio.toFixed(2)} casa (área parche: ${(areaRatio * 100).toFixed(1)}%)`;
+      }
+      document
+        .getElementById("btnCutmix")
+        .addEventListener("click", generateCutmix);
+
+      /* ===============================================================
+   7) CUTOUT interactivo
+   =============================================================== */
+      const cutoutCanvas = document.getElementById("cutoutCanvas");
+      const ctxCutout = cutoutCanvas.getContext("2d");
+      const sliderCutoutSize = document.getElementById("sliderCutoutSize");
+      const valCutoutSize = document.getElementById("valCutoutSize");
+
+      function resetCutout() {
+        paintCat(ctxCutout, cutoutCanvas.width, cutoutCanvas.height);
+      }
+      function placeCutout(x, y) {
+        const s = +sliderCutoutSize.value;
+        valCutoutSize.textContent = s + " px";
+        ctxCutout.fillStyle = "#000";
+        ctxCutout.fillRect(x - s / 2, y - s / 2, s, s);
+      }
+      cutoutCanvas.addEventListener("click", (e) => {
+        const rect = cutoutCanvas.getBoundingClientRect();
+        const scaleX = cutoutCanvas.width / rect.width;
+        const scaleY = cutoutCanvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        placeCutout(x, y);
+      });
+      sliderCutoutSize.addEventListener("input", () => {
+        valCutoutSize.textContent = sliderCutoutSize.value + " px";
+      });
+      document
+        .getElementById("btnCutoutReset")
+        .addEventListener("click", resetCutout);
+      document
+        .getElementById("btnCutoutRandom")
+        .addEventListener("click", () => {
+          resetCutout();
+          for (let i = 0; i < 5; i++) {
+            placeCutout(
+              Math.random() * cutoutCanvas.width,
+              Math.random() * cutoutCanvas.height,
+            );
+          }
+        });
+
+      /* ===============================================================
+   8) TEXTO
+   =============================================================== */
+      const BASE_SENTENCE =
+        "El restaurante es excelente y el servicio fue muy rápido esta noche.";
+      const SYN_MAP = {
+        restaurante: "local",
+        excelente: "magnífico",
+        servicio: "trato",
+        muy: "realmente",
+        rápido: "ágil",
+        esta: "la presente",
+        noche: "velada",
+      };
+      const textAugmented = document.getElementById("textAugmented");
+      const textAugExplain = document.getElementById("textAugExplain");
+
+      function deactivateAllTextBtns() {
+        document
+          .querySelectorAll("#s6 button.toggle")
+          .forEach((b) => b.classList.remove("active"));
+      }
+
+      function markSynonyms() {
+        deactivateAllTextBtns();
+        document.getElementById("btnSynonym").classList.add("active");
+        const words = BASE_SENTENCE.replace(".", "").split(/\s+/);
+        const out = [];
+        let changed = 0;
+        for (const w of words) {
+          const key = w.toLowerCase().replace(/[^a-záéíóúñ]/g, "");
+          if (SYN_MAP[key] && Math.random() < 0.6 && changed < 3) {
+            out.push("<mark>" + SYN_MAP[key] + "</mark>");
+            changed++;
+          } else {
+            out.push(w);
+          }
+        }
+        textAugmented.innerHTML = out.join(" ") + ".";
+        textAugExplain.innerHTML =
+          "<strong>Synonym replacement</strong>: sustituimos algunas palabras por sinónimos. Preserva significado, cambia superficie.";
+      }
+      function markBackTranslate() {
+        deactivateAllTextBtns();
+        document.getElementById("btnBackTranslate").classList.add("active");
+        textAugmented.innerHTML =
+          "<mark>El local</mark> es <mark>magnífico</mark> y el servicio <mark>resultó sumamente</mark> rápido <mark>anoche</mark>.";
+        textAugExplain.innerHTML =
+          "<strong>Back-translation</strong>: es → en → es. Paráfrasis fluida generada por un modelo de traducción.";
+      }
+      function markInsert() {
+        deactivateAllTextBtns();
+        document.getElementById("btnInsert").classList.add("active");
+        textAugmented.innerHTML =
+          "El restaurante es <mark>realmente</mark> excelente y el <mark>agradable</mark> servicio fue muy rápido esta noche.";
+        textAugExplain.innerHTML =
+          "<strong>Random insertion</strong>: inserta palabras neutras o sinónimos de palabras del contexto. Aumenta longitud sin romper sentido.";
+      }
+      function markDelete() {
+        deactivateAllTextBtns();
+        document.getElementById("btnDelete").classList.add("active");
+        const words = BASE_SENTENCE.replace(".", "").split(/\s+/);
+        const out = words.map((w) =>
+          Math.random() < 0.25 &&
+          !["el", "la", "es", "y"].includes(w.toLowerCase())
+            ? '<mark style="background:#ffccd5;text-decoration:line-through;">' +
+              w +
+              "</mark>"
+            : w,
+        );
+        textAugmented.innerHTML = out.join(" ") + ".";
+        textAugExplain.innerHTML =
+          "<strong>Random deletion</strong>: borra palabras con probabilidad p. La frase sigue siendo comprensible si p es bajo.";
+      }
+      function markSwap() {
+        deactivateAllTextBtns();
+        document.getElementById("btnSwap").classList.add("active");
+        const words = BASE_SENTENCE.replace(".", "").split(/\s+/);
+        // swap 2 random content words
+        const idxs = [];
+        for (let i = 0; i < words.length; i++) {
+          if (
+            !["el", "la", "es", "y", "fue", "esta"].includes(
+              words[i].toLowerCase(),
+            )
+          )
+            idxs.push(i);
+        }
+        if (idxs.length >= 2) {
+          const i = idxs[Math.floor(Math.random() * idxs.length)];
+          let j;
+          do {
+            j = idxs[Math.floor(Math.random() * idxs.length)];
+          } while (j === i);
+          const tmp = words[i];
+          words[i] = "<mark>" + words[j] + "</mark>";
+          words[j] = "<mark>" + tmp + "</mark>";
+        }
+        textAugmented.innerHTML = words.join(" ") + ".";
+        textAugExplain.innerHTML =
+          "<strong>Random swap</strong>: intercambia posiciones de dos palabras. Afecta poco a modelos bag-of-words, más a modelos secuenciales.";
+      }
+      document
+        .getElementById("btnSynonym")
+        .addEventListener("click", markSynonyms);
+      document
+        .getElementById("btnBackTranslate")
+        .addEventListener("click", markBackTranslate);
+      document
+        .getElementById("btnInsert")
+        .addEventListener("click", markInsert);
+      document
+        .getElementById("btnDelete")
+        .addEventListener("click", markDelete);
+      document.getElementById("btnSwap").addEventListener("click", markSwap);
+
+      /* ===============================================================
+   9) SMOTE scatter
+   =============================================================== */
+      const smoteCanvas = document.getElementById("smoteCanvas");
+      const ctxSm = smoteCanvas.getContext("2d");
+      let majorityPoints = [],
+        minorityPoints = [],
+        syntheticPoints = [];
+
+      function generateSmoteBase() {
+        majorityPoints = [];
+        minorityPoints = [];
+        syntheticPoints = [];
+        const w = smoteCanvas.width,
+          h = smoteCanvas.height;
+        // majority: big cluster
+        for (let i = 0; i < 150; i++) {
+          majorityPoints.push({
+            x: w * 0.55 + gauss() * 90,
+            y: h * 0.55 + gauss() * 55,
+          });
+        }
+        // minority: small, partly overlapping
+        for (let i = 0; i < 18; i++) {
+          minorityPoints.push({
+            x: w * 0.35 + gauss() * 55,
+            y: h * 0.35 + gauss() * 40,
+          });
+        }
+      }
+      function gauss() {
+        const u = Math.random(),
+          v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      }
+      function computeSmote(k, nSynth) {
+        syntheticPoints = [];
+        if (nSynth === 0) return;
+        for (let s = 0; s < nSynth; s++) {
+          const i = Math.floor(Math.random() * minorityPoints.length);
+          const xi = minorityPoints[i];
+          // k-NN por distancia euclídea
+          const dist = minorityPoints
+            .map((p, idx) => ({
+              idx,
+              d: Math.hypot(p.x - xi.x, p.y - xi.y),
+            }))
+            .filter((o) => o.idx !== i)
+            .sort((a, b) => a.d - b.d);
+          const kNN = dist.slice(0, k);
+          const neighbor = kNN[Math.floor(Math.random() * kNN.length)];
+          const xj = minorityPoints[neighbor.idx];
+          const a = Math.random();
+          syntheticPoints.push({
+            x: xi.x + a * (xj.x - xi.x),
+            y: xi.y + a * (xj.y - xi.y),
+            parentA: xi,
+            parentB: xj,
+          });
+        }
+      }
+      function drawSmote() {
+        const w = smoteCanvas.width,
+          h = smoteCanvas.height;
+        ctxSm.fillStyle = "#fafaf5";
+        ctxSm.fillRect(0, 0, w, h);
+        // grid
+        ctxSm.strokeStyle = "#eee6d9";
+        ctxSm.lineWidth = 1;
+        for (let gx = 0; gx <= w; gx += 40) {
+          ctxSm.beginPath();
+          ctxSm.moveTo(gx, 0);
+          ctxSm.lineTo(gx, h);
+          ctxSm.stroke();
+        }
+        for (let gy = 0; gy <= h; gy += 40) {
+          ctxSm.beginPath();
+          ctxSm.moveTo(0, gy);
+          ctxSm.lineTo(w, gy);
+          ctxSm.stroke();
+        }
+        // majority
+        ctxSm.fillStyle = "#2196F3";
+        for (const p of majorityPoints) {
+          ctxSm.beginPath();
+          ctxSm.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+          ctxSm.fill();
+        }
+        // connectors to synthetic
+        ctxSm.strokeStyle = "rgba(255,140,0,0.35)";
+        ctxSm.lineWidth = 1;
+        for (const s of syntheticPoints) {
+          ctxSm.beginPath();
+          ctxSm.moveTo(s.parentA.x, s.parentA.y);
+          ctxSm.lineTo(s.parentB.x, s.parentB.y);
+          ctxSm.stroke();
+        }
+        // minority
+        ctxSm.fillStyle = "#FF6600";
+        for (const p of minorityPoints) {
+          ctxSm.beginPath();
+          ctxSm.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctxSm.fill();
+        }
+        // synthetic
+        ctxSm.strokeStyle = "#FF8C00";
+        ctxSm.lineWidth = 2;
+        for (const s of syntheticPoints) {
+          ctxSm.beginPath();
+          ctxSm.moveTo(s.x - 5, s.y - 5);
+          ctxSm.lineTo(s.x + 5, s.y + 5);
+          ctxSm.moveTo(s.x + 5, s.y - 5);
+          ctxSm.lineTo(s.x - 5, s.y + 5);
+          ctxSm.stroke();
+        }
+        // caption
+        ctxSm.fillStyle = "#7a3500";
+        ctxSm.font = "bold 12px Arial";
+        ctxSm.fillText(
+          `mayoritaria: ${majorityPoints.length} · minoritaria: ${minorityPoints.length} · sintéticas: ${syntheticPoints.length}`,
+          14,
+          22,
+        );
+      }
+      function updateSmote() {
+        const k = +document.getElementById("sliderK").value;
+        const n = +document.getElementById("sliderSmoteN").value;
+        document.getElementById("valK").textContent = k;
+        document.getElementById("valSmoteN").textContent = n;
+        computeSmote(k, n);
+        drawSmote();
+      }
+      document.getElementById("sliderK").addEventListener("input", updateSmote);
+      document
+        .getElementById("sliderSmoteN")
+        .addEventListener("input", updateSmote);
+      document.getElementById("btnSmoteReset").addEventListener("click", () => {
+        generateSmoteBase();
+        updateSmote();
+      });
+
+      /* ===============================================================
+   10) TABS DE CÓDIGO
+   =============================================================== */
+      document.querySelectorAll(".code-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".code-tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          document
+            .querySelectorAll('[id^="code-"]')
+            .forEach((b) => b.classList.add("hidden"));
+          document
+            .getElementById("code-" + tab.dataset.tab)
+            .classList.remove("hidden");
+        });
+      });
+
+      /* ===============================================================
+   11) QUIZ
+   =============================================================== */
+      const QUIZ = [
+        {
+          q: "¿Cuál de las siguientes transformaciones NO es apropiada para un dataset de dígitos manuscritos (MNIST)?",
+          opts: [
+            "Rotación de ±10°",
+            "Volteo horizontal",
+            "Añadir ruido gaussiano",
+            "Pequeños desplazamientos X/Y",
+          ],
+          answer: 1,
+          expl: "Un '6' volteado horizontalmente se convierte en algo parecido a un '6' espejado, y verticalmente se vuelve un '9'. El volteo cambia la etiqueta → no válido para dígitos.",
+        },
+        {
+          q: "¿En qué conjunto(s) se aplica data augmentation durante un entrenamiento estándar?",
+          opts: [
+            "Solo en training",
+            "Solo en validation",
+            "En training y validation",
+            "En training, validation y test",
+          ],
+          answer: 0,
+          expl: "Augmentation solo se aplica al training set. Validation y test deben reflejar la distribución real de los datos que verá el modelo en producción.",
+        },
+        {
+          q: "Mixup combina dos imágenes x_a y x_b con peso λ. ¿Qué label recibe la imagen resultante?",
+          opts: [
+            "La label de la imagen con mayor peso (argmax)",
+            "Siempre la label de x_a",
+            "Una combinación lineal: λ·y_a + (1-λ)·y_b",
+            "Una label nueva 'mixed' añadida al dataset",
+          ],
+          answer: 2,
+          expl: "La genialidad de Mixup es que las etiquetas también se interpolan linealmente. Si λ=0.7, la red aprende a predecir 70% clase A + 30% clase B.",
+        },
+        {
+          q: "SMOTE genera muestras sintéticas...",
+          opts: [
+            "Aleatorias en todo el espacio de features",
+            "Duplicando exactamente las muestras de la clase minoritaria",
+            "Interpolando entre una muestra minoritaria y uno de sus k vecinos minoritarios",
+            "Usando una GAN entrenada sobre el dataset",
+          ],
+          answer: 2,
+          expl: "SMOTE toma un punto de la minoritaria, un vecino cercano también minoritario, y genera un punto intermedio con una interpolación lineal aleatoria.",
+        },
+        {
+          q: "¿Cuál es la MAYOR ventaja de Albumentations sobre torchvision.transforms?",
+          opts: [
+            "Tiene más documentación",
+            "Viene preinstalada con PyTorch",
+            "Es significativamente más rápida (implementación en C++)",
+            "Soporta modelos de texto",
+          ],
+          answer: 2,
+          expl: "Albumentations es hasta 3× más rápida que torchvision porque usa implementaciones optimizadas en C++ (OpenCV). Para training a gran escala, ese factor importa mucho.",
+        },
+        {
+          q: "Entrenas un detector de caras para una app de selfies. ¿Qué augmentation es menos adecuada?",
+          opts: [
+            "Color jitter moderado",
+            "Zoom y crop aleatorio",
+            "Flip horizontal",
+            "Rotación de ±180° (cara boca abajo)",
+          ],
+          answer: 3,
+          expl: "Una app de selfies casi nunca verá caras boca abajo. Augmentar con rotaciones extremas añade variabilidad irrelevante y dificulta el aprendizaje sin aportar robustez útil en producción.",
+        },
+      ];
+
+      function buildQuiz() {
+        const container = document.getElementById("quizContainer");
+        container.innerHTML = "";
+        QUIZ.forEach((q, qi) => {
+          const card = document.createElement("div");
+          card.className = "quiz-question";
+          card.dataset.idx = qi;
+          card.innerHTML = `
+      <div class="quiz-q"><span class="q-num">Q${qi + 1}</span>${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o, oi) => `<button class="quiz-option" data-q="${qi}" data-o="${oi}">${String.fromCharCode(65 + oi)}) ${o}</button>`).join("")}
+      </div>
+      <div class="quiz-feedback"></div>
+    `;
+          container.appendChild(card);
+        });
+        document.querySelectorAll(".quiz-option").forEach((btn) => {
+          btn.addEventListener("click", onQuizAnswer);
+        });
+        document.getElementById("scoreBox").innerHTML = "";
+      }
+
+      let quizAnswered = new Set();
+      let quizCorrect = 0;
+
+      function onQuizAnswer(e) {
+        const qi = +e.target.dataset.q;
+        const oi = +e.target.dataset.o;
+        if (quizAnswered.has(qi)) return;
+        quizAnswered.add(qi);
+        const q = QUIZ[qi];
+        const card = e.target.closest(".quiz-question");
+        const isCorrect = oi === q.answer;
+        if (isCorrect) quizCorrect++;
+        // mark
+        card.querySelectorAll(".quiz-option").forEach((btn, i) => {
+          btn.disabled = true;
+          if (i === q.answer) btn.classList.add("reveal-correct");
+          if (i === oi) {
+            btn.classList.remove("reveal-correct");
+            btn.classList.add(
+              isCorrect ? "selected-correct" : "selected-wrong",
+            );
+          }
+        });
+        const fb = card.querySelector(".quiz-feedback");
+        fb.classList.add("show", isCorrect ? "good" : "bad");
+        fb.innerHTML =
+          (isCorrect
+            ? "✓ ¡Correcto! "
+            : "✗ Respuesta correcta: " +
+              String.fromCharCode(65 + q.answer) +
+              ". ") + q.expl;
+        card.classList.add(isCorrect ? "correct" : "incorrect");
+
+        if (quizAnswered.size === QUIZ.length) {
+          showScore();
+        }
+      }
+
+      function showScore() {
+        const pct = Math.round((100 * quizCorrect) / QUIZ.length);
+        let msg;
+        if (pct >= 90)
+          msg =
+            "🏆 Dominas el tema. ¡A entrenar redes con augmentation bien puesto!";
+        else if (pct >= 70)
+          msg = "👍 Muy bien. Repasa las que fallaste y listo.";
+        else if (pct >= 50)
+          msg = "📚 Vas por buen camino. Vuelve a las secciones relevantes.";
+        else msg = "🧠 Relee el material con calma — luego vuelve al quiz.";
+        document.getElementById("scoreBox").innerHTML = `
+    <div class="score-box">
+      <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:0.9;">Tu resultado</div>
+      <span class="score-big">${quizCorrect} / ${QUIZ.length}</span>
+      <div style="font-size:22px; font-weight:700;">${pct}%</div>
+      <div style="margin-top:6px;">${msg}</div>
+    </div>
+  `;
+      }
+
+      document.getElementById("btnResetQuiz").addEventListener("click", () => {
+        quizAnswered = new Set();
+        quizCorrect = 0;
+        buildQuiz();
+      });
+
+      /* ===============================================================
+   INIT
+   =============================================================== */
+      function init() {
+        drawOriginal();
+        applyAugmentation();
+        bindSliders();
+        buildGallery();
+        buildChart("off", true);
+        updateMixup();
+        generateCutmix();
+        resetCutout();
+        generateSmoteBase();
+        updateSmote();
+        buildQuiz();
+      }
+      init();
+    </script>
+  </body>
+</html>

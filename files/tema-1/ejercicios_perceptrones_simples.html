@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejercicios: Perceptrones Simples — Aprendizaje Profundo</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #1a1a1a;
+      background: #fff8f0;
+      padding: 0;
+    }
+
+    /* ─── Page Layout ───────────────────────────────────────────────────────── */
+    .page-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 36px 60px;
+      background: #ffffff;
+      box-shadow: 0 4px 32px rgba(255,102,0,0.10);
+    }
+
+    /* ─── Header ────────────────────────────────────────────────────────────── */
+    .doc-header {
+      background: linear-gradient(135deg, #FF6600 0%, #FF8C00 60%, #FFA500 100%);
+      color: #fff;
+      border-radius: 10px;
+      padding: 36px 40px 28px;
+      margin-bottom: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+    .doc-header::after {
+      content: '';
+      position: absolute;
+      bottom: -50px; left: -20px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .institution {
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.88;
+      margin-bottom: 10px;
+    }
+    .doc-title {
+      font-size: 32px;
+      font-weight: 700;
+      font-family: 'Arial', sans-serif;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+    .doc-subtitle {
+      font-size: 16px;
+      font-style: italic;
+      opacity: 0.92;
+      margin-bottom: 18px;
+    }
+    .doc-meta {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .meta-chip {
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Intro box ─────────────────────────────────────────────────────────── */
+    .intro-box {
+      background: #FFF3E0;
+      border-left: 5px solid #FF8C00;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin-bottom: 36px;
+      font-size: 14px;
+      color: #5a3000;
+    }
+    .intro-box strong { color: #FF6600; }
+
+    /* ─── Exercise Cards ─────────────────────────────────────────────────────── */
+    .exercise {
+      border: 2px solid #FFB347;
+      border-radius: 10px;
+      margin-bottom: 38px;
+      overflow: hidden;
+      page-break-inside: avoid;
+    }
+
+    .exercise-header {
+      background: linear-gradient(90deg, #FF6600, #FF8C00);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .exercise-number {
+      background: rgba(255,255,255,0.25);
+      border: 2px solid rgba(255,255,255,0.55);
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 20px;
+      padding: 3px 13px;
+      white-space: nowrap;
+    }
+    .exercise-title {
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .exercise-body {
+      padding: 24px 26px;
+      background: #fff;
+    }
+
+    /* ─── Sub-sections inside exercise ──────────────────────────────────────── */
+    .section-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #FF6600;
+      margin-top: 20px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #FFD599;
+      padding-bottom: 3px;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    p { margin-bottom: 10px; }
+    ul, ol { margin-left: 22px; margin-bottom: 10px; }
+    li { margin-bottom: 4px; }
+
+    /* ─── Math / Formula ────────────────────────────────────────────────────── */
+    .formula-block {
+      background: #FFF8EE;
+      border: 1.5px solid #FFB347;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin: 14px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #7a3500;
+      text-align: center;
+      line-height: 2;
+    }
+    .formula-block .formula-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FF8C00;
+      display: block;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+    .math {
+      font-family: 'Courier New', monospace;
+      background: #FFF3E0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: #b54000;
+      font-size: 13.5px;
+    }
+
+    /* ─── Tables ────────────────────────────────────────────────────────────── */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+    thead tr {
+      background: linear-gradient(90deg, #FF6600, #FF8C00);
+      color: #fff;
+    }
+    thead th {
+      padding: 9px 14px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-align: center;
+    }
+    tbody tr:nth-child(odd)  { background: #FFF8F0; }
+    tbody tr:nth-child(even) { background: #ffffff; }
+    tbody tr:hover           { background: #FFEDD5; }
+    tbody td {
+      padding: 8px 14px;
+      text-align: center;
+      border-bottom: 1px solid #FFE0B2;
+      font-family: 'Courier New', monospace;
+    }
+    tbody td.label-cell {
+      font-family: 'Arial', sans-serif;
+      font-weight: 600;
+      color: #7a3500;
+      text-align: left;
+    }
+
+    /* ─── Hint Box ──────────────────────────────────────────────────────────── */
+    .hint-box {
+      background: #FFF9F0;
+      border: 1.5px dashed #FFA500;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: #5a3000;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .hint-icon {
+      font-size: 18px;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
+    /* ─── Answer / Work Area ────────────────────────────────────────────────── */
+    .work-area {
+      border: 1.5px solid #FFB347;
+      border-radius: 6px;
+      background: #fffdf9;
+      padding: 12px 16px;
+      margin-top: 12px;
+      min-height: 80px;
+      color: #aaa;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    /* ─── Code Block ────────────────────────────────────────────────────────── */
+    .code-block {
+      background: #1e1e1e;
+      color: #f8f8f2;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 14px 0;
+      overflow-x: auto;
+      border-left: 4px solid #FF6600;
+    }
+    .code-block .kw  { color: #FF8C00; font-weight: bold; }  /* keywords */
+    .code-block .fn  { color: #FFD580; }                      /* functions */
+    .code-block .cm  { color: #75715e; font-style: italic; } /* comments */
+    .code-block .st  { color: #a6e22e; }                      /* strings */
+    .code-block .nb  { color: #ae81ff; }                      /* numbers */
+
+    /* ─── Geometric / Diagram Placeholder ───────────────────────────────────── */
+    .diagram-area {
+      border: 2px dashed #FFB347;
+      border-radius: 8px;
+      background: #FFF9F0;
+      padding: 20px;
+      margin: 14px 0;
+      text-align: center;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .diagram-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #FFA500;
+    }
+
+    /* ─── SVG perceptron diagram ─────────────────────────────────────────────── */
+    .svg-container {
+      display: flex;
+      justify-content: center;
+      margin: 14px 0;
+    }
+
+    /* ─── Callout / Note ────────────────────────────────────────────────────── */
+    .note-box {
+      background: #fff8e1;
+      border-left: 4px solid #FFA500;
+      border-radius: 0 6px 6px 0;
+      padding: 10px 16px;
+      margin: 12px 0;
+      font-size: 13.5px;
+      color: #5a3a00;
+    }
+    .note-box strong { color: #FF6600; }
+
+    /* ─── Highlight span ────────────────────────────────────────────────────── */
+    .hl { background: #FFE0B2; color: #a33000; border-radius: 3px; padding: 0 4px; font-weight: 700; }
+
+    /* ─── Separator ─────────────────────────────────────────────────────────── */
+    .section-sep {
+      height: 3px;
+      background: linear-gradient(90deg, #FF6600, #FFD599, transparent);
+      border: none;
+      border-radius: 2px;
+      margin: 14px 0;
+    }
+
+    /* ─── Tag / Badge ───────────────────────────────────────────────────────── */
+    .tag {
+      display: inline-block;
+      background: #FF6600;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 12px;
+      padding: 2px 10px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .tag.teal   { background: #e65c00; }
+    .tag.purple { background: #cc5500; }
+
+    /* ─── Footer ────────────────────────────────────────────────────────────── */
+    .doc-footer {
+      margin-top: 44px;
+      border-top: 2px solid #FFB347;
+      padding-top: 16px;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      font-size: 11.5px;
+      color: #b36200;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Print ─────────────────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; }
+      .page-wrapper { box-shadow: none; padding: 20px; }
+      .exercise { page-break-inside: avoid; }
+    }
+
+    /* ─── Step-by-step table ─────────────────────────────────────────────────── */
+    .step-table td { font-size: 12.5px; }
+    .step-table .updated { color: #FF6600; font-weight: 700; }
+
+    /* ─── Grid for XOR ──────────────────────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+      margin: 14px 0;
+    }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* inline math fraction helper */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.1;
+    }
+    .frac span:first-child { border-bottom: 1px solid #b54000; padding: 0 4px; }
+    .frac span:last-child  { padding: 0 4px; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  HEADER                                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <header class="doc-header">
+    <div class="institution">CUNEF Universidad &mdash; Grado en Ciencia de Datos e Inteligencia Artificial</div>
+    <div class="doc-title">Ejercicios: Perceptrones Simples</div>
+    <div class="doc-subtitle">Asignatura: Aprendizaje Profundo &mdash; Bloque I: Fundamentos de Redes Neuronales</div>
+    <div class="doc-meta">
+      <span class="meta-chip">8 Ejercicios</span>
+      <span class="meta-chip">Nivel: Introductorio–Intermedio</span>
+      <span class="meta-chip">Curso 2025–2026</span>
+      <span class="meta-chip">Tipo: Teórico-Práctico</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  INTRO                                                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="intro-box">
+    <strong>Instrucciones generales:</strong> Los siguientes ejercicios cubren los conceptos fundamentales del
+    <strong>perceptrón simple</strong>, modelo base de las redes neuronales artificiales propuesto por Frank
+    Rosenblatt en 1958. Se trabajan tanto aspectos teóricos (convergencia, limitaciones geométricas) como
+    prácticos (cálculo de salidas, actualización de pesos, implementación). Se recomienda resolverlos en
+    orden progresivo. Duración orientativa: <strong>2&ndash;3 horas</strong>.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 1                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 1</span>
+      <span class="exercise-title">Cálculo de la salida de un perceptrón simple</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Dado el siguiente perceptrón simple con <strong>tres entradas</strong>, calcula la salida de la red
+        para cada uno de los tres vectores de entrada indicados en la tabla. Utiliza la
+        <span class="hl">función de activación escalón unitario (step function)</span> con umbral &theta; = 0.
+      </p>
+
+      <!-- SVG Perceptron diagram -->
+      <div class="svg-container">
+        <svg width="440" height="200" viewBox="0 0 440 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Input nodes -->
+          <circle cx="70" cy="50"  r="22" fill="#FFF3E0" stroke="#FF6600" stroke-width="2"/>
+          <text x="70" y="55" text-anchor="middle" font-size="13" font-family="Courier New" fill="#7a3500">x&#8321;</text>
+
+          <circle cx="70" cy="100" r="22" fill="#FFF3E0" stroke="#FF6600" stroke-width="2"/>
+          <text x="70" y="105" text-anchor="middle" font-size="13" font-family="Courier New" fill="#7a3500">x&#8322;</text>
+
+          <circle cx="70" cy="150" r="22" fill="#FFF3E0" stroke="#FF6600" stroke-width="2"/>
+          <text x="70" y="155" text-anchor="middle" font-size="13" font-family="Courier New" fill="#7a3500">x&#8323;</text>
+
+          <!-- Bias node -->
+          <circle cx="70" cy="190" r="18" fill="#FFE0B2" stroke="#FF8C00" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="70" y="195" text-anchor="middle" font-size="12" font-family="Courier New" fill="#b54000">b</text>
+
+          <!-- Weights on connections -->
+          <line x1="92" y1="55"  x2="270" y2="93"  stroke="#FFB347" stroke-width="2"/>
+          <line x1="92" y1="100" x2="270" y2="98"  stroke="#FFB347" stroke-width="2"/>
+          <line x1="92" y1="145" x2="270" y2="103" stroke="#FFB347" stroke-width="2"/>
+          <line x1="88" y1="185" x2="270" y2="108" stroke="#FF8C00" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+          <!-- Weight labels -->
+          <text x="168" y="68"  text-anchor="middle" font-size="12" font-family="Courier New" fill="#FF6600">w&#8321;=0.5</text>
+          <text x="168" y="96"  text-anchor="middle" font-size="12" font-family="Courier New" fill="#FF6600">w&#8322;=-1</text>
+          <text x="168" y="130" text-anchor="middle" font-size="12" font-family="Courier New" fill="#FF6600">w&#8323;=2</text>
+          <text x="168" y="160" text-anchor="middle" font-size="11" font-family="Courier New" fill="#FF8C00">b=-0.5</text>
+
+          <!-- Summation node -->
+          <circle cx="300" cy="100" r="28" fill="#FF8C00" stroke="#FF6600" stroke-width="2.5"/>
+          <text x="300" y="95"  text-anchor="middle" font-size="18" fill="#fff">&Sigma;</text>
+          <text x="300" y="113" text-anchor="middle" font-size="10" font-family="Arial" fill="#ffe0b2">net</text>
+
+          <!-- Activation node -->
+          <rect x="360" y="78" width="52" height="44" rx="8" fill="#FF6600" stroke="#FF8C00" stroke-width="2"/>
+          <text x="386" y="96"  text-anchor="middle" font-size="10" font-family="Arial" fill="#fff" font-weight="bold">&#966;(z)</text>
+          <text x="386" y="112" text-anchor="middle" font-size="9"  font-family="Arial" fill="#ffe0b2">step</text>
+
+          <!-- Connections between nodes -->
+          <line x1="328" y1="100" x2="360" y2="100" stroke="#FF6600" stroke-width="2.5"/>
+          <text x="344" y="94" text-anchor="middle" font-size="11" font-family="Courier New" fill="#7a3500">z</text>
+
+          <!-- Output -->
+          <line x1="412" y1="100" x2="438" y2="100" stroke="#FF6600" stroke-width="2.5"/>
+          <polygon points="433,95 443,100 433,105" fill="#FF6600"/>
+          <text x="440" y="90" text-anchor="middle" font-size="12" font-family="Courier New" fill="#7a3500">&#375;</text>
+        </svg>
+      </div>
+
+      <div class="formula-block">
+        <span class="formula-label">Modelo del Perceptrón</span>
+        z = w&#8321;·x&#8321; + w&#8322;·x&#8322; + w&#8323;·x&#8323; + b &nbsp;&nbsp;&nbsp;
+        &#375; = &#966;(z) = step(z) =
+        <span style="display:inline-flex; align-items:center; gap:4px;">
+          &#123; 1 si z &ge; 0 &nbsp;|&nbsp; 0 si z &lt; 0 &#125;
+        </span>
+      </div>
+
+      <div class="section-label">Parámetros</div>
+      <p>Pesos: <span class="math">w&#8321; = 0.5</span>, <span class="math">w&#8322; = &minus;1.0</span>,
+         <span class="math">w&#8323; = 2.0</span> &nbsp;|&nbsp; Sesgo: <span class="math">b = &minus;0.5</span></p>
+
+      <div class="section-label">Vectores de Entrada</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Caso</th>
+            <th>x&#8321;</th>
+            <th>x&#8322;</th>
+            <th>x&#8323;</th>
+            <th>z = &Sigma;w&#x1D62;x&#x1D62; + b</th>
+            <th>&#375; = step(z)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Caso A</td>
+            <td>1</td><td>0</td><td>1</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">Calcular</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Caso B</td>
+            <td>0</td><td>1</td><td>0</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">Calcular</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Caso C</td>
+            <td>1</td><td>2</td><td>&minus;1</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">Calcular</em></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> Sustituye cada vector directamente en la ecuación
+        <span class="math">z = 0.5·x&#8321; &minus; 1.0·x&#8322; + 2.0·x&#8323; &minus; 0.5</span>
+        y aplica la función escalón. Para el Caso A: <span class="math">z = 0.5·1 + (&minus;1)·0 + 2·1 &minus; 0.5 = ?</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 2                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 2</span>
+      <span class="exercise-title">Frontera de decisión: Puerta lógica AND</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Un perceptrón simple puede implementar la puerta lógica <strong>AND</strong> de dos entradas
+        binarias (x&#8321;, x&#8322; &isin; {0, 1}). Dado el perceptrón con pesos
+        <span class="math">w&#8321; = 1</span>, <span class="math">w&#8322; = 1</span> y
+        <span class="math">b = &minus;1.5</span>:
+      </p>
+      <ol>
+        <li>Completa la tabla de verdad y verifica que el perceptrón implementa AND correctamente.</li>
+        <li>Determina la ecuación de la <span class="hl">frontera de decisión</span> (línea recta en el plano x&#8321;-x&#8322;).</li>
+        <li>Describe geométricamente cómo separa esta línea los puntos de las clases 0 y 1.</li>
+      </ol>
+
+      <hr class="section-sep">
+
+      <div class="two-col">
+        <div>
+          <div class="section-label">Tabla de verdad — AND</div>
+          <table>
+            <thead>
+              <tr><th>x&#8321;</th><th>x&#8322;</th><th>AND real</th><th>z = x&#8321;+x&#8322;&minus;1.5</th><th>&#375;</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td><em style="color:#aaa">?</em></td><td><em style="color:#aaa">?</em></td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td><em style="color:#aaa">?</em></td><td><em style="color:#aaa">?</em></td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td><em style="color:#aaa">?</em></td><td><em style="color:#aaa">?</em></td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td><em style="color:#aaa">?</em></td><td><em style="color:#aaa">?</em></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="section-label">Espacio geométrico</div>
+          <div class="diagram-area" style="min-height:155px;">
+            <div class="diagram-label">Representa aquí los 4 puntos</div>
+            <!-- Simple coordinate system guide -->
+            <svg width="200" height="140" viewBox="0 0 200 140">
+              <!-- Axes -->
+              <line x1="30" y1="110" x2="180" y2="110" stroke="#FFB347" stroke-width="1.5"/>
+              <line x1="30" y1="110" x2="30"  y2="20"  stroke="#FFB347" stroke-width="1.5"/>
+              <!-- Arrow heads -->
+              <polygon points="175,106 183,110 175,114" fill="#FFB347"/>
+              <polygon points="26,25 30,17 34,25" fill="#FFB347"/>
+              <!-- Grid dots -->
+              <circle cx="30"  cy="110" r="3" fill="#FFB347"/>
+              <circle cx="100" cy="110" r="3" fill="#FFB347"/>
+              <circle cx="30"  cy="50"  r="3" fill="#FFB347"/>
+              <circle cx="100" cy="50"  r="3" fill="#FFB347"/>
+              <!-- Axis labels -->
+              <text x="185" y="114" font-size="11" fill="#FF6600" font-family="Courier New">x&#8321;</text>
+              <text x="22"  y="15"  font-size="11" fill="#FF6600" font-family="Courier New">x&#8322;</text>
+              <text x="20"  y="114" font-size="9"  fill="#7a3500" font-family="Courier New">0</text>
+              <text x="97"  y="124" font-size="9"  fill="#7a3500" font-family="Courier New">1</text>
+              <text x="15"  y="54"  font-size="9"  fill="#7a3500" font-family="Courier New">1</text>
+              <!-- Decision boundary line -->
+              <line x1="30" y1="50" x2="160" y2="130" stroke="#FF6600" stroke-width="2" stroke-dasharray="6,3"/>
+              <text x="90" y="40" font-size="9" fill="#FF6600" font-family="Arial" font-style="italic">x&#8321;+x&#8322;=1.5</text>
+              <!-- Points: (0,0)=clase 0, (0,1)=clase 0, (1,0)=clase 0, (1,1)=clase 1 -->
+              <circle cx="30"  cy="110" r="7" fill="none" stroke="#888" stroke-width="2"/>
+              <circle cx="30"  cy="50"  r="7" fill="none" stroke="#888" stroke-width="2"/>
+              <circle cx="100" cy="110" r="7" fill="none" stroke="#888" stroke-width="2"/>
+              <circle cx="100" cy="50"  r="9" fill="#FF6600" stroke="#b54000" stroke-width="2"/>
+              <text x="108" y="45" font-size="9" fill="#FF6600" font-family="Arial">(1,1)</text>
+            </svg>
+            <div style="font-size:12px; color:#7a3500; font-family:Arial;">
+              Clase 0 (&#9675;) &nbsp;|&nbsp; Clase 1 (&#9679; naranja) &nbsp;|&nbsp; Frontera (- - -)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Derivación de la Frontera de Decisión</div>
+      <p>La frontera se produce cuando <span class="math">z = 0</span>, es decir:</p>
+      <div class="formula-block">
+        w&#8321;·x&#8321; + w&#8322;·x&#8322; + b = 0
+        &nbsp;&nbsp;&rArr;&nbsp;&nbsp;
+        x&#8321; + x&#8322; &minus; 1.5 = 0
+        &nbsp;&nbsp;&rArr;&nbsp;&nbsp;
+        x&#8322; = &minus;x&#8321; + 1.5
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> La frontera de decisión es una <em>línea recta</em> con pendiente &minus;1 e intercepto 1.5 en el eje x&#8322;.
+        Todos los puntos con <span class="math">z &ge; 0</span> se clasifican como clase 1.
+        Verifica que solo el punto (1,1) cae en la región z &ge; 0.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 3                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 3</span>
+      <span class="exercise-title">Limitación del perceptrón: el problema XOR</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Uno de los resultados más importantes en la historia de la inteligencia artificial es que un
+        <span class="hl">perceptrón simple NO puede resolver el problema XOR</span>. Demuestra esta
+        afirmación mediante dos vías complementarias:
+      </p>
+      <ol>
+        <li><strong>Argumento algebraico:</strong> Muestra que no existe ningún conjunto de pesos (w&#8321;, w&#8322;, b) que clasifique correctamente todos los puntos de la tabla XOR.</li>
+        <li><strong>Argumento geométrico:</strong> Explica por qué el problema XOR no es linealmente separable.</li>
+      </ol>
+
+      <hr class="section-sep">
+
+      <div class="two-col">
+        <div>
+          <div class="section-label">Tabla XOR</div>
+          <table>
+            <thead>
+              <tr><th>x&#8321;</th><th>x&#8322;</th><th>XOR</th><th>Clase</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td style="color:#888;">Negativa</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td style="color:#FF6600; font-weight:700;">Positiva</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td style="color:#FF6600; font-weight:700;">Positiva</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td style="color:#888;">Negativa</td></tr>
+            </tbody>
+          </table>
+
+          <div class="note-box">
+            <strong>Observación clave:</strong> Los puntos de clase 1 son (0,1) y (1,0); los de clase 0 son (0,0) y (1,1). Forman un patrón en diagonal opuesta.
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Plano geométrico XOR</div>
+          <div class="diagram-area" style="min-height:175px;">
+            <svg width="200" height="160" viewBox="0 0 200 160">
+              <!-- Axes -->
+              <line x1="30" y1="130" x2="185" y2="130" stroke="#FFB347" stroke-width="1.5"/>
+              <line x1="30" y1="130" x2="30"  y2="15"  stroke="#FFB347" stroke-width="1.5"/>
+              <polygon points="180,126 188,130 180,134" fill="#FFB347"/>
+              <polygon points="26,20 30,12 34,20" fill="#FFB347"/>
+              <text x="190" y="134" font-size="10" fill="#FF6600" font-family="Courier New">x&#8321;</text>
+              <text x="22"  y="12"  font-size="10" fill="#FF6600" font-family="Courier New">x&#8322;</text>
+              <!-- Class 0 points: (0,0) and (1,1) -->
+              <circle cx="30"  cy="130" r="9" fill="none" stroke="#888" stroke-width="2.5"/>
+              <circle cx="130" cy="50"  r="9" fill="none" stroke="#888" stroke-width="2.5"/>
+              <!-- Class 1 points: (0,1) and (1,0) -->
+              <circle cx="30"  cy="50"  r="9" fill="#FF6600" stroke="#b54000" stroke-width="2"/>
+              <circle cx="130" cy="130" r="9" fill="#FF6600" stroke="#b54000" stroke-width="2"/>
+              <!-- Labels -->
+              <text x="14"  y="148" font-size="9" fill="#555" font-family="Arial">(0,0)</text>
+              <text x="114" y="148" font-size="9" fill="#FF6600" font-family="Arial">(1,0)</text>
+              <text x="14"  y="43"  font-size="9" fill="#FF6600" font-family="Arial">(0,1)</text>
+              <text x="114" y="43"  font-size="9" fill="#555" font-family="Arial">(1,1)</text>
+              <!-- Impossible separating line hint -->
+              <text x="60" y="95" font-size="9" fill="#cc4400" font-family="Arial" font-style="italic">&#10005; No existe</text>
+              <text x="55" y="107" font-size="9" fill="#cc4400" font-family="Arial" font-style="italic">línea separadora</text>
+            </svg>
+            <div style="font-size:11px; color:#7a3500; font-family:Arial; margin-top:4px;">
+              Clase 0 (&#9675;) = {(0,0),(1,1)} &nbsp;&nbsp; Clase 1 (&#9679;) = {(0,1),(1,0)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Argumento Algebraico (Guía)</div>
+      <p>Para que el perceptrón clasifique correctamente, deben cumplirse simultáneamente las cuatro condiciones:</p>
+      <div class="formula-block">
+        (1) b &ge; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [XOR(0,0)=0 &rArr; z&lt;0]<br>
+        (2) w&#8322; + b &ge; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [XOR(0,1)=1 &rArr; z&ge;0]<br>
+        (3) w&#8321; + b &ge; 0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [XOR(1,0)=1 &rArr; z&ge;0]<br>
+        (4) w&#8321; + w&#8322; + b &lt; 0 &nbsp;&nbsp; [XOR(1,1)=0 &rArr; z&lt;0]
+      </div>
+      <p>Sumando (2) y (3): <span class="math">w&#8321; + w&#8322; + 2b &ge; 0</span>. De (1): <span class="math">b &ge; 0</span>, luego <span class="math">w&#8321; + w&#8322; + b &ge; 0</span>. Esto <strong>contradice</strong> (4). Por tanto, no existe solución. &#9632;</p>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Conclusión:</strong> El XOR no es <em>linealmente separable</em>: los dos grupos de puntos no pueden separarse con una única recta en el plano. Se necesita al menos una capa oculta (red MLP). Minsky y Papert demostraron esto en 1969 en su libro <em>Perceptrons</em>.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 4                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 4</span>
+      <span class="exercise-title">Clasificación de puntos 2D: encontrar pesos y sesgo</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Dado el siguiente conjunto de puntos en el plano, encuentra (razonadamente) unos valores de
+        <span class="math">w&#8321;</span>, <span class="math">w&#8322;</span> y <span class="math">b</span> tales que el perceptrón con función escalón los clasifique correctamente.
+        <em>No se pide el único conjunto de pesos posible: justifica la elección.</em>
+      </p>
+
+      <div class="section-label">Dataset</div>
+      <table>
+        <thead>
+          <tr><th>Punto</th><th>x&#8321;</th><th>x&#8322;</th><th>Clase (y)</th><th>Verificar: z = w&#8321;x&#8321; + w&#8322;x&#8322; + b</th><th>step(z) = y?</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="label-cell">P&#8321;</td><td>2</td><td>3</td><td style="color:#FF6600;font-weight:700;">1</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+          <tr><td class="label-cell">P&#8322;</td><td>1</td><td>5</td><td style="color:#FF6600;font-weight:700;">1</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+          <tr><td class="label-cell">P&#8323;</td><td>4</td><td>1</td><td style="color:#FF6600;font-weight:700;">1</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+          <tr><td class="label-cell">P&#8324;</td><td>&minus;1</td><td>&minus;2</td><td style="color:#888;">0</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+          <tr><td class="label-cell">P&#8325;</td><td>&minus;3</td><td>0</td><td style="color:#888;">0</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+          <tr><td class="label-cell">P&#8326;</td><td>0</td><td>&minus;4</td><td style="color:#888;">0</td><td><em style="color:#aaa">con tus pesos</em></td><td><em style="color:#aaa">?</em></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Estrategia de Resolución</div>
+      <ol>
+        <li>Dibuja los puntos en el plano x&#8321;-x&#8322; e identifica visualmente si son linealmente separables.</li>
+        <li>Observa que la clase 1 tiene coordenadas predominantemente positivas y la clase 0 predominantemente negativas.</li>
+        <li>Propón una línea separadora, como por ejemplo <span class="math">x&#8321; + x&#8322; = 1</span>, y extrae los pesos.</li>
+        <li>Verifica cada punto con los pesos elegidos.</li>
+      </ol>
+
+      <div class="formula-block">
+        <span class="formula-label">Propuesta de solución orientativa (completa la verificación)</span>
+        w&#8321; = 1, &nbsp; w&#8322; = 1, &nbsp; b = &minus;1
+        &nbsp;&nbsp;&rArr;&nbsp;&nbsp; z = x&#8321; + x&#8322; &minus; 1
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> Para P&#8321;: <span class="math">z = 2 + 3 &minus; 1 = 4 &gt; 0 &rArr; &#375; = 1 &#10003;</span>. Verifica los demás. ¿Existen otros valores de pesos válidos? En problemas linealmente separables hay infinitas soluciones.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 5                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 5</span>
+      <span class="exercise-title">Algoritmo de aprendizaje del perceptrón: actualización de pesos paso a paso</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Aplica el <span class="hl">algoritmo de aprendizaje del perceptrón</span> durante
+        <strong>una época completa</strong> (los 4 ejemplos de entrenamiento una vez) sobre la puerta
+        lógica OR. Muestra explícitamente cada actualización de pesos e indica cuándo hay error y cuándo no.
+      </p>
+
+      <div class="section-label">Regla de Actualización</div>
+      <div class="formula-block">
+        <span class="formula-label">Perceptron Learning Rule</span>
+        w&#x1D62; &larr; w&#x1D62; + &eta; · (y &minus; &#375;) · x&#x1D62;
+        &nbsp;&nbsp;&nbsp;
+        b &larr; b + &eta; · (y &minus; &#375;)
+        &nbsp;&nbsp;&nbsp;
+        donde &eta; = tasa de aprendizaje
+      </div>
+
+      <div class="section-label">Configuración Inicial</div>
+      <table>
+        <thead><tr><th>Parámetro</th><th>Valor inicial</th></tr></thead>
+        <tbody>
+          <tr><td class="label-cell">w&#8321;</td><td>0</td></tr>
+          <tr><td class="label-cell">w&#8322;</td><td>0</td></tr>
+          <tr><td class="label-cell">b</td><td>0</td></tr>
+          <tr><td class="label-cell">&eta; (tasa de aprendizaje)</td><td>1</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Datos de Entrenamiento (OR)</div>
+      <table>
+        <thead><tr><th>x&#8321;</th><th>x&#8322;</th><th>y (OR)</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>1</td><td>1</td><td>1</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Traza de Ejecución (Época 1)</div>
+      <table class="step-table">
+        <thead>
+          <tr>
+            <th>Paso</th>
+            <th>(x&#8321;,x&#8322;)</th>
+            <th>y</th>
+            <th>z = w&#8321;x&#8321;+w&#8322;x&#8322;+b</th>
+            <th>&#375;</th>
+            <th>Error = y&minus;&#375;</th>
+            <th>w&#8321; nuevo</th>
+            <th>w&#8322; nuevo</th>
+            <th>b nuevo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td><td>(0,0)</td><td>0</td>
+            <td>0·0+0·0+0 = <strong>0</strong></td>
+            <td>1</td>
+            <td class="updated">&minus;1</td>
+            <td class="updated">0+(1)(−1)(0)=0</td>
+            <td class="updated">0+(1)(−1)(0)=0</td>
+            <td class="updated">0+(1)(−1)=−1</td>
+          </tr>
+          <tr>
+            <td>2</td><td>(0,1)</td><td>1</td>
+            <td>0·0+0·1+(−1) = <strong>−1</strong></td>
+            <td>0</td>
+            <td class="updated">+1</td>
+            <td class="updated">0+(1)(1)(0)=0</td>
+            <td class="updated">0+(1)(1)(1)=1</td>
+            <td class="updated">−1+(1)(1)=0</td>
+          </tr>
+          <tr>
+            <td>3</td><td>(1,0)</td><td>1</td>
+            <td><em style="color:#aaa">Calcula con pesos actuales</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+          <tr>
+            <td>4</td><td>(1,1)</td><td>1</td>
+            <td><em style="color:#aaa">Calcula con pesos actuales</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box">
+        <strong>Nota:</strong> La función escalón en el paso 1 devuelve 1 para z=0 (convenio: step(0)=1 en algunos textos)
+        o 0 (si el umbral es estricto). El resultado depende del convenio adoptado; usa
+        <span class="math">step(z) = 1 si z &ge; 0</span> en este ejercicio.
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> Al final de la época 1, continúa entrenando en épocas sucesivas hasta que el error sea cero en todos los ejemplos. El algoritmo garantiza convergencia si los datos son linealmente separables.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 6                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 6</span>
+      <span class="exercise-title">Implementación en Python: perceptrón para la puerta OR</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        Implementa un perceptrón simple en Python capaz de aprender la función lógica <strong>OR</strong>
+        de dos entradas. El código debe incluir:
+      </p>
+      <ol>
+        <li>La clase <code>Perceptron</code> con métodos <code>predict</code> y <code>fit</code>.</li>
+        <li>La función de activación escalón.</li>
+        <li>El bucle de entrenamiento con la regla del perceptrón.</li>
+        <li>Impresión de los pesos finales y verificación sobre todos los ejemplos.</li>
+      </ol>
+
+      <div class="section-label">Código Python</div>
+      <div class="code-block">
+<span class="cm"># ─── Perceptrón Simple — Puerta lógica OR ───────────────────────────────────</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">class</span> <span class="fn">Perceptron</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, tasa_aprendizaje=<span class="nb">1.0</span>, epocas=<span class="nb">10</span>):
+        self.eta   = tasa_aprendizaje   <span class="cm"># η: tasa de aprendizaje</span>
+        self.n_iter = epocas
+        self.pesos  = <span class="kw">None</span>              <span class="cm"># w₁, w₂, ..., wₙ</span>
+        self.sesgo  = <span class="kw">None</span>              <span class="cm"># b</span>
+
+    <span class="kw">def</span> <span class="fn">_escalon</span>(self, z):
+        <span class="st">"""Función de activación escalón unitario."""</span>
+        <span class="kw">return</span> np.where(z >= <span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X):
+        <span class="st">"""Calcula z = X·w + b y aplica la función escalón."""</span>
+        z = np.dot(X, self.pesos) + self.sesgo
+        <span class="kw">return</span> self._escalon(z)
+
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X, y):
+        <span class="st">"""Entrena el perceptrón con la regla de actualización de Rosenblatt."""</span>
+        n_muestras, n_entradas = X.shape
+        self.pesos = np.zeros(n_entradas)   <span class="cm"># Inicializar pesos a 0</span>
+        self.sesgo = <span class="nb">0</span>
+
+        <span class="kw">for</span> epoca <span class="kw">in</span> range(self.n_iter):
+            errores_totales = <span class="nb">0</span>
+            <span class="kw">for</span> xi, yi <span class="kw">in</span> zip(X, y):
+                prediccion = self.predict(xi)
+                error      = yi - prediccion         <span class="cm"># δ = y - ŷ</span>
+                <span class="cm"># Regla de actualización: Δwᵢ = η · δ · xᵢ</span>
+                self.pesos += self.eta * error * xi
+                self.sesgo += self.eta * error
+                errores_totales += <span class="nb">int</span>(error != <span class="nb">0</span>)
+
+            <span class="nb">print</span>(f<span class="st">"Época {epoca+1:2d} | Errores: {errores_totales} | "</span>
+                  f<span class="st">"w={self.pesos} | b={self.sesgo}"</span>)
+            <span class="kw">if</span> errores_totales == <span class="nb">0</span>:
+                <span class="nb">print</span>(<span class="st">"  ✓ Convergencia alcanzada. Entrenamiento finalizado."</span>)
+                <span class="kw">break</span>
+        <span class="kw">return</span> self
+
+
+<span class="cm"># ─── Datos de entrenamiento: OR ─────────────────────────────────────────────</span>
+X_or = np.array([[<span class="nb">0</span>, <span class="nb">0</span>],
+                  [<span class="nb">0</span>, <span class="nb">1</span>],
+                  [<span class="nb">1</span>, <span class="nb">0</span>],
+                  [<span class="nb">1</span>, <span class="nb">1</span>]])
+
+y_or = np.array([<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">1</span>, <span class="nb">1</span>])  <span class="cm"># Etiquetas: puerta OR</span>
+
+<span class="cm"># ─── Entrenamiento ───────────────────────────────────────────────────────────</span>
+perceptron = Perceptron(tasa_aprendizaje=<span class="nb">1.0</span>, epocas=<span class="nb">20</span>)
+perceptron.fit(X_or, y_or)
+
+<span class="cm"># ─── Verificación ────────────────────────────────────────────────────────────</span>
+<span class="nb">print</span>(<span class="st">"\n--- Verificación final ---"</span>)
+<span class="kw">for</span> xi, yi <span class="kw">in</span> zip(X_or, y_or):
+    pred = perceptron.predict(xi)
+    ok   = <span class="st">"OK"</span> <span class="kw">if</span> pred == yi <span class="kw">else</span> <span class="st">"FALLO"</span>
+    <span class="nb">print</span>(f<span class="st">"  OR{tuple(xi)} = {yi} → predicción = {pred}  [{ok}]"</span>)
+      </div>
+
+      <div class="section-label">Preguntas Adicionales</div>
+      <ol>
+        <li>¿Qué cambiarías en el código para implementar la puerta AND? ¿Y la puerta NAND?</li>
+        <li>¿Qué sucede si cambias la inicialización de los pesos a valores aleatorios pequeños?</li>
+        <li>Añade un atributo <code>historial_errores_</code> que guarde el número de errores por época para poder graficar la curva de convergencia.</li>
+      </ol>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> Para AND solo cambia <code>y_or</code> por <code>y_and = [0, 0, 0, 1]</code>.
+        Para NAND usa <code>y_nand = [1, 1, 1, 0]</code>.
+        La estructura del perceptrón y el algoritmo de aprendizaje permanecen idénticos.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 7                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 7</span>
+      <span class="exercise-title">Teorema de convergencia del perceptrón</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        El <span class="hl">Teorema de Convergencia del Perceptrón</span> (Rosenblatt, 1962; Novikoff, 1962)
+        establece condiciones formales bajo las cuales el algoritmo de aprendizaje del perceptrón
+        <strong>garantiza</strong> encontrar una solución en un número finito de pasos.
+        Responde razonadamente a las siguientes preguntas:
+      </p>
+
+      <hr class="section-sep">
+
+      <div class="section-label">Parte A — Enunciado del Teorema</div>
+      <p>
+        Enuncia el teorema de convergencia del perceptrón en tus propias palabras. ¿Qué condición
+        debe satisfacer el conjunto de datos para que el teorema sea aplicable?
+      </p>
+
+      <div class="formula-block">
+        <span class="formula-label">Hipótesis del Teorema (Novikoff, 1962)</span>
+        Sea D = {(x&#x1D62;, y&#x1D62;)} un conjunto de entrenamiento linealmente separable.<br>
+        Existen w* y R &gt; 0 tal que: &nbsp; y&#x1D62; · (w*&#x1D40; · x&#x1D62;) &ge; &gamma; &gt; 0 &nbsp;&forall;i
+        &nbsp;&nbsp;&nbsp;y&nbsp;&nbsp;&nbsp; ||x&#x1D62;|| &le; R &nbsp;&forall;i<br><br>
+        Entonces el número de actualizaciones de pesos k satisface:<br><br>
+        k &le; <span style="font-size:18px;">(</span>
+          <span class="frac"><span>R · ||w*||</span><span>&gamma;</span></span>
+        <span style="font-size:18px;">)</span>&#178;
+      </div>
+
+      <div class="section-label">Parte B — Interpretación</div>
+      <ol>
+        <li>
+          ¿Qué representa el cociente <span class="math">R / &gamma;</span> en el teorema?
+          ¿Cómo afecta al número máximo de errores cometidos durante el entrenamiento?
+        </li>
+        <li>
+          Si el conjunto de datos <em>no</em> es linealmente separable, ¿qué le ocurre al algoritmo
+          del perceptrón? ¿Converge? Justifica tu respuesta.
+        </li>
+        <li>
+          El margen de separabilidad &gamma; mide la "holgura" entre la frontera de decisión y los puntos
+          más cercanos. ¿Qué método de aprendizaje automático <em>maximiza</em> este margen?
+        </li>
+      </ol>
+
+      <div class="section-label">Parte C — Demostración Esquemática</div>
+      <p>Completa los pasos clave de la demostración por inducción:</p>
+      <ol>
+        <li><strong>Cota inferior:</strong> Demuestra que <span class="math">w&#x1D40;(k) · w* &ge; k · &gamma;</span> tras k actualizaciones.</li>
+        <li><strong>Cota superior:</strong> Demuestra que <span class="math">||w(k)||&#178; &le; k · R&#178;</span>.</li>
+        <li><strong>Combinación:</strong> Usa la desigualdad de Cauchy-Schwarz para obtener el límite en k.</li>
+      </ol>
+
+      <div class="formula-block">
+        <span class="formula-label">Desigualdad de Cauchy-Schwarz aplicada</span>
+        k&#178; &gamma;&#178; &le; (w&#x1D40;(k) · w*)&#178; &le; ||w(k)||&#178; · ||w*||&#178; &le; k · R&#178; · ||w*||&#178;
+        &nbsp;&nbsp;&rArr;&nbsp;&nbsp; k &le;
+        <span class="frac"><span>R&#178; · ||w*||&#178;</span><span>&gamma;&#178;</span></span>
+      </div>
+
+      <div class="section-label">Parte D — Reflexión Crítica</div>
+      <p>
+        ¿Cuáles son las principales <strong>limitaciones prácticas</strong> del perceptrón simple
+        como modelo de clasificación? Menciona al menos tres y propón cómo las redes neuronales
+        profundas (deep learning) superan cada una de ellas.
+      </p>
+
+      <table>
+        <thead><tr><th>Limitación del perceptrón</th><th>Solución en Deep Learning</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">Solo fronteras de decisión lineales</td>
+            <td><em style="color:#aaa">Responder...</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Una única neurona de salida</td>
+            <td><em style="color:#aaa">Responder...</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">Función de activación escalón no diferenciable</td>
+            <td><em style="color:#aaa">Responder...</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">No puede aprender representaciones jerárquicas</td>
+            <td><em style="color:#aaa">Responder...</em></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div><strong>Pista:</strong> Para la Parte C, recuerda que en cada error el algoritmo realiza la actualización
+        <span class="math">w &larr; w + y&#x1D62; · x&#x1D62;</span>. Calcula el producto interno
+        <span class="math">w(k) · w*</span> e itera la cota k veces. La clave es que w* es fija y cada
+        actualización aumenta el producto interno en al menos &gamma;.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  EJERCICIO 8                                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="exercise">
+    <div class="exercise-header">
+      <span class="exercise-number">EJERCICIO 8</span>
+      <span class="exercise-title">Funciones de activación: escalón, sigmoide y signo</span>
+    </div>
+    <div class="exercise-body">
+
+      <div class="section-label">Enunciado</div>
+      <p>
+        La elección de la <span class="hl">función de activación</span> determina el comportamiento del
+        perceptrón: tipo de salida, diferenciabilidad y capacidad de aprendizaje por gradiente. En este
+        ejercicio compararás tres funciones clásicas aplicadas al mismo perceptrón.
+      </p>
+      <p>
+        Dado el perceptrón con <span class="math">w&#8321; = 0.8</span>, <span class="math">w&#8322; = &minus;0.6</span>,
+        <span class="math">b = 0.2</span>, calcula la salida de cada función de activación para los
+        cuatro vectores de entrada indicados.
+      </p>
+
+      <hr class="section-sep">
+
+      <div class="section-label">Definición de las Funciones de Activación</div>
+      <div class="formula-block">
+        <span class="formula-label">1. Función Escalón (Heaviside / Step)</span>
+        &#966;&#8321;(z) = step(z) = &#123; 1 si z &ge; 0 &nbsp;|&nbsp; 0 si z &lt; 0 &#125;
+        &nbsp;&nbsp;&nbsp; Rango: {0, 1}
+      </div>
+      <div class="formula-block">
+        <span class="formula-label">2. Función Sigmoide (Logística)</span>
+        &#966;&#8322;(z) = &sigma;(z) =
+        <span class="frac"><span>1</span><span>1 + e<sup>&minus;z</sup></span></span>
+        &nbsp;&nbsp;&nbsp; Rango: (0, 1) &nbsp;&nbsp;&nbsp; &sigma;(0) = 0.5
+      </div>
+      <div class="formula-block">
+        <span class="formula-label">3. Función Signo (Sign)</span>
+        &#966;&#8323;(z) = sgn(z) = &#123; +1 si z &gt; 0 &nbsp;|&nbsp; 0 si z = 0 &nbsp;|&nbsp; &minus;1 si z &lt; 0 &#125;
+        &nbsp;&nbsp;&nbsp; Rango: {&minus;1, 0, +1}
+      </div>
+
+      <div class="section-label">Tabla Comparativa</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Entrada (x&#8321;, x&#8322;)</th>
+            <th>z = 0.8x&#8321; &minus; 0.6x&#8322; + 0.2</th>
+            <th>step(z)</th>
+            <th>&sigma;(z) &#8776;</th>
+            <th>sgn(z)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label-cell">(1, 1)</td>
+            <td>0.8·1 &minus; 0.6·1 + 0.2 = <strong>0.4</strong></td>
+            <td>1</td>
+            <td>&#8776; 0.599</td>
+            <td>+1</td>
+          </tr>
+          <tr>
+            <td class="label-cell">(0, 1)</td>
+            <td>0.8·0 &minus; 0.6·1 + 0.2 = <strong>&minus;0.4</strong></td>
+            <td>0</td>
+            <td>&#8776; 0.401</td>
+            <td>&minus;1</td>
+          </tr>
+          <tr>
+            <td class="label-cell">(1, 0)</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">(0, 0)</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">(&minus;1, &minus;1)</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+          <tr>
+            <td class="label-cell">(2, 3)</td>
+            <td><em style="color:#aaa">Calcular</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+            <td><em style="color:#aaa">?</em></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-label">Curvas de las Funciones de Activación</div>
+      <div class="diagram-area" style="min-height:160px; flex-direction:row; flex-wrap:wrap; gap:18px;">
+        <!-- Step -->
+        <div style="text-align:center;">
+          <div class="diagram-label">Escalón</div>
+          <svg width="130" height="110" viewBox="-5 -15 130 125">
+            <line x1="0" y1="60" x2="125" y2="60" stroke="#FFB347" stroke-width="1.5"/>
+            <line x1="60" y1="5"  x2="60"  y2="115" stroke="#FFB347" stroke-width="1.5"/>
+            <!-- Step function -->
+            <polyline points="0,90 60,90 60,30 125,30" fill="none" stroke="#FF6600" stroke-width="2.5"/>
+            <circle cx="60" cy="90" r="4" fill="white" stroke="#FF6600" stroke-width="2"/>
+            <circle cx="60" cy="30" r="4" fill="#FF6600" stroke="#FF6600" stroke-width="2"/>
+            <text x="115" y="57" font-size="9" fill="#FF6600" font-family="Arial">z</text>
+            <text x="63"  y="10" font-size="9" fill="#FF6600" font-family="Arial">&#966;</text>
+            <text x="62"  y="28" font-size="8" fill="#7a3500" font-family="Courier New">1</text>
+            <text x="62"  y="95" font-size="8" fill="#7a3500" font-family="Courier New">0</text>
+          </svg>
+        </div>
+        <!-- Sigmoid -->
+        <div style="text-align:center;">
+          <div class="diagram-label">Sigmoide</div>
+          <svg width="130" height="110" viewBox="-5 -15 130 125">
+            <line x1="0" y1="60" x2="125" y2="60" stroke="#FFB347" stroke-width="1.5"/>
+            <line x1="60" y1="5"  x2="60"  y2="115" stroke="#FFB347" stroke-width="1.5"/>
+            <!-- Sigmoid curve approximation -->
+            <path d="M 0 90 C 10 89, 30 85, 45 70 S 70 35, 90 30 S 115 27, 125 26"
+                  fill="none" stroke="#FF6600" stroke-width="2.5"/>
+            <!-- asymptotes -->
+            <line x1="0" y1="90" x2="125" y2="90" stroke="#FFB347" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="0" y1="26" x2="125" y2="26" stroke="#FFB347" stroke-width="1" stroke-dasharray="3,3"/>
+            <circle cx="60" cy="58" r="4" fill="#FF6600"/>
+            <text x="115" y="57" font-size="9" fill="#FF6600" font-family="Arial">z</text>
+            <text x="63"  y="10" font-size="9" fill="#FF6600" font-family="Arial">&#966;</text>
+            <text x="3"   y="22" font-size="7" fill="#7a3500" font-family="Courier New">1</text>
+            <text x="3"   y="94" font-size="7" fill="#7a3500" font-family="Courier New">0</text>
+            <text x="62"  y="58" font-size="7" fill="#7a3500" font-family="Courier New">0.5</text>
+          </svg>
+        </div>
+        <!-- Sign -->
+        <div style="text-align:center;">
+          <div class="diagram-label">Signo</div>
+          <svg width="130" height="110" viewBox="-5 -15 130 125">
+            <line x1="0" y1="60" x2="125" y2="60" stroke="#FFB347" stroke-width="1.5"/>
+            <line x1="60" y1="5"  x2="60"  y2="115" stroke="#FFB347" stroke-width="1.5"/>
+            <!-- Sign function -->
+            <line x1="0"   y1="90"  x2="60"  y2="90"  stroke="#FF6600" stroke-width="2.5"/>
+            <line x1="60"  y1="30"  x2="125" y2="30"  stroke="#FF6600" stroke-width="2.5"/>
+            <circle cx="60" cy="90" r="4" fill="white" stroke="#FF6600" stroke-width="2"/>
+            <circle cx="60" cy="30" r="4" fill="white" stroke="#FF6600" stroke-width="2"/>
+            <circle cx="60" cy="60" r="4" fill="#FF6600"/>
+            <text x="115" y="57" font-size="9" fill="#FF6600" font-family="Arial">z</text>
+            <text x="63"  y="10" font-size="9" fill="#FF6600" font-family="Arial">&#966;</text>
+            <text x="62"  y="27" font-size="8" fill="#7a3500" font-family="Courier New">+1</text>
+            <text x="62"  y="95" font-size="8" fill="#7a3500" font-family="Courier New">-1</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="section-label">Preguntas de Análisis</div>
+      <ol>
+        <li>
+          ¿Por qué la función escalón hace <em>imposible</em> el uso del descenso por gradiente
+          para entrenar el perceptrón? ¿Cuál de las tres funciones es preferible para el aprendizaje
+          con backpropagation y por qué?
+        </li>
+        <li>
+          La función sigmoide produce salidas en el intervalo (0, 1). ¿Qué interpretación probabilística
+          se le puede dar a <span class="math">&sigma;(z)</span>?
+        </li>
+        <li>
+          Calcula la derivada de la sigmoide: <span class="math">d&sigma;/dz</span>.
+          Demuestra que puede expresarse como <span class="math">&sigma;(z) · (1 &minus; &sigma;(z))</span>.
+          ¿Para qué valor de z es máxima esta derivada?
+        </li>
+        <li>
+          ¿Qué función de activación moderna (introducida tras 2010) ha reemplazado a la sigmoide
+          como estándar en redes profundas, y cuáles son sus ventajas?
+        </li>
+      </ol>
+
+      <div class="formula-block">
+        <span class="formula-label">Derivada de la Sigmoide (Completar la demostración)</span>
+        <span class="frac"><span>d&sigma;</span><span>dz</span></span>
+        =
+        <span class="frac">
+          <span>d</span>
+          <span>dz</span>
+        </span>
+        &nbsp;
+        <span class="frac">
+          <span>1</span>
+          <span>1 + e<sup>&minus;z</sup></span>
+        </span>
+        = &nbsp; ... &nbsp; = &sigma;(z) · (1 &minus; &sigma;(z))
+      </div>
+
+      <div class="note-box">
+        <strong>Dato histórico:</strong> La función ReLU (Rectified Linear Unit), <span class="math">ReLU(z) = max(0, z)</span>,
+        introducida en el contexto moderno por Nair y Hinton (2010), permitió entrenar redes mucho más profundas
+        al evitar el problema del <em>gradiente desvaneciente</em> (<em>vanishing gradient</em>) que afecta a
+        las funciones sigmoide y tanh en redes con muchas capas.
+      </div>
+
+      <div class="hint-box">
+        <span class="hint-icon">&#128161;</span>
+        <div>
+          <strong>Pista para la derivada de la sigmoide:</strong> Aplica la regla de la cadena.
+          Sea <span class="math">u = 1 + e<sup>&minus;z</sup></span>, entonces
+          <span class="math">&sigma; = u<sup>&minus;1</sup></span>.
+          La derivada de <span class="math">e<sup>&minus;z</sup></span> es <span class="math">&minus;e<sup>&minus;z</sup></span>.
+          Simplifica el resultado usando la propia definición de &sigma;.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!--  FOOTER                                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="doc-footer">
+    <p>
+      CUNEF Universidad &mdash; Aprendizaje Profundo &mdash; Bloque I: Fundamentos
+      &mdash; Ejercicios: Perceptrones Simples
+    </p>
+    <p style="margin-top:6px; opacity:0.7;">
+      Documento generado para uso docente &mdash; Curso 2025&ndash;2026
+      &mdash; Referencia bibliografica: Rosenblatt (1958), Minsky & Papert (1969), Goodfellow et al. (2016)
+    </p>
+  </div>
+
+</div><!-- /page-wrapper -->
+</body>
+</html>
