@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Materiales · Aprendizaje Profundo · CUNEF</title>
+    <meta
+      name="description"
+      content="Materiales descargables de la asignatura Aprendizaje Profundo — CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,600;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .mat-main {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+      .mat-head {
+        margin-bottom: 2rem;
+      }
+      .mat-head .kicker {
+        font: 600 0.8rem var(--mono, monospace);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent, #ff5700);
+      }
+      .mat-head h1 {
+        font: 700 2.4rem/1.05 var(--serif, Georgia, serif);
+        color: var(--ink, #1a1f6c);
+        margin: 0.3rem 0 0.6rem;
+      }
+      .mat-head p {
+        color: var(--ink-soft, #3b4080);
+        max-width: 60ch;
+      }
+      .mat-group {
+        margin-top: 2.25rem;
+      }
+      .mat-group > h2 {
+        font: 600 1.15rem var(--sans, system-ui);
+        color: var(--ink, #1a1f6c);
+        border-bottom: 1px solid var(--line, #e2ded0);
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .mat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.5rem;
+      }
+      .mat-item a {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.7rem 0.9rem;
+        border: 1px solid var(--line, #e2ded0);
+        border-radius: 12px;
+        background: var(--paper, #fff);
+        color: var(--ink, #1a1f6c);
+        text-decoration: none;
+        transition:
+          border-color 0.15s ease,
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .mat-item a:hover {
+        border-color: var(--accent, #ff5700);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(26, 31, 108, 0.08);
+      }
+      .mat-ext {
+        flex: 0 0 auto;
+        min-width: 5.2rem;
+        text-align: center;
+        font: 700 0.7rem var(--mono, monospace);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--accent-deep, #c8410f);
+        background: var(--paper-warm, #f0ebdd);
+        border-radius: 999px;
+        padding: 0.3rem 0.5rem;
+      }
+      .mat-name {
+        flex: 1 1 auto;
+        font-weight: 500;
+        word-break: break-word;
+      }
+      .mat-size {
+        flex: 0 0 auto;
+        font: 500 0.8rem var(--mono, monospace);
+        color: var(--ink-mute, #7c80a6);
+      }
+      .mat-empty {
+        color: var(--ink-mute, #7c80a6);
+        padding: 2rem 0;
+      }
+      @media (max-width: 520px) {
+        .mat-item a {
+          flex-wrap: wrap;
+        }
+        .mat-size {
+          margin-left: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a href="./index.html" style="display: inline-flex; align-items: center">
+        <img
+          class="bar-logo"
+          src="./assets/cunef-logo.png"
+          alt="CUNEF Universidad"
+        />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo</span>
+    </header>
+
+    <main class="mat-main">
+      <div class="mat-head">
+        <span class="kicker">CUNEF Universidad · Asignatura</span>
+        <h1>Materiales</h1>
+        <p>
+          Presentaciones, notebooks y ejercicios de la asignatura, organizados
+          por tema. Pulsa cualquier archivo para abrirlo o descargarlo.
+        </p>
+      </div>
+
+      <div id="materiales">
+        <p class="mat-empty">Cargando materiales…</p>
+      </div>
+    </main>
+
+    <footer>CUNEF Universidad · Aprendizaje Profundo · cunef.edu</footer>
+
+    <script>
+      (function () {
+        var mount = document.getElementById("materiales");
+        var EXT_LABEL = {
+          pdf: "PDF",
+          pptx: "Diapositivas",
+          ppt: "Diapositivas",
+          ipynb: "Notebook",
+          docx: "Word",
+          doc: "Word",
+          html: "Demo",
+          zip: "ZIP",
+          csv: "CSV",
+          xlsx: "Excel",
+        };
+        function esc(s) {
+          return String(s).replace(/[&<>"]/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+          });
+        }
+        function fmtSize(b) {
+          if (b < 1024) return b + " B";
+          if (b < 1048576) return Math.round(b / 1024) + " KB";
+          return (b / 1048576).toFixed(1) + " MB";
+        }
+        function encPath(p) {
+          return p.split("/").map(encodeURIComponent).join("/");
+        }
+        function render(data) {
+          var groups = (data && data.groups) || [];
+          if (!groups.length) {
+            mount.innerHTML =
+              '<p class="mat-empty">Aún no hay materiales publicados.</p>';
+            return;
+          }
+          var html = "";
+          groups.forEach(function (g) {
+            html += '<section class="mat-group"><h2>' + esc(g.title) + "</h2>";
+            html += '<ul class="mat-list">';
+            g.files.forEach(function (f) {
+              var label =
+                EXT_LABEL[f.ext] || (f.ext ? f.ext.toUpperCase() : "Archivo");
+              html +=
+                '<li class="mat-item"><a href="/' +
+                encPath(f.path) +
+                '" target="_blank" rel="noopener">' +
+                '<span class="mat-ext">' +
+                esc(label) +
+                "</span>" +
+                '<span class="mat-name">' +
+                esc(f.name) +
+                "</span>" +
+                '<span class="mat-size">' +
+                fmtSize(f.size) +
+                "</span></a></li>";
+            });
+            html += "</ul></section>";
+          });
+          mount.innerHTML = html;
+        }
+        fetch("/files-manifest.json", { cache: "no-cache" })
+          .then(function (r) {
+            if (!r.ok) throw new Error("http " + r.status);
+            return r.json();
+          })
+          .then(render)
+          .catch(function () {
+            mount.innerHTML =
+              '<p class="mat-empty">No se pudo cargar el listado de materiales.</p>';
+          });
+      })();
+    </script>
+  </body>
+</html>
