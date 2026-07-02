@@ -35,30 +35,6 @@
       "title": "Tema 1 · Introducción",
       "files": [
         {
-          "name": "1_Introduccion_al_deep_learning.ipynb",
-          "path": "files/tema-1/1_Introduccion_al_deep_learning.ipynb",
-          "ext": "ipynb",
-          "size": 643135
-        },
-        {
-          "name": "1_Introduccion_al_deep_learning.pdf",
-          "path": "files/tema-1/1_Introduccion_al_deep_learning.pdf",
-          "ext": "pdf",
-          "size": 362951
-        },
-        {
-          "name": "1. Introducción.pptx",
-          "path": "files/tema-1/1. Introducción.pptx",
-          "ext": "pptx",
-          "size": 10798959
-        },
-        {
-          "name": "1.2. Perceptrón simple.pptx",
-          "path": "files/tema-1/1.2. Perceptrón simple.pptx",
-          "ext": "pptx",
-          "size": 6660016
-        },
-        {
           "name": "CUNEF_Actividad_1_Redes_Neuronales_Artificiales_ANN.ipynb",
           "path": "files/tema-1/CUNEF_Actividad_1_Redes_Neuronales_Artificiales_ANN.ipynb",
           "ext": "ipynb",
@@ -99,6 +75,18 @@
           "path": "files/tema-1/ejercicios_perceptrones_simples.html",
           "ext": "html",
           "size": 68762
+        },
+        {
+          "name": "T1 - Introducción.pptx",
+          "path": "files/tema-1/T1 - Introducción.pptx",
+          "ext": "pptx",
+          "size": 696657
+        },
+        {
+          "name": "T1.2. Perceptrón simple (desde HTML).pptx",
+          "path": "files/tema-1/T1.2. Perceptrón simple (desde HTML).pptx",
+          "ext": "pptx",
+          "size": 310242
         }
       ]
     },
@@ -113,52 +101,22 @@
           "size": 101263
         },
         {
-          "name": "descenso_gradiente.html",
-          "path": "files/tema-2/descenso_gradiente.html",
-          "ext": "html",
-          "size": 142005
-        },
-        {
-          "name": "Tema_2_1_Neuronas_solucion_(1).ipynb",
-          "path": "files/tema-2/Tema_2_1_Neuronas_solucion_(1).ipynb",
-          "ext": "ipynb",
-          "size": 538474
-        },
-        {
-          "name": "Tema_2_1_Neuronas_solucion.ipynb",
-          "path": "files/tema-2/Tema_2_1_Neuronas_solucion.ipynb",
-          "ext": "ipynb",
-          "size": 564135
-        },
-        {
-          "name": "Tema_2_1_Neuronas.ipynb",
-          "path": "files/tema-2/Tema_2_1_Neuronas.ipynb",
-          "ext": "ipynb",
-          "size": 13464
-        },
-        {
-          "name": "TEMA_2_Base_Matemática (1).ipynb",
-          "path": "files/tema-2/TEMA_2_Base_Matemática (1).ipynb",
-          "ext": "ipynb",
-          "size": 2325765
-        },
-        {
-          "name": "TEMA_2_Base_Matemática (2).ipynb",
-          "path": "files/tema-2/TEMA_2_Base_Matemática (2).ipynb",
-          "ext": "ipynb",
-          "size": 2305597
-        },
-        {
-          "name": "Test tema 2.pdf",
-          "path": "files/tema-2/Test tema 2.pdf",
+          "name": "Ejercicio_MLP_Region_Rectangular.pdf",
+          "path": "files/tema-2/Ejercicio_MLP_Region_Rectangular.pdf",
           "ext": "pdf",
-          "size": 76543
+          "size": 3337
         },
         {
-          "name": "vertopal.com_TEMA_2_Base_Matemática (1).pdf",
-          "path": "files/tema-2/vertopal.com_TEMA_2_Base_Matemática (1).pdf",
+          "name": "Ejercicio_Red_Neuronal_Triangulo.pdf",
+          "path": "files/tema-2/Ejercicio_Red_Neuronal_Triangulo.pdf",
           "ext": "pdf",
-          "size": 723962
+          "size": 3213
+        },
+        {
+          "name": "T2. Perceptrón multicapa (mejorado).pptx",
+          "path": "files/tema-2/T2. Perceptrón multicapa (mejorado).pptx",
+          "ext": "pptx",
+          "size": 385516
         }
       ]
     },
@@ -167,46 +125,10 @@
       "title": "Tema 3 · Perceptrón multicapa (MLP)",
       "files": [
         {
-          "name": "2. Perceptrón multicapa.pptx",
-          "path": "files/tema-3/2. Perceptrón multicapa.pptx",
+          "name": "T3. Redes LSTM (mejorado).pptx",
+          "path": "files/tema-3/T3. Redes LSTM (mejorado).pptx",
           "ext": "pptx",
-          "size": 1058143
-        },
-        {
-          "name": "Ejercicio_MLP_Region_Rectangular.pdf",
-          "path": "files/tema-3/Ejercicio_MLP_Region_Rectangular.pdf",
-          "ext": "pdf",
-          "size": 3337
-        },
-        {
-          "name": "Ejercicio_Red_Neuronal_Triangulo.pdf",
-          "path": "files/tema-3/Ejercicio_Red_Neuronal_Triangulo.pdf",
-          "ext": "pdf",
-          "size": 3213
-        },
-        {
-          "name": "perceptrones_multicapa.html",
-          "path": "files/tema-3/perceptrones_multicapa.html",
-          "ext": "html",
-          "size": 108961
-        },
-        {
-          "name": "Práctica 3 (1).pdf",
-          "path": "files/tema-3/Práctica 3 (1).pdf",
-          "ext": "pdf",
-          "size": 54285
-        },
-        {
-          "name": "Práctica 3 (2).pdf",
-          "path": "files/tema-3/Práctica 3 (2).pdf",
-          "ext": "pdf",
-          "size": 69088
-        },
-        {
-          "name": "Práctica 3.pdf",
-          "path": "files/tema-3/Práctica 3.pdf",
-          "ext": "pdf",
-          "size": 71044
+          "size": 215537
         }
       ]
     },
@@ -251,6 +173,18 @@
           "size": 42074
         },
         {
+          "name": "Práctica 3 (2).pdf",
+          "path": "files/tema-4/Práctica 3 (2).pdf",
+          "ext": "pdf",
+          "size": 69088
+        },
+        {
+          "name": "T4. Redes convolucionales (mejorado).pptx",
+          "path": "files/tema-4/T4. Redes convolucionales (mejorado).pptx",
+          "ext": "pptx",
+          "size": 249731
+        },
+        {
           "name": "test_CNN_medio.pdf",
           "path": "files/tema-4/test_CNN_medio.pdf",
           "ext": "pdf",
@@ -261,6 +195,18 @@
           "path": "files/tema-4/test_CNN.pdf",
           "ext": "pdf",
           "size": 5549
+        }
+      ]
+    },
+    {
+      "id": "tema-5",
+      "title": "tema-5",
+      "files": [
+        {
+          "name": "T5. Aprendizaje profundo (mejorado).pptx",
+          "path": "files/tema-5/T5. Aprendizaje profundo (mejorado).pptx",
+          "ext": "pptx",
+          "size": 420888
         }
       ]
     }
