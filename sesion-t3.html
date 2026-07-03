@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 3</title>
+    <meta
+      name="description"
+      content="Tema 3 de Aprendizaje Profundo en CUNEF. Redes LSTM: memoria, puertas y dependencias a largo plazo en secuencias."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 3</span>
+      </a>
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span
+        ><span id="slideTotal">0</span>
+      </div>
+      <button
+        class="topbar-pdf"
+        id="pdfBtn"
+        type="button"
+        title="Descargar como PDF (P)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- ============================================================ -->
+      <!-- 00 — PORTADA -->
+      <!-- ============================================================ -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block">
+              <span class="meta-label">Asignatura</span>
+              <span class="meta-val">Aprendizaje Profundo</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Tema</span>
+              <span class="meta-val">3 · Redes LSTM</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Duración</span>
+              <span class="meta-val">~50 minutos</span>
+            </div>
+          </div>
+          <h1 class="cover-title">
+            Redes con<br />
+            <em>memoria</em>.
+          </h1>
+          <p class="cover-sub">
+            Por qué las redes recurrentes olvidan, cómo la celda
+            <em>LSTM</em> añade puertas para recordar lo importante y por qué
+            de aquí salen el <em>seq2seq</em>, la atención y los Transformers.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="60" y="150" width="280" height="100" rx="18" />
+              <path d="M40 175 H360 M40 175" />
+              <circle cx="140" cy="200" r="26" />
+              <circle cx="200" cy="200" r="26" />
+              <circle cx="260" cy="200" r="26" />
+              <path d="M20 200 H60 M340 200 H380 M200 250 V300 M200 100 V150" />
+            </g>
+            <g fill="currentColor" opacity="0.85">
+              <circle cx="140" cy="200" r="4" />
+              <circle cx="200" cy="200" r="4" />
+              <circle cx="260" cy="200" r="4" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 01 — AGENDA -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li>
+              <span class="agenda-num">01</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title">El problema a resolver</span>
+                <span class="agenda-desc"
+                  >El gradiente que se desvanece y las dependencias a largo
+                  plazo en secuencias.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">02</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">La celda LSTM</span>
+                <span class="agenda-desc"
+                  >Estado de memoria y tres puertas: olvido, entrada y
+                  salida.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">03</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Entrenamiento y aplicaciones</span>
+                <span class="agenda-desc"
+                  >Backprop en el tiempo, ADAM, seq2seq y NLP.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">04</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title">Variantes</span>
+                <span class="agenda-desc"
+                  >GRU, Bi-LSTM y la atención que llevó a los
+                  Transformers.</span
+                >
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 02 — DIVISOR 1 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="El problema">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">El problema<br />a <em>resolver</em>.</h2>
+          <p class="divider-sub">
+            Antes de la solución, el síntoma: las redes recurrentes simples
+            <em>no consiguen recordar</em> lo que pasó hace muchos pasos.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 03 — Vanishing / exploding gradient -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Vanishing gradient">
+        <div class="slide-inner">
+          <span class="kicker">El talón de Aquiles de las RNN</span>
+          <h2 class="h2">El gradiente se <em>desvanece</em>.</h2>
+          <p class="lead">
+            Una RNN procesa una secuencia paso a paso, reutilizando los mismos
+            pesos. Al retropropagar el error, los gradientes se
+            <em>multiplican</em> en cada paso de tiempo.
+          </p>
+          <svg
+            viewBox="0 0 720 200"
+            style="width: 100%; height: auto; margin: 14px 0"
+          >
+            <g font-family="JetBrains Mono" font-size="12" fill="#fff">
+              <rect x="30" y="70" width="90" height="56" rx="8" fill="#1a1f6c" />
+              <text x="75" y="103" text-anchor="middle">h₁</text>
+              <rect x="185" y="70" width="90" height="56" rx="8" fill="#1a1f6c" />
+              <text x="230" y="103" text-anchor="middle">h₂</text>
+              <rect x="340" y="70" width="90" height="56" rx="8" fill="#1a1f6c" />
+              <text x="385" y="103" text-anchor="middle">h₃</text>
+              <rect x="495" y="70" width="90" height="56" rx="8" fill="#1a1f6c" />
+              <text x="540" y="103" text-anchor="middle">h₄</text>
+              <rect x="620" y="70" width="70" height="56" rx="8" fill="#ff5700" />
+              <text x="655" y="103" text-anchor="middle">loss</text>
+            </g>
+            <g stroke="#7c80a6" stroke-width="1.6" fill="none">
+              <path d="M120 98 H185" marker-end="url(#ar)" />
+              <path d="M275 98 H340" marker-end="url(#ar)" />
+              <path d="M430 98 H495" marker-end="url(#ar)" />
+              <path d="M585 98 H620" marker-end="url(#ar)" />
+            </g>
+            <defs>
+              <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0 0 L6 3 L0 6 Z" fill="#7c80a6" />
+              </marker>
+            </defs>
+            <!-- gradiente que decae hacia atrás -->
+            <path
+              d="M640 150 H40"
+              stroke="#c8410f"
+              stroke-width="2"
+              fill="none"
+              stroke-dasharray="5,4"
+            />
+            <g fill="#c8410f" opacity="1">
+              <circle cx="640" cy="150" r="7" />
+            </g>
+            <circle cx="490" cy="150" r="5.2" fill="#c8410f" opacity="0.7" />
+            <circle cx="340" cy="150" r="3.6" fill="#c8410f" opacity="0.5" />
+            <circle cx="190" cy="150" r="2.2" fill="#c8410f" opacity="0.33" />
+            <circle cx="60" cy="150" r="1.3" fill="#c8410f" opacity="0.2" />
+            <text x="360" y="185" text-anchor="middle" font-family="Inter Tight" font-style="italic" font-size="12" fill="#c8410f">
+              el gradiente se encoge en cada paso hacia atrás
+            </text>
+          </svg>
+          <div class="two-col">
+            <p class="lead">
+              Si la derivada es <strong>&lt; 1</strong>, el gradiente
+              <em>decae exponencialmente</em> (vanishing) y las capas lejanas
+              casi no aprenden.
+            </p>
+            <p class="lead">
+              Si es <strong>&gt; 1</strong>, <em>crece exponencialmente</em>
+              (exploding) y el entrenamiento se vuelve inestable.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 04 — Dependencias a largo plazo -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Dependencias largas">
+        <div class="slide-inner">
+          <span class="kicker">Recordar lo lejano</span>
+          <h2 class="h2">Dependencias a <em>largo plazo</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una RNN simple no logra retener información durante muchos
+                pasos. Cuando lo relevante quedó lejos en la secuencia, se
+                pierde.
+              </p>
+              <p class="note">
+                Solución: dar a la red una <em>memoria explícita</em>,
+                controlada por puertas que deciden qué guardar y qué tirar.
+                Eso es una <strong>LSTM</strong>.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot"></span>
+                Concordancia sujeto–verbo
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">«Las <strong>redes</strong> que vimos</span>
+                  <span class="pt-c">en la clase anterior…</span>
+                  <span class="pt-t">(muchas palabras después)</span>
+                  <span class="pt-f">
+                    …<strong>son</strong> recurrentes» ← plural
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note">
+            Para elegir «son» y no «es», la red debe recordar que el sujeto
+            («redes») era <em>plural</em> muchas palabras atrás.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 05 — DIVISOR 2 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="La celda LSTM">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">La celda<br /><em>LSTM</em>.</h2>
+          <p class="divider-sub">
+            <em>Long Short-Term Memory</em>: una memoria que se mantiene en el
+            tiempo porque unas <em>puertas</em> deciden qué entra, qué se
+            queda y qué sale.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 06 — Tres puertas por celda (diagrama) -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Tres puertas">
+        <div class="slide-inner">
+          <span class="kicker">Long Short-Term Memory</span>
+          <h2 class="h2">Tres <em>puertas</em> por celda.</h2>
+          <svg
+            viewBox="0 0 760 300"
+            style="width: 100%; height: auto; margin: 6px 0 12px"
+          >
+            <!-- caja de la celda -->
+            <rect x="120" y="40" width="520" height="210" rx="16" fill="none" stroke="#1a1f6c" stroke-width="1.5" opacity="0.4" />
+            <!-- cinta de memoria (cell state) -->
+            <line x1="60" y1="80" x2="700" y2="80" stroke="#0796a3" stroke-width="3" />
+            <text x="70" y="70" font-family="JetBrains Mono" font-size="12" fill="#0796a3">Cₜ₋₁</text>
+            <text x="675" y="70" font-family="JetBrains Mono" font-size="12" fill="#0796a3">Cₜ</text>
+            <!-- operadores en la cinta -->
+            <circle cx="250" cy="80" r="15" fill="#fff" stroke="#c8410f" stroke-width="2" />
+            <text x="250" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="15" fill="#c8410f">×</text>
+            <circle cx="440" cy="80" r="15" fill="#fff" stroke="#0796a3" stroke-width="2" />
+            <text x="440" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="15" fill="#0796a3">+</text>
+            <!-- puertas -->
+            <g font-family="Inter Tight" font-size="12" fill="#fff" text-anchor="middle">
+              <rect x="215" y="150" width="70" height="40" rx="8" fill="#c8410f" />
+              <text x="250" y="167">σ</text>
+              <text x="250" y="182" font-size="10">forget</text>
+              <rect x="360" y="150" width="70" height="40" rx="8" fill="#1a1f6c" />
+              <text x="395" y="167">σ</text>
+              <text x="395" y="182" font-size="10">input</text>
+              <rect x="440" y="150" width="70" height="40" rx="8" fill="#1a1f6c" />
+              <text x="475" y="167">tanh</text>
+              <text x="475" y="182" font-size="10">candidato</text>
+              <rect x="560" y="150" width="70" height="40" rx="8" fill="#fe961f" />
+              <text x="595" y="167" fill="#1a1f6c">σ</text>
+              <text x="595" y="182" font-size="10" fill="#1a1f6c">output</text>
+            </g>
+            <!-- conexiones puertas -> cinta -->
+            <g stroke="#7c80a6" stroke-width="1.4" fill="none">
+              <path d="M250 150 V95" marker-end="url(#a3)" />
+              <path d="M395 150 V120 H440 V95" marker-end="url(#a3)" />
+              <path d="M475 150 V95" marker-end="url(#a3)" />
+              <path d="M595 150 V80 H700" />
+              <path d="M595 80 V230" stroke="#fe961f" />
+            </g>
+            <!-- entradas y salida -->
+            <text x="150" y="235" font-family="JetBrains Mono" font-size="12" fill="#7c80a6">hₜ₋₁, xₜ</text>
+            <line x1="150" y1="225" x2="150" y2="205" stroke="#7c80a6" stroke-width="1.4" />
+            <path d="M150 205 H595" stroke="#7c80a6" stroke-width="1.4" stroke-dasharray="3,3" fill="none" />
+            <text x="612" y="250" font-family="JetBrains Mono" font-size="12" fill="#fe961f">hₜ</text>
+            <defs>
+              <marker id="a3" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+                <path d="M0 0 L6 3 L0 6 Z" fill="#7c80a6" />
+              </marker>
+            </defs>
+          </svg>
+          <p class="note">
+            La <em>cinta</em> superior es el estado de memoria <code>Cₜ</code>.
+            El <strong>forget gate</strong> multiplica (borra), el
+            <strong>input gate</strong> suma (añade) y el
+            <strong>output gate</strong> decide qué se expone como
+            <code>hₜ</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 07 — Cell state -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Cell state">
+        <div class="slide-inner">
+          <span class="kicker">La cinta de memoria</span>
+          <h2 class="h2">El estado de la <em>celda</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                La celda mantiene un vector <code>Cₜ</code>, de la misma
+                dimensión que el estado oculto <code>hₜ</code>. Es una
+                <em>cinta transportadora</em> a la que se añade o de la que se
+                elimina información.
+              </p>
+              <ul class="neuron-notes">
+                <li>
+                  El <strong>forget gate</strong> borra lo que ya no hace falta
+                  (multiplica por ~0).
+                </li>
+                <li>
+                  El <strong>input gate</strong> escribe la información nueva
+                  (suma).
+                </li>
+                <li>
+                  Al fluir casi sin transformaciones, el gradiente
+                  <em>no se desvanece</em>.
+                </li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot prompt-dot-good"></span>
+                Ejemplo · persona y número
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">Aparece un sujeto: «el gato»</span>
+                  <span class="pt-t">input gate → guarda «3ª sing.»</span>
+                  <span class="pt-c">Aparece un sujeto nuevo</span>
+                  <span class="pt-f">forget gate → borra el anterior</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 08 — Puertas en detalle -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Puertas en detalle">
+        <div class="slide-inner">
+          <span class="kicker">Sigmoide y tanh</span>
+          <h2 class="h2">Las puertas, en <em>detalle</em>.</h2>
+          <p class="lead">
+            Cada puerta mira la entrada actual <code>xₜ</code> y el estado
+            anterior <code>hₜ₋₁</code>. La <em>sigmoide</em> decide
+            <em>cuánto</em> (0 a 1); la <em>tanh</em> propone <em>qué</em> (−1 a
+            1).
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Forget gate</h4>
+              <div class="fn-formula">σ(Wf·[hₜ₋₁,xₜ]+bf)</div>
+              <p>Valor 0–1: cerca de 0 olvida, cerca de 1 mantiene.</p>
+              <span class="fn-use">→ qué se descarta</span>
+            </div>
+            <div class="fn-card">
+              <h4>Input gate</h4>
+              <div class="fn-formula">σ(Wi·[hₜ₋₁,xₜ]+bi)</div>
+              <p>Decide cuánta información nueva se escribe en la memoria.</p>
+              <span class="fn-use">→ qué se añade</span>
+            </div>
+            <div class="fn-card">
+              <h4>Candidato</h4>
+              <div class="fn-formula">tanh(WC·[hₜ₋₁,xₜ]+bC)</div>
+              <p>Propone los valores nuevos (−1 a 1) que podrían entrar.</p>
+              <span class="fn-use">→ cuánto sumar/restar</span>
+            </div>
+            <div class="fn-card">
+              <h4>Output gate</h4>
+              <div class="fn-formula">σ(Wo·[hₜ₋₁,xₜ]+bo)</div>
+              <p>Filtra el estado (pasado por tanh) para producir <code>hₜ</code>.</p>
+              <span class="fn-use">→ qué se expone</span>
+            </div>
+          </div>
+          <p class="note">
+            Actualización: <code>Cₜ = fₜ · Cₜ₋₁ + iₜ · C̃ₜ</code> — olvidar
+            (×) y añadir (+), componente a componente.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 09 — DIVISOR 3 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Entrenamiento">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Entrenamiento<br />y <em>aplicaciones</em>.</h2>
+          <p class="divider-sub">
+            Cómo se entrena una LSTM y para qué brilla: sobre todo, todo lo que
+            llega en forma de <em>secuencia</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 10 — Entrenamiento -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Cómo se entrena">
+        <div class="slide-inner">
+          <span class="kicker">Backpropagation en el tiempo</span>
+          <h2 class="h2">Cómo se <em>entrena</em> una LSTM.</h2>
+          <div class="two-col">
+            <div>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>BPTT</strong> · backpropagation <em>a través del
+                  tiempo</em>: se despliega la red por la secuencia.
+                </li>
+                <li>
+                  <strong>SGD con momentum</strong> · orden aleatorio de
+                  ejemplos por época.
+                </li>
+                <li>
+                  <strong>ADAM</strong> · el optimizador habitual (Kingma &amp;
+                  Ba, 2015).
+                </li>
+                <li>
+                  Muchos parámetros por celda: <code>Wf, Wi, WC, Wo</code>.
+                </li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot"></span>
+                Requisitos
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">Muchos datos de entrenamiento</span>
+                  <span class="pt-c">Mucho tiempo de cómputo</span>
+                  <span class="pt-f">Clústeres de GPU</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note">
+            El truco: como el estado <code>Cₜ</code> fluye casi lineal, el
+            gradiente sobrevive muchos pasos hacia atrás — justo lo que las RNN
+            simples no lograban.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 11 — Aplicaciones y arquitecturas -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Arquitecturas">
+        <div class="slide-inner">
+          <span class="kicker">Formas de conectar la secuencia</span>
+          <h2 class="h2">Cuatro <em>arquitecturas</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Etiquetado</h4>
+              <div class="fn-formula">seq → seq</div>
+              <p>Una salida por cada paso de tiempo (p. ej. POS tagging).</p>
+              <span class="fn-use">→ una etiqueta por token</span>
+            </div>
+            <div class="fn-card">
+              <h4>Modelado del lenguaje</h4>
+              <div class="fn-formula">predecir xₜ₊₁</div>
+              <p>Predecir la siguiente entrada de la secuencia.</p>
+              <span class="fn-use">→ autocompletar</span>
+            </div>
+            <div class="fn-card">
+              <h4>Clasificación</h4>
+              <div class="fn-formula">seq → 1</div>
+              <p>Del estado final a una sola salida (p. ej. sentimiento).</p>
+              <span class="fn-use">→ una etiqueta por secuencia</span>
+            </div>
+            <div class="fn-card">
+              <h4>Seq2seq</h4>
+              <div class="fn-formula">encoder → decoder</div>
+              <p>Una LSTM codifica y otra genera (traducción, subtítulos).</p>
+              <span class="fn-use">→ secuencia a secuencia</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 12 — Aplicaciones reales -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Aplicaciones reales">
+        <div class="slide-inner">
+          <span class="kicker">Dónde se han usado</span>
+          <h2 class="h2">De la voz a la <em>traducción</em>.</h2>
+          <div class="two-col">
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">
+                Lenguaje y voz
+              </h3>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Reconocimiento de voz</strong> · modelado acústico y
+                  de lenguaje.
+                </li>
+                <li>
+                  <strong>POS tagging, NER</strong> · chunking de frases.
+                </li>
+                <li>Análisis <strong>sintáctico y semántico</strong>.</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">
+                Visión y traducción
+              </h3>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Image captioning</strong> · del vector de una CNN a
+                  una frase.
+                </li>
+                <li>
+                  <strong>Traducción automática</strong> · (Sutskever, Vinyals
+                  &amp; Le, 2014).
+                </li>
+                <li>
+                  <strong>Video captioning</strong> · fotogramas (CNN) → texto.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 13 — DIVISOR 4 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Variantes">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">Las <em>variantes</em>.</h2>
+          <p class="divider-sub">
+            La misma idea, afinada: menos puertas, doble sentido y, sobre todo,
+            <em>atender</em> a lo relevante.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 14 — Bi-LSTM -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Bi-LSTM">
+        <div class="slide-inner">
+          <span class="kicker">Procesar en dos sentidos</span>
+          <h2 class="h2">Bi-<em>LSTM</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Hacia delante →</h3>
+              <p>Una LSTM recorre la secuencia de principio a fin.</p>
+            </div>
+            <div class="flow-card">
+              <h3>← Hacia atrás</h3>
+              <p>Otra LSTM independiente la recorre en sentido inverso.</p>
+            </div>
+          </div>
+          <p class="note">
+            En cada paso, las capas ocultas de ambas se <em>concatenan</em>.
+            Así cada elemento aprovecha el <strong>contexto pasado y
+            futuro</strong> — clave cuando la frase entera está disponible.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 15 — GRU -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="GRU">
+        <div class="slide-inner">
+          <span class="kicker">Una alternativa más simple</span>
+          <h2 class="h2">GRU · <em>Gated Recurrent Unit</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una RNN con puertas alternativa a la LSTM (Cho et al., 2014),
+                pensada para ser más <em>ligera</em>.
+              </p>
+              <ul class="neuron-notes">
+                <li>
+                  Combina forget e input en una sola puerta de
+                  <strong>actualización</strong>.
+                </li>
+                <li>
+                  Elimina el vector de <strong>estado de celda</strong>
+                  separado.
+                </li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot prompt-dot-good"></span>
+                LSTM vs GRU
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">LSTM · 3 puertas + estado Cₜ</span>
+                  <span class="pt-c">GRU · 2 puertas, sin Cₜ</span>
+                  <span class="pt-t">menos parámetros</span>
+                  <span class="pt-f">
+                    entrena más rápido · resultados comparables
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 16 — Atención -->
+      <!-- ============================================================ -->
+      <section class="slide slide-exercise" data-title="Atención">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">De la LSTM al Transformer</span>
+          <h2 class="h2 h2-ex">Aprender a <em>atender</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                La <strong>atención</strong> permite a la red centrarse en
+                distintas partes de la entrada en cada paso, en lugar de
+                comprimirlo todo en un único estado.
+              </p>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Image captioning</strong> · enfocar distintas
+                  regiones de la imagen al generar cada palabra.
+                </li>
+                <li>
+                  <strong>Traducción</strong> · atender a distintas partes de
+                  la frase origen en cada palabra generada.
+                </li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot prompt-dot-good"></span>
+                Lo que vino después
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">LSTM + atención</span>
+                  <span class="pt-t">"Attention is all you need" (2017)</span>
+                  <span class="pt-f">
+                    → los <strong>Transformers</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 17 — Ideas para llevarte -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 3</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item">
+              <span class="close-num">01 · EL PROBLEMA</span>
+              <h3>El gradiente se desvanece</h3>
+              <p>
+                Las RNN simples no aprenden dependencias largas: el gradiente
+                decae al retropropagar por muchos pasos.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">02 · LA SOLUCIÓN</span>
+              <h3>Puertas y memoria</h3>
+              <p>
+                La LSTM usa un estado <code>Cₜ</code> y tres puertas (olvido,
+                entrada, salida) para retener lo importante.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">03 · MÁS ALLÁ</span>
+              <h3>GRU, Bi-LSTM y atención</h3>
+              <p>
+                Variantes más simples, en dos sentidos y con foco selectivo —
+                la atención abrió la puerta a los Transformers.
+              </p>
+            </div>
+          </div>
+          <div class="close-next">
+            <span>Siguiente · Tema 4</span>
+            <span
+              >Redes convolucionales — cómo las redes aprenden a mirar
+              imágenes.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 18 — Cierre -->
+      <!-- ============================================================ -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 3</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">
+            Para profundizar antes del próximo tema, dos referencias:
+          </p>
+          <ul class="proj-list">
+            <li>
+              <strong>Olah, C.</strong> — <em>"Understanding LSTM Networks"</em>
+              (el diagrama clásico de la celda).
+            </li>
+            <li>
+              <strong>Sutskever, Vinyals &amp; Le</strong> —
+              <em>"Sequence to Sequence Learning with Neural Networks"</em>
+              (2014).
+            </li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./index.html">
+              <span class="close-cta-eyebrow">Volver al inicio</span>
+              <span class="close-cta-title"
+                >Ver todos los temas
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">Tema 4 y 5 en preparación.</span>
+            </a>
+            <a class="close-cta" href="./repaso-t3.html">
+              <span class="close-cta-eyebrow">Ponerte a prueba</span>
+              <span class="close-cta-title"
+                >Repaso del Tema 3
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">10 retos autocorregibles.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- CONTROLES FLOTANTES -->
+    <div class="controls">
+      <button
+        class="ctrl"
+        id="prevBtn"
+        type="button"
+        title="Anterior (←)"
+        aria-label="Slide anterior"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="ctrl"
+        id="nextBtn"
+        type="button"
+        title="Siguiente (→)"
+        aria-label="Slide siguiente"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 6l6 6-6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- AYUDA -->
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
