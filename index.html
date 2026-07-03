@@ -1014,23 +1014,22 @@
       <div class="layout">
         <aside class="toc">
           <nav aria-label="Secciones del material">
-            <span class="toc-title">Material</span>
-            <a class="toc-link" href="#teoria">Teoría</a>
-            <a class="toc-link" href="#practica">Práctica</a>
-            <a class="toc-link" href="#ejercicios">Ejercicios</a>
+            <span class="toc-title">Temario</span>
+            <a class="toc-link" href="#tema-1">Tema 1</a>
+            <a class="toc-link" href="#tema-2">Tema 2</a>
           </nav>
         </aside>
 
         <div class="content">
-          <!-- ===== TEORÍA ===== -->
-          <section class="section" id="teoria">
+          <!-- ===== TEMA 1 ===== -->
+          <section class="section" id="tema-1">
             <div class="level-band">
-              <span class="level-name">Teoría</span>
+              <span class="level-name">Tema 1 · Introducción</span>
               <span class="level-rule" aria-hidden="true"></span>
             </div>
             <h2 class="level-title">Cómo <em>aprende</em> una red.</h2>
 
-            <div class="picker">
+            <div class="picker picker-three">
               <a class="card card-tema1" href="./sesion1.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1053,7 +1052,7 @@
                     <circle cx="200" cy="200" r="60" fill="currentColor" />
                   </svg>
                 </div>
-                <span class="card-tag">Tema 1 · Introducción</span>
+                <span class="card-tag">Teoría</span>
                 <h2>De la inteligencia artificial al <em>perceptrón</em></h2>
                 <p>
                   IA, ML y deep learning explicados desde cero.
@@ -1072,19 +1071,7 @@
                   >Entrar a la sesión <span class="arrow">→</span></span
                 >
               </a>
-            </div>
-            <p class="soon-line">Temas 2–4 · próximamente</p>
-          </section>
 
-          <!-- ===== PRÁCTICA ===== -->
-          <section class="section" id="practica">
-            <div class="level-band">
-              <span class="level-name">Práctica</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Del concepto al <em>código</em>.</h2>
-
-            <div class="picker">
               <a class="card card-tema1" href="./sesion2.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1114,7 +1101,7 @@
                     />
                   </svg>
                 </div>
-                <span class="card-tag">Tema 1 · Introducción</span>
+                <span class="card-tag">Práctica</span>
                 <h2>Primeros pasos en <em>Python</em></h2>
                 <p>
                   Del concepto al código. El ecosistema de librerías (NumPy,
@@ -1132,19 +1119,7 @@
                   >Entrar a la sesión <span class="arrow">→</span></span
                 >
               </a>
-            </div>
-            <p class="soon-line">Temas 2–4 · próximamente</p>
-          </section>
 
-          <!-- ===== EJERCICIOS ===== -->
-          <section class="section" id="ejercicios">
-            <div class="level-band">
-              <span class="level-name">Ejercicios</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Comprueba lo que te <em>llevas</em>.</h2>
-
-            <div class="picker">
               <a class="card card-repaso" href="./repaso1.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1158,7 +1133,7 @@
                     <circle cx="200" cy="330" r="14" fill="currentColor" />
                   </svg>
                 </div>
-                <span class="card-tag">Tema 1 · Introducción</span>
+                <span class="card-tag">Repaso</span>
                 <h2>¿Has pillado el <em>deep learning</em>?</h2>
                 <p>
                   Diez retos autocorregibles para comprobar lo que te llevas:
@@ -1177,7 +1152,92 @@
                 >
               </a>
             </div>
-            <p class="soon-line">Temas 2–4 · próximamente</p>
+          </section>
+
+          <!-- ===== TEMA 2 ===== -->
+          <section class="section" id="tema-2">
+            <div class="level-band">
+              <span class="level-name">Tema 2 · Perceptrón multicapa</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">De una neurona a una <em>red</em>.</h2>
+
+            <div class="picker picker-two">
+              <a class="card card-tema2" href="./sesion-t2.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M90 130 L200 90 M90 130 L200 200 M90 130 L200 310" />
+                      <path d="M90 270 L200 90 M90 270 L200 200 M90 270 L200 310" />
+                      <path d="M200 90 L310 200 M200 200 L310 200 M200 310 L310 200" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="90" cy="130" r="16" />
+                      <circle cx="90" cy="270" r="16" />
+                      <circle cx="200" cy="90" r="16" />
+                      <circle cx="200" cy="200" r="16" />
+                      <circle cx="200" cy="310" r="16" />
+                      <circle cx="310" cy="200" r="16" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Del perceptrón simple al <em>multicapa</em></h2>
+                <p>
+                  La neurona artificial, la topología en capas y los tipos de
+                  aprendizaje. Por qué el perceptrón simple fracasa con XOR y
+                  cómo el MLP lo resuelve con backpropagation.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 minutos</span>
+                  <span class="sep">·</span>
+                  <span>incluye XOR y backpropagation</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t2.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path
+                      d="M120 150 a80 80 0 1 1 80 110 v30"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="18"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Dominas el <em>perceptrón multicapa</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre la neurona artificial, la
+                  topología de redes, la regla delta, el problema XOR y
+                  backpropagation. Con explicación en cada respuesta.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 minutos</span>
+                  <span class="sep">·</span>
+                  <span>opción única, múltiple y clasificar</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+
+            <p class="soon-line">Temas 3–5 · próximamente</p>
           </section>
         </div>
       </div>

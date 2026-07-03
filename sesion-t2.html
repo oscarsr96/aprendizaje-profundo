@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 2</title>
+    <meta
+      name="description"
+      content="Tema 2 de Aprendizaje Profundo en CUNEF. Del perceptrón simple al perceptrón multicapa: la neurona artificial, topología de redes, aprendizaje y backpropagation."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 2</span>
+      </a>
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span
+        ><span id="slideTotal">0</span>
+      </div>
+      <button
+        class="topbar-pdf"
+        id="pdfBtn"
+        type="button"
+        title="Descargar como PDF (P)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- ============================================================ -->
+      <!-- 00 — PORTADA -->
+      <!-- ============================================================ -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block">
+              <span class="meta-label">Asignatura</span>
+              <span class="meta-val">Aprendizaje Profundo</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Tema</span>
+              <span class="meta-val">2 · Perceptrón multicapa</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Duración</span>
+              <span class="meta-val">~50 minutos</span>
+            </div>
+          </div>
+          <h1 class="cover-title">
+            De una neurona<br />
+            a una <em>red</em>.
+          </h1>
+          <p class="cover-sub">
+            Cómo la neurona artificial imita al sistema nervioso, cómo se
+            conecta en <em>capas</em>, cómo aprende una red y por qué el
+            perceptrón simple necesita hacerse <em>multicapa</em> para resolver
+            problemas como el XOR.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <path d="M80 110 L200 80 M80 110 L200 200 M80 110 L200 320" />
+              <path d="M80 290 L200 80 M80 290 L200 200 M80 290 L200 320" />
+              <path d="M200 80 L320 200 M200 200 L320 200 M200 320 L320 200" />
+            </g>
+            <g fill="currentColor" opacity="0.9">
+              <circle cx="80" cy="110" r="10" />
+              <circle cx="80" cy="290" r="10" />
+              <circle cx="200" cy="80" r="10" />
+              <circle cx="200" cy="200" r="10" />
+              <circle cx="200" cy="320" r="10" />
+              <circle cx="320" cy="200" r="10" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 01 — AGENDA -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li>
+              <span class="agenda-num">01</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Redes neuronales</span>
+                <span class="agenda-desc"
+                  >De la biología a la neurona artificial. Topología en capas y
+                  clasificación de redes.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">02</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Aprendizaje de la red</span>
+                <span class="agenda-desc"
+                  >El ciclo de aprendizaje, supervisado vs no supervisado y la
+                  regla delta.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">03</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Del perceptrón al MLP</span>
+                <span class="agenda-desc"
+                  >El perceptrón simple, su límite con XOR y el perceptrón
+                  multicapa con backpropagation.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">04</span>
+              <span class="agenda-time">5&prime;</span>
+              <div>
+                <span class="agenda-title">Ideas para llevarte</span>
+                <span class="agenda-desc"
+                  >Las frases que te tienen que quedar al salir del Tema 2.</span
+                >
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 02 — DIVISOR 1 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Redes neuronales">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">
+            Redes<br /><em>neuronales</em>.
+          </h2>
+          <p class="divider-sub">
+            De la inspiración en el sistema nervioso a la neurona artificial, y
+            de la neurona suelta a una <em>red organizada en capas</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 03 — Inspiración biológica -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Inspiración biológica">
+        <div class="slide-inner">
+          <span class="kicker">Inspiración biológica</span>
+          <h2 class="h2">Del <em>sistema nervioso</em> al modelo.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una red neuronal artificial es una
+                <em>simulación abstracta</em> del sistema nervioso: lo que
+                importa no es copiar la biología, sino imitar cómo las neuronas
+                y sus conexiones procesan información.
+              </p>
+              <p class="note">
+                La neurona artificial imita este esquema de forma matemática:
+                recibe, integra y transmite. Nada más… y nada menos.
+              </p>
+            </div>
+            <ul class="neuron-notes">
+              <li>
+                <strong>Dendritas</strong> · reciben las entradas →
+                <code>xᵢ</code> (las señales que llegan).
+              </li>
+              <li>
+                <strong>Cuerpo (soma)</strong> · integra lo recibido →
+                <code>Σ wᵢxᵢ + b</code> (la suma ponderada).
+              </li>
+              <li>
+                <strong>Axón</strong> · transmite la salida →
+                <code>y = f(z)</code> (la respuesta).
+              </li>
+              <li>
+                <strong>Sinapsis</strong> · la fuerza de cada conexión →
+                <code>wᵢ</code> (los pesos que se aprenden).
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 04 — ¿Por qué redes artificiales? -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Por qué redes artificiales">
+        <div class="slide-inner">
+          <span class="kicker">Más allá de la biología</span>
+          <h2 class="h2">¿Por qué redes <em>artificiales</em>?</h2>
+          <p class="lead">
+            Un sistema nervioso no posee todo el conocimiento de antemano: hay
+            que añadir funciones y conexiones. Las redes artificiales se
+            <em>diseñan para aplicaciones concretas</em> y aportan tres
+            propiedades clave.
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Auto-organización</h4>
+              <div class="fn-formula">adaptatividad</div>
+              <p>
+                Ajustan sus pesos ante nuevos datos sin reprogramar reglas a
+                mano.
+              </p>
+              <span class="fn-use">→ aprenden de la experiencia</span>
+            </div>
+            <div class="fn-card">
+              <h4>Procesado no lineal</h4>
+              <div class="fn-formula">f(·) no lineal</div>
+              <p>
+                Las activaciones capturan relaciones complejas que una recta no
+                puede describir.
+              </p>
+              <span class="fn-use">→ fronteras curvas</span>
+            </div>
+            <div class="fn-card">
+              <h4>Procesado paralelo</h4>
+              <div class="fn-formula">muchas unidades</div>
+              <p>
+                Muchas neuronas operan a la vez; el cómputo se reparte por toda
+                la red.
+              </p>
+              <span class="fn-use">→ robustez y escala</span>
+            </div>
+          </div>
+          <p class="note">
+            Estas propiedades son las que convierten una simple suma ponderada
+            en un sistema capaz de <em>aprender</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 05 — Modelo de neurona artificial -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Neurona artificial">
+        <div class="slide-inner">
+          <span class="kicker">El elemento de procesamiento</span>
+          <h2 class="h2">Modelo de <em>neurona artificial</em>.</h2>
+          <div class="neuron">
+            <svg class="neuron-svg" viewBox="0 0 420 320">
+              <!-- inputs -->
+              <circle class="n-input" cx="50" cy="60" r="22" stroke-width="1.5" />
+              <text x="50" y="65" text-anchor="middle" class="n-label">x₁</text>
+              <circle class="n-input" cx="50" cy="160" r="22" stroke-width="1.5" />
+              <text x="50" y="165" text-anchor="middle" class="n-label">x₂</text>
+              <circle class="n-input" cx="50" cy="260" r="22" stroke-width="1.5" />
+              <text x="50" y="265" text-anchor="middle" class="n-label">xᵢ</text>
+              <!-- líneas -->
+              <line class="n-line" x1="72" y1="60" x2="200" y2="155" />
+              <line class="n-line" x1="72" y1="160" x2="200" y2="160" />
+              <line class="n-line" x1="72" y1="260" x2="200" y2="165" />
+              <!-- pesos -->
+              <text x="130" y="100" class="n-w">wⱼ₁</text>
+              <text x="130" y="155" class="n-w">wⱼ₂</text>
+              <text x="130" y="225" class="n-w">wⱼᵢ</text>
+              <!-- cuerpo -->
+              <circle class="n-body" cx="240" cy="160" r="44" />
+              <text
+                x="240"
+                y="155"
+                text-anchor="middle"
+                fill="#fff"
+                font-family="JetBrains Mono"
+                font-size="13"
+                font-weight="700"
+              >
+                Σ
+              </text>
+              <text
+                x="240"
+                y="178"
+                text-anchor="middle"
+                fill="#fff"
+                font-family="Inter Tight"
+                font-style="italic"
+                font-size="11"
+              >
+                + wⱼ₀
+              </text>
+              <!-- activación -->
+              <rect x="300" y="138" width="50" height="44" rx="6" fill="#1a1f6c" />
+              <text
+                x="325"
+                y="166"
+                text-anchor="middle"
+                fill="#fff"
+                font-family="Inter Tight"
+                font-style="italic"
+                font-size="12"
+              >
+                f
+              </text>
+              <line class="n-line" x1="284" y1="160" x2="300" y2="160" />
+              <!-- salida -->
+              <line class="n-line" x1="350" y1="160" x2="395" y2="160" />
+              <text x="408" y="165" text-anchor="middle" class="n-label">yⱼ</text>
+            </svg>
+            <div>
+              <div class="neuron-equation">
+                z = Σ wⱼᵢ·xᵢ + wⱼ₀ &nbsp;→&nbsp; yⱼ = <strong>f</strong>(z)
+              </div>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Entradas</strong> <code>xᵢ</code> · ponderadas por los
+                  pesos <code>wⱼᵢ</code>, que miden su importancia.
+                </li>
+                <li>
+                  <strong>Valor neto</strong> <code>z</code> · la suma ponderada
+                  más la tendencia o sesgo <code>wⱼ₀</code> (bias).
+                </li>
+                <li>
+                  <strong>Activación</strong> <code>f</code> · comprime
+                  <code>z</code>; actúa como limitador dinámico de la salida.
+                </li>
+                <li>
+                  <strong>Salida</strong> <code>yⱼ</code> · el valor que la
+                  neurona transmite a la siguiente capa.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 06 — Topología: capas -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Topología: capas">
+        <div class="slide-inner">
+          <span class="kicker">Organización en capas</span>
+          <h2 class="h2">Neuronas conectadas en <em>capas</em>.</h2>
+          <svg
+            viewBox="0 0 720 300"
+            style="width: 100%; height: auto; margin: 8px 0 16px"
+          >
+            <g stroke="#7c80a6" stroke-width="1.2" opacity="0.55">
+              <line x1="120" y1="90" x2="330" y2="60" />
+              <line x1="120" y1="90" x2="330" y2="150" />
+              <line x1="120" y1="90" x2="330" y2="240" />
+              <line x1="120" y1="210" x2="330" y2="60" />
+              <line x1="120" y1="210" x2="330" y2="150" />
+              <line x1="120" y1="210" x2="330" y2="240" />
+              <line x1="330" y1="60" x2="560" y2="110" />
+              <line x1="330" y1="60" x2="560" y2="190" />
+              <line x1="330" y1="150" x2="560" y2="110" />
+              <line x1="330" y1="150" x2="560" y2="190" />
+              <line x1="330" y1="240" x2="560" y2="110" />
+              <line x1="330" y1="240" x2="560" y2="190" />
+            </g>
+            <g fill="#1a1f6c">
+              <circle cx="120" cy="90" r="20" />
+              <circle cx="120" cy="210" r="20" />
+            </g>
+            <g fill="#ff5700">
+              <circle cx="330" cy="60" r="20" />
+              <circle cx="330" cy="150" r="20" />
+              <circle cx="330" cy="240" r="20" />
+            </g>
+            <g fill="#0796a3">
+              <circle cx="560" cy="110" r="20" />
+              <circle cx="560" cy="190" r="20" />
+            </g>
+            <text x="120" y="270" text-anchor="middle" font-family="Inter Tight" font-size="13" fill="#7c80a6">Capa de entrada</text>
+            <text x="330" y="285" text-anchor="middle" font-family="Inter Tight" font-size="13" fill="#7c80a6">Capa(s) oculta(s)</text>
+            <text x="560" y="240" text-anchor="middle" font-family="Inter Tight" font-size="13" fill="#7c80a6">Capa de salida</text>
+          </svg>
+          <div class="two-col">
+            <p class="lead">
+              Los elementos de proceso se conectan formando <em>capas</em>. Cada
+              capa puede tener un número distinto de neuronas, y puede haber
+              tantas capas como se desee.
+            </p>
+            <p class="note">
+              Cuidado: a más capas, problemas más complejos… pero
+              <em>no siempre mejora</em> el resultado. Más profundidad también
+              es más difícil de entrenar.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 07 — Clasificación de redes -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Clasificación de redes">
+        <div class="slide-inner">
+          <span class="kicker">Cómo se clasifican</span>
+          <h2 class="h2">Dos formas de <em>ordenar</em> las redes.</h2>
+          <div class="two-col">
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">
+                Según las conexiones
+              </h3>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Totalmente conectadas</strong> · cada neurona enlaza
+                  con todas las de la capa siguiente.
+                </li>
+                <li>
+                  <strong>Localmente conectadas</strong> · cada neurona se
+                  conecta solo a una región.
+                </li>
+                <li>
+                  <strong>ACON</strong> · <em>All Class in One Network</em>:
+                  todas las clases en una red.
+                </li>
+                <li>
+                  <strong>OCON</strong> · <em>One Class in One Network</em>: una
+                  subred por clase.
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">
+                Según el flujo de información
+              </h3>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Feedforward</strong> · la salida de la capa
+                  <code>i</code> va solo a la capa <code>i+1</code>.
+                </li>
+                <li>
+                  <strong>Feedback / recurrente</strong> · hay salidas que
+                  vuelven hacia atrás (realimentación).
+                </li>
+              </ul>
+              <p class="note" style="margin-top: 18px">
+                La mayoría de redes clásicas —perceptrón, MLP— son
+                <em>feedforward</em>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 08 — Feedforward vs recurrente -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Feedforward vs recurrente">
+        <div class="slide-inner">
+          <span class="kicker">Cómo circula la señal</span>
+          <h2 class="h2">¿Hacia delante o con <em>memoria</em>?</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Feedforward</h3>
+              <div class="flow-pipe">
+                <span class="flow-tag">Entrada</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-box">Capas</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-tag">Salida</span>
+              </div>
+              <p>
+                La información avanza en un <em>único sentido</em> hacia la
+                salida. No hay bucles. El perceptrón y el MLP son de este tipo.
+              </p>
+            </div>
+            <div class="flow-card">
+              <h3>Recurrente</h3>
+              <div class="flow-pipe">
+                <span class="flow-tag">Entrada</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-box box-ml">Estado</span>
+                <span class="flow-arrow">↺</span>
+                <span class="flow-tag">Salida</span>
+              </div>
+              <p>
+                Hay <em>realimentación</em>: la red mantiene un estado interno
+                (memoria). Es la base de las redes que veremos en el Tema 3.
+              </p>
+            </div>
+          </div>
+          <p class="note">
+            En este tema nos centramos en las <em>feedforward</em>: la señal
+            entra, atraviesa las capas y sale, sin volver atrás.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 09 — DIVISOR 2 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Aprendizaje de la red">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">
+            Cómo <em>aprende</em><br />la red.
+          </h2>
+          <p class="divider-sub">
+            Presentar entradas, comparar con lo deseado y ajustar los pesos.
+            Ese es, en esencia, todo el <em>aprendizaje</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 10 — Ciclo de aprendizaje -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Ciclo de aprendizaje">
+        <div class="slide-inner">
+          <span class="kicker">Estructura de un sistema de aprendizaje</span>
+          <h2 class="h2">El <em>ciclo</em> de aprendizaje.</h2>
+          <div class="train-loop">
+            <div class="tl-step">
+              <span class="tl-num">01 · Entrada</span>
+              <h4>Se presenta un ejemplo</h4>
+              <p>
+                Un dato <code>x</code> entra en la red y la atraviesa capa a
+                capa.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">02 · Salida</span>
+              <h4>La red responde</h4>
+              <p>
+                La red produce una salida <code>y</code> con sus pesos
+                actuales.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">03 · Comparador</span>
+              <h4>¿Cuánto ha fallado?</h4>
+              <p>
+                Un comparador enfrenta <code>y</code> con la salida deseada
+                <code>d</code> y mide el error.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">04 · Actualizar</span>
+              <h4>Ajustar los pesos</h4>
+              <p>
+                Se corrigen los pesos según el error… y se repite el ciclo con
+                el siguiente ejemplo.
+              </p>
+            </div>
+          </div>
+          <p class="note">
+            Entrada → salida → comparación → actualización. Ese bucle, repetido
+            muchas veces, es lo que llamamos <em>entrenar</em> una red.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 11 — Tipos de aprendizaje -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Tipos de aprendizaje">
+        <div class="slide-inner">
+          <span class="kicker">Con o sin profesor</span>
+          <h2 class="h2">Dos familias de <em>aprendizaje</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Supervisado</h3>
+              <p>
+                Necesita un <em>"profesor"</em> que indique la salida correcta
+                para cada ejemplo.
+              </p>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Por corrección de error</strong> · ajusta pesos según
+                  la diferencia (regla delta).
+                </li>
+                <li>
+                  <strong>Por refuerzo</strong> · una señal mide si el
+                  comportamiento es bueno.
+                </li>
+                <li>
+                  <strong>Estocástico</strong> · cambios aleatorios guiados por
+                  una función de energía.
+                </li>
+              </ul>
+            </div>
+            <div class="flow-card">
+              <h3>No supervisado</h3>
+              <p>
+                No hay intervención externa: nadie dice si la salida es
+                correcta. También llamado <em>auto-supervisado</em>.
+              </p>
+              <ul class="neuron-notes">
+                <li>Busca <strong>características</strong> en los datos.</li>
+                <li>Detecta <strong>regularidades</strong> y correlaciones.</li>
+                <li>Descubre <strong>categorías</strong> por sí solo.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 12 — Regla delta -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Regla delta">
+        <div class="slide-inner">
+          <span class="kicker">Aprendizaje por corrección de error</span>
+          <h2 class="h2">La <em>regla delta</em>.</h2>
+          <p class="lead">
+            Es el esquema supervisado más habitual: se actualizan los pesos en
+            proporción al error cometido, ejemplo a ejemplo, hasta minimizarlo.
+          </p>
+          <div class="neuron-equation" style="font-size: clamp(20px, 3vw, 30px); text-align: center; margin: 18px 0">
+            Δwᵢ = <strong>η</strong> · ( d − y ) · xᵢ
+          </div>
+          <ul class="neuron-notes">
+            <li>
+              <strong>d</strong> · la salida <em>deseada</em> (lo que el
+              profesor dice que debería salir).
+            </li>
+            <li>
+              <strong>y</strong> · la salida <em>real</em> que ha producido la
+              neurona.
+            </li>
+            <li>
+              <strong>(d − y)</strong> · el <em>error</em>: si es 0, el peso no
+              cambia.
+            </li>
+            <li>
+              <strong>η</strong> · la <em>tasa de aprendizaje</em>: cuánto nos
+              movemos en cada paso.
+            </li>
+            <li>
+              <strong>xᵢ</strong> · solo se corrigen los pesos de las entradas
+              que estaban activas.
+            </li>
+          </ul>
+          <p class="note">
+            Se repite hasta que el error deja de bajar. Es la generalización de
+            esta regla la que, más adelante, hace posible el MLP.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 13 — DIVISOR 3 -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Del perceptrón al MLP">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">
+            Del perceptrón<br />al <em>multicapa</em>.
+          </h2>
+          <p class="divider-sub">
+            Una sola neurona tiene un límite muy claro. Añadir
+            <em>capas ocultas</em> lo rompe… y ahí nace el deep learning.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 14 — El perceptrón simple -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="El perceptrón simple">
+        <div class="slide-inner">
+          <span class="kicker">Una sola neurona</span>
+          <h2 class="h2">El <em>perceptrón</em> simple.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una red con una <em>única neurona</em> y un umbral de activación.
+                Calcula la salida a partir del valor de entrada ponderado.
+              </p>
+              <ul class="neuron-notes">
+                <li>
+                  Si <code>Σ wᵢxᵢ + b</code> supera el <strong>umbral</strong> →
+                  salida 1; si no → 0.
+                </li>
+                <li>
+                  Sus pesos se ajustan con la <strong>regla delta</strong>.
+                </li>
+                <li>
+                  Solo resuelve problemas
+                  <strong>linealmente separables</strong>.
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div class="prompt-box">
+                <div class="prompt-head">
+                  <span class="prompt-dot prompt-dot-good"></span>
+                  AND · linealmente separable
+                </div>
+                <div class="prompt-good">
+                  <div class="prompt-text">
+                    <span class="pt-c">(0,0) → 0 &nbsp; (0,1) → 0</span>
+                    <span class="pt-c">(1,0) → 0 &nbsp; (1,1) → 1</span>
+                    <span class="pt-t">una recta separa el único "1"</span>
+                    <span class="pt-f"
+                      >el perceptrón <strong>lo resuelve</strong></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 15 — La limitación: XOR -->
+      <!-- ============================================================ -->
+      <section class="slide slide-exercise" data-title="El problema XOR">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">La limitación</span>
+          <h2 class="h2 h2-ex">Lo que el perceptrón <em>no puede</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El problema <strong>XOR</strong> ("uno u otro, pero no ambos")
+                no es linealmente separable: <em>ninguna recta</em> separa los
+                unos de los ceros.
+              </p>
+              <svg viewBox="0 0 240 240" style="width: 100%; max-width: 260px; height: auto">
+                <rect x="30" y="20" width="180" height="180" fill="none" stroke="#c9c3b3" stroke-width="1" />
+                <line x1="30" y1="200" x2="210" y2="200" stroke="#1a1f6c" stroke-width="1.5" />
+                <line x1="30" y1="20" x2="30" y2="200" stroke="#1a1f6c" stroke-width="1.5" />
+                <!-- clase 0 (círculos) en (0,0) y (1,1) -->
+                <circle cx="30" cy="200" r="12" fill="none" stroke="#1a1f6c" stroke-width="2.5" />
+                <circle cx="210" cy="20" r="12" fill="none" stroke="#1a1f6c" stroke-width="2.5" />
+                <!-- clase 1 (cruces) en (0,1) y (1,0) -->
+                <g stroke="#ff5700" stroke-width="3" stroke-linecap="round">
+                  <line x1="22" y1="12" x2="38" y2="28" /><line x1="38" y1="12" x2="22" y2="28" />
+                  <line x1="202" y1="192" x2="218" y2="208" /><line x1="218" y1="192" x2="202" y2="208" />
+                </g>
+                <text x="16" y="216" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">0,0</text>
+                <text x="196" y="216" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">1,0</text>
+                <text x="196" y="14" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">1,1</text>
+              </svg>
+            </div>
+            <div>
+              <div class="prompt-box">
+                <div class="prompt-head">
+                  <span class="prompt-dot"></span>
+                  XOR · tabla de verdad
+                </div>
+                <div class="prompt-good">
+                  <div class="prompt-text">
+                    <span class="pt-c">(0,0) → 0 &nbsp;·&nbsp; (1,1) → 0</span>
+                    <span class="pt-c">(0,1) → 1 &nbsp;·&nbsp; (1,0) → 1</span>
+                    <span class="pt-t">
+                      una sola recta no separa las clases
+                    </span>
+                    <span class="pt-f"
+                      >el perceptrón simple <strong>fracasa</strong></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <p class="note" style="margin-top: 20px">
+                La solución: <em>añadir capas ocultas</em> que transformen el
+                espacio hasta que el problema sí sea separable. Así nace el
+                <strong>perceptrón multicapa (MLP)</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 16 — Perceptrón multicapa + backpropagation -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Perceptrón multicapa">
+        <div class="slide-inner">
+          <span class="kicker">Una red con capas ocultas</span>
+          <h2 class="h2">El perceptrón <em>multicapa</em>.</h2>
+          <svg
+            viewBox="0 0 720 340"
+            style="width: 100%; height: auto; margin: 4px 0 14px"
+          >
+            <g stroke="#7c80a6" stroke-width="1.2" opacity="0.55">
+              <line x1="120" y1="90" x2="330" y2="60" />
+              <line x1="120" y1="90" x2="330" y2="150" />
+              <line x1="120" y1="90" x2="330" y2="240" />
+              <line x1="120" y1="210" x2="330" y2="60" />
+              <line x1="120" y1="210" x2="330" y2="150" />
+              <line x1="120" y1="210" x2="330" y2="240" />
+              <line x1="330" y1="60" x2="560" y2="150" />
+              <line x1="330" y1="150" x2="560" y2="150" />
+              <line x1="330" y1="240" x2="560" y2="150" />
+            </g>
+            <g fill="#1a1f6c">
+              <circle cx="120" cy="90" r="20" />
+              <circle cx="120" cy="210" r="20" />
+            </g>
+            <g fill="#ff5700">
+              <circle cx="330" cy="60" r="20" />
+              <circle cx="330" cy="150" r="20" />
+              <circle cx="330" cy="240" r="20" />
+            </g>
+            <g fill="#0796a3">
+              <circle cx="560" cy="150" r="20" />
+            </g>
+            <!-- etiquetas de capa -->
+            <text x="120" y="272" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">entrada</text>
+            <text x="330" y="292" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">capa oculta</text>
+            <text x="560" y="192" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">salida</text>
+            <!-- flecha backpropagation -->
+            <path
+              d="M 560 182 Q 340 335 120 240"
+              stroke="#c8410f"
+              stroke-width="2"
+              fill="none"
+              stroke-dasharray="5,4"
+            />
+            <text x="345" y="330" text-anchor="middle" font-family="Inter Tight" font-style="italic" font-size="12" fill="#c8410f">
+              backpropagation · propaga el error hacia atrás
+            </text>
+          </svg>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li>
+                Red <strong>feedforward</strong> con una o más
+                <strong>capas ocultas</strong>.
+              </li>
+              <li>
+                Combina activaciones no lineales para aprender
+                <strong>fronteras complejas</strong> (¡adiós al límite del
+                XOR!).
+              </li>
+              <li>
+                Se entrena con la <strong>generalización de la regla delta</strong>.
+              </li>
+            </ul>
+            <ul class="neuron-notes">
+              <li>
+                <strong>Backpropagation</strong> · propaga el error de la salida
+                hacia atrás para ajustar todos los pesos.
+              </li>
+              <li>
+                Cada capa oculta <strong>transforma el espacio</strong> de
+                representación.
+              </li>
+              <li>
+                Con suficientes neuronas aproxima
+                <strong>cualquier función</strong> (aproximador universal): la
+                base de las redes profundas actuales.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 17 — Ideas para llevarte -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 2</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item">
+              <span class="close-num">01 · NEURONA</span>
+              <h3>Suma ponderada + activación</h3>
+              <p>
+                La neurona artificial suma sus entradas por pesos, añade el
+                sesgo y aplica una activación no lineal.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">02 · RED</span>
+              <h3>Capas, conexiones y flujo</h3>
+              <p>
+                Las neuronas se organizan en capas y las redes se clasifican por
+                sus conexiones y por cómo circula la señal.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">03 · APRENDER</span>
+              <h3>Regla delta y backpropagation</h3>
+              <p>
+                El perceptrón simple solo separa linealmente; el MLP lo supera
+                con capas ocultas y backpropagation.
+              </p>
+            </div>
+          </div>
+          <div class="close-next">
+            <span>Siguiente · Tema 3</span>
+            <span
+              >Redes recurrentes y LSTM — qué pasa cuando la red necesita
+              memoria y los datos llegan en secuencia.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 18 — Cierre -->
+      <!-- ============================================================ -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 2</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">
+            Para afianzar el tema antes de la próxima sesión:
+          </p>
+          <ul class="proj-list">
+            <li>
+              <strong>Ejercicios</strong> — región rectangular y triángulo con
+              MLP (en Materiales del Tema 2).
+            </li>
+            <li>
+              <strong>Chollet, F.</strong> — <em>Deep Learning with Python</em>,
+              capítulos sobre redes densas y backpropagation.
+            </li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./index.html">
+              <span class="close-cta-eyebrow">Volver al inicio</span>
+              <span class="close-cta-title"
+                >Ver todos los temas
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">Tema 3, 4 y 5 en preparación.</span>
+            </a>
+            <a class="close-cta" href="./repaso-t2.html">
+              <span class="close-cta-eyebrow">Ponerte a prueba</span>
+              <span class="close-cta-title"
+                >Repaso del Tema 2
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">10 retos autocorregibles.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- CONTROLES FLOTANTES -->
+    <div class="controls">
+      <button
+        class="ctrl"
+        id="prevBtn"
+        type="button"
+        title="Anterior (←)"
+        aria-label="Slide anterior"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="ctrl"
+        id="nextBtn"
+        type="button"
+        title="Siguiente (→)"
+        aria-label="Slide siguiente"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 6l6 6-6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- AYUDA -->
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
