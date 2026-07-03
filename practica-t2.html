@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 2 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 2 de Aprendizaje Profundo: construye regiones del plano con perceptrones. Cada neurona es una recta; la salida hace el AND. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c;
+        --ink-soft: #3b4080;
+        --ink-mute: #7c80a6;
+        --paper: #ffffff;
+        --paper-warm: #f0ebdd;
+        --accent: #ff5700;
+        --accent-deep: #c8410f;
+        --gold: #fe961f;
+        --line: #e2ded0;
+        --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif;
+        --sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scrollbar-gutter: stable;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        background-image:
+          radial-gradient(
+            ellipse at 15% 8%,
+            rgba(26, 31, 108, 0.05) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 88% 92%,
+            rgba(255, 87, 0, 0.045) 0%,
+            transparent 55%
+          );
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+
+      /* ---------- TOPBAR ---------- */
+      .bar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 28px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .bar a.brand {
+        display: flex;
+        align-items: center;
+      }
+      .bar-logo {
+        height: 26px;
+        width: auto;
+        display: block;
+      }
+      .bar-sub {
+        color: var(--ink-mute);
+      }
+      .bar-tag {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent-deep);
+        background: rgba(255, 87, 0, 0.1);
+        padding: 4px 11px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      /* ---------- LAYOUT ---------- */
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 42px 24px 90px;
+      }
+      .kicker {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border-bottom: 1px solid var(--accent);
+        padding-bottom: 6px;
+        display: inline-block;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(34px, 6vw, 56px);
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin: 18px 0 14px;
+      }
+      h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .lead {
+        font-size: clamp(15px, 2vw, 18px);
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 62ch;
+      }
+      .lead code,
+      p code {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        background: rgba(26, 31, 108, 0.06);
+        padding: 1px 6px;
+        border-radius: 5px;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(24px, 3.4vw, 34px);
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      h2.section-title em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .band {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 54px 0 18px;
+      }
+      .band .num {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        color: var(--ink-mute);
+        white-space: nowrap;
+      }
+      .band .rule {
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      /* ---------- TOOLBAR ---------- */
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0 20px;
+      }
+      .seg {
+        display: inline-flex;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .seg button {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: #fff;
+        border: none;
+        padding: 10px 18px;
+        cursor: pointer;
+        transition: background 0.16s ease, color 0.16s ease;
+      }
+      .seg button + button {
+        border-left: 1.5px solid var(--line);
+      }
+      .seg button.active {
+        background: var(--ink);
+        color: #fff;
+      }
+      .btn {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 600;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 18px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        transition: transform 0.12s ease, border-color 0.16s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--ink-mute);
+      }
+      .btn-accent {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+        box-shadow: 0 6px 16px rgba(255, 87, 0, 0.25);
+      }
+      .btn-accent:hover {
+        border-color: var(--accent);
+      }
+
+      /* ---------- STAGE ---------- */
+      .stage {
+        display: grid;
+        grid-template-columns: 460px 1fr;
+        gap: 26px;
+        align-items: start;
+      }
+      @media (max-width: 880px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+      .canvas-card {
+        background: #fbfaf6;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 14px 40px rgba(26, 31, 108, 0.06);
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 8px;
+        background: #fff;
+      }
+      .canvas-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--ink-mute);
+      }
+      .canvas-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .swatch.region {
+        background: rgba(255, 87, 0, 0.32);
+        border: 1px solid var(--accent);
+      }
+      .swatch.target {
+        background: transparent;
+        border: 1.5px dashed var(--ink);
+      }
+
+      /* ---------- CONTROL PANEL ---------- */
+      .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .out-readout {
+        background: var(--ink);
+        color: #fff;
+        border-radius: 12px;
+        padding: 14px 18px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .out-readout .eq {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--gold);
+        margin-top: 4px;
+        display: block;
+      }
+      .out-readout b {
+        color: #fff;
+      }
+      .neuron {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 13px 15px;
+        background: #fff;
+      }
+      .neuron.off {
+        opacity: 0.5;
+      }
+      .neuron-head {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 8px;
+      }
+      .neuron-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+      .neuron-name {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .neuron-eq {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-mute);
+        margin-left: auto;
+      }
+      .neuron-toggle {
+        margin-left: 8px;
+        border: 1.5px solid var(--line);
+        background: #fff;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ink-mute);
+        padding: 3px 10px;
+        cursor: pointer;
+      }
+      .neuron-toggle.on {
+        background: rgba(7, 150, 163, 0.12);
+        border-color: var(--ok);
+        color: var(--ok);
+      }
+      .slider-row {
+        display: grid;
+        grid-template-columns: 34px 1fr 46px;
+        align-items: center;
+        gap: 10px;
+        margin: 6px 0;
+      }
+      .slider-row label {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-soft);
+      }
+      .slider-row input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+      .slider-row .val {
+        font-family: var(--mono);
+        font-size: 12px;
+        text-align: right;
+        color: var(--ink);
+      }
+      .panel-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .hint {
+        font-size: 13px;
+        color: var(--ink-mute);
+        line-height: 1.5;
+      }
+      .hint strong {
+        color: var(--ok);
+      }
+
+      /* ---------- CODE ---------- */
+      .code-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      @media (max-width: 880px) {
+        .code-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      pre.code {
+        background: #101340;
+        color: #eef0f6;
+        border-radius: 12px;
+        padding: 18px 20px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      pre.code .cm {
+        color: #7c80a6;
+      }
+      pre.code .kw {
+        color: var(--gold);
+      }
+      pre.code .fn {
+        color: #4fd1c5;
+      }
+      .code-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        margin-bottom: 8px;
+      }
+      .note {
+        border-left: 4px solid var(--ok);
+        background: rgba(7, 150, 163, 0.06);
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        margin-top: 14px;
+      }
+
+      /* ---------- RETOS ---------- */
+      .retos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .retos {
+          grid-template-columns: 1fr;
+        }
+      }
+      .reto {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #fbfaf6;
+      }
+      .reto h4 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 19px;
+        margin-bottom: 6px;
+      }
+      .reto p {
+        font-size: 14px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+      .reto .tag {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--accent-deep);
+        letter-spacing: 0.05em;
+      }
+
+      /* ---------- CLOSE ---------- */
+      .close-cta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 20px;
+      }
+      @media (max-width: 620px) {
+        .close-cta-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .close-cta {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 20px 22px;
+        text-decoration: none;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: border-color 0.18s ease, transform 0.16s ease;
+      }
+      .close-cta:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .close-cta .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+      }
+      .close-cta .title {
+        font-family: var(--serif);
+        font-size: 20px;
+        font-weight: 500;
+      }
+      footer {
+        margin-top: 60px;
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--ink-mute);
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      footer a {
+        color: var(--ink-mute);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 2</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <!-- INTRO -->
+      <section>
+        <span class="kicker">Tema 2 · Práctica</span>
+        <h1>Construye regiones con <em>perceptrones</em>.</h1>
+        <p class="lead">
+          Cada neurona escalón <code>step(w₁·x₁ + w₂·x₂ + b)</code> parte el
+          plano en dos: una recta y el semiplano que activa. Si apilas varias en
+          una capa oculta y la neurona de salida hace el <strong>AND</strong>,
+          obtienes una <em>región</em>. Mueve los pesos y compruébalo en vivo —
+          es justo lo que hace una capa oculta: <em>transformar el espacio</em>.
+        </p>
+      </section>
+
+      <!-- BLOQUE 1 -->
+      <div class="band">
+        <span class="num">— 01 · DISEÑO GEOMÉTRICO —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">Una neurona = una <em>recta</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        Elige un ejercicio. El sombreado naranja marca dónde la red da
+        <code>salida = 1</code>; el contorno discontinuo es la región objetivo.
+      </p>
+
+      <div class="toolbar">
+        <div class="seg" id="exSeg">
+          <button data-ex="rect" class="active">Rectángulo</button>
+          <button data-ex="tri">Triángulo</button>
+          <button data-ex="free">Libre</button>
+        </div>
+        <button class="btn btn-accent" id="solBtn">↺ Solución</button>
+        <button class="btn" id="addBtn" hidden>+ neurona</button>
+      </div>
+
+      <div class="stage">
+        <div class="canvas-card">
+          <canvas id="plot" width="440" height="440"></canvas>
+          <div class="canvas-legend">
+            <span><span class="swatch region"></span> salida = 1 (AND)</span>
+            <span><span class="swatch target"></span> región objetivo</span>
+            <span id="legendLines"></span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="out-readout">
+            <b>Neurona de salida · AND</b> de <span id="outN">4</span>
+            semiplanos.
+            <span class="eq" id="outEq">y = step(h₁+h₂+h₃+h₄ − 3.5)</span>
+          </div>
+          <div id="neurons"></div>
+          <p class="hint" id="exHint"></p>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2 -->
+      <div class="band">
+        <span class="num">— 02 · EL MISMO DISEÑO EN CÓDIGO —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">De la pizarra al <em>código</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        El diseño que acabas de construir es, literalmente, un perceptrón
+        multicapa con pesos fijados a mano. Así se escribe con NumPy — y así se
+        entrenaría de verdad con Keras.
+      </p>
+
+      <div class="code-grid" style="margin-top: 18px">
+        <div>
+          <div class="code-label">NumPy · tu diseño actual</div>
+          <pre class="code" id="codeNumpy"></pre>
+          <div class="note">
+            Este código reproduce <em>exactamente</em> la región dibujada: los
+            pesos son los que tú has puesto. Cambia un slider y vuelve aquí — el
+            código cambia contigo.
+          </div>
+        </div>
+        <div>
+          <div class="code-label">Keras · y con entrenamiento</div>
+          <pre class="code" id="codeKeras"></pre>
+          <div class="note">
+            El escalón no es derivable, así que <em>no</em> se puede entrenar con
+            gradientes. En la práctica se usa una activación suave (ReLU,
+            sigmoide) y <strong>backpropagation</strong> descubre pesos
+            parecidos a los que tú fijaste a mano.
+          </div>
+        </div>
+      </div>
+
+      <!-- RETOS -->
+      <div class="band">
+        <span class="num">— 03 · TUS RETOS —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        En el modo <strong>Libre</strong>, añade neuronas y diseña estas
+        regiones. Pista: cada lado es una recta.
+      </p>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto">
+          <span class="tag">2 neuronas</span>
+          <h4>Una banda</h4>
+          <p>
+            La franja <code>1 ≤ x₂ ≤ 2</code> (dos rectas horizontales
+            paralelas). ¿Qué pesos y bias necesitas?
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">4 neuronas</span>
+          <h4>Un rombo</h4>
+          <p>
+            Un cuadrado girado 45° centrado en (1.5, 1). Cuatro rectas
+            diagonales: <code>±x₁ ± x₂</code>.
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">Reflexiona</span>
+          <h4>¿Y el XOR?</h4>
+          <p>
+            El AND solo da regiones <em>convexas</em>. El XOR no lo es: hace
+            falta combinar regiones. ¿Cómo lo harías con dos capas?
+          </p>
+        </div>
+      </div>
+
+      <div class="band">
+        <span class="num">— SIGUIENTE —</span>
+        <span class="rule"></span>
+      </div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t2.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Perceptrón multicapa →</span>
+        </a>
+        <a class="close-cta" href="./repaso-t2.html">
+          <span class="eyebrow">Ponerte a prueba</span>
+          <span class="title">Repaso del Tema 2 →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 2 — regiones con perceptrones
+      // =====================================================
+      const canvas = document.getElementById("plot");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+
+      // Rango del plano
+      const XMIN = -1,
+        XMAX = 4,
+        YMIN = -1,
+        YMAX = 4;
+
+      const COLORS = [
+        "#ff5700",
+        "#0796a3",
+        "#fe961f",
+        "#1a1f6c",
+        "#8b5cf6",
+        "#2aa775",
+      ];
+
+      // Soluciones de referencia (de los PDFs)
+      const SOLUTIONS = {
+        rect: [
+          { w1: 1, w2: 0, b: -1 },
+          { w1: -1, w2: 0, b: 3 },
+          { w1: 0, w2: 1, b: 0 },
+          { w1: 0, w2: -1, b: 2 },
+        ],
+        tri: [
+          { w1: 0, w2: -1, b: 2 },
+          { w1: 1, w2: 1, b: -2 },
+          { w1: -1, w2: 1, b: 0 },
+        ],
+        free: [{ w1: 1, w2: 0, b: -1 }],
+      };
+
+      // Contornos objetivo
+      const TARGETS = {
+        rect: [
+          [1, 0],
+          [3, 0],
+          [3, 2],
+          [1, 2],
+        ],
+        tri: [
+          [0, 2],
+          [1, 1],
+          [2, 2],
+        ],
+        free: null,
+      };
+
+      const HINTS = {
+        rect:
+          "Objetivo: activar solo dentro del rectángulo <strong>1 ≤ x₁ ≤ 3, 0 ≤ x₂ ≤ 2</strong>. Son 4 desigualdades → 4 neuronas. Perturba un slider y pulsa <strong>Solución</strong> para volver.",
+        tri:
+          "Objetivo: el triángulo de vértices <strong>(0,2), (1,1), (2,2)</strong>. Tres lados → 3 neuronas. Fíjate en la recta <code>x₂ = x₁</code>.",
+        free:
+          "Modo libre: añade neuronas con <strong>+ neurona</strong> y diseña tu propia región. Prueba los retos de abajo.",
+      };
+
+      let exercise = "rect";
+      let neurons = clone(SOLUTIONS.rect);
+
+      function clone(a) {
+        return a.map((n) => ({ ...n, on: true }));
+      }
+
+      // ---- transformaciones de coordenadas ----
+      function px(dx) {
+        return ((dx - XMIN) / (XMAX - XMIN)) * W;
+      }
+      function py(dy) {
+        return H - ((dy - YMIN) / (YMAX - YMIN)) * H;
+      }
+
+      // ---- modelo ----
+      function step(z) {
+        return z >= 0 ? 1 : 0;
+      }
+      function output(dx, dy) {
+        const act = neurons.filter((n) => n.on);
+        if (!act.length) return 0;
+        let s = 0;
+        for (const n of act) s += step(n.w1 * dx + n.w2 * dy + n.b);
+        return s >= act.length - 0.5 ? 1 : 0;
+      }
+
+      // ---- render ----
+      let raf = null;
+      function requestRender() {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = null;
+          render();
+        });
+      }
+
+      function render() {
+        // 1. región (ImageData)
+        const img = ctx.createImageData(W, H);
+        const d = img.data;
+        for (let j = 0; j < H; j++) {
+          const dy = YMIN + ((H - j) / H) * (YMAX - YMIN);
+          for (let i = 0; i < W; i++) {
+            const dx = XMIN + (i / W) * (XMAX - XMIN);
+            const idx = (j * W + i) * 4;
+            if (output(dx, dy)) {
+              d[idx] = 255;
+              d[idx + 1] = 87;
+              d[idx + 2] = 0;
+              d[idx + 3] = 82;
+            } else {
+              d[idx + 3] = 0;
+            }
+          }
+        }
+        ctx.clearRect(0, 0, W, H);
+        ctx.putImageData(img, 0, 0);
+
+        // 2. rejilla
+        ctx.strokeStyle = "rgba(26,31,108,0.08)";
+        ctx.lineWidth = 1;
+        for (let v = Math.ceil(XMIN); v <= XMAX; v++) {
+          ctx.beginPath();
+          ctx.moveTo(px(v), 0);
+          ctx.lineTo(px(v), H);
+          ctx.stroke();
+        }
+        for (let v = Math.ceil(YMIN); v <= YMAX; v++) {
+          ctx.beginPath();
+          ctx.moveTo(0, py(v));
+          ctx.lineTo(W, py(v));
+          ctx.stroke();
+        }
+        // ejes
+        ctx.strokeStyle = "rgba(26,31,108,0.55)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px(XMIN), py(0));
+        ctx.lineTo(px(XMAX), py(0));
+        ctx.moveTo(px(0), py(YMIN));
+        ctx.lineTo(px(0), py(YMAX));
+        ctx.stroke();
+        ctx.fillStyle = "#7c80a6";
+        ctx.font = "12px 'JetBrains Mono', monospace";
+        ctx.fillText("x₁", W - 18, py(0) - 6);
+        ctx.fillText("x₂", px(0) + 6, 14);
+
+        // 3. rectas de cada neurona activa
+        neurons.forEach((n, k) => {
+          if (!n.on) return;
+          const col = COLORS[k % COLORS.length];
+          drawLine(n, col);
+        });
+
+        // 4. contorno objetivo
+        const tgt = TARGETS[exercise];
+        if (tgt) {
+          ctx.strokeStyle = "rgba(26,31,108,0.9)";
+          ctx.setLineDash([7, 5]);
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          tgt.forEach((p, i) => {
+            const X = px(p[0]),
+              Y = py(p[1]);
+            if (i === 0) ctx.moveTo(X, Y);
+            else ctx.lineTo(X, Y);
+          });
+          ctx.closePath();
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      function drawLine(n, col) {
+        // w1*x1 + w2*x2 + b = 0
+        let p1, p2;
+        if (Math.abs(n.w2) > 1e-9) {
+          const y1 = -(n.w1 * XMIN + n.b) / n.w2;
+          const y2 = -(n.w1 * XMAX + n.b) / n.w2;
+          p1 = [XMIN, y1];
+          p2 = [XMAX, y2];
+        } else if (Math.abs(n.w1) > 1e-9) {
+          const x = -n.b / n.w1;
+          p1 = [x, YMIN];
+          p2 = [x, YMAX];
+        } else {
+          return; // w1=w2=0, sin recta
+        }
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(px(p1[0]), py(p1[1]));
+        ctx.lineTo(px(p2[0]), py(p2[1]));
+        ctx.stroke();
+      }
+
+      // ---- panel de neuronas ----
+      const neuronsEl = document.getElementById("neurons");
+      const SUB = ["₁", "₂", "₃", "₄", "₅", "₆"];
+
+      function fmt(v) {
+        return Number.isInteger(v) ? String(v) : v.toFixed(1);
+      }
+
+      function neuronEq(n) {
+        return `step(${fmt(n.w1)}·x₁ + ${fmt(n.w2)}·x₂ + ${fmt(n.b)})`;
+      }
+
+      function buildPanel() {
+        neuronsEl.innerHTML = "";
+        neurons.forEach((n, k) => {
+          const col = COLORS[k % COLORS.length];
+          const card = document.createElement("div");
+          card.className = "neuron" + (n.on ? "" : " off");
+          card.innerHTML = `
+            <div class="neuron-head">
+              <span class="neuron-dot" style="background:${col}"></span>
+              <span class="neuron-name">h${SUB[k] || k + 1}</span>
+              <span class="neuron-eq">${neuronEq(n)}</span>
+              <button class="neuron-toggle ${n.on ? "on" : ""}">${
+                n.on ? "activa" : "off"
+              }</button>
+            </div>
+            ${sliderRow(k, "w1", "w₁", -3, 3, 0.5, n.w1)}
+            ${sliderRow(k, "w2", "w₂", -3, 3, 0.5, n.w2)}
+            ${sliderRow(k, "b", "b", -5, 5, 0.5, n.b)}
+            ${
+              exercise === "free" && neurons.length > 1
+                ? `<button class="neuron-toggle" data-del="${k}" style="margin-left:0;margin-top:6px">quitar</button>`
+                : ""
+            }
+          `;
+          // toggle activa/off
+          card
+            .querySelector(".neuron-toggle")
+            .addEventListener("click", () => {
+              n.on = !n.on;
+              buildPanel();
+              updateAll();
+            });
+          // sliders
+          card.querySelectorAll("input[type=range]").forEach((inp) => {
+            inp.addEventListener("input", () => {
+              const key = inp.dataset.k;
+              n[key] = parseFloat(inp.value);
+              card.querySelector(`.val[data-v="${key}"]`).textContent = fmt(
+                n[key],
+              );
+              card.querySelector(".neuron-eq").textContent = neuronEq(n);
+              updateAll();
+            });
+          });
+          // quitar (modo libre)
+          const del = card.querySelector("[data-del]");
+          if (del)
+            del.addEventListener("click", () => {
+              neurons.splice(k, 1);
+              buildPanel();
+              updateAll();
+            });
+          neuronsEl.appendChild(card);
+        });
+      }
+
+      function sliderRow(k, key, label, min, max, stepv, val) {
+        return `
+          <div class="slider-row">
+            <label>${label}</label>
+            <input type="range" data-k="${key}" min="${min}" max="${max}" step="${stepv}" value="${val}" />
+            <span class="val" data-v="${key}">${fmt(val)}</span>
+          </div>`;
+      }
+
+      // ---- salida / código ----
+      const outN = document.getElementById("outN");
+      const outEq = document.getElementById("outEq");
+      const legendLines = document.getElementById("legendLines");
+      const codeNumpy = document.getElementById("codeNumpy");
+      const codeKeras = document.getElementById("codeKeras");
+
+      function updateAll() {
+        const act = neurons.filter((n) => n.on);
+        const n = act.length;
+        outN.textContent = n;
+        const terms = act.map((_, i) => "h" + (SUB[i] || i + 1)).join("+");
+        outEq.textContent = `y = step(${terms || "0"} − ${fmt(
+          Math.max(n - 0.5, 0),
+        )})`;
+        legendLines.innerHTML = neurons
+          .map((nn, k) =>
+            nn.on
+              ? `<span><span class="swatch" style="background:${
+                  COLORS[k % COLORS.length]
+                }"></span> h${SUB[k] || k + 1}</span>`
+              : "",
+          )
+          .join("");
+        renderCode(act, n);
+        requestRender();
+      }
+
+      function renderCode(act, n) {
+        const Wrows = act
+          .map((nn) => `[${fmt(nn.w1)}, ${fmt(nn.w2)}]`)
+          .join(", ");
+        const B = act.map((nn) => fmt(nn.b)).join(", ");
+        const thr = fmt(Math.max(n - 0.5, 0));
+        codeNumpy.innerHTML =
+          `<span class="kw">import</span> numpy <span class="kw">as</span> np\n\n` +
+          `<span class="kw">def</span> <span class="fn">step</span>(z):\n` +
+          `    <span class="kw">return</span> (z &gt;= 0).astype(int)\n\n` +
+          `<span class="cm"># ${n} neurona(s) oculta(s): una recta cada una</span>\n` +
+          `W = np.array([${Wrows}])\n` +
+          `b = np.array([${B}])\n\n` +
+          `<span class="kw">def</span> <span class="fn">red</span>(x):            <span class="cm"># x = [x1, x2]</span>\n` +
+          `    h = <span class="fn">step</span>(W @ x + b)      <span class="cm"># semiplanos</span>\n` +
+          `    <span class="kw">return</span> <span class="fn">step</span>(h.sum() - ${thr})  <span class="cm"># AND</span>`;
+      }
+
+      codeKeras.innerHTML =
+        `<span class="kw">from</span> tensorflow <span class="kw">import</span> keras\n` +
+        `<span class="kw">from</span> keras <span class="kw">import</span> layers\n\n` +
+        `model = keras.<span class="fn">Sequential</span>([\n` +
+        `    layers.<span class="fn">Dense</span>(4, activation=<span class="cm">"relu"</span>, input_shape=(2,)),\n` +
+        `    layers.<span class="fn">Dense</span>(1, activation=<span class="cm">"sigmoid"</span>),\n` +
+        `])\n` +
+        `model.<span class="fn">compile</span>(optimizer=<span class="cm">"adam"</span>,\n` +
+        `              loss=<span class="cm">"binary_crossentropy"</span>)\n` +
+        `model.<span class="fn">fit</span>(X, y, epochs=200)`;
+
+      // ---- controles globales ----
+      const exHint = document.getElementById("exHint");
+      const addBtn = document.getElementById("addBtn");
+
+      function loadExercise(ex) {
+        exercise = ex;
+        neurons = clone(SOLUTIONS[ex]);
+        exHint.innerHTML = HINTS[ex];
+        addBtn.hidden = ex !== "free";
+        buildPanel();
+        updateAll();
+      }
+
+      document.getElementById("exSeg").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-ex]");
+        if (!btn) return;
+        document
+          .querySelectorAll("#exSeg button")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        loadExercise(btn.dataset.ex);
+      });
+
+      document.getElementById("solBtn").addEventListener("click", () => {
+        neurons = clone(SOLUTIONS[exercise]);
+        buildPanel();
+        updateAll();
+      });
+
+      addBtn.addEventListener("click", () => {
+        if (neurons.length >= 6) return;
+        neurons.push({ w1: 1, w2: 0, b: 0, on: true });
+        buildPanel();
+        updateAll();
+      });
+
+      // ---- init ----
+      loadExercise("rect");
+    </script>
+  </body>
+</html>
