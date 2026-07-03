@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 3 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 3 de Aprendizaje Profundo: simula la cinta de memoria de una celda LSTM. Mueve las puertas y ve evolucionar el estado y la salida. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c;
+        --ink-soft: #3b4080;
+        --ink-mute: #7c80a6;
+        --paper: #ffffff;
+        --paper-warm: #f0ebdd;
+        --accent: #ff5700;
+        --accent-deep: #c8410f;
+        --gold: #fe961f;
+        --line: #e2ded0;
+        --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif;
+        --sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scrollbar-gutter: stable;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        background-image:
+          radial-gradient(
+            ellipse at 15% 8%,
+            rgba(26, 31, 108, 0.05) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 88% 92%,
+            rgba(255, 87, 0, 0.045) 0%,
+            transparent 55%
+          );
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+
+      /* ---------- TOPBAR ---------- */
+      .bar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 28px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .bar a.brand {
+        display: flex;
+        align-items: center;
+      }
+      .bar-logo {
+        height: 26px;
+        width: auto;
+        display: block;
+      }
+      .bar-sub {
+        color: var(--ink-mute);
+      }
+      .bar-tag {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent-deep);
+        background: rgba(255, 87, 0, 0.1);
+        padding: 4px 11px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      /* ---------- LAYOUT ---------- */
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 42px 24px 90px;
+      }
+      .kicker {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border-bottom: 1px solid var(--accent);
+        padding-bottom: 6px;
+        display: inline-block;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(34px, 6vw, 56px);
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin: 18px 0 14px;
+      }
+      h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .lead {
+        font-size: clamp(15px, 2vw, 18px);
+        line-height: 1.6;
+        color: var(--ink-soft);
+        max-width: 64ch;
+      }
+      .lead code,
+      p code {
+        font-family: var(--mono);
+        font-size: 0.88em;
+        background: rgba(26, 31, 108, 0.06);
+        padding: 1px 6px;
+        border-radius: 5px;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(24px, 3.4vw, 34px);
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      h2.section-title em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .band {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 54px 0 18px;
+      }
+      .band .num {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        color: var(--ink-mute);
+        white-space: nowrap;
+      }
+      .band .rule {
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      /* ---------- DIAGRAMA ---------- */
+      .diagram-card {
+        background: #fbfaf6;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px 16px;
+        box-shadow: 0 14px 40px rgba(26, 31, 108, 0.06);
+        margin-bottom: 20px;
+      }
+      .diagram-card svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* ---------- STAGE ---------- */
+      .stage {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        align-items: start;
+      }
+      @media (max-width: 880px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+      .chart-card {
+        background: #fbfaf6;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 14px 40px rgba(26, 31, 108, 0.06);
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 8px;
+        background: #fff;
+      }
+      .chart-legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--ink-mute);
+      }
+      .chart-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        width: 16px;
+        height: 4px;
+        border-radius: 2px;
+        display: inline-block;
+      }
+
+      /* ---------- PANEL ---------- */
+      .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .step-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 600;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 16px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        transition: transform 0.12s ease, border-color 0.16s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: var(--ink-mute);
+      }
+      .btn-accent {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+        box-shadow: 0 6px 16px rgba(255, 87, 0, 0.25);
+        flex: 1;
+      }
+      .btn-accent:hover {
+        border-color: var(--accent);
+      }
+      .step-count {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-mute);
+      }
+      .sliders {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .slider-row label {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--ink-soft);
+        margin-bottom: 4px;
+      }
+      .slider-row label .v {
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .slider-row input[type="range"] {
+        width: 100%;
+      }
+      .slider-row.forget input {
+        accent-color: var(--accent-deep);
+      }
+      .slider-row.input input {
+        accent-color: var(--ink);
+      }
+      .slider-row.output input {
+        accent-color: var(--gold);
+      }
+      .slider-row.cand input {
+        accent-color: var(--ok);
+      }
+      .eq {
+        background: var(--ink);
+        color: #fff;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.7;
+      }
+      .eq .r {
+        color: var(--gold);
+      }
+      .eq .lbl {
+        color: #a7abd6;
+        font-family: var(--sans);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .presets {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .preset {
+        text-align: left;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        padding: 11px 14px;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color 0.16s ease, transform 0.12s ease;
+      }
+      .preset:hover {
+        border-color: var(--ok);
+        transform: translateX(2px);
+      }
+      .preset b {
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--ink);
+      }
+      .preset span {
+        display: block;
+        font-size: 12.5px;
+        color: var(--ink-mute);
+        margin-top: 2px;
+      }
+      .presets-title {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+      }
+
+      /* ---------- CODE ---------- */
+      .code-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+      @media (max-width: 880px) {
+        .code-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      pre.code {
+        background: #101340;
+        color: #eef0f6;
+        border-radius: 12px;
+        padding: 18px 20px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      pre.code .cm {
+        color: #7c80a6;
+      }
+      pre.code .kw {
+        color: var(--gold);
+      }
+      pre.code .fn {
+        color: #4fd1c5;
+      }
+      .code-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        margin-bottom: 8px;
+      }
+      .note {
+        border-left: 4px solid var(--ok);
+        background: rgba(7, 150, 163, 0.06);
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        margin-top: 14px;
+      }
+
+      /* ---------- RETOS ---------- */
+      .retos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 760px) {
+        .retos {
+          grid-template-columns: 1fr;
+        }
+      }
+      .reto {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #fbfaf6;
+      }
+      .reto h4 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 19px;
+        margin-bottom: 6px;
+      }
+      .reto p {
+        font-size: 14px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+      .reto .tag {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--accent-deep);
+        letter-spacing: 0.05em;
+      }
+
+      /* ---------- CLOSE ---------- */
+      .close-cta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 20px;
+      }
+      @media (max-width: 620px) {
+        .close-cta-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .close-cta {
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        padding: 20px 22px;
+        text-decoration: none;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: border-color 0.18s ease, transform 0.16s ease;
+      }
+      .close-cta:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .close-cta .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+      }
+      .close-cta .title {
+        font-family: var(--serif);
+        font-size: 20px;
+        font-weight: 500;
+      }
+      footer {
+        margin-top: 60px;
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--ink-mute);
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      footer a {
+        color: var(--ink-mute);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 3</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <!-- INTRO -->
+      <section>
+        <span class="kicker">Tema 3 · Práctica</span>
+        <h1>La cinta de <em>memoria</em>.</h1>
+        <p class="lead">
+          Una celda LSTM guarda un estado <code>C</code> y lo actualiza en cada
+          paso con dos operaciones: <strong>olvidar</strong> (multiplicar por la
+          puerta <em>forget</em>) y <strong>añadir</strong> (sumar el candidato
+          filtrado por la puerta <em>input</em>). La salida
+          <code>h</code> es el estado, filtrado por la puerta <em>output</em>.
+          Mueve las puertas y ve qué pasa con la memoria a lo largo del tiempo.
+        </p>
+      </section>
+
+      <!-- BLOQUE 1 -->
+      <div class="band">
+        <span class="num">— 01 · SIMULADOR —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">Mueve las <em>puertas</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        Los caminos del diagrama se iluminan según cuánto abras cada puerta.
+        Pulsa <strong>paso ▶</strong> para avanzar por la secuencia, o prueba un
+        escenario.
+      </p>
+
+      <!-- DIAGRAMA -->
+      <div class="diagram-card">
+        <svg viewBox="0 0 760 220" role="img" aria-label="Celda LSTM">
+          <rect x="120" y="20" width="520" height="170" rx="16" fill="none" stroke="#1a1f6c" stroke-width="1.5" opacity="0.35" />
+          <!-- cinta de memoria -->
+          <line x1="50" y1="55" x2="710" y2="55" stroke="#0796a3" stroke-width="3" />
+          <text x="58" y="46" font-family="JetBrains Mono" font-size="12" fill="#0796a3">Cₜ₋₁</text>
+          <text x="686" y="46" font-family="JetBrains Mono" font-size="12" fill="#0796a3">Cₜ</text>
+          <!-- operadores -->
+          <circle cx="250" cy="55" r="15" fill="#fff" stroke="#c8410f" stroke-width="2" />
+          <text x="250" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="15" fill="#c8410f">×</text>
+          <circle cx="440" cy="55" r="15" fill="#fff" stroke="#0796a3" stroke-width="2" />
+          <text x="440" y="60" text-anchor="middle" font-family="JetBrains Mono" font-size="15" fill="#0796a3">+</text>
+          <!-- puertas -->
+          <g id="gForget">
+            <rect x="215" y="120" width="70" height="42" rx="8" fill="#c8410f" />
+            <text x="250" y="139" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#fff">forget</text>
+            <text x="250" y="154" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#fff" id="dForget">1.00</text>
+            <path d="M250 120 V70" stroke="#c8410f" stroke-width="2" fill="none" marker-end="url(#af)" />
+          </g>
+          <g id="gInput">
+            <rect x="330" y="120" width="70" height="42" rx="8" fill="#1a1f6c" />
+            <text x="365" y="139" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#fff">input</text>
+            <text x="365" y="154" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#fff" id="dInput">0.00</text>
+            <path d="M365 120 V90 H440 V70" stroke="#1a1f6c" stroke-width="2" fill="none" marker-end="url(#ai)" />
+          </g>
+          <g id="gCand">
+            <rect x="415" y="120" width="70" height="42" rx="8" fill="#0796a3" />
+            <text x="450" y="139" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#fff">C̃ tanh</text>
+            <text x="450" y="154" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#fff" id="dCand">1.00</text>
+          </g>
+          <g id="gOutput">
+            <rect x="560" y="120" width="70" height="42" rx="8" fill="#fe961f" />
+            <text x="595" y="139" text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#1a1f6c">output</text>
+            <text x="595" y="154" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#1a1f6c" id="dOutput">0.80</text>
+            <path d="M595 120 V55 H710" stroke="#fe961f" stroke-width="2" fill="none" />
+            <path d="M595 55 V200" stroke="#fe961f" stroke-width="2" fill="none" marker-end="url(#ao)" />
+            <text x="612" y="200" font-family="JetBrains Mono" font-size="12" fill="#fe961f">hₜ</text>
+          </g>
+          <defs>
+            <marker id="af" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c8410f" /></marker>
+            <marker id="ai" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#1a1f6c" /></marker>
+            <marker id="ao" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#fe961f" /></marker>
+          </defs>
+        </svg>
+      </div>
+
+      <!-- STAGE -->
+      <div class="stage">
+        <div class="chart-card">
+          <canvas id="chart" width="480" height="300"></canvas>
+          <div class="chart-legend">
+            <span><span class="swatch" style="background:#0796a3"></span> Cₜ · memoria</span>
+            <span><span class="swatch" style="background:#ff5700"></span> hₜ · salida</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="step-bar">
+            <button class="btn btn-accent" id="stepBtn">paso ▶</button>
+            <button class="btn" id="backBtn">◀</button>
+            <button class="btn" id="resetBtn">↺</button>
+            <span class="step-count">paso <b id="stepNum">0</b></span>
+          </div>
+          <div class="sliders">
+            <div class="slider-row forget">
+              <label>forget · f <span class="v" id="vForget">1.00</span></label>
+              <input type="range" id="sForget" min="0" max="1" step="0.05" value="1" />
+            </div>
+            <div class="slider-row input">
+              <label>input · i <span class="v" id="vInput">0.00</span></label>
+              <input type="range" id="sInput" min="0" max="1" step="0.05" value="0" />
+            </div>
+            <div class="slider-row cand">
+              <label>candidato · C̃ <span class="v" id="vCand">1.00</span></label>
+              <input type="range" id="sCand" min="-1" max="1" step="0.05" value="1" />
+            </div>
+            <div class="slider-row output">
+              <label>output · o <span class="v" id="vOutput">0.80</span></label>
+              <input type="range" id="sOutput" min="0" max="1" step="0.05" value="0.8" />
+            </div>
+          </div>
+          <div class="eq">
+            <span class="lbl">Próximo paso</span>
+            <div id="eqC"></div>
+            <div id="eqH"></div>
+          </div>
+          <div class="presets">
+            <span class="presets-title">Escenarios</span>
+            <button class="preset" data-preset="hold">
+              <b>Mantener la memoria</b>
+              <span>f≈1, i≈0 · el estado se conserva muchos pasos (dependencia larga).</span>
+            </button>
+            <button class="preset" data-preset="overwrite">
+              <b>Sobrescribir</b>
+              <span>f≈0, i≈1 · olvida lo viejo y escribe lo nuevo (sujeto que cambia).</span>
+            </button>
+            <button class="preset" data-preset="decay">
+              <b>Dejar que decaiga</b>
+              <span>f≈0.6 · la memoria se desvanece — como una RNN simple.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2 -->
+      <div class="band">
+        <span class="num">— 02 · EL MISMO MECANISMO EN CÓDIGO —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">De las puertas al <em>código</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        Lo que acabas de mover a mano es, paso a paso, lo que calcula una celda
+        LSTM. Así se escribe con NumPy — y así se usa de verdad con Keras.
+      </p>
+
+      <div class="code-grid" style="margin-top: 18px">
+        <div>
+          <div class="code-label">NumPy · tus valores actuales</div>
+          <pre class="code" id="codeNumpy"></pre>
+          <div class="note">
+            Los valores <code>f, i, o, C̃</code> son los de tus sliders. En una
+            LSTM real no los fijas tú: salen de <code>σ(W·[hₜ₋₁,xₜ]+b)</code> y se
+            <em>aprenden</em>.
+          </div>
+        </div>
+        <div>
+          <div class="code-label">Keras · así se usa</div>
+          <pre class="code" id="codeKeras"></pre>
+          <div class="note">
+            Una sola línea, <code>layers.LSTM(64)</code>, crea 64 celdas como
+            esta y <strong>aprende</strong> las matrices
+            <code>Wf, Wi, WC, Wo</code> con backpropagation en el tiempo.
+          </div>
+        </div>
+      </div>
+
+      <!-- RETOS -->
+      <div class="band">
+        <span class="num">— 03 · TUS RETOS —</span>
+        <span class="rule"></span>
+      </div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto">
+          <span class="tag">memoria</span>
+          <h4>Que dure 10 pasos</h4>
+          <p>
+            Consigue que <code>C</code> se mantenga casi constante durante 10
+            pasos. ¿Qué valor de <em>forget</em> necesitas?
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">olvido</span>
+          <h4>Borrar de golpe</h4>
+          <p>
+            Construye memoria unos pasos y luego bórrala en uno solo. ¿Qué
+            puertas mueves y a qué valor?
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">salida</span>
+          <h4>¿Quién controla hₜ?</h4>
+          <p>
+            Deja <code>C</code> fijo y mueve solo <em>output</em>. ¿Qué le pasa a
+            la salida <code>h</code>? ¿Y si <code>o = 0</code>?
+          </p>
+        </div>
+      </div>
+
+      <div class="band">
+        <span class="num">— SIGUIENTE —</span>
+        <span class="rule"></span>
+      </div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t3.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Redes LSTM →</span>
+        </a>
+        <a class="close-cta" href="./repaso-t3.html">
+          <span class="eyebrow">Ponerte a prueba</span>
+          <span class="title">Repaso del Tema 3 →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 3 — simulador de la cinta de memoria LSTM
+      // =====================================================
+      const $ = (id) => document.getElementById(id);
+
+      // sliders
+      const S = {
+        f: $("sForget"),
+        i: $("sInput"),
+        o: $("sOutput"),
+        c: $("sCand"),
+      };
+      // estado de la secuencia: lista de {C, h}
+      let hist = [{ C: 0, h: 0 }];
+
+      function vals() {
+        return {
+          f: parseFloat(S.f.value),
+          i: parseFloat(S.i.value),
+          o: parseFloat(S.o.value),
+          c: parseFloat(S.c.value),
+        };
+      }
+      function fmt(v) {
+        return (v >= 0 ? " " : "") + v.toFixed(2);
+      }
+      function fmt2(v) {
+        return v.toFixed(2);
+      }
+
+      // ---- gráfica ----
+      const chart = $("chart");
+      const cx = chart.getContext("2d");
+      const CW = chart.width,
+        CH = chart.height;
+      const PAD_L = 34,
+        PAD_R = 14,
+        PAD_T = 14,
+        PAD_B = 26;
+      const YMIN = -2,
+        YMAX = 2;
+
+      function drawChart() {
+        cx.clearRect(0, 0, CW, CH);
+        const nSlots = Math.max(hist.length - 1, 12);
+        const X = (t) =>
+          PAD_L + (t / nSlots) * (CW - PAD_L - PAD_R);
+        const Y = (v) =>
+          PAD_T + ((YMAX - v) / (YMAX - YMIN)) * (CH - PAD_T - PAD_B);
+
+        // rejilla horizontal
+        cx.strokeStyle = "rgba(26,31,108,0.08)";
+        cx.fillStyle = "#7c80a6";
+        cx.font = "10px 'JetBrains Mono', monospace";
+        cx.lineWidth = 1;
+        for (let v = YMIN; v <= YMAX; v++) {
+          cx.beginPath();
+          cx.moveTo(PAD_L, Y(v));
+          cx.lineTo(CW - PAD_R, Y(v));
+          cx.stroke();
+          cx.fillText(v.toFixed(0), 6, Y(v) + 3);
+        }
+        // eje 0
+        cx.strokeStyle = "rgba(26,31,108,0.4)";
+        cx.lineWidth = 1.4;
+        cx.beginPath();
+        cx.moveTo(PAD_L, Y(0));
+        cx.lineTo(CW - PAD_R, Y(0));
+        cx.stroke();
+        cx.fillText("paso", CW - 40, CH - 8);
+
+        // series
+        function line(key, color) {
+          cx.strokeStyle = color;
+          cx.lineWidth = 2.4;
+          cx.beginPath();
+          hist.forEach((p, t) => {
+            const px = X(t),
+              py = Y(Math.max(YMIN, Math.min(YMAX, p[key])));
+            if (t === 0) cx.moveTo(px, py);
+            else cx.lineTo(px, py);
+          });
+          cx.stroke();
+          cx.fillStyle = color;
+          hist.forEach((p, t) => {
+            cx.beginPath();
+            cx.arc(X(t), Y(Math.max(YMIN, Math.min(YMAX, p[key]))), 3, 0, 7);
+            cx.fill();
+          });
+        }
+        line("C", "#0796a3");
+        line("h", "#ff5700");
+      }
+
+      // ---- diagrama: opacidad según valor de puerta ----
+      function op(v) {
+        return (0.3 + 0.7 * Math.abs(v)).toFixed(2);
+      }
+      function syncDiagram() {
+        const { f, i, o, c } = vals();
+        $("gForget").style.opacity = op(f);
+        $("gInput").style.opacity = op(i);
+        $("gOutput").style.opacity = op(o);
+        $("gCand").style.opacity = op(Math.abs(c));
+        $("dForget").textContent = fmt2(f);
+        $("dInput").textContent = fmt2(i);
+        $("dOutput").textContent = fmt2(o);
+        $("dCand").textContent = fmt2(c);
+      }
+
+      // ---- ecuación en vivo (previsualiza el próximo paso) ----
+      function syncEq() {
+        const { f, i, o, c } = vals();
+        const Cprev = hist[hist.length - 1].C;
+        const C = f * Cprev + i * c;
+        const h = o * Math.tanh(C);
+        $("eqC").innerHTML =
+          `Cₜ = f·Cₜ₋₁ + i·C̃ = ${fmt2(f)}·${fmt2(Cprev)} + ${fmt2(i)}·${fmt2(
+            c,
+          )} = <span class="r">${fmt2(C)}</span>`;
+        $("eqH").innerHTML =
+          `hₜ = o·tanh(Cₜ) = ${fmt2(o)}·tanh(${fmt2(C)}) = <span class="r">${fmt2(
+            h,
+          )}</span>`;
+      }
+
+      // ---- código ----
+      function syncCode() {
+        const { f, i, o, c } = vals();
+        $("codeNumpy").innerHTML =
+          `<span class="kw">import</span> numpy <span class="kw">as</span> np\n\n` +
+          `<span class="cm"># puertas fijadas con los sliders (0–1) y candidato (−1..1)</span>\n` +
+          `f, i, o = ${fmt2(f)}, ${fmt2(i)}, ${fmt2(o)}\n` +
+          `C_cand  = ${fmt2(c)}\n\n` +
+          `<span class="kw">def</span> <span class="fn">paso_lstm</span>(C_prev):\n` +
+          `    C = f*C_prev + i*C_cand    <span class="cm"># olvidar (×) + añadir (+)</span>\n` +
+          `    h = o*np.<span class="fn">tanh</span>(C)          <span class="cm"># salida filtrada</span>\n` +
+          `    <span class="kw">return</span> C, h`;
+      }
+
+      $("codeKeras").innerHTML =
+        `<span class="kw">from</span> tensorflow <span class="kw">import</span> keras\n` +
+        `<span class="kw">from</span> keras <span class="kw">import</span> layers\n\n` +
+        `model = keras.<span class="fn">Sequential</span>([\n` +
+        `    layers.<span class="fn">Embedding</span>(10000, 32),\n` +
+        `    layers.<span class="fn">LSTM</span>(64),      <span class="cm"># 64 celdas como esta</span>\n` +
+        `    layers.<span class="fn">Dense</span>(1, activation=<span class="cm">"sigmoid"</span>),\n` +
+        `])\n` +
+        `model.<span class="fn">compile</span>(optimizer=<span class="cm">"adam"</span>,\n` +
+        `              loss=<span class="cm">"binary_crossentropy"</span>)\n` +
+        `model.<span class="fn">fit</span>(X, y, epochs=10)`;
+
+      // ---- acciones ----
+      function refresh() {
+        syncDiagram();
+        syncEq();
+        syncCode();
+        drawChart();
+        $("stepNum").textContent = hist.length - 1;
+      }
+      function doStep() {
+        const { f, i, o, c } = vals();
+        const Cprev = hist[hist.length - 1].C;
+        const C = f * Cprev + i * c;
+        const h = o * Math.tanh(C);
+        hist.push({ C, h });
+        refresh();
+      }
+      function back() {
+        if (hist.length > 1) hist.pop();
+        refresh();
+      }
+      function reset() {
+        hist = [{ C: 0, h: 0 }];
+        refresh();
+      }
+
+      function setSliders(f, i, o, c) {
+        S.f.value = f;
+        S.i.value = i;
+        S.o.value = o;
+        S.c.value = c;
+        $("vForget").textContent = fmt2(f);
+        $("vInput").textContent = fmt2(i);
+        $("vOutput").textContent = fmt2(o);
+        $("vCand").textContent = fmt2(c);
+      }
+
+      const PRESETS = {
+        // seedC, f, i, o, cand, steps
+        hold: { seed: 1.5, f: 1.0, i: 0.0, o: 0.8, c: 1.0, steps: 12 },
+        overwrite: { seed: 1.5, f: 0.0, i: 1.0, o: 0.8, c: -1.0, steps: 12 },
+        decay: { seed: 1.5, f: 0.6, i: 0.0, o: 0.8, c: 0.0, steps: 12 },
+      };
+      function runPreset(name) {
+        const p = PRESETS[name];
+        setSliders(p.f, p.i, p.o, p.c);
+        hist = [{ C: p.seed, h: p.o * Math.tanh(p.seed) }];
+        for (let k = 0; k < p.steps; k++) {
+          const Cprev = hist[hist.length - 1].C;
+          const C = p.f * Cprev + p.i * p.c;
+          const h = p.o * Math.tanh(C);
+          hist.push({ C, h });
+        }
+        refresh();
+      }
+
+      // ---- eventos ----
+      Object.values(S).forEach((sl) =>
+        sl.addEventListener("input", () => {
+          $("vForget").textContent = fmt2(parseFloat(S.f.value));
+          $("vInput").textContent = fmt2(parseFloat(S.i.value));
+          $("vOutput").textContent = fmt2(parseFloat(S.o.value));
+          $("vCand").textContent = fmt2(parseFloat(S.c.value));
+          syncDiagram();
+          syncEq();
+          syncCode();
+        }),
+      );
+      $("stepBtn").addEventListener("click", doStep);
+      $("backBtn").addEventListener("click", back);
+      $("resetBtn").addEventListener("click", reset);
+      document.querySelectorAll(".preset").forEach((b) =>
+        b.addEventListener("click", () => runPreset(b.dataset.preset)),
+      );
+
+      // ---- init ----
+      refresh();
+    </script>
+  </body>
+</html>
