@@ -131,6 +131,12 @@
       "title": "Tema 3 · Perceptrón multicapa (MLP)",
       "files": [
         {
+          "name": "Lab_Tema3_LSTM_Series.ipynb",
+          "path": "files/tema-3/Lab_Tema3_LSTM_Series.ipynb",
+          "ext": "ipynb",
+          "size": 6971
+        },
+        {
           "name": "T3. Redes LSTM (mejorado).pptx",
           "path": "files/tema-3/T3. Redes LSTM (mejorado).pptx",
           "ext": "pptx",
