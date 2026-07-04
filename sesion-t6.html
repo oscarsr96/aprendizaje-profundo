@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 6</title>
+    <meta
+      name="description"
+      content="Tema 6 de Aprendizaje Profundo en CUNEF. Atención y Transformers: del cuello de botella del seq2seq a la self-attention, la arquitectura Transformer y los LLMs."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 6</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">6 · Atención y Transformers</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Aprender a<br /><em>atender</em>.</h1>
+          <p class="cover-sub">
+            Por qué comprimir una frase en un solo vector es un cuello de
+            botella, cómo la <em>atención</em> deja que cada palabra mire a
+            todas las demás, y cómo de esa idea nacen los
+            <em>Transformers</em> y los LLMs.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <circle cx="90" cy="200" r="14" /><circle cx="180" cy="120" r="14" />
+              <circle cx="180" cy="200" r="14" /><circle cx="180" cy="280" r="14" />
+              <circle cx="310" cy="200" r="14" />
+              <path d="M104 200 L296 200 M104 195 L166 125 M104 205 L166 275 M194 125 L296 195 M194 275 L296 205 M180 134 L180 186 M180 214 L180 266" />
+            </g>
+            <circle cx="310" cy="200" r="6" fill="currentColor" opacity="0.7" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">El cuello de botella</span><span class="agenda-desc">Por qué el seq2seq con LSTM se queda corto con frases largas.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">18&prime;</span>
+              <div><span class="agenda-title">Self-attention</span><span class="agenda-desc">Query, Key, Value; el cálculo de la atención y multi-head.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">El Transformer</span><span class="agenda-desc">La arquitectura, el paralelismo y el positional encoding.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">De BERT a los LLMs</span><span class="agenda-desc">Preentrenar + fine-tuning; los grandes modelos de lenguaje.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="El cuello de botella">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">El cuello<br />de <em>botella</em>.</h2>
+          <p class="divider-sub">
+            El Tema 3 nos dejó con las LSTM y el <em>seq2seq</em>. Funciona…
+            hasta que la frase se hace larga.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — El problema del seq2seq -->
+      <section class="slide" data-title="El problema seq2seq">
+        <div class="slide-inner">
+          <span class="kicker">Comprimirlo todo en un vector</span>
+          <h2 class="h2">Un solo vector no <em>basta</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En un encoder–decoder con LSTM, toda la frase de entrada se
+                resume en un <em>único vector de estado</em>. El decoder debe
+                generar la traducción solo a partir de ese resumen.
+              </p>
+              <p class="note">
+                Con frases largas, ese vector se queda sin sitio: la información
+                del principio se diluye. Es el mismo <em>olvido</em> del Tema 3,
+                agravado.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>El cuello de botella</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">«La casa que compramos el año…»</span>
+                <span class="pt-t">→ [un vector fijo] →</span>
+                <span class="pt-f">el decoder ya no ve las palabras, solo el resumen</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — La idea de atención -->
+      <section class="slide" data-title="La idea de atención">
+        <div class="slide-inner">
+          <span class="kicker">Mirar a todas las palabras</span>
+          <h2 class="h2">La idea de <em>atención</em>.</h2>
+          <p class="lead">
+            ¿Y si, en lugar de un único resumen, el decoder pudiera
+            <em>mirar todas las palabras</em> de la entrada en cada paso, y
+            decidir <em>a cuáles prestar más atención</em>?
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Al generar "house" mira sobre todo a "casa"; al generar "bought"
+              mira a "compramos". La atención es un <em>promedio ponderado</em>
+              de todas las palabras, con pesos que la red aprende.
+            </p>
+            <p class="note">
+              Idea clave: la atención elimina el cuello de botella dando
+              <em>acceso directo</em> a toda la secuencia, con foco selectivo.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="Self-attention">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title"><em>Self</em>-attention.</h2>
+          <p class="divider-sub">
+            El giro clave de los Transformers: que la secuencia se atienda
+            <em>a sí misma</em>, sin recurrencia.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — Q, K, V -->
+      <section class="slide" data-title="Query, Key, Value">
+        <div class="slide-inner">
+          <span class="kicker">Query · Key · Value</span>
+          <h2 class="h2">Una <em>búsqueda</em> en la propia frase.</h2>
+          <p class="lead">
+            Cada palabra genera tres vectores (proyecciones aprendidas de su
+            embedding). Piénsalo como una búsqueda:
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Query (Q)</h4>
+              <div class="fn-formula">"qué busco"</div>
+              <p>Lo que esta palabra quiere encontrar en el resto.</p>
+              <span class="fn-use">→ la pregunta</span>
+            </div>
+            <div class="fn-card">
+              <h4>Key (K)</h4>
+              <div class="fn-formula">"qué ofrezco"</div>
+              <p>La etiqueta con la que cada palabra se anuncia.</p>
+              <span class="fn-use">→ el índice</span>
+            </div>
+            <div class="fn-card">
+              <h4>Value (V)</h4>
+              <div class="fn-formula">"qué aporto"</div>
+              <p>La información que se llevará quien atienda a esta palabra.</p>
+              <span class="fn-use">→ el contenido</span>
+            </div>
+          </div>
+          <p class="note">
+            La Query de una palabra se compara con las Keys de todas; esa
+            afinidad decide cuánto Value de cada una se lleva.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — El cálculo (diagrama) -->
+      <section class="slide" data-title="El cálculo">
+        <div class="slide-inner">
+          <span class="kicker">Scaled dot-product attention</span>
+          <h2 class="h2">Afinidad → <em>softmax</em> → mezcla.</h2>
+          <svg viewBox="0 0 760 210" style="width:100%; height:auto; margin: 6px 0 12px">
+            <g text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">
+              <rect x="20" y="80" width="70" height="46" rx="6" fill="#1a1f6c"/><text x="55" y="107" fill="#fff" font-family="JetBrains Mono">Q</text>
+              <rect x="20" y="20" width="70" height="40" rx="6" fill="#0796a3"/><text x="55" y="45" fill="#fff" font-family="JetBrains Mono">Kᵀ</text>
+              <rect x="150" y="55" width="96" height="50" rx="6" fill="none" stroke="#1a1f6c" stroke-width="1.5"/><text x="198" y="78" fill="#1a1f6c">Q · Kᵀ</text><text x="198" y="95" font-size="10">afinidad</text>
+              <rect x="300" y="55" width="110" height="50" rx="6" fill="#ff5700"/><text x="355" y="78" fill="#fff">softmax</text><text x="355" y="95" fill="#fff" font-size="10">/ √dₖ → pesos</text>
+              <rect x="300" y="140" width="70" height="40" rx="6" fill="#fe961f"/><text x="335" y="165" fill="#1a1f6c" font-family="JetBrains Mono">V</text>
+              <rect x="470" y="70" width="120" height="60" rx="6" fill="#1a1f6c"/><text x="530" y="96" fill="#fff">salida =</text><text x="530" y="114" fill="#fff" font-size="11">Σ pesos · V</text>
+              <text x="650" y="105" text-anchor="start" font-family="Taviraj" font-style="italic" font-size="14" fill="#1a1f6c">contexto</text>
+              <g stroke="#c9c3b3" stroke-width="1.3" fill="none">
+                <path d="M90 100 H148" marker-end="url(#a6)"/>
+                <path d="M90 40 H120 V72 H148" marker-end="url(#a6)"/>
+                <path d="M246 80 H298" marker-end="url(#a6)"/>
+                <path d="M410 90 H468" marker-end="url(#a6)"/>
+                <path d="M370 160 H440 V128 H468" marker-end="url(#a6)"/>
+                <path d="M590 100 H646" marker-end="url(#a6)"/>
+              </g>
+            </g>
+            <defs><marker id="a6" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3"/></marker></defs>
+          </svg>
+          <p class="note">
+            <code>Atención(Q,K,V) = softmax(Q·Kᵀ / √dₖ) · V</code>. Los pesos
+            (una distribución que suma 1) dicen cuánto se mezcla el Value de cada
+            palabra en la salida de esta.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — Multi-head -->
+      <section class="slide" data-title="Multi-head">
+        <div class="slide-inner">
+          <span class="kicker">Varias miradas a la vez</span>
+          <h2 class="h2">Multi-head <em>attention</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En lugar de una sola atención, se calculan varias en paralelo
+                (varias <em>cabezas</em>), cada una con sus propias proyecciones
+                Q/K/V.
+              </p>
+              <ul class="neuron-notes">
+                <li>Cada cabeza aprende a fijarse en un <strong>tipo de relación</strong> distinto.</li>
+                <li>Una en la <em>concordancia</em>, otra en la <em>sintaxis</em>, otra en la <em>correferencia</em>…</li>
+                <li>Sus salidas se <strong>concatenan</strong> y se combinan.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>«El gato no cruzó porque estaba cansado»</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">cabeza A: «estaba» → «gato» (sujeto)</span>
+                <span class="pt-c">cabeza B: «cruzó» → «no» (negación)</span>
+                <span class="pt-f">varias relaciones, en paralelo</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">Lo verás en la <em>práctica interactiva</em>: elige una palabra y una cabeza, y observa a dónde mira.</p>
+        </div>
+      </section>
+
+      <!-- 09 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="El Transformer">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">El <em>Transformer</em>.</h2>
+          <p class="divider-sub">
+            "Attention is all you need" (2017): quitar la recurrencia y quedarse
+            solo con la atención.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — La arquitectura (diagrama) -->
+      <section class="slide" data-title="La arquitectura">
+        <div class="slide-inner">
+          <span class="kicker">Bloques apilados</span>
+          <h2 class="h2">La <em>arquitectura</em>.</h2>
+          <svg viewBox="0 0 760 200" style="width:100%; height:auto; margin:6px 0 12px">
+            <g text-anchor="middle" font-family="Inter Tight" font-size="11" fill="#7c80a6">
+              <rect x="20" y="80" width="90" height="44" rx="6" fill="#1a1f6c"/><text x="65" y="100" fill="#fff">tokens →</text><text x="65" y="116" fill="#fff" font-size="10">embeddings</text>
+              <rect x="130" y="80" width="70" height="44" rx="6" fill="#0796a3"/><text x="165" y="100" fill="#fff" font-size="10">+ posición</text><text x="165" y="115" fill="#fff" font-size="9">(orden)</text>
+              <rect x="230" y="55" width="180" height="96" rx="8" fill="none" stroke="#1a1f6c" stroke-width="1.5"/>
+              <text x="320" y="48" fill="#7c80a6" font-size="11">bloque × N</text>
+              <rect x="248" y="70" width="144" height="32" rx="5" fill="#ff5700"/><text x="320" y="90" fill="#fff" font-size="11">multi-head attention</text>
+              <rect x="248" y="112" width="144" height="30" rx="5" fill="#fe961f"/><text x="320" y="131" fill="#1a1f6c" font-size="11">feed-forward</text>
+              <rect x="440" y="80" width="90" height="44" rx="6" fill="#1a1f6c"/><text x="485" y="106" fill="#fff" font-size="10">salida</text>
+              <text x="600" y="106" text-anchor="start" font-family="Taviraj" font-style="italic" font-size="14" fill="#1a1f6c">token siguiente</text>
+              <g stroke="#c9c3b3" stroke-width="1.3" fill="none">
+                <path d="M110 102 H128" marker-end="url(#b6)"/>
+                <path d="M200 102 H228" marker-end="url(#b6)"/>
+                <path d="M410 102 H438" marker-end="url(#b6)"/>
+                <path d="M530 102 H586" marker-end="url(#b6)"/>
+              </g>
+            </g>
+            <defs><marker id="b6" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3"/></marker></defs>
+          </svg>
+          <p class="note">
+            Tokens → <em>embeddings</em> + codificación de posición → una pila de
+            <strong>bloques</strong> (multi-head attention + red feed-forward,
+            con conexiones residuales y normalización) → salida.
+          </p>
+        </div>
+      </section>
+
+      <!-- 11 — Sin recurrencia -->
+      <section class="slide" data-title="Sin recurrencia">
+        <div class="slide-inner">
+          <span class="kicker">Por qué escala</span>
+          <h2 class="h2">Todo en <em>paralelo</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>RNN / LSTM</h3>
+              <p>Procesa la secuencia <em>token a token</em>, en orden. No se puede paralelizar en el tiempo.</p>
+              <ul class="neuron-notes"><li>Lento en secuencias largas.</li><li>La info lejana se degrada.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Transformer</h3>
+              <p>La atención mira <em>todos los tokens a la vez</em>: se calcula en paralelo.</p>
+              <ul class="neuron-notes"><li>Aprovecha las GPUs al máximo.</li><li>Acceso directo a cualquier posición.</li></ul>
+            </div>
+          </div>
+          <p class="note">Quitar la recurrencia es lo que permitió entrenar modelos <strong>enormes</strong> con muchísimos datos.</p>
+        </div>
+      </section>
+
+      <!-- 12 — Positional encoding -->
+      <section class="slide" data-title="Positional encoding">
+        <div class="slide-inner">
+          <span class="kicker">¿Y el orden?</span>
+          <h2 class="h2">Saber la <em>posición</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Sin recurrencia, la atención no sabe si "perro muerde hombre" u
+                "hombre muerde perro": ve un <em>conjunto</em> de palabras, no
+                una secuencia.
+              </p>
+              <p class="note">
+                Solución: sumar a cada embedding un <strong>codificado de
+                posición</strong> (un patrón que depende del lugar). Así la red
+                recupera el orden.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>embedding + posición</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">«perro» (pos 1) ≠ «perro» (pos 3)</span>
+                <span class="pt-t">mismo significado, distinta posición</span>
+                <span class="pt-f">el orden vuelve a importar</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="De BERT a los LLMs">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">De BERT<br />a los <em>LLMs</em>.</h2>
+          <p class="divider-sub">
+            La receta que domina el NLP moderno: <em>preentrenar</em> a lo
+            grande y <em>ajustar</em> a tu tarea.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — Preentrenar + fine-tuning -->
+      <section class="slide" data-title="Preentrenar y ajustar">
+        <div class="slide-inner">
+          <span class="kicker">Transfer learning en NLP</span>
+          <h2 class="h2">Preentrenar, luego <em>ajustar</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Preentrenar</h3>
+              <p>Un modelo (p. ej. <strong>BERT</strong>) aprende el lenguaje sobre <em>enormes</em> corpus sin etiquetar.</p>
+              <ul class="neuron-notes"><li>Tarea: predecir palabras <em>enmascaradas</em>.</li><li>Aprende representaciones ricas del idioma.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Fine-tuning</h3>
+              <p>Reaprovechas ese modelo y lo <em>ajustas</em> con pocos datos a tu tarea.</p>
+              <ul class="neuron-notes"><li>Clasificar sentimiento, spam, temas…</li><li>Rápido y con poca etiqueta.</li></ul>
+            </div>
+          </div>
+          <p class="note">Justo lo que harás en el <strong>laboratorio</strong>: fine-tuning de un modelo preentrenado para clasificar texto.</p>
+        </div>
+      </section>
+
+      <!-- 15 — LLMs -->
+      <section class="slide slide-exercise" data-title="LLMs">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Los grandes modelos de lenguaje</span>
+          <h2 class="h2 h2-ex">Y así llegamos a los <em>LLMs</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un <strong>LLM</strong> (GPT, Claude, Llama…) es un Transformer
+                gigantesco entrenado para una tarea sencilla a escala brutal:
+                <em>predecir el siguiente token</em>.
+              </p>
+              <ul class="neuron-notes">
+                <li>Miles de millones de parámetros, entrenados con casi todo el texto disponible.</li>
+                <li>De esa predicción emergen traducir, resumir, programar, conversar…</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Predecir el siguiente token</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">«El cielo es de color ___»</span>
+                <span class="pt-t">P(azul) alta · P(verde) baja</span>
+                <span class="pt-f">repetido, genera texto coherente</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 6</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · POR QUÉ</span><h3>Adiós al cuello de botella</h3><p>La atención da acceso directo a toda la secuencia, con foco selectivo — sin comprimir en un vector.</p></div>
+            <div class="close-item"><span class="close-num">02 · CÓMO</span><h3>Q · K · V y multi-head</h3><p>Cada palabra pregunta (Q), se compara con las claves (K) y mezcla los valores (V); varias cabezas en paralelo.</p></div>
+            <div class="close-item"><span class="close-num">03 · HASTA DÓNDE</span><h3>Transformers y LLMs</h3><p>Sin recurrencia, en paralelo y a escala: la base de BERT, GPT y todo el NLP moderno.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Visualiza la atención en el interactivo, y haz fine-tuning de un modelo real en el laboratorio.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 6</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Vaswani et al.</strong> — <em>"Attention Is All You Need"</em> (2017), el paper original.</li>
+            <li><strong>Alammar, J.</strong> — <em>"The Illustrated Transformer"</em> (la explicación visual de referencia).</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./practica-t6.html">
+              <span class="close-cta-eyebrow">Ver la atención</span>
+              <span class="close-cta-title">Práctica · self-attention <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Elige una palabra y mira a dónde atiende.</span>
+            </a>
+            <a class="close-cta" href="./lab-t6.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · fine-tuning <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Ajusta un Transformer preentrenado.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

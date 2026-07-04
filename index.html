@@ -393,6 +393,9 @@
       .card-tema5 {
         background: linear-gradient(160deg, #fbfaf6 0%, #f1ecf6 100%);
       }
+      .card-tema6 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #e7f2ef 100%);
+      }
       .card-repaso {
         background: linear-gradient(160deg, #fbfaf6 0%, #f0ebdd 100%);
       }
@@ -1066,6 +1069,7 @@
             <a class="toc-link" href="#tema-3">Tema 3</a>
             <a class="toc-link" href="#tema-4">Tema 4</a>
             <a class="toc-link" href="#tema-5">Tema 5</a>
+            <a class="toc-link" href="#tema-6">Tema 6</a>
           </nav>
         </aside>
 
@@ -1721,6 +1725,121 @@
                   <span>10 retos</span>
                   <span class="sep">·</span>
                   <span>~5 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <!-- ===== TEMA 6 ===== -->
+          <section class="section" id="tema-6">
+            <div class="level-band">
+              <span class="level-name">Tema 6 · Atención y Transformers</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">Aprender a <em>atender</em>.</h2>
+
+            <div class="picker picker-four">
+              <a class="card card-tema6" href="./sesion-t6.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M110 120 L290 200 M110 200 L290 200 M110 280 L290 200 M110 120 L200 120 M110 280 L200 280" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="110" cy="120" r="14" /><circle cx="110" cy="200" r="14" /><circle cx="110" cy="280" r="14" />
+                      <circle cx="290" cy="200" r="18" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Atención y <em>Transformers</em></h2>
+                <p>
+                  Del cuello de botella del seq2seq a la self-attention (Q·K·V),
+                  la arquitectura Transformer y los LLMs.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 min</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema6" href="./practica-t6.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <circle cx="200" cy="200" r="30" fill="currentColor" />
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M200 90 L200 140 M200 260 L200 310 M90 200 L140 200 M260 200 L310 200 M125 125 L160 160 M240 240 L275 275 M275 125 L240 160 M160 240 L125 275" />
+                      <circle cx="200" cy="200" r="120" opacity="0.5" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>¿A dónde <em>mira</em>?</h2>
+                <p>
+                  Visualizador de self-attention: elige una palabra y una
+                  cabeza, y observa a quién atiende y con qué peso.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>3 cabezas</span>
+                </div>
+                <span class="card-go"
+                  >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema6" href="./lab-t6.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Fine-tuning de un <em>Transformer</em></h2>
+                <p>
+                  Notebook: ajusta DistilBERT en Keras para clasificar
+                  sentimiento. Colab (con GPU) o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>HuggingFace · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t6.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Dominas la <em>atención</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre self-attention, Q·K·V,
+                  multi-head, la arquitectura Transformer y los LLMs.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 min</span>
                 </div>
                 <span class="card-go"
                   >Ponerme a prueba <span class="arrow">→</span></span

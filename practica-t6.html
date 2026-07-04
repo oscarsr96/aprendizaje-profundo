@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 6 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 6: visualiza la self-attention. Elige una palabra (query) y una cabeza, y observa a qué otras palabras atiende. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c; --ink-soft: #3b4080; --ink-mute: #7c80a6;
+        --paper: #ffffff; --accent: #ff5700; --accent-deep: #c8410f;
+        --gold: #fe961f; --line: #e2ded0; --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif; --sans: "Inter Tight", system-ui, sans-serif; --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        font-family: var(--sans); color: var(--ink); background: var(--paper);
+        background-image: radial-gradient(ellipse at 15% 8%, rgba(26,31,108,0.05) 0%, transparent 55%), radial-gradient(ellipse at 88% 92%, rgba(255,87,0,0.045) 0%, transparent 55%);
+        -webkit-font-smoothing: antialiased; min-height: 100vh;
+      }
+      .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 13px 28px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); font-size: 13px; }
+      .bar a.brand { display: flex; align-items: center; }
+      .bar-logo { height: 26px; width: auto; display: block; }
+      .bar-sub { color: var(--ink-mute); }
+      .bar-tag { margin-left: auto; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); background: rgba(255,87,0,0.1); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+      main { max-width: 1080px; margin: 0 auto; padding: 42px 24px 90px; }
+      .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block; }
+      h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 6vw, 56px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px 0 14px; }
+      h1 em { font-style: italic; color: var(--accent); }
+      .lead { font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft); max-width: 64ch; }
+      .lead code, p code { font-family: var(--mono); font-size: 0.88em; background: rgba(26,31,108,0.06); padding: 1px 6px; border-radius: 5px; }
+      h2.section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.02em; margin: 0 0 6px; }
+      h2.section-title em { font-style: italic; color: var(--accent); }
+      .band { display: flex; align-items: center; gap: 16px; margin: 54px 0 18px; }
+      .band .num { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; color: var(--ink-mute); white-space: nowrap; }
+      .band .rule { flex: 1; height: 1px; background: var(--line); }
+
+      .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 8px; }
+      .tlabel { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-right: 4px; }
+      .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 9px; overflow: hidden; }
+      .seg button { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-soft); background: #fff; border: none; padding: 9px 15px; cursor: pointer; transition: background 0.16s, color 0.16s; }
+      .seg button + button { border-left: 1.5px solid var(--line); }
+      .seg button.active { background: var(--ink); color: #fff; }
+      .headdesc { font-size: 13.5px; color: var(--ink-mute); margin: 4px 0 0; }
+
+      .board { background: #fbfaf6; border: 1px solid var(--line); border-radius: 14px; padding: 24px 22px; box-shadow: 0 14px 40px rgba(26,31,108,0.06); margin-top: 14px; }
+      .sentence { display: flex; flex-wrap: wrap; gap: 10px; }
+      .tok { position: relative; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px 14px 22px; min-width: 58px; text-align: center; cursor: pointer; background: #fff; transition: border-color 0.16s, transform 0.1s; font-size: 16px; }
+      .tok:hover { transform: translateY(-2px); }
+      .tok.query { border-color: var(--ink); box-shadow: 0 0 0 2px rgba(26,31,108,0.15); }
+      .tok .w { position: absolute; left: 0; right: 0; bottom: 5px; font-family: var(--mono); font-size: 10px; color: var(--ink-mute); }
+      .tok .bar { position: absolute; left: 6px; right: 6px; bottom: 16px; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+      .tok .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+      .hint { font-size: 13.5px; color: var(--ink-mute); margin-top: 14px; }
+      .hint b { color: var(--ink); }
+
+      .qkv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+      @media (max-width: 640px) { .qkv { grid-template-columns: 1fr; } }
+      .qkv .c { border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #fff; }
+      .qkv .c h4 { font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+      .qkv .c p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+      .qkv .c .k { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); }
+
+      pre.code { background: #101340; color: #eef0f6; border-radius: 12px; padding: 18px 20px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; overflow-x: auto; white-space: pre; margin-top: 8px; }
+      pre.code .cm { color: #7c80a6; } pre.code .kw { color: var(--gold); } pre.code .fn { color: #4fd1c5; }
+      .code-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+      .note { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.06); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin-top: 14px; }
+
+      .retos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 760px) { .retos { grid-template-columns: 1fr; } }
+      .reto { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px; background: #fbfaf6; }
+      .reto h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin-bottom: 6px; }
+      .reto p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+      .reto .tag { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); letter-spacing: 0.05em; }
+
+      .close-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+      @media (max-width: 620px) { .close-cta-grid { grid-template-columns: 1fr; } }
+      .close-cta { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px 22px; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.18s, transform 0.16s; }
+      .close-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .close-cta .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+      .close-cta .title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding-top: 20px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 6</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <section>
+        <span class="kicker">Tema 6 · Práctica</span>
+        <h1>¿A dónde <em>mira</em> cada palabra?</h1>
+        <p class="lead">
+          En la self-attention, cada palabra (la <em>query</em>) se compara con
+          todas las demás y reparte su atención según cuánto encajan. Elige una
+          palabra y una <em>cabeza</em>, y observa a quién atiende: el sombreado
+          y la barra bajo cada palabra son su peso de atención.
+        </p>
+      </section>
+
+      <div class="band"><span class="num">— 01 · SELF-ATTENTION —</span><span class="rule"></span></div>
+      <h2 class="section-title">Elige una <em>palabra</em>.</h2>
+
+      <div class="toolbar">
+        <span class="tlabel">Cabeza</span>
+        <div class="seg" id="headSeg">
+          <button data-h="coref" class="active">Correferencia</button>
+          <button data-h="verbo">Sujeto–verbo</button>
+          <button data-h="pos">Posición</button>
+        </div>
+      </div>
+      <p class="headdesc" id="headDesc"></p>
+
+      <div class="board">
+        <div class="sentence" id="sentence"></div>
+        <p class="hint" id="hint"></p>
+      </div>
+
+      <div class="qkv">
+        <div class="c"><span class="k">Query (Q)</span><h4>Qué busco</h4><p>La palabra seleccionada lanza su pregunta al resto.</p></div>
+        <div class="c"><span class="k">Key (K)</span><h4>Qué ofrezco</h4><p>Cada palabra se compara con la query: afinidad = Q·K.</p></div>
+        <div class="c"><span class="k">Value (V)</span><h4>Qué se lleva</h4><p>La salida mezcla los Value según los pesos (softmax).</p></div>
+      </div>
+
+      <div class="band"><span class="num">— 02 · EL CÁLCULO —</span><span class="rule"></span></div>
+      <h2 class="section-title">Softmax de las <em>afinidades</em>.</h2>
+      <p class="lead" style="margin-top:6px">
+        Los pesos que ves son <code>softmax(Q·Kᵀ / √dₖ)</code>: una distribución
+        que suma 1. Aquí las proyecciones Q/K están fijadas a mano para que cada
+        cabeza muestre un patrón claro; en un Transformer real se
+        <em>aprenden</em>.
+      </p>
+      <div class="code-label" style="margin-top:16px">NumPy · scaled dot-product attention</div>
+      <pre class="code" id="code"></pre>
+      <div class="note">
+        Cambia de palabra o de cabeza y este cálculo cambia: la fila de pesos es
+        la atención de tu query sobre toda la frase.
+      </div>
+
+      <div class="band"><span class="num">— 03 · TUS RETOS —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto"><span class="tag">correferencia</span><h4>¿A quién se refiere?</h4><p>En la cabeza <em>Correferencia</em>, pincha «cansado». ¿A qué palabra atiende más? ¿Tiene sentido?</p></div>
+        <div class="reto"><span class="tag">cabezas</span><h4>Distintas miradas</h4><p>Selecciona la misma palabra y cambia de cabeza. ¿Cómo cambia el reparto de atención?</p></div>
+        <div class="reto"><span class="tag">posición</span><h4>Vecindad</h4><p>En la cabeza <em>Posición</em>, ¿a quién atiende cada palabra? ¿Por qué se parece a mirar a los vecinos?</p></div>
+      </div>
+
+      <div class="band"><span class="num">— SIGUIENTE —</span><span class="rule"></span></div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t6.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Atención y Transformers →</span>
+        </a>
+        <a class="close-cta" href="./lab-t6.html">
+          <span class="eyebrow">Manos a la obra</span>
+          <span class="title">Laboratorio · fine-tuning →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 6 — self-attention (proyecciones fijas)
+      // =====================================================
+      const TOKENS = ["El", "gato", "no", "cruzó", "porque", "estaba", "cansado"];
+      const N = TOKENS.length;
+
+      // Embeddings por cabeza (fijados a mano para patrones claros).
+      // Self-attention: Q = K = E; pesos = softmax(E·Eᵀ / √d).
+      const HEADS = {
+        coref: {
+          desc: "Cada palabra atiende a aquella con la que se relaciona por significado: los estados y adjetivos buscan a su sujeto.",
+          // dims: [sujeto, verbo, negación, estado]
+          E: [
+            [0.3, 0, 0, 0],   // El
+            [1.0, 0, 0, 0],   // gato
+            [0, 0, 1.0, 0],   // no
+            [0, 1.0, 0.3, 0], // cruzó
+            [0, 0, 0, 0.2],   // porque
+            [0.8, 0.2, 0, 0.4], // estaba
+            [0.95, 0, 0, 0.3],  // cansado
+          ],
+        },
+        verbo: {
+          desc: "La cabeza sintáctica: el verbo busca a su sujeto y a la negación que lo modifica.",
+          // dims: [nombre, verbo, negación, conector]
+          E: [
+            [0.2, 0, 0, 0],
+            [1.0, 0, 0, 0],   // gato (nombre)
+            [0, 0, 1.0, 0],   // no
+            [0.7, 1.0, 0.7, 0], // cruzó → nombre + negación
+            [0, 0, 0, 1.0],   // porque
+            [0.4, 0.6, 0, 0.2], // estaba
+            [0.2, 0, 0, 0],   // cansado
+          ],
+        },
+        pos: {
+          desc: "La cabeza posicional: sin significado, cada palabra atiende sobre todo a sus vecinas por su lugar en la frase.",
+          // embedding posicional 2-D: posiciones cercanas → mayor afinidad
+          E: TOKENS.map((_, i) => [Math.cos(i * 0.7), Math.sin(i * 0.7)]),
+        },
+      };
+
+      let head = "coref";
+      let query = 5; // "estaba" por defecto
+
+      function dot(a, b) { let s = 0; for (let k = 0; k < a.length; k++) s += a[k] * b[k]; return s; }
+      // Ganancia: las proyecciones de juguete son pequeñas; escalamos para que
+      // la atención se concentre y el patrón de cada cabeza se vea con claridad.
+      const GAIN = 5;
+      function attention(headKey, qi) {
+        const E = HEADS[headKey].E;
+        const scores = E.map((e) => dot(E[qi], e) * GAIN);
+        const m = Math.max(...scores);
+        const exps = scores.map((s) => Math.exp(s - m));
+        const Z = exps.reduce((a, b) => a + b, 0);
+        return exps.map((e) => e / Z);
+      }
+
+      const sentenceEl = document.getElementById("sentence");
+      const hintEl = document.getElementById("hint");
+      const headDescEl = document.getElementById("headDesc");
+      const codeEl = document.getElementById("code");
+
+      function render() {
+        const w = attention(head, query);
+        headDescEl.textContent = HEADS[head].desc;
+        sentenceEl.innerHTML = "";
+        TOKENS.forEach((t, i) => {
+          const el = document.createElement("div");
+          el.className = "tok" + (i === query ? " query" : "");
+          const a = w[i];
+          // sombreado por peso (naranja translúcido)
+          el.style.background = `rgba(255,87,0,${(a * 0.85).toFixed(2)})`;
+          el.style.color = a > 0.5 ? "#fff" : "#1a1f6c";
+          el.innerHTML =
+            `${t}<div class="bar"><i style="width:${(a * 100).toFixed(0)}%"></i></div>` +
+            `<div class="w">${a.toFixed(2)}</div>`;
+          el.addEventListener("click", () => { query = i; render(); });
+          sentenceEl.appendChild(el);
+        });
+        // top atendida (excluyendo la propia query si domina)
+        const order = w.map((a, i) => [a, i]).sort((x, y) => y[0] - x[0]);
+        const top = order.filter(([, i]) => i !== query)[0];
+        hintEl.innerHTML =
+          `Query: <b>«${TOKENS[query]}»</b> · atiende sobre todo a <b>«${TOKENS[top[1]]}»</b> (${top[0].toFixed(2)}). Pincha otra palabra para cambiar la query.`;
+        renderCode(w);
+      }
+
+      function renderCode(w) {
+        const wl = "[" + w.map((a) => a.toFixed(2)).join(", ") + "]";
+        codeEl.innerHTML =
+          `<span class="kw">import</span> numpy <span class="kw">as</span> np\n\n` +
+          `<span class="cm"># Q, K, V: proyecciones de los embeddings (aquí Q=K=E)</span>\n` +
+          `scores = Q @ K.T / np.<span class="fn">sqrt</span>(d_k)   <span class="cm"># afinidades</span>\n` +
+          `pesos  = <span class="fn">softmax</span>(scores, axis=-1)   <span class="cm"># suman 1</span>\n` +
+          `salida = pesos @ V                <span class="cm"># mezcla ponderada</span>\n\n` +
+          `<span class="cm"># fila de «${TOKENS[query]}» (${HEADS[head] && head}):</span>\n` +
+          `pesos[i] = ${wl}`;
+      }
+
+      document.getElementById("headSeg").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-h]");
+        if (!b) return;
+        document.querySelectorAll("#headSeg button").forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        head = b.dataset.h;
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
