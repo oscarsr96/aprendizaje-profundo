@@ -396,6 +396,9 @@
       .card-tema6 {
         background: linear-gradient(160deg, #fbfaf6 0%, #e7f2ef 100%);
       }
+      .card-tema7 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #f6efe3 100%);
+      }
       .card-repaso {
         background: linear-gradient(160deg, #fbfaf6 0%, #f0ebdd 100%);
       }
@@ -1070,6 +1073,7 @@
             <a class="toc-link" href="#tema-4">Tema 4</a>
             <a class="toc-link" href="#tema-5">Tema 5</a>
             <a class="toc-link" href="#tema-6">Tema 6</a>
+            <a class="toc-link" href="#tema-7">Tema 7</a>
           </nav>
         </aside>
 
@@ -1835,6 +1839,125 @@
                 <p>
                   Diez retos autocorregibles sobre self-attention, Q·K·V,
                   multi-head, la arquitectura Transformer y los LLMs.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 min</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <section class="section" id="tema-7">
+            <div class="level-band">
+              <span class="level-name">Tema 7 · Entrenamiento</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">Bajar la <em>colina</em>.</h2>
+
+            <div class="picker picker-four">
+              <a class="card card-tema7" href="./sesion-t7.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M50 130 Q150 320 220 260 Q290 200 360 300" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="80" cy="150" r="12" />
+                      <circle cx="150" cy="268" r="12" />
+                      <circle cx="212" cy="256" r="12" />
+                    </g>
+                    <circle cx="235" cy="240" r="16" fill="currentColor" opacity="0.5" />
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Entrenar de <em>verdad</em></h2>
+                <p>
+                  Descenso del gradiente, batch/mini-batch/SGD, learning rate y
+                  su scheduling, momentum, RMSProp y Adam.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 min</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema7" href="./practica-t7.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <ellipse cx="200" cy="200" rx="150" ry="60" />
+                      <ellipse cx="200" cy="200" rx="100" ry="38" />
+                      <ellipse cx="200" cy="200" rx="52" ry="18" />
+                      <path d="M70 150 L150 235 L200 205 L250 220 L330 200" stroke-width="2.5" />
+                    </g>
+                    <circle cx="200" cy="200" r="10" fill="currentColor" />
+                    <circle cx="70" cy="150" r="9" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>Baja la <em>colina</em></h2>
+                <p>
+                  Playground del descenso del gradiente: elige optimizador y
+                  learning rate, y mira la bola bajar… o divergir.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>3 optimizadores</span>
+                </div>
+                <span class="card-go"
+                  >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema7" href="./lab-t7.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M100 280 Q150 190 200 230 Q250 260 300 180" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M100 290 Q150 250 200 265 Q250 275 300 240" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Curvas de <em>pérdida</em></h2>
+                <p>
+                  Notebook: entrena el mismo MLP en Keras variando optimizador y
+                  LR, y compara las curvas. Colab o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t7.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Sabes <em>entrenar</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre el descenso del gradiente, el
+                  learning rate, los batches y los optimizadores modernos.
                 </p>
                 <div class="card-meta">
                   <span>10 retos</span>

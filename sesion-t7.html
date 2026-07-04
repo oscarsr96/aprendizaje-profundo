@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 7</title>
+    <meta
+      name="description"
+      content="Tema 7 de Aprendizaje Profundo en CUNEF. Entrenar de verdad: descenso del gradiente, batch/mini-batch/SGD, learning rate y su scheduling, momentum, RMSProp y Adam."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 7</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">7 · Entrenamiento</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Bajar la<br /><em>colina</em>.</h1>
+          <p class="cover-sub">
+            Ya sabemos qué es una red y cómo se propaga el error. Ahora, lo que
+            de verdad hace que aprenda: el <em>descenso del gradiente</em>, el
+            <em>learning rate</em> y los optimizadores modernos —
+            <em>momentum</em>, <em>RMSProp</em> y <em>Adam</em>.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <path d="M40 120 Q130 300 200 250 Q280 190 360 300" />
+              <path d="M40 150 Q130 330 200 280 Q280 220 360 330" opacity="0.5" />
+              <circle cx="70" cy="140" r="8" />
+              <circle cx="128" cy="248" r="8" />
+              <circle cx="190" cy="256" r="8" />
+              <circle cx="230" cy="228" r="8" />
+            </g>
+            <circle cx="210" cy="262" r="6" fill="currentColor" opacity="0.7" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">El descenso del gradiente</span><span class="agenda-desc">Pérdida, gradiente y el paso que baja la colina.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Batch, mini-batch y SGD</span><span class="agenda-desc">Cuántos ejemplos ves antes de dar un paso; épocas y batch size.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">El learning rate</span><span class="agenda-desc">El hiperparámetro que más importa; su programación en el tiempo.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Optimizadores modernos</span><span class="agenda-desc">Momentum, RMSProp y por qué casi todos usan Adam.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="El descenso del gradiente">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">El descenso<br />del <em>gradiente</em>.</h2>
+          <p class="divider-sub">
+            Entrenar es un problema de optimización: encontrar los pesos que
+            hacen la <em>pérdida</em> lo más pequeña posible.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — Pérdida como superficie -->
+      <section class="slide" data-title="La pérdida es una colina">
+        <div class="slide-inner">
+          <span class="kicker">Recordatorio del Tema 2</span>
+          <h2 class="h2">La pérdida es una <em>colina</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Para cada combinación de pesos, la <em>función de pérdida</em>
+                mide cuánto se equivoca la red. Imagínala como un paisaje: los
+                pesos son las coordenadas y la altura es el error.
+              </p>
+              <p class="note">
+                Entrenar = <strong>bajar</strong> hasta un valle. Pero no vemos
+                el mapa entero: solo notamos, bajo nuestros pies, hacia dónde
+                baja más.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>La analogía</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">estás en la niebla, en una ladera</span>
+                <span class="pt-t">→ palpas la pendiente local →</span>
+                <span class="pt-f">das un paso cuesta abajo, y repites</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — El gradiente -->
+      <section class="slide" data-title="El gradiente">
+        <div class="slide-inner">
+          <span class="kicker">La brújula</span>
+          <h2 class="h2">El gradiente <em>apunta</em> hacia arriba.</h2>
+          <p class="lead">
+            El <em>gradiente</em> ∇L es el vector de derivadas parciales de la
+            pérdida respecto a cada peso. Señala la dirección de <em>máximo
+            ascenso</em>: hacia dónde la pérdida crece más rápido.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Para bajar, vamos justo en <em>sentido contrario</em>: <code>−∇L</code>.
+              El <em>backprop</em> del Tema 3 es, precisamente, la máquina de
+              calcular ese gradiente de forma eficiente.
+            </p>
+            <p class="note">
+              Idea clave: no resolvemos la red de una vez. La mejoramos
+              <strong>a pasitos</strong>, siguiendo la pendiente local.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — La regla de actualización -->
+      <section class="slide" data-title="El paso">
+        <div class="slide-inner">
+          <span class="kicker">La regla de actualización</span>
+          <h2 class="h2">Un <em>paso</em> cuesta abajo.</h2>
+          <svg viewBox="0 0 760 150" style="width:100%; height:auto; margin: 8px 0 12px">
+            <g font-family="JetBrains Mono" text-anchor="middle">
+              <text x="380" y="70" font-size="30" fill="#1a1f6c">w &#8592; w &#8722; &#951; &#183; &#8711;L</text>
+            </g>
+            <g font-family="Inter Tight" font-size="12" fill="#7c80a6" text-anchor="middle">
+              <text x="250" y="110">peso nuevo</text>
+              <text x="360" y="110">peso actual</text>
+              <text x="452" y="110" fill="#ff5700">learning rate</text>
+              <text x="527" y="110">gradiente</text>
+              <path d="M250 95 V82" stroke="#c9c3b3"/><path d="M360 95 V82" stroke="#c9c3b3"/>
+              <path d="M452 95 V82" stroke="#ff5700"/><path d="M527 95 V82" stroke="#c9c3b3"/>
+            </g>
+          </svg>
+          <p class="note">
+            Cada peso se mueve un poco en <em>contra</em> del gradiente. El
+            tamaño de ese «poco» lo fija el <strong>learning rate</strong> η — el
+            protagonista del bloque 03. Repetir esto miles de veces
+            <em>es</em> entrenar.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="Batch, mini-batch y SGD">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">¿Cuántos ejemplos<br />por <em>paso</em>?</h2>
+          <p class="divider-sub">
+            Antes de dar cada paso, ¿miramos todos los datos, uno solo, o un
+            puñado? Esa elección lo cambia todo.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Batch vs mini-batch vs SGD -->
+      <section class="slide" data-title="Tres formas de dar el paso">
+        <div class="slide-inner">
+          <span class="kicker">El tamaño del lote</span>
+          <h2 class="h2">Tres formas de <em>dar el paso</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Batch (lote completo)</h4>
+              <div class="fn-formula">todo el dataset</div>
+              <p>Gradiente exacto, pero un paso por época: lento y come memoria.</p>
+              <span class="fn-use">→ dirección estable</span>
+            </div>
+            <div class="fn-card">
+              <h4>SGD (estocástico)</h4>
+              <div class="fn-formula">1 ejemplo</div>
+              <p>Un paso por ejemplo: rapidísimo pero muy ruidoso, zigzaguea.</p>
+              <span class="fn-use">→ mucho ruido</span>
+            </div>
+            <div class="fn-card">
+              <h4>Mini-batch</h4>
+              <div class="fn-formula">32 · 64 · 128…</div>
+              <p>Un puñado por paso: el punto dulce entre estabilidad y velocidad.</p>
+              <span class="fn-use">→ lo que se usa</span>
+            </div>
+          </div>
+          <p class="note">
+            En la práctica casi siempre se usa <strong>mini-batch</strong>
+            (aunque, por costumbre, lo llamemos «SGD»): aprovecha la GPU y el
+            ruido incluso ayuda a escapar de valles malos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — Época y batch size -->
+      <section class="slide" data-title="Época y batch size">
+        <div class="slide-inner">
+          <span class="kicker">El vocabulario del entrenamiento</span>
+          <h2 class="h2">Época, <em>iteración</em>, batch size.</h2>
+          <div class="two-col">
+            <div>
+              <ul class="neuron-notes">
+                <li><strong>Batch size</strong>: cuántos ejemplos entran en cada paso.</li>
+                <li><strong>Iteración</strong>: un paso (un batch → una actualización de pesos).</li>
+                <li><strong>Época</strong>: una pasada completa por <em>todos</em> los datos.</li>
+              </ul>
+              <p class="note">
+                Con 10 000 ejemplos y batch size 100 → 100 iteraciones = 1 época.
+                Entrenamos durante varias épocas.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El tamaño importa</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">batch pequeño → más ruido, generaliza algo mejor</span>
+                <span class="pt-c">batch grande → paso estable, más rápido en GPU</span>
+                <span class="pt-f">típico: 32–256, potencia de 2</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="El learning rate">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">El <em>learning<br />rate</em>.</h2>
+          <p class="divider-sub">
+            Si tuvieras que ajustar <em>un solo</em> hiperparámetro, sería este.
+            Demasiado grande explota; demasiado pequeño no llega.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — LR: tres regímenes -->
+      <section class="slide" data-title="El tamaño del paso">
+        <div class="slide-inner">
+          <span class="kicker">η · el tamaño del paso</span>
+          <h2 class="h2">Ni corto, ni <em>pasado</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>η demasiado pequeño</h3>
+              <p>Pasos minúsculos: baja, pero <em>tardísimo</em>. Puede quedarse atascado antes de llegar al valle.</p>
+              <ul class="neuron-notes"><li>Entrenamiento lento y caro.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>η demasiado grande</h3>
+              <p>Pasos enormes: <em>rebota</em> por las paredes del valle o incluso <strong>diverge</strong> (la pérdida crece).</p>
+              <ul class="neuron-notes"><li>Pérdida que salta o se vuelve NaN.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>η justo</h3>
+              <p>Baja rápido y se estabiliza en el valle. El objetivo es encontrar esa franja.</p>
+              <ul class="neuron-notes"><li>Curva de pérdida suave y decreciente.</li></ul>
+            </div>
+          </div>
+          <p class="note">Lo verás con tus manos en la <em>práctica</em>: sube el LR hasta que la bola se desboca.</p>
+        </div>
+      </section>
+
+      <!-- 11 — LR scheduling -->
+      <section class="slide" data-title="Programar el learning rate">
+        <div class="slide-inner">
+          <span class="kicker">Learning rate scheduling</span>
+          <h2 class="h2">Empezar <em>grande</em>, acabar fino.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                No hace falta mantener η fijo. Lo habitual es empezar con pasos
+                grandes (avanzar rápido) e ir <em>reduciéndolo</em> para afinar
+                cerca del valle.
+              </p>
+              <ul class="neuron-notes">
+                <li><strong>Decay</strong>: bajar η por escalones o de forma continua.</li>
+                <li><strong>Warmup</strong>: arrancar pequeñito y subir al inicio (clave en Transformers).</li>
+                <li><strong>Cosine</strong>: bajarlo suavemente siguiendo un coseno.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>La intuición del aterrizaje</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">al principio: zancadas para acercarte</span>
+                <span class="pt-t">al final: pasitos para no pasarte</span>
+                <span class="pt-f">como un avión que reduce al aterrizar</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="Optimizadores modernos">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">Optimizadores<br /><em>modernos</em>.</h2>
+          <p class="divider-sub">
+            El SGD puro zigzaguea y se atasca. Tres ideas lo mejoran:
+            <em>inercia</em>, <em>paso adaptativo</em> y su combinación.
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — Momentum -->
+      <section class="slide" data-title="Momentum">
+        <div class="slide-inner">
+          <span class="kicker">Idea 1 · inercia</span>
+          <h2 class="h2">Momentum: una <em>bola</em> que rueda.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En vez de decidir el paso solo con el gradiente <em>actual</em>,
+                acumulamos una <em>velocidad</em>: los pasos anteriores empujan
+                al siguiente.
+              </p>
+              <p class="note">
+                En un valle alargado, el SGD rebota de pared a pared; el momentum
+                <strong>cancela</strong> ese zigzag y acelera en la dirección
+                buena. Como una bola pesada que gana inercia.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>La velocidad se acumula</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">v &#8592; &#946;·v &#8722; &#951;·&#8711;L</span>
+                <span class="pt-c">w &#8592; w + v</span>
+                <span class="pt-f">β≈0.9: recuerda el 90 % del impulso previo</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 — RMSProp / adaptativo -->
+      <section class="slide" data-title="Paso adaptativo">
+        <div class="slide-inner">
+          <span class="kicker">Idea 2 · un paso por peso</span>
+          <h2 class="h2">Paso <em>adaptativo</em> (RMSProp).</h2>
+          <p class="lead">
+            No todos los pesos necesitan el mismo tamaño de paso. Los métodos
+            adaptativos (AdaGrad, <strong>RMSProp</strong>) dan a cada peso su
+            propio η, según cómo de grandes han sido sus gradientes.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              A un peso con gradientes <em>enormes</em> se le acorta el paso; a
+              uno con gradientes <em>diminutos</em> se le agranda. Todos avanzan
+              a ritmo parecido.
+            </p>
+            <p class="note">
+              Esto ayuda muchísimo cuando la colina es mucho más empinada en unas
+              direcciones que en otras — que es casi siempre.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 — Adam -->
+      <section class="slide slide-exercise" data-title="Adam">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Idea 3 · lo mejor de ambas</span>
+          <h2 class="h2 h2-ex">Y así llegamos a <em>Adam</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                <strong>Adam</strong> combina las dos ideas: <em>momentum</em>
+                (inercia) + <em>paso adaptativo</em> por peso. Es robusto y
+                funciona bien casi de fábrica.
+              </p>
+              <ul class="neuron-notes">
+                <li>Es el optimizador <strong>por defecto</strong> en la mayoría de proyectos.</li>
+                <li>Un buen punto de partida: <code>Adam(learning_rate=1e-3)</code>.</li>
+                <li>Aun así, el LR sigue importando: pruébalo.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En Keras</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">model.compile(</span>
+                <span class="pt-c">&nbsp;&nbsp;optimizer=Adam(1e-3),</span>
+                <span class="pt-c">&nbsp;&nbsp;loss="categorical_crossentropy")</span>
+                <span class="pt-f">y a entrenar</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 7</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · QUÉ</span><h3>Bajar la colina</h3><p>Entrenar es descender la pérdida siguiendo <code>−∇L</code>, a pasitos: <code>w ← w − η·∇L</code>.</p></div>
+            <div class="close-item"><span class="close-num">02 · CÓMO</span><h3>Mini-batch</h3><p>Un puñado de ejemplos por paso: el equilibrio entre velocidad, memoria y estabilidad.</p></div>
+            <div class="close-item"><span class="close-num">03 · LA PALANCA</span><h3>Learning rate y Adam</h3><p>El LR es el hiperparámetro clave; Adam (momentum + adaptativo) es el punto de partida seguro.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Juega con el optimizador y el LR en el interactivo, y entrena el mismo MLP variándolos en el laboratorio.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 7</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Kingma &amp; Ba</strong> — <em>"Adam: A Method for Stochastic Optimization"</em> (2015), el paper original.</li>
+            <li><strong>Goodfellow, Bengio &amp; Courville</strong> — <em>Deep Learning</em>, cap. 8 (optimización).</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./practica-t7.html">
+              <span class="close-cta-eyebrow">Juega con la bajada</span>
+              <span class="close-cta-title">Práctica · optimizadores y LR <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Elige optimizador y learning rate, y mira la bola bajar.</span>
+            </a>
+            <a class="close-cta" href="./lab-t7.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · curvas de pérdida <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Entrena un MLP variando optimizador y LR en Keras.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

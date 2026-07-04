@@ -200,13 +200,37 @@
     },
     {
       "id": "tema-5",
-      "title": "tema-5",
+      "title": "Tema 5 · Aprendizaje profundo (panorámica)",
       "files": [
         {
           "name": "T5. Aprendizaje profundo (mejorado).pptx",
           "path": "files/tema-5/T5. Aprendizaje profundo (mejorado).pptx",
           "ext": "pptx",
           "size": 420888
+        }
+      ]
+    },
+    {
+      "id": "tema-6",
+      "title": "Tema 6 · Atención y Transformers",
+      "files": [
+        {
+          "name": "Lab_Tema6_FineTuning_Transformers.ipynb",
+          "path": "files/tema-6/Lab_Tema6_FineTuning_Transformers.ipynb",
+          "ext": "ipynb",
+          "size": 6910
+        }
+      ]
+    },
+    {
+      "id": "tema-7",
+      "title": "Tema 7 · Entrenamiento",
+      "files": [
+        {
+          "name": "Lab_Tema7_Optimizadores_LR.ipynb",
+          "path": "files/tema-7/Lab_Tema7_Optimizadores_LR.ipynb",
+          "ext": "ipynb",
+          "size": 8589
         }
       ]
     }

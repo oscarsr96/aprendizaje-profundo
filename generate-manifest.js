@@ -12,6 +12,11 @@ const GROUP_TITLES = {
   "tema-2": "Tema 2 · Base matemática",
   "tema-3": "Tema 3 · Perceptrón multicapa (MLP)",
   "tema-4": "Tema 4 · CNN",
+  "tema-5": "Tema 5 · Aprendizaje profundo (panorámica)",
+  "tema-6": "Tema 6 · Atención y Transformers",
+  "tema-7": "Tema 7 · Entrenamiento",
+  "tema-8": "Tema 8 · Generalización",
+  "tema-9": "Tema 9 · Evaluación",
   general: "General",
 };
 

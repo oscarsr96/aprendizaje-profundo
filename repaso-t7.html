@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Repaso Tema 7</title>
+    <meta
+      name="description"
+      content="Cuestionario autocorregible del Tema 7 de Aprendizaje Profundo. 10 retos sobre entrenamiento: descenso del gradiente, learning rate, batches y optimizadores. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c;
+        --ink-soft: #3b4080;
+        --ink-mute: #7c80a6;
+        --paper: #ffffff;
+        --paper-warm: #f0ebdd;
+        --paper-deep: #101340;
+        --accent: #ff5700;
+        --accent-deep: #c8410f;
+        --gold: #fe961f;
+        --line: #e2ded0;
+        --ok: #0796a3;
+        --bad: #d6452e;
+        --serif: "Taviraj", Georgia, serif;
+        --sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", Menlo, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scrollbar-gutter: stable;
+        overflow-y: scroll;
+      }
+
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        background-image:
+          radial-gradient(
+            ellipse at 18% 12%,
+            rgba(26, 31, 108, 0.05) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 85% 88%,
+            rgba(255, 87, 0, 0.045) 0%,
+            transparent 55%
+          );
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ---------- TOPBAR ---------- */
+      .bar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 14px 28px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .bar-brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .bar-brand a {
+        display: flex;
+        align-items: center;
+      }
+      .bar-logo {
+        height: 26px;
+        width: auto;
+        display: block;
+        flex-shrink: 0;
+      }
+      .bar-sub {
+        color: var(--ink-mute);
+        display: none;
+      }
+      .bar-progress {
+        flex: 1;
+        height: 3px;
+        background: var(--line);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--accent);
+        border-radius: 2px;
+        transition: width 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+      }
+      .bar-score {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ink);
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+      .bar-score b {
+        color: var(--accent);
+      }
+      @media (min-width: 720px) {
+        .bar-sub {
+          display: inline;
+        }
+      }
+
+      /* ---------- LAYOUT ---------- */
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 40px 24px 80px;
+        display: flex;
+        align-items: center;
+      }
+      .screen {
+        width: 100%;
+        animation: pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .screen[hidden] {
+        display: none;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ---------- INTRO ---------- */
+      .hero {
+        text-align: center;
+        padding: 24px 0;
+      }
+      .hero-kicker {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent);
+        display: inline-block;
+        margin-bottom: 22px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--accent);
+      }
+      .hero h1 {
+        font-family: var(--serif);
+        font-weight: 400;
+        font-size: clamp(40px, 8vw, 76px);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        margin-bottom: 26px;
+      }
+      .hero h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .hero p {
+        font-size: clamp(16px, 2vw, 19px);
+        line-height: 1.55;
+        color: var(--ink-soft);
+        max-width: 48ch;
+        margin: 0 auto 16px;
+      }
+      .hero-meta {
+        display: flex;
+        gap: 26px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 28px 0 36px;
+      }
+      .hero-meta div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .hero-meta .n {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 34px;
+        color: var(--ink);
+        line-height: 1;
+      }
+      .hero-meta .l {
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        font-weight: 600;
+      }
+
+      /* ---------- CARD ---------- */
+      .card {
+        background: #fbfaf6;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 34px 32px;
+        box-shadow: 0 14px 40px rgba(26, 31, 108, 0.06);
+      }
+      .qmeta {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        margin-bottom: 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .qmeta .tag {
+        background: rgba(255, 87, 0, 0.1);
+        color: var(--accent-deep);
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+      .qtext {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(23px, 3.2vw, 31px);
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        margin-bottom: 8px;
+      }
+      .qhint {
+        font-size: 13.5px;
+        color: var(--ink-mute);
+        margin-bottom: 22px;
+      }
+
+      /* ---------- OPTIONS ---------- */
+      .opts {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+      }
+      .opt {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-align: left;
+        width: 100%;
+        background: #fff;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 15px 18px;
+        font-family: var(--sans);
+        font-size: 15.5px;
+        line-height: 1.4;
+        color: var(--ink);
+        cursor: pointer;
+        transition:
+          border-color 0.18s ease,
+          background 0.18s ease,
+          transform 0.12s ease;
+      }
+      .opt:hover:not(:disabled) {
+        border-color: var(--ink-mute);
+        transform: translateX(2px);
+      }
+      .opt .mark {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid var(--line);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        transition: all 0.18s ease;
+      }
+      .opt.multi .mark {
+        border-radius: 7px;
+      }
+      .opt.sel {
+        border-color: var(--accent);
+        background: rgba(255, 87, 0, 0.05);
+      }
+      .opt.sel .mark {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .opt:disabled {
+        cursor: default;
+      }
+      .opt.correct {
+        border-color: var(--ok);
+        background: rgba(7, 150, 163, 0.08);
+      }
+      .opt.correct .mark {
+        background: var(--ok);
+        border-color: var(--ok);
+      }
+      .opt.wrong {
+        border-color: var(--bad);
+        background: rgba(214, 69, 46, 0.07);
+      }
+      .opt.wrong .mark {
+        background: var(--bad);
+        border-color: var(--bad);
+      }
+
+      /* ---------- CLASSIFY ---------- */
+      .citems {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .citem {
+        background: #fff;
+        border: 1.5px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+      .citem-text {
+        font-size: 15px;
+        line-height: 1.4;
+        margin-bottom: 11px;
+        color: var(--ink);
+      }
+      .citem-text .res {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 6px;
+        padding: 2px 7px;
+        border-radius: 12px;
+      }
+      .res.ok {
+        background: rgba(7, 150, 163, 0.13);
+        color: var(--ok);
+      }
+      .res.no {
+        background: rgba(214, 69, 46, 0.13);
+        color: var(--bad);
+      }
+      .buckets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .bkt {
+        background: #fff;
+        border: 1.5px solid var(--line);
+        border-radius: 20px;
+        padding: 7px 15px;
+        font-family: var(--sans);
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        cursor: pointer;
+        transition: all 0.16s ease;
+      }
+      .bkt:hover:not(:disabled) {
+        border-color: var(--ink-mute);
+      }
+      .bkt.sel {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+      .bkt:disabled {
+        cursor: default;
+      }
+      .bkt.correct {
+        background: var(--ok);
+        border-color: var(--ok);
+        color: #fff;
+      }
+      .bkt.wrong {
+        background: var(--bad);
+        border-color: var(--bad);
+        color: #fff;
+      }
+      .bkt.reveal {
+        border-color: var(--ok);
+        color: var(--ok);
+        border-style: dashed;
+      }
+
+      /* ---------- FEEDBACK ---------- */
+      .feedback {
+        margin-top: 22px;
+        border-radius: 8px;
+        padding: 16px 18px;
+        font-size: 14.5px;
+        line-height: 1.55;
+        border-left: 4px solid var(--ink-mute);
+        background: rgba(26, 31, 108, 0.04);
+      }
+      .feedback[hidden] {
+        display: none;
+      }
+      .feedback.good {
+        border-left-color: var(--ok);
+        background: rgba(7, 150, 163, 0.07);
+      }
+      .feedback.bad {
+        border-left-color: var(--bad);
+        background: rgba(214, 69, 46, 0.06);
+      }
+      .feedback .fh {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .feedback.good .fh {
+        color: var(--ok);
+      }
+      .feedback.bad .fh {
+        color: var(--bad);
+      }
+      .feedback p {
+        color: var(--ink-soft);
+      }
+
+      /* ---------- ACTIONS ---------- */
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 26px;
+      }
+      .btn {
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        border: none;
+        border-radius: 8px;
+        padding: 13px 28px;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          background 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(255, 87, 0, 0.28);
+      }
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(255, 87, 0, 0.34);
+      }
+      .btn-primary:disabled {
+        background: var(--line);
+        color: var(--ink-mute);
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+      .btn-ink {
+        background: var(--ink);
+        color: #fff;
+      }
+      .btn-ink:hover {
+        transform: translateY(-2px);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--line);
+      }
+      .btn-ghost:hover {
+        border-color: var(--ink);
+      }
+      .btn-lg {
+        padding: 16px 40px;
+        font-size: 16px;
+      }
+
+      /* ---------- RESULTS ---------- */
+      .results {
+        text-align: center;
+        padding: 16px 0;
+      }
+      .ring {
+        --pct: 0;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        margin: 8px auto 26px;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(
+          var(--accent) calc(var(--pct) * 1%),
+          var(--line) 0
+        );
+        position: relative;
+        transition: --pct 1s ease;
+      }
+      .ring::before {
+        content: "";
+        position: absolute;
+        inset: 14px;
+        border-radius: 50%;
+        background: #fbfaf6;
+      }
+      .ring-inner {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+      }
+      .ring-pct {
+        font-family: var(--serif);
+        font-size: 52px;
+        line-height: 1;
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .ring-sub {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-mute);
+        letter-spacing: 0.05em;
+        margin-top: 4px;
+      }
+      .results h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(28px, 5vw, 42px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+      }
+      .results h2 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .results p {
+        font-size: 16px;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        max-width: 46ch;
+        margin: 0 auto 30px;
+      }
+      .results-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* ---------- CONFETTI ---------- */
+      .confetti {
+        position: fixed;
+        top: -24px;
+        z-index: 999;
+        border-radius: 2px;
+        pointer-events: none;
+        animation: fall linear forwards;
+      }
+      @keyframes fall {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0.85;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .card {
+          padding: 26px 20px;
+        }
+        .actions {
+          flex-direction: column-reverse;
+        }
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- BARRA -->
+    <header class="bar">
+      <span class="bar-brand">
+        <a href="./index.html" title="Volver al inicio">
+          <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        </a>
+        <span class="bar-sub">· Aprendizaje Profundo · Repaso Tema 7</span>
+      </span>
+      <div class="bar-progress"><div class="bar-fill" id="barFill"></div></div>
+      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/10</span>
+    </header>
+
+    <main>
+      <!-- INTRO -->
+      <section class="screen" id="introScreen">
+        <div class="hero">
+          <span class="hero-kicker">Tema 7 · Repaso</span>
+          <h1>¿Sabes <br /><em>entrenar</em>?</h1>
+          <p>
+            Diez retos para comprobar lo que te llevas del Tema 7: el descenso
+            del gradiente y la regla <code>w ← w − η·∇L</code>, batch / mini-batch
+            / SGD, épocas y batch size, el learning rate y su programación, y los
+            optimizadores modernos (momentum, RMSProp, Adam). Con explicación en
+            cada respuesta.
+          </p>
+          <div class="hero-meta">
+            <div><span class="n">10</span><span class="l">Retos</span></div>
+            <div><span class="n">~5′</span><span class="l">Minutos</span></div>
+            <div><span class="n">0</span><span class="l">Riesgo</span></div>
+          </div>
+          <button class="btn btn-primary btn-lg" id="startBtn">
+            Empezar el repaso →
+          </button>
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section class="screen" id="quizScreen" hidden>
+        <div class="card">
+          <div class="qmeta">
+            <span id="qCounter">Reto 1 / 10</span>
+            <span class="tag" id="qType">Opción única</span>
+          </div>
+          <h2 class="qtext" id="qText"></h2>
+          <p class="qhint" id="qHint"></p>
+          <div id="qBody"></div>
+          <div class="feedback" id="feedback" hidden>
+            <span class="fh" id="fbHead"></span>
+            <p id="fbText"></p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="checkBtn" disabled>
+            Comprobar
+          </button>
+          <button class="btn btn-ink" id="nextBtn" hidden>Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- RESULTADOS -->
+      <section class="screen" id="resultScreen" hidden>
+        <div class="results">
+          <div class="ring" id="ring">
+            <div class="ring-inner">
+              <div class="ring-pct" id="ringPct">0%</div>
+              <div class="ring-sub" id="ringSub">0 / 10</div>
+            </div>
+          </div>
+          <h2 id="resTitle"></h2>
+          <p id="resMsg"></p>
+          <div class="results-actions">
+            <button class="btn btn-primary" id="replayBtn">
+              Repetir el repaso
+            </button>
+            <a class="btn btn-ghost" href="./sesion-t7.html">Ver la sesión</a>
+            <a class="btn btn-ghost" href="./index.html">← Inicio</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // =====================================================
+      // Repaso interactivo — motor de preguntas
+      // =====================================================
+      const TYPE_LABEL = {
+        choice: "Opción única",
+        multi: "Opción múltiple",
+        classify: "Clasifica",
+      };
+
+      const QUESTIONS = [
+        {
+          type: "choice",
+          q: "En esencia, ¿qué es 'entrenar' una red neuronal?",
+          options: [
+            "Guardar los datos de entrenamiento en la red",
+            "Ajustar los pesos para minimizar una función de pérdida, a pasitos",
+            "Elegir a mano el valor de cada peso",
+            "Aumentar el número de capas hasta que acierte",
+          ],
+          correct: 1,
+          explain:
+            "Entrenar es un problema de optimización: buscar los pesos que hacen la pérdida lo más pequeña posible, mejorándolos poco a poco con el gradiente.",
+        },
+        {
+          type: "choice",
+          q: "¿Qué indica el gradiente ∇L de la pérdida?",
+          options: [
+            "El valor mínimo de la pérdida",
+            "La dirección de máximo ascenso: hacia dónde crece más rápido la pérdida",
+            "El learning rate óptimo",
+            "El número de épocas necesarias",
+          ],
+          correct: 1,
+          explain:
+            "El gradiente apunta hacia donde la pérdida sube más rápido. Por eso para bajar nos movemos en sentido contrario, −∇L.",
+        },
+        {
+          type: "choice",
+          q: "La regla de actualización es w ← w − η·∇L. ¿Qué papel tiene η (eta)?",
+          options: [
+            "Es el número de capas",
+            "Es el learning rate: el tamaño de cada paso cuesta abajo",
+            "Es el valor de la pérdida",
+            "Es el tamaño del batch",
+          ],
+          correct: 1,
+          explain:
+            "η es el learning rate. Multiplica al gradiente y fija cuánto nos movemos en cada paso: el hiperparámetro que más suele importar.",
+        },
+        {
+          type: "choice",
+          q: "Si el learning rate es demasiado grande, lo típico es que…",
+          options: [
+            "El entrenamiento sea simplemente más lento",
+            "La pérdida rebote o incluso diverja (crezca sin parar / NaN)",
+            "El modelo generalice siempre mejor",
+            "No pase nada, η no afecta a la estabilidad",
+          ],
+          correct: 1,
+          explain:
+            "Con pasos demasiado grandes la bola se pasa de largo, rebota por las paredes del valle y puede divergir. Con η demasiado pequeño, en cambio, entrena lentísimo.",
+        },
+        {
+          type: "classify",
+          q: "Empareja cada estrategia con cuántos ejemplos usa por paso.",
+          buckets: ["Batch (lote completo)", "SGD (estocástico)", "Mini-batch"],
+          items: [
+            { text: "Todo el dataset antes de cada actualización", bucket: 0 },
+            { text: "Un solo ejemplo por actualización", bucket: 1 },
+            { text: "Un puñado (p. ej. 32, 64, 128) por actualización", bucket: 2 },
+          ],
+          explain:
+            "Batch = gradiente exacto pero lento; SGD = un ejemplo, rápido pero ruidoso; mini-batch = el equilibrio que se usa en la práctica y aprovecha la GPU.",
+        },
+        {
+          type: "choice",
+          q: "Con 10 000 ejemplos y un batch size de 100, ¿cuántas iteraciones tiene una época?",
+          options: ["1", "100", "10 000", "1 000 000"],
+          correct: 1,
+          explain:
+            "Una época es una pasada completa por los datos. 10 000 / 100 = 100 batches → 100 iteraciones (100 actualizaciones de pesos) por época.",
+        },
+        {
+          type: "choice",
+          q: "¿Qué es el 'learning rate scheduling' (programar el LR)?",
+          options: [
+            "Fijar el learning rate para siempre",
+            "Ir cambiando el learning rate durante el entrenamiento (p. ej. empezar grande y reducirlo)",
+            "Usar un learning rate distinto para cada dato",
+            "Entrenar sin learning rate",
+          ],
+          correct: 1,
+          explain:
+            "Es habitual empezar con pasos grandes (avanzar rápido) y reducir η al acercarse al valle para afinar. El warmup (arrancar pequeño) es clave en Transformers.",
+        },
+        {
+          type: "choice",
+          q: "¿Qué añade el 'momentum' al descenso del gradiente?",
+          options: [
+            "Más capas a la red",
+            "Una velocidad acumulada (inercia): los pasos previos empujan al siguiente",
+            "Un learning rate mayor siempre",
+            "Elimina la necesidad del gradiente",
+          ],
+          correct: 1,
+          explain:
+            "El momentum acumula una velocidad, como una bola pesada. En valles alargados cancela el zigzag del SGD y acelera en la dirección buena.",
+        },
+        {
+          type: "choice",
+          q: "¿Por qué Adam es el optimizador por defecto en tantos proyectos?",
+          options: [
+            "Porque no necesita datos",
+            "Porque combina momentum (inercia) y paso adaptativo por peso, y funciona bien casi de fábrica",
+            "Porque es el más simple y antiguo",
+            "Porque garantiza el óptimo global",
+          ],
+          correct: 1,
+          explain:
+            "Adam junta las dos ideas clave: inercia (momentum) y un learning rate adaptado a cada peso (como RMSProp). Robusto y buen punto de partida (p. ej. 1e-3).",
+        },
+        {
+          type: "multi",
+          q: "¿Qué afirmaciones sobre el entrenamiento son correctas?",
+          hint: "Marca todas las que apliquen.",
+          options: [
+            "El learning rate suele ser el hiperparámetro más importante",
+            "En la práctica se entrena casi siempre con mini-batches",
+            "Los métodos adaptativos (RMSProp, Adam) dan a cada peso su propio tamaño de paso",
+            "Un learning rate más alto siempre entrena mejor",
+          ],
+          correct: [0, 1, 2],
+          explain:
+            "El LR es la palanca principal, se usa mini-batch, y los adaptativos ajustan el paso por peso. Lo que NO es cierto es que subir el LR siempre mejore: pasado un punto, diverge.",
+        },
+      ];
+
+      const TOTAL = QUESTIONS.length;
+
+      // ---- estado ----
+      let idx = 0;
+      let score = 0;
+      let answered = false;
+      let sel = null; // choice: int | multi: Set | classify: int[]
+
+      // ---- refs ----
+      const $ = (id) => document.getElementById(id);
+      const introScreen = $("introScreen");
+      const quizScreen = $("quizScreen");
+      const resultScreen = $("resultScreen");
+      const qBody = $("qBody");
+      const feedback = $("feedback");
+      const checkBtn = $("checkBtn");
+      const nextBtn = $("nextBtn");
+      const barFill = $("barFill");
+
+      $("scoreNum").parentElement.parentElement; // noop guard
+
+      // ---- helpers ----
+      function setProgress() {
+        const done = answered ? idx + 1 : idx;
+        barFill.style.width = (done / TOTAL) * 100 + "%";
+        $("scoreNum").textContent = score;
+      }
+
+      function arraysEqualSet(a, b) {
+        if (a.size !== b.length) return false;
+        return b.every((x) => a.has(x));
+      }
+
+      // ---- render ----
+      function renderQuestion() {
+        const item = QUESTIONS[idx];
+        answered = false;
+        feedback.hidden = true;
+        feedback.className = "feedback";
+        nextBtn.hidden = true;
+        checkBtn.hidden = false;
+        checkBtn.disabled = true;
+        nextBtn.textContent =
+          idx === TOTAL - 1 ? "Ver resultados →" : "Siguiente →";
+
+        $("qCounter").textContent = `Reto ${idx + 1} / ${TOTAL}`;
+        $("qType").textContent = TYPE_LABEL[item.type];
+        $("qText").textContent = item.q;
+        $("qHint").textContent = item.hint || "";
+        $("qHint").style.display = item.hint ? "block" : "none";
+
+        qBody.innerHTML = "";
+        if (item.type === "choice") renderChoice(item);
+        else if (item.type === "multi") renderMulti(item);
+        else if (item.type === "classify") renderClassify(item);
+
+        setProgress();
+      }
+
+      function optEl(text, multi) {
+        const b = document.createElement("button");
+        b.className = "opt" + (multi ? " multi" : "");
+        b.innerHTML = `<span class="mark"></span><span class="otext">${text}</span>`;
+        return b;
+      }
+
+      function renderChoice(item) {
+        sel = null;
+        const wrap = document.createElement("div");
+        wrap.className = "opts";
+        item.options.forEach((text, i) => {
+          const b = optEl(text, false);
+          b.addEventListener("click", () => {
+            if (answered) return;
+            sel = i;
+            wrap
+              .querySelectorAll(".opt")
+              .forEach((o) => o.classList.remove("sel"));
+            b.classList.add("sel");
+            b.querySelector(".mark").textContent = "✓";
+            wrap.querySelectorAll(".opt").forEach((o) => {
+              if (o !== b) o.querySelector(".mark").textContent = "";
+            });
+            checkBtn.disabled = false;
+          });
+          wrap.appendChild(b);
+        });
+        qBody.appendChild(wrap);
+      }
+
+      function renderMulti(item) {
+        sel = new Set();
+        const wrap = document.createElement("div");
+        wrap.className = "opts";
+        item.options.forEach((text, i) => {
+          const b = optEl(text, true);
+          b.addEventListener("click", () => {
+            if (answered) return;
+            if (sel.has(i)) {
+              sel.delete(i);
+              b.classList.remove("sel");
+              b.querySelector(".mark").textContent = "";
+            } else {
+              sel.add(i);
+              b.classList.add("sel");
+              b.querySelector(".mark").textContent = "✓";
+            }
+            checkBtn.disabled = sel.size === 0;
+          });
+          wrap.appendChild(b);
+        });
+        qBody.appendChild(wrap);
+      }
+
+      function renderClassify(item) {
+        sel = new Array(item.items.length).fill(-1);
+        const wrap = document.createElement("div");
+        wrap.className = "citems";
+        item.items.forEach((it, i) => {
+          const row = document.createElement("div");
+          row.className = "citem";
+          row.dataset.i = i;
+          const t = document.createElement("div");
+          t.className = "citem-text";
+          t.textContent = it.text;
+          row.appendChild(t);
+          const bks = document.createElement("div");
+          bks.className = "buckets";
+          item.buckets.forEach((name, b) => {
+            const btn = document.createElement("button");
+            btn.className = "bkt";
+            btn.textContent = name;
+            btn.addEventListener("click", () => {
+              if (answered) return;
+              sel[i] = b;
+              bks
+                .querySelectorAll(".bkt")
+                .forEach((x) => x.classList.remove("sel"));
+              btn.classList.add("sel");
+              checkBtn.disabled = sel.some((s) => s === -1);
+            });
+            bks.appendChild(btn);
+          });
+          row.appendChild(bks);
+          wrap.appendChild(row);
+        });
+        qBody.appendChild(wrap);
+      }
+
+      // ---- comprobar ----
+      function check() {
+        const item = QUESTIONS[idx];
+        let ok = false;
+        const opts = qBody.querySelectorAll(".opt");
+
+        if (item.type === "choice") {
+          ok = sel === item.correct;
+          opts.forEach((o, i) => {
+            o.disabled = true;
+            if (i === item.correct) {
+              o.classList.add("correct");
+              o.querySelector(".mark").textContent = "✓";
+            } else if (i === sel) {
+              o.classList.add("wrong");
+              o.querySelector(".mark").textContent = "✕";
+            }
+          });
+        } else if (item.type === "multi") {
+          ok = arraysEqualSet(sel, item.correct);
+          opts.forEach((o, i) => {
+            o.disabled = true;
+            const shouldBe = item.correct.includes(i);
+            if (shouldBe) {
+              o.classList.add("correct");
+              o.querySelector(".mark").textContent = "✓";
+            } else if (sel.has(i)) {
+              o.classList.add("wrong");
+              o.querySelector(".mark").textContent = "✕";
+            }
+          });
+        } else if (item.type === "classify") {
+          ok = item.items.every((it, i) => sel[i] === it.bucket);
+          qBody.querySelectorAll(".citem").forEach((row, i) => {
+            const it = item.items[i];
+            const good = sel[i] === it.bucket;
+            const btns = row.querySelectorAll(".bkt");
+            btns.forEach((btn, b) => {
+              btn.disabled = true;
+              btn.classList.remove("sel");
+              if (b === sel[i]) btn.classList.add(good ? "correct" : "wrong");
+              if (!good && b === it.bucket) btn.classList.add("reveal");
+            });
+            const badge = document.createElement("span");
+            badge.className = "res " + (good ? "ok" : "no");
+            badge.textContent = good ? "BIEN" : item.buckets[it.bucket];
+            row.querySelector(".citem-text").appendChild(badge);
+          });
+        }
+
+        if (ok) score++;
+        answered = true;
+
+        feedback.hidden = false;
+        feedback.className = "feedback " + (ok ? "good" : "bad");
+        $("fbHead").textContent = ok ? "¡Correcto!" : "Casi";
+        $("fbText").textContent = item.explain;
+
+        checkBtn.hidden = true;
+        nextBtn.hidden = false;
+        setProgress();
+      }
+
+      function next() {
+        idx++;
+        if (idx >= TOTAL) showResults();
+        else renderQuestion();
+      }
+
+      // ---- resultados ----
+      function showResults() {
+        quizScreen.hidden = true;
+        resultScreen.hidden = false;
+        barFill.style.width = "100%";
+
+        const pct = Math.round((score / TOTAL) * 100);
+        $("ringPct").textContent = pct + "%";
+        $("ringSub").textContent = `${score} / ${TOTAL}`;
+        // animar el aro
+        const ring = $("ring");
+        ring.style.setProperty("--pct", "0");
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => ring.style.setProperty("--pct", pct)),
+        );
+
+        let title, msg;
+        if (pct >= 90) {
+          title = "Sabes <em>entrenar</em>.";
+          msg =
+            "Del descenso del gradiente al mini-batch y a Adam — todo en su sitio. Ya entiendes qué mueve de verdad los pesos y por qué el learning rate manda.";
+        } else if (pct >= 70) {
+          title = "Muy <em>bien</em> encaminado.";
+          msg =
+            "Lo esencial lo tienes. Repasa los fallos y afianza la regla w ← w − η·∇L y la diferencia entre batch, mini-batch y SGD.";
+        } else if (pct >= 50) {
+          title = "Vas por <em>buen camino</em>.";
+          msg =
+            "Repasa el papel del learning rate (pequeño = lento, grande = diverge) y qué aportan el momentum y el paso adaptativo de Adam. Ahí está el hilo del Tema 7.";
+        } else {
+          title = "Toca <em>repasar</em>.";
+          msg =
+            "Sin prisa: vuelve a la sesión (y prueba la práctica del descenso del gradiente). Fíjate en cómo el LR cambia todo y en por qué se usa mini-batch. Después, repite este repaso.";
+        }
+        $("resTitle").innerHTML = title;
+        $("resMsg").textContent = msg;
+
+        if (pct >= 80) confetti();
+      }
+
+      function confetti() {
+        const colors = ["#1a1f6c", "#ff5700", "#fe961f", "#0796a3"];
+        for (let i = 0; i < 90; i++) {
+          const c = document.createElement("div");
+          c.className = "confetti";
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.background = colors[i % colors.length];
+          c.style.width = 6 + Math.random() * 7 + "px";
+          c.style.height = 8 + Math.random() * 9 + "px";
+          c.style.animationDelay = Math.random() * 0.7 + "s";
+          c.style.animationDuration = 2.4 + Math.random() * 1.8 + "s";
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 4600);
+        }
+      }
+
+      function startQuiz() {
+        idx = 0;
+        score = 0;
+        introScreen.hidden = true;
+        resultScreen.hidden = true;
+        quizScreen.hidden = false;
+        renderQuestion();
+      }
+
+      // ---- eventos ----
+      $("startBtn").addEventListener("click", startQuiz);
+      $("replayBtn").addEventListener("click", startQuiz);
+      checkBtn.addEventListener("click", () => {
+        if (!checkBtn.disabled) check();
+      });
+      nextBtn.addEventListener("click", next);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          if (!quizScreen.hidden && !nextBtn.hidden) next();
+          else if (!quizScreen.hidden && !checkBtn.disabled) check();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 7 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 7: descenso del gradiente. Elige optimizador (SGD, Momentum, Adam) y learning rate, y observa la bola bajar la colina de pérdida — o divergir. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c; --ink-soft: #3b4080; --ink-mute: #7c80a6;
+        --paper: #ffffff; --accent: #ff5700; --accent-deep: #c8410f;
+        --gold: #fe961f; --line: #e2ded0; --ok: #0796a3; --bad: #d6452e;
+        --serif: "Taviraj", Georgia, serif; --sans: "Inter Tight", system-ui, sans-serif; --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        font-family: var(--sans); color: var(--ink); background: var(--paper);
+        background-image: radial-gradient(ellipse at 15% 8%, rgba(26,31,108,0.05) 0%, transparent 55%), radial-gradient(ellipse at 88% 92%, rgba(255,87,0,0.045) 0%, transparent 55%);
+        -webkit-font-smoothing: antialiased; min-height: 100vh;
+      }
+      .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 13px 28px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); font-size: 13px; }
+      .bar a.brand { display: flex; align-items: center; }
+      .bar-logo { height: 26px; width: auto; display: block; }
+      .bar-sub { color: var(--ink-mute); }
+      .bar-tag { margin-left: auto; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); background: rgba(255,87,0,0.1); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+      main { max-width: 1080px; margin: 0 auto; padding: 42px 24px 90px; }
+      .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block; }
+      h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 6vw, 56px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px 0 14px; }
+      h1 em { font-style: italic; color: var(--accent); }
+      .lead { font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft); max-width: 66ch; }
+      .lead code, p code { font-family: var(--mono); font-size: 0.88em; background: rgba(26,31,108,0.06); padding: 1px 6px; border-radius: 5px; }
+      h2.section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.02em; margin: 0 0 6px; }
+      h2.section-title em { font-style: italic; color: var(--accent); }
+      .band { display: flex; align-items: center; gap: 16px; margin: 54px 0 18px; }
+      .band .num { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; color: var(--ink-mute); white-space: nowrap; }
+      .band .rule { flex: 1; height: 1px; background: var(--line); }
+
+      .toolbar { display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: center; margin: 16px 0 8px; }
+      .tgroup { display: flex; align-items: center; gap: 10px; }
+      .tlabel { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+      .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 9px; overflow: hidden; }
+      .seg button { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-soft); background: #fff; border: none; padding: 9px 15px; cursor: pointer; transition: background 0.16s, color 0.16s; }
+      .seg button + button { border-left: 1.5px solid var(--line); }
+      .seg button.active { background: var(--ink); color: #fff; }
+      input[type="range"] { -webkit-appearance: none; appearance: none; width: 180px; height: 4px; border-radius: 3px; background: var(--line); outline: none; }
+      input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+      input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; }
+      .lrval { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent-deep); min-width: 62px; }
+      .btn { font-family: var(--sans); font-size: 13.5px; font-weight: 600; border: 1.5px solid var(--line); border-radius: 9px; padding: 9px 16px; background: #fff; color: var(--ink); cursor: pointer; transition: transform 0.12s, border-color 0.16s; }
+      .btn:hover { transform: translateY(-1px); border-color: var(--ink-mute); }
+      .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+      .stage { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-top: 14px; }
+      @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+      .board { background: #fbfaf6; border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 14px 40px rgba(26,31,108,0.06); }
+      canvas { width: 100%; height: auto; display: block; border-radius: 8px; }
+      .side { display: flex; flex-direction: column; gap: 14px; }
+      .statcard { border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; background: #fff; }
+      .statrow { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+      .statrow:last-child { border-bottom: none; }
+      .statrow .k { color: var(--ink-mute); }
+      .statrow .v { font-family: var(--mono); font-weight: 700; color: var(--ink); }
+      .verdict { font-size: 14px; line-height: 1.5; border-radius: 8px; padding: 12px 14px; }
+      .verdict.ok { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.07); color: var(--ink-soft); }
+      .verdict.warn { border-left: 4px solid var(--gold); background: rgba(254,150,31,0.08); color: var(--ink-soft); }
+      .verdict.bad { border-left: 4px solid var(--bad); background: rgba(214,69,46,0.08); color: var(--ink-soft); }
+      .losschart { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 12px 6px; background: #fff; }
+      .losschart .cl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin: 0 4px 6px; }
+
+      .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--ink-mute); }
+      .legend span { display: inline-flex; align-items: center; gap: 6px; }
+      .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+
+      .note { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.06); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin-top: 16px; }
+
+      .retos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 760px) { .retos { grid-template-columns: 1fr; } }
+      .reto { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px; background: #fbfaf6; }
+      .reto h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin-bottom: 6px; }
+      .reto p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+      .reto .tag { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); letter-spacing: 0.05em; }
+
+      .close-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+      @media (max-width: 620px) { .close-cta-grid { grid-template-columns: 1fr; } }
+      .close-cta { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px 22px; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.18s, transform 0.16s; }
+      .close-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .close-cta .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+      .close-cta .title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding-top: 20px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 7</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <section>
+        <span class="kicker">Tema 7 · Práctica</span>
+        <h1>Baja la <em>colina</em>.</h1>
+        <p class="lead">
+          Esta es una <em>colina de pérdida</em> con forma de valle alargado —
+          empinada de lado, suave a lo largo. Elige un <em>optimizador</em> y un
+          <em>learning rate</em>, pulsa <strong>Entrenar</strong> y mira cómo la
+          bola busca el mínimo (el punto blanco). Verás el zigzag del SGD, cómo
+          el momentum lo cancela, cómo Adam adapta el paso… y cómo un LR
+          demasiado alto la hace <em>divergir</em>.
+        </p>
+      </section>
+
+      <div class="band"><span class="num">— 01 · DESCENSO DEL GRADIENTE —</span><span class="rule"></span></div>
+      <h2 class="section-title">Elige <em>cómo</em> bajar.</h2>
+
+      <div class="toolbar">
+        <div class="tgroup">
+          <span class="tlabel">Optimizador</span>
+          <div class="seg" id="optSeg">
+            <button data-o="sgd" class="active">SGD</button>
+            <button data-o="momentum">Momentum</button>
+            <button data-o="adam">Adam</button>
+          </div>
+        </div>
+        <div class="tgroup">
+          <span class="tlabel">Learning rate</span>
+          <input type="range" id="lr" min="0" max="100" value="42" />
+          <span class="lrval" id="lrval">0.10</span>
+        </div>
+        <div class="tgroup">
+          <button class="btn btn-accent" id="runBtn">▶ Entrenar</button>
+          <button class="btn" id="resetBtn">↺ Reiniciar</button>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="board">
+          <canvas id="cv" width="720" height="440"></canvas>
+          <div class="legend">
+            <span><i class="dot" style="background:#1a1f6c"></i> trayectoria</span>
+            <span><i class="dot" style="background:#fff;border:1.5px solid #1a1f6c"></i> mínimo (pérdida 0)</span>
+            <span><i class="dot" style="background:#ff5700"></i> posición actual</span>
+            <span>zonas oscuras = pérdida alta</span>
+          </div>
+        </div>
+        <div class="side">
+          <div class="statcard">
+            <div class="statrow"><span class="k">Iteración (paso)</span><span class="v" id="stIter">0</span></div>
+            <div class="statrow"><span class="k">Pérdida</span><span class="v" id="stLoss">—</span></div>
+            <div class="statrow"><span class="k">Learning rate</span><span class="v" id="stLr">0.10</span></div>
+            <div class="statrow"><span class="k">Optimizador</span><span class="v" id="stOpt">SGD</span></div>
+          </div>
+          <div class="verdict ok" id="verdict">Pulsa <b>Entrenar</b> para lanzar la bola desde la esquina.</div>
+          <div class="losschart">
+            <p class="cl">Pérdida vs. iteración</p>
+            <canvas id="lossCv" width="360" height="150"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        La colina es <code>L(a,b) = ½(a² + 18·b²)</code>: el gradiente es exacto
+        (usamos todos los datos). Ese «valle» estirado imita el problema real de
+        las redes, donde la pérdida es mucho más empinada en unas direcciones que
+        en otras — justo donde el momentum y Adam marcan la diferencia.
+      </div>
+
+      <div class="band"><span class="num">— 02 · TUS RETOS —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto"><span class="tag">divergencia</span><h4>Rómpelo</h4><p>Con <em>SGD</em>, sube el learning rate poco a poco y entrena. ¿A partir de qué valor la bola se desboca y la pérdida explota?</p></div>
+        <div class="reto"><span class="tag">zigzag</span><h4>SGD vs Momentum</h4><p>Con un LR medio, compara <em>SGD</em> y <em>Momentum</em>. ¿Cuál zigzaguea de pared a pared? ¿Cuál llega antes al valle?</p></div>
+        <div class="reto"><span class="tag">robustez</span><h4>Adam aguanta más</h4><p>Prueba el mismo LR alto con <em>SGD</em> y con <em>Adam</em>. ¿Cuál soporta pasos grandes sin explotar?</p></div>
+      </div>
+
+      <div class="band"><span class="num">— SIGUIENTE —</span><span class="rule"></span></div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t7.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Entrenamiento →</span>
+        </a>
+        <a class="close-cta" href="./lab-t7.html">
+          <span class="eyebrow">Manos a la obra</span>
+          <span class="title">Laboratorio · curvas de pérdida →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 7 — descenso del gradiente en un valle
+      // L(a,b) = 0.5*(a^2 + K*b^2); grad = (a, K*b); mínimo (0,0)
+      // =====================================================
+      const K = 18;
+      const START = { a: -2.55, b: 0.92 };
+      const XR = [-3.0, 3.0]; // rango del eje a (horizontal)
+      const YR = [-1.3, 1.3]; // rango del eje b (vertical)
+      const MAX_STEPS = 260;
+      const DIVERGE = 60; // pérdida a partir de la cual declaramos divergencia
+
+      const cv = document.getElementById("cv");
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+      const lossCv = document.getElementById("lossCv");
+      const lctx = lossCv.getContext("2d");
+
+      function loss(a, b) { return 0.5 * (a * a + K * b * b); }
+      function grad(a, b) { return [a, K * b]; }
+      function sx(a) { return ((a - XR[0]) / (XR[1] - XR[0])) * W; }
+      function sy(b) { return H - ((b - YR[0]) / (YR[1] - YR[0])) * H; }
+
+      // --- learning rate: slider 0..100 → escala log 0.003 .. 0.35 ---
+      const lrEl = document.getElementById("lr");
+      const lrValEl = document.getElementById("lrval");
+      function currentLR() {
+        const t = +lrEl.value / 100;
+        return 0.003 * Math.pow(0.35 / 0.003, t); // log-espaciado
+      }
+
+      let opt = "sgd";
+      let path = [];      // [{a,b}]
+      let losses = [];    // pérdida por iteración
+      let state = null;   // estado del optimizador
+      let running = false;
+      let raf = null;
+      let diverged = false;
+
+      const stIter = document.getElementById("stIter");
+      const stLoss = document.getElementById("stLoss");
+      const stLr = document.getElementById("stLr");
+      const stOpt = document.getElementById("stOpt");
+      const verdict = document.getElementById("verdict");
+
+      // ---------- fondo: heatmap de la pérdida + contornos ----------
+      function drawBackground() {
+        // heatmap por celdas (pérdida → color papel→añil)
+        const cols = 96, rows = 60;
+        const cw = W / cols, ch = H / rows;
+        let lmax = loss(XR[0], YR[0]);
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            const a = XR[0] + ((i + 0.5) / cols) * (XR[1] - XR[0]);
+            const b = YR[0] + ((j + 0.5) / rows) * (YR[1] - YR[0]);
+            const t = Math.min(1, loss(a, b) / lmax);
+            const e = Math.pow(t, 0.55);
+            // interpola papel (251,250,246) → añil (26,31,108)
+            const r = Math.round(251 + (26 - 251) * e);
+            const g = Math.round(250 + (31 - 250) * e);
+            const bl = Math.round(246 + (108 - 246) * e);
+            ctx.fillStyle = `rgb(${r},${g},${bl})`;
+            ctx.fillRect(i * cw, j * ch, cw + 1, ch + 1);
+          }
+        }
+        // contornos (elipses de nivel L=c)
+        ctx.strokeStyle = "rgba(255,255,255,0.28)";
+        ctx.lineWidth = 1;
+        for (const c of [0.15, 0.5, 1.2, 2.5, 4.5]) {
+          ctx.beginPath();
+          const rax = Math.sqrt(2 * c);        // semieje en a
+          const rby = Math.sqrt((2 * c) / K);  // semieje en b
+          for (let k = 0; k <= 90; k++) {
+            const th = (k / 90) * 2 * Math.PI;
+            const a = rax * Math.cos(th);
+            const b = rby * Math.sin(th);
+            const x = sx(a), y = sy(b);
+            k === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+        // mínimo
+        ctx.beginPath();
+        ctx.arc(sx(0), sy(0), 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = "#1a1f6c";
+        ctx.stroke();
+      }
+
+      function draw() {
+        drawBackground();
+        // trayectoria
+        if (path.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(sx(path[0].a), sy(path[0].b));
+          for (let i = 1; i < path.length; i++) {
+            const p = path[i];
+            // recorta puntos fuera de rango para que la línea no se dispare
+            ctx.lineTo(sx(Math.max(XR[0] * 1.5, Math.min(XR[1] * 1.5, p.a))),
+                       sy(Math.max(YR[0] * 1.5, Math.min(YR[1] * 1.5, p.b))));
+          }
+          ctx.strokeStyle = "#1a1f6c";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // puntos intermedios
+          ctx.fillStyle = "rgba(26,31,108,0.55)";
+          for (let i = 0; i < path.length; i += 1) {
+            const p = path[i];
+            if (p.a < XR[0] * 1.5 || p.a > XR[1] * 1.5) continue;
+            ctx.beginPath(); ctx.arc(sx(p.a), sy(p.b), 2.2, 0, 2 * Math.PI); ctx.fill();
+          }
+        }
+        // posición actual
+        const cur = path[path.length - 1];
+        if (cur && cur.a >= XR[0] * 1.5 && cur.a <= XR[1] * 1.5) {
+          ctx.beginPath();
+          ctx.arc(sx(cur.a), sy(cur.b), 7, 0, 2 * Math.PI);
+          ctx.fillStyle = "#ff5700";
+          ctx.fill();
+          ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
+        }
+        drawLossChart();
+      }
+
+      function drawLossChart() {
+        const w = lossCv.width, h = lossCv.height;
+        lctx.clearRect(0, 0, w, h);
+        lctx.fillStyle = "#fff"; lctx.fillRect(0, 0, w, h);
+        if (losses.length < 2) {
+          lctx.fillStyle = "#7c80a6"; lctx.font = "12px 'Inter Tight'";
+          lctx.fillText("entrena para ver la curva", 12, h / 2);
+          return;
+        }
+        const pad = 6;
+        const n = losses.length;
+        const lmax = Math.max(...losses.map((v) => Math.min(v, DIVERGE)));
+        const lmin = 0;
+        // eje
+        lctx.strokeStyle = "#e2ded0"; lctx.lineWidth = 1;
+        lctx.beginPath(); lctx.moveTo(pad, h - pad); lctx.lineTo(w - pad, h - pad); lctx.stroke();
+        lctx.beginPath(); lctx.moveTo(pad, pad); lctx.lineTo(pad, h - pad); lctx.stroke();
+        // curva
+        lctx.beginPath();
+        for (let i = 0; i < n; i++) {
+          const x = pad + (i / (n - 1)) * (w - 2 * pad);
+          const v = Math.min(losses[i], DIVERGE);
+          const y = (h - pad) - ((v - lmin) / (lmax - lmin || 1)) * (h - 2 * pad);
+          i === 0 ? lctx.moveTo(x, y) : lctx.lineTo(x, y);
+        }
+        lctx.strokeStyle = diverged ? "#d6452e" : "#ff5700";
+        lctx.lineWidth = 2; lctx.stroke();
+      }
+
+      function initState() {
+        return { m: [0, 0], v: [0, 0], t: 0 };
+      }
+
+      function step() {
+        const cur = path[path.length - 1];
+        let { a, b } = cur;
+        const lr = currentLR();
+        const [ga, gb] = grad(a, b);
+        let da, db;
+        if (opt === "sgd") {
+          da = -lr * ga; db = -lr * gb;
+        } else if (opt === "momentum") {
+          const beta = 0.9;
+          state.m[0] = beta * state.m[0] - lr * ga;
+          state.m[1] = beta * state.m[1] - lr * gb;
+          da = state.m[0]; db = state.m[1];
+        } else { // adam
+          const b1 = 0.9, b2 = 0.999, eps = 1e-8;
+          state.t += 1;
+          const g = [ga, gb];
+          const out = [0, 0];
+          for (let k = 0; k < 2; k++) {
+            state.m[k] = b1 * state.m[k] + (1 - b1) * g[k];
+            state.v[k] = b2 * state.v[k] + (1 - b2) * g[k] * g[k];
+            const mh = state.m[k] / (1 - Math.pow(b1, state.t));
+            const vh = state.v[k] / (1 - Math.pow(b2, state.t));
+            out[k] = -lr * mh / (Math.sqrt(vh) + eps);
+          }
+          da = out[0]; db = out[1];
+        }
+        a += da; b += db;
+        path.push({ a, b });
+        const L = loss(a, b);
+        losses.push(L);
+        return L;
+      }
+
+      function updateStats(L) {
+        stIter.textContent = path.length - 1;
+        stLoss.textContent = (isFinite(L) ? L : Infinity) > DIVERGE ? "∞" : L.toFixed(4);
+        stLr.textContent = currentLR().toFixed(3);
+        stOpt.textContent = opt === "sgd" ? "SGD" : opt === "momentum" ? "Momentum" : "Adam";
+      }
+
+      function setVerdict() {
+        const it = path.length - 1;
+        const L = losses[losses.length - 1];
+        if (diverged) {
+          verdict.className = "verdict bad";
+          verdict.innerHTML = `💥 <b>Divergió</b> en ${it} pasos: el learning rate es demasiado grande y la pérdida explota. Bájalo o prueba Adam.`;
+        } else if (L < 0.02) {
+          verdict.className = "verdict ok";
+          verdict.innerHTML = `✅ <b>Convergió</b> al valle en ${it} pasos (pérdida ${L.toFixed(3)}). ${opt === "sgd" ? "Fíjate en el zigzag del camino." : ""}`;
+        } else if (it >= MAX_STEPS) {
+          verdict.className = "verdict warn";
+          verdict.innerHTML = `🐌 Tras ${it} pasos aún no llega (pérdida ${L.toFixed(3)}): learning rate pequeño para este optimizador. Súbelo.`;
+        }
+      }
+
+      function loop() {
+        if (!running) return;
+        // varios pasos por frame para fluidez
+        for (let s = 0; s < 2; s++) {
+          const L = step();
+          if (!isFinite(L) || L > DIVERGE) { diverged = true; running = false; break; }
+          if (L < 0.02 || path.length - 1 >= MAX_STEPS) { running = false; break; }
+        }
+        const L = losses[losses.length - 1];
+        updateStats(L);
+        draw();
+        if (running) { raf = requestAnimationFrame(loop); }
+        else { setVerdict(); document.getElementById("runBtn").textContent = "▶ Entrenar"; }
+      }
+
+      function reset() {
+        running = false;
+        if (raf) cancelAnimationFrame(raf);
+        diverged = false;
+        path = [{ a: START.a, b: START.b }];
+        losses = [loss(START.a, START.b)];
+        state = initState();
+        updateStats(losses[0]);
+        verdict.className = "verdict ok";
+        verdict.innerHTML = "Pulsa <b>Entrenar</b> para lanzar la bola desde la esquina.";
+        draw();
+        document.getElementById("runBtn").textContent = "▶ Entrenar";
+      }
+
+      function run() {
+        if (running) { // pausa
+          running = false; if (raf) cancelAnimationFrame(raf);
+          document.getElementById("runBtn").textContent = "▶ Continuar";
+          setVerdict(); return;
+        }
+        // si ya terminó, reinicia antes de correr
+        if (diverged || path.length - 1 >= MAX_STEPS || losses[losses.length - 1] < 0.02) reset();
+        running = true;
+        document.getElementById("runBtn").textContent = "⏸ Pausar";
+        loop();
+      }
+
+      // ---------- eventos ----------
+      document.getElementById("optSeg").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-o]");
+        if (!btn) return;
+        document.querySelectorAll("#optSeg button").forEach((x) => x.classList.remove("active"));
+        btn.classList.add("active");
+        opt = btn.dataset.o;
+        reset();
+      });
+      lrEl.addEventListener("input", () => {
+        lrValEl.textContent = currentLR().toFixed(3);
+        stLr.textContent = currentLR().toFixed(3);
+      });
+      document.getElementById("runBtn").addEventListener("click", run);
+      document.getElementById("resetBtn").addEventListener("click", reset);
+
+      // ---------- init ----------
+      lrValEl.textContent = currentLR().toFixed(3);
+      reset();
+    </script>
+  </body>
+</html>
