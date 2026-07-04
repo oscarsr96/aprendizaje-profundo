@@ -233,6 +233,18 @@
           "size": 8589
         }
       ]
+    },
+    {
+      "id": "tema-8",
+      "title": "Tema 8 · Generalización",
+      "files": [
+        {
+          "name": "Lab_Tema8_Overfitting_Regularizacion.ipynb",
+          "path": "files/tema-8/Lab_Tema8_Overfitting_Regularizacion.ipynb",
+          "ext": "ipynb",
+          "size": 8670
+        }
+      ]
     }
   ]
 }

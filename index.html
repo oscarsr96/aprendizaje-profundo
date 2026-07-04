@@ -399,6 +399,9 @@
       .card-tema7 {
         background: linear-gradient(160deg, #fbfaf6 0%, #f6efe3 100%);
       }
+      .card-tema8 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #eae6f2 100%);
+      }
       .card-repaso {
         background: linear-gradient(160deg, #fbfaf6 0%, #f0ebdd 100%);
       }
@@ -1074,6 +1077,7 @@
             <a class="toc-link" href="#tema-5">Tema 5</a>
             <a class="toc-link" href="#tema-6">Tema 6</a>
             <a class="toc-link" href="#tema-7">Tema 7</a>
+            <a class="toc-link" href="#tema-8">Tema 8</a>
           </nav>
         </aside>
 
@@ -1958,6 +1962,126 @@
                 <p>
                   Diez retos autocorregibles sobre el descenso del gradiente, el
                   learning rate, los batches y los optimizadores modernos.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 min</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <section class="section" id="tema-8">
+            <div class="level-band">
+              <span class="level-name">Tema 8 · Generalización</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">Aprender, no <em>memorizar</em>.</h2>
+
+            <div class="picker picker-four">
+              <a class="card card-tema8" href="./sesion-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M50 300 Q140 100 200 200 Q260 300 350 130" />
+                      <path d="M50 280 L110 220 L160 235 L210 205 L260 240 L310 200 L350 180" stroke-width="2.5" opacity="0.55" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="110" cy="220" r="7" /><circle cx="160" cy="235" r="7" />
+                      <circle cx="210" cy="205" r="7" /><circle cx="260" cy="240" r="7" />
+                      <circle cx="310" cy="200" r="7" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Generalización y <em>regularización</em></h2>
+                <p>
+                  Overfitting y underfitting, sesgo/varianza, train/val/test,
+                  dropout, weight decay, early stopping y augmentation.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 min</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema8" href="./practica-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M60 300 L120 200 L160 240 L200 150 L240 250 L280 170 L340 260" stroke-linejoin="round" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="120" cy="200" r="8" /><circle cx="160" cy="240" r="8" />
+                      <circle cx="200" cy="150" r="8" /><circle cx="240" cy="250" r="8" />
+                      <circle cx="280" cy="170" r="8" />
+                    </g>
+                    <path d="M60 260 Q200 150 340 210" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4" />
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>Provoca el <em>overfitting</em></h2>
+                <p>
+                  Sube el grado del modelo y mira separarse las curvas de train y
+                  validación; luego arréglalo con regularización.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>grado + λ</span>
+                </div>
+                <span class="card-go"
+                  >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema8" href="./lab-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M100 270 Q170 200 300 195" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M100 280 Q160 250 210 250 Q270 250 300 215" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Overfitting y su <em>cura</em></h2>
+                <p>
+                  Notebook: provoca overfitting en Keras y arréglalo con dropout,
+                  L2 y early stopping. Colab o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Generalizas o <em>memorizas</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre overfitting, sesgo/varianza,
+                  train/val/test, dropout, regularización y early stopping.
                 </p>
                 <div class="card-meta">
                   <span>10 retos</span>

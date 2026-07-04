@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 8</title>
+    <meta
+      name="description"
+      content="Tema 8 de Aprendizaje Profundo en CUNEF. Generalización y regularización: sesgo y varianza, overfitting, train/val/test, dropout, weight decay, early stopping, data augmentation y batch norm."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 8</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">8 · Generalización</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Aprender, no<br /><em>memorizar</em>.</h1>
+          <p class="cover-sub">
+            Una red que borda el entrenamiento pero falla con datos nuevos no ha
+            aprendido: ha <em>memorizado</em>. Este tema va de
+            <em>generalizar</em> — y de las herramientas para lograrlo:
+            <em>dropout</em>, <em>regularización</em>, <em>early stopping</em> y
+            más.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <path d="M40 260 Q120 120 200 200 Q280 280 360 140" />
+              <circle cx="70" cy="228" r="5" /><circle cx="110" cy="180" r="5" />
+              <circle cx="160" cy="176" r="5" /><circle cx="205" cy="205" r="5" />
+              <circle cx="250" cy="238" r="5" /><circle cx="300" cy="200" r="5" />
+              <circle cx="335" cy="160" r="5" />
+            </g>
+            <path d="M40 250 L110 200 L160 210 L210 190 L260 220 L310 190 L360 175" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.6" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Overfitting y underfitting</span><span class="agenda-desc">Memorizar vs. generalizar; sesgo y varianza.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">Train / validación / test</span><span class="agenda-desc">Por qué partimos los datos y cómo se detecta el overfitting.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">16&prime;</span>
+              <div><span class="agenda-title">La caja de herramientas</span><span class="agenda-desc">Dropout, weight decay, early stopping, augmentation, batch norm.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">Más datos, y una receta</span><span class="agenda-desc">El regularizador definitivo y cómo combinarlo todo.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="Overfitting">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">Memorizar<br />no es <em>aprender</em>.</h2>
+          <p class="divider-sub">
+            El objetivo real no es acertar con los datos que ya tienes, sino con
+            los que <em>aún no has visto</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — El estudiante empollón -->
+      <section class="slide" data-title="El problema">
+        <div class="slide-inner">
+          <span class="kicker">La analogía del examen</span>
+          <h2 class="h2">El que se <em>empolla</em> las respuestas.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un estudiante memoriza al pie de la letra los exámenes de años
+                anteriores. En el simulacro saca un 10… pero en el examen real,
+                con preguntas nuevas, se hunde.
+              </p>
+              <p class="note">
+                No aprendió la materia: memorizó ejemplos. Una red hace lo mismo
+                cuando <em>sobreajusta</em> (overfitting): borda el entrenamiento
+                y falla con datos nuevos.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>El síntoma</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">error en entrenamiento: bajísimo ✓</span>
+                <span class="pt-t">error en datos nuevos: alto ✗</span>
+                <span class="pt-f">esa brecha es el overfitting</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — Underfit / good / overfit -->
+      <section class="slide" data-title="Tres ajustes">
+        <div class="slide-inner">
+          <span class="kicker">Ni poco, ni demasiado</span>
+          <h2 class="h2">Tres formas de <em>ajustar</em>.</h2>
+          <svg viewBox="0 0 760 180" style="width:100%; height:auto; margin: 6px 0 10px">
+            <g fill="none" stroke-width="2.5">
+              <!-- underfit -->
+              <g transform="translate(20,10)">
+                <rect x="0" y="0" width="210" height="150" rx="8" fill="#fbfaf6" stroke="#e2ded0" stroke-width="1"/>
+                <path d="M15 120 Q105 40 195 40" stroke="#7c80a6"/>
+                <g fill="#1a1f6c"><circle cx="30" cy="110" r="3.5"/><circle cx="60" cy="80" r="3.5"/><circle cx="95" cy="95" r="3.5"/><circle cx="130" cy="55" r="3.5"/><circle cx="165" cy="70" r="3.5"/><circle cx="185" cy="45" r="3.5"/></g>
+              </g>
+              <!-- good -->
+              <g transform="translate(275,10)">
+                <rect x="0" y="0" width="210" height="150" rx="8" fill="#fbfaf6" stroke="#e2ded0" stroke-width="1"/>
+                <path d="M15 115 Q70 60 110 85 Q150 55 195 48" stroke="#0796a3"/>
+                <g fill="#1a1f6c"><circle cx="30" cy="110" r="3.5"/><circle cx="60" cy="80" r="3.5"/><circle cx="95" cy="95" r="3.5"/><circle cx="130" cy="55" r="3.5"/><circle cx="165" cy="70" r="3.5"/><circle cx="185" cy="45" r="3.5"/></g>
+              </g>
+              <!-- overfit -->
+              <g transform="translate(530,10)">
+                <rect x="0" y="0" width="210" height="150" rx="8" fill="#fbfaf6" stroke="#e2ded0" stroke-width="1"/>
+                <path d="M30 110 L60 80 L95 95 L130 55 L165 70 L185 45" stroke="#ff5700" stroke-linejoin="round"/>
+                <g fill="#1a1f6c"><circle cx="30" cy="110" r="3.5"/><circle cx="60" cy="80" r="3.5"/><circle cx="95" cy="95" r="3.5"/><circle cx="130" cy="55" r="3.5"/><circle cx="165" cy="70" r="3.5"/><circle cx="185" cy="45" r="3.5"/></g>
+              </g>
+            </g>
+            <g font-family="Inter Tight" font-size="13" text-anchor="middle" fill="#3b4080">
+              <text x="125" y="178">Underfitting</text>
+              <text x="380" y="178">Buen ajuste</text>
+              <text x="635" y="178">Overfitting</text>
+            </g>
+          </svg>
+          <p class="note">
+            <strong>Underfit</strong>: demasiado simple, no capta el patrón (mucho
+            <em>sesgo</em>). <strong>Overfit</strong>: tan flexible que persigue
+            hasta el ruido (mucha <em>varianza</em>). Queremos el punto medio.
+          </p>
+        </div>
+      </section>
+
+      <!-- 05 — Sesgo y varianza -->
+      <section class="slide" data-title="Sesgo y varianza">
+        <div class="slide-inner">
+          <span class="kicker">El compromiso central</span>
+          <h2 class="h2">Sesgo <em>vs.</em> varianza.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Sesgo alto (underfit)</h3>
+              <p>El modelo es demasiado rígido para el problema. Se equivoca <em>sistemáticamente</em>, también en entrenamiento.</p>
+              <ul class="neuron-notes"><li>Solución: más capacidad, menos regularización.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Varianza alta (overfit)</h3>
+              <p>El modelo es tan flexible que cambia mucho con cada muestra: memoriza el ruido.</p>
+              <ul class="neuron-notes"><li>Solución: más datos o más regularización.</li></ul>
+            </div>
+          </div>
+          <p class="note">Aumentar la capacidad baja el sesgo pero sube la varianza. El arte del tema es <strong>encontrar el equilibrio</strong>.</p>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="Train / val / test">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">Partir<br />los <em>datos</em>.</h2>
+          <p class="divider-sub">
+            No puedes juzgar la generalización con los datos que usaste para
+            entrenar. Necesitas datos que la red no haya visto.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Los tres conjuntos -->
+      <section class="slide" data-title="Los tres conjuntos">
+        <div class="slide-inner">
+          <span class="kicker">Train · Validación · Test</span>
+          <h2 class="h2">Tres conjuntos, tres <em>papeles</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Entrenamiento</h4>
+              <div class="fn-formula">~70 %</div>
+              <p>Con estos datos la red ajusta sus pesos.</p>
+              <span class="fn-use">→ aprender</span>
+            </div>
+            <div class="fn-card">
+              <h4>Validación</h4>
+              <div class="fn-formula">~15 %</div>
+              <p>Para elegir hiperparámetros y vigilar el overfitting durante el entrenamiento.</p>
+              <span class="fn-use">→ afinar</span>
+            </div>
+            <div class="fn-card">
+              <h4>Test</h4>
+              <div class="fn-formula">~15 %</div>
+              <p>Se toca <em>una sola vez</em>, al final: la estimación honesta.</p>
+              <span class="fn-use">→ juzgar</span>
+            </div>
+          </div>
+          <p class="note">
+            Regla de oro: el <strong>test no se toca</strong> hasta el final. Si
+            ajustas contra él, deja de ser una medida honesta de generalización.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — Las dos curvas -->
+      <section class="slide" data-title="Las dos curvas">
+        <div class="slide-inner">
+          <span class="kicker">Cómo se ve el overfitting</span>
+          <h2 class="h2">Cuando las curvas se <em>separan</em>.</h2>
+          <svg viewBox="0 0 760 220" style="width:100%; height:auto; margin: 4px 0 10px">
+            <g stroke="#c9c3b3" stroke-width="1">
+              <line x1="60" y1="20" x2="60" y2="180"/><line x1="60" y1="180" x2="720" y2="180"/>
+            </g>
+            <path d="M60 60 Q250 150 400 168 T720 176" fill="none" stroke="#0796a3" stroke-width="2.5"/>
+            <path d="M60 65 Q250 150 380 150 Q520 150 720 110" fill="none" stroke="#ff5700" stroke-width="2.5"/>
+            <line x1="400" y1="20" x2="400" y2="180" stroke="#1a1f6c" stroke-width="1" stroke-dasharray="4 4"/>
+            <g font-family="Inter Tight" font-size="12.5">
+              <text x="690" y="188" fill="#7c80a6">épocas</text>
+              <text x="30" y="30" fill="#7c80a6" transform="rotate(-90 30 100)">error</text>
+              <text x="620" y="176" fill="#0796a3">entrenamiento</text>
+              <text x="600" y="100" fill="#ff5700">validación</text>
+              <text x="410" y="36" fill="#1a1f6c" font-style="italic" font-family="Taviraj">aquí empieza a memorizar</text>
+            </g>
+          </svg>
+          <p class="note">
+            El error de <em>entrenamiento</em> siempre baja. Cuando el de
+            <em>validación</em> deja de bajar y empieza a <strong>subir</strong>,
+            la red ha empezado a sobreajustar. Ese punto es donde conviene parar.
+          </p>
+        </div>
+      </section>
+
+      <!-- 09 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="La caja de herramientas">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">La caja de<br /><em>herramientas</em>.</h2>
+          <p class="divider-sub">
+            <em>Regularizar</em> es todo lo que hacemos para reducir la varianza:
+            frenar a la red para que no memorice.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — Dropout -->
+      <section class="slide" data-title="Dropout">
+        <div class="slide-inner">
+          <span class="kicker">Herramienta 1</span>
+          <h2 class="h2"><em>Dropout</em>: apagar neuronas.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En cada paso de entrenamiento, apagamos al azar una fracción de
+                las neuronas (p. ej. el 50 %). La red no puede depender de ninguna
+                en concreto.
+              </p>
+              <p class="note">
+                La obliga a aprender representaciones <em>redundantes</em> y
+                robustas. Es como estudiar en equipo cambiando quién falta cada
+                día. En test, todas las neuronas vuelven a estar activas.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En Keras</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">Dense(128, activation="relu")</span>
+                <span class="pt-c">Dropout(0.5)&nbsp;&nbsp;# apaga el 50 %</span>
+                <span class="pt-f">solo activo en entrenamiento</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — Weight decay -->
+      <section class="slide" data-title="Regularización L2">
+        <div class="slide-inner">
+          <span class="kicker">Herramienta 2</span>
+          <h2 class="h2">Pesos <em>pequeños</em> (L2 / weight decay).</h2>
+          <p class="lead">
+            Añadimos a la pérdida un castigo por tener pesos grandes:
+            <code>L + λ·Σw²</code>. La red busca la solución más simple que
+            explique los datos.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Pesos grandes → funciones muy onduladas que persiguen el ruido.
+              Penalizarlos empuja hacia curvas más <em>suaves</em>, que
+              generalizan mejor.
+            </p>
+            <p class="note">
+              λ controla la fuerza del castigo: demasiado, y la red no aprende
+              nada (underfit); poco, y no frena el overfitting.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 — Early stopping -->
+      <section class="slide" data-title="Early stopping">
+        <div class="slide-inner">
+          <span class="kicker">Herramienta 3</span>
+          <h2 class="h2"><em>Early stopping</em>: parar a tiempo.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Vigilamos el error de validación durante el entrenamiento y
+                <em>paramos</em> cuando deja de mejorar — justo antes de que la
+                red empiece a memorizar.
+              </p>
+              <p class="note">
+                Es la herramienta más barata y de las más efectivas: no cambia el
+                modelo, solo elige <strong>cuándo dejar de entrenar</strong>.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En Keras</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">EarlyStopping(</span>
+                <span class="pt-c">&nbsp;&nbsp;monitor="val_loss",</span>
+                <span class="pt-c">&nbsp;&nbsp;patience=5,</span>
+                <span class="pt-c">&nbsp;&nbsp;restore_best_weights=True)</span>
+                <span class="pt-f">para y recupera el mejor punto</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 — Augmentation + batchnorm -->
+      <section class="slide" data-title="Augmentation y batch norm">
+        <div class="slide-inner">
+          <span class="kicker">Herramientas 4 y 5</span>
+          <h2 class="h2">Aumentar datos, <em>normalizar</em> capas.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Data augmentation</h3>
+              <p>Generar variantes de los datos: rotar, recortar, girar imágenes; sinónimos en texto…</p>
+              <ul class="neuron-notes"><li>La red ve "más" datos y aprende a ignorar lo irrelevante.</li><li>Lo viste en el interactivo del Tema 4 (CNN).</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Batch normalization</h3>
+              <p>Normaliza las activaciones dentro de la red, capa a capa.</p>
+              <ul class="neuron-notes"><li>Estabiliza y acelera el entrenamiento.</li><li>De paso, regulariza un poco.</li></ul>
+            </div>
+          </div>
+          <p class="note">Rara vez se usa una sola: se <strong>combinan</strong> varias según el problema.</p>
+        </div>
+      </section>
+
+      <!-- 14 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="Más datos">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">El mejor<br /><em>regularizador</em>.</h2>
+          <p class="divider-sub">
+            Antes de tocar hiperparámetros, la pregunta más rentable casi siempre
+            es: ¿puedo conseguir <em>más datos</em>?
+          </p>
+        </div>
+      </section>
+
+      <!-- 15 — Más datos + receta -->
+      <section class="slide slide-exercise" data-title="Una receta">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Cómo atacarlo en la práctica</span>
+          <h2 class="h2 h2-ex">Una <em>receta</em> sencilla.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                <strong>Más datos</strong> reducen la varianza sin sacrificar
+                capacidad: es el regularizador más potente que existe. Cuando no
+                puedes conseguir más, combinas las herramientas.
+              </p>
+              <ul class="neuron-notes">
+                <li>¿Sesgo alto (underfit)? → más capacidad, entrena más.</li>
+                <li>¿Varianza alta (overfit)? → más datos, dropout, L2, early stopping.</li>
+                <li>Siempre: mira las <em>dos curvas</em> y decide.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El diagnóstico</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">train alto, val alto → underfit</span>
+                <span class="pt-c">train bajo, val alto → overfit</span>
+                <span class="pt-c">train bajo, val bajo → ✓</span>
+                <span class="pt-f">las curvas te dicen qué hacer</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 8</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · QUÉ</span><h3>Generalizar, no memorizar</h3><p>Lo que importa es el error con datos <em>nuevos</em>. La brecha train–validación es el overfitting.</p></div>
+            <div class="close-item"><span class="close-num">02 · CÓMO SE VE</span><h3>Train/val/test</h3><p>Se parten los datos; cuando la curva de validación sube mientras la de train baja, hay sobreajuste.</p></div>
+            <div class="close-item"><span class="close-num">03 · CÓMO SE ARREGLA</span><h3>Regularizar</h3><p>Más datos, dropout, weight decay, early stopping, augmentation: frenar a la red para que no memorice.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Provoca overfitting con un slider en el interactivo, y arréglalo con dropout y early stopping en el laboratorio.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 8</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Srivastava et al.</strong> — <em>"Dropout: A Simple Way to Prevent Neural Networks from Overfitting"</em> (2014).</li>
+            <li><strong>Goodfellow, Bengio &amp; Courville</strong> — <em>Deep Learning</em>, cap. 7 (regularización).</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./practica-t8.html">
+              <span class="close-cta-eyebrow">Provoca el overfitting</span>
+              <span class="close-cta-title">Práctica · overfitting <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Sube la complejidad y mira separarse las curvas.</span>
+            </a>
+            <a class="close-cta" href="./lab-t8.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · dropout y early stopping <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Provoca overfitting en Keras y arréglalo.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

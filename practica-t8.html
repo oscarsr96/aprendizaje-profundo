@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 8 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 8: provoca el overfitting. Sube la complejidad del modelo y observa cómo la curva persigue el ruido y el error de validación se dispara; arréglalo con regularización. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c; --ink-soft: #3b4080; --ink-mute: #7c80a6;
+        --paper: #ffffff; --accent: #ff5700; --accent-deep: #c8410f;
+        --gold: #fe961f; --line: #e2ded0; --ok: #0796a3; --bad: #d6452e;
+        --serif: "Taviraj", Georgia, serif; --sans: "Inter Tight", system-ui, sans-serif; --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        font-family: var(--sans); color: var(--ink); background: var(--paper);
+        background-image: radial-gradient(ellipse at 15% 8%, rgba(26,31,108,0.05) 0%, transparent 55%), radial-gradient(ellipse at 88% 92%, rgba(255,87,0,0.045) 0%, transparent 55%);
+        -webkit-font-smoothing: antialiased; min-height: 100vh;
+      }
+      .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 13px 28px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); font-size: 13px; }
+      .bar a.brand { display: flex; align-items: center; }
+      .bar-logo { height: 26px; width: auto; display: block; }
+      .bar-sub { color: var(--ink-mute); }
+      .bar-tag { margin-left: auto; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); background: rgba(255,87,0,0.1); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+      main { max-width: 1080px; margin: 0 auto; padding: 42px 24px 90px; }
+      .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block; }
+      h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 6vw, 56px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px 0 14px; }
+      h1 em { font-style: italic; color: var(--accent); }
+      .lead { font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft); max-width: 66ch; }
+      .lead code, p code { font-family: var(--mono); font-size: 0.88em; background: rgba(26,31,108,0.06); padding: 1px 6px; border-radius: 5px; }
+      h2.section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.02em; margin: 0 0 6px; }
+      h2.section-title em { font-style: italic; color: var(--accent); }
+      .band { display: flex; align-items: center; gap: 16px; margin: 54px 0 18px; }
+      .band .num { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; color: var(--ink-mute); white-space: nowrap; }
+      .band .rule { flex: 1; height: 1px; background: var(--line); }
+
+      .toolbar { display: flex; flex-wrap: wrap; gap: 18px 26px; align-items: center; margin: 16px 0 8px; }
+      .tgroup { display: flex; align-items: center; gap: 10px; }
+      .tlabel { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+      input[type="range"] { -webkit-appearance: none; appearance: none; width: 168px; height: 4px; border-radius: 3px; background: var(--line); outline: none; }
+      input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+      input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid #fff; }
+      .rval { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent-deep); min-width: 34px; }
+      .btn { font-family: var(--sans); font-size: 13.5px; font-weight: 600; border: 1.5px solid var(--line); border-radius: 9px; padding: 9px 16px; background: #fff; color: var(--ink); cursor: pointer; transition: transform 0.12s, border-color 0.16s; }
+      .btn:hover { transform: translateY(-1px); border-color: var(--ink-mute); }
+
+      .stage { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-top: 14px; }
+      @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+      .board { background: #fbfaf6; border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: 0 14px 40px rgba(26,31,108,0.06); }
+      canvas { width: 100%; height: auto; display: block; border-radius: 8px; }
+      .side { display: flex; flex-direction: column; gap: 14px; }
+      .statcard { border: 1.5px solid var(--line); border-radius: 12px; padding: 16px 18px; background: #fff; }
+      .statrow { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+      .statrow:last-child { border-bottom: none; }
+      .statrow .k { color: var(--ink-mute); }
+      .statrow .v { font-family: var(--mono); font-weight: 700; }
+      .verdict { font-size: 14px; line-height: 1.5; border-radius: 8px; padding: 12px 14px; }
+      .verdict.ok { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.07); color: var(--ink-soft); }
+      .verdict.warn { border-left: 4px solid var(--gold); background: rgba(254,150,31,0.08); color: var(--ink-soft); }
+      .verdict.bad { border-left: 4px solid var(--bad); background: rgba(214,69,46,0.08); color: var(--ink-soft); }
+      .curvebox { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 12px 6px; background: #fff; }
+      .curvebox .cl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin: 0 4px 6px; }
+
+      .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--ink-mute); }
+      .legend span { display: inline-flex; align-items: center; gap: 6px; }
+      .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+      .swatch { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+
+      .note { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.06); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin-top: 16px; }
+
+      .retos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 760px) { .retos { grid-template-columns: 1fr; } }
+      .reto { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px; background: #fbfaf6; }
+      .reto h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin-bottom: 6px; }
+      .reto p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+      .reto .tag { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); letter-spacing: 0.05em; }
+
+      .close-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+      @media (max-width: 620px) { .close-cta-grid { grid-template-columns: 1fr; } }
+      .close-cta { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px 22px; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.18s, transform 0.16s; }
+      .close-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .close-cta .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+      .close-cta .title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding-top: 20px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 8</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <section>
+        <span class="kicker">Tema 8 · Práctica</span>
+        <h1>Provoca el <em>overfitting</em>.</h1>
+        <p class="lead">
+          Tenemos unos pocos datos ruidosos que salen de una curva suave
+          (la <em>señal</em> real, en gris). Ajusta un modelo de complejidad
+          creciente: sube el <strong>grado</strong> y verás la curva pasar de
+          demasiado simple (<em>underfit</em>) a perseguir cada punto —
+          incluido el ruido (<em>overfit</em>). Mira la brecha entre el error de
+          <em>entrenamiento</em> y el de <em>validación</em>… y luego arréglalo
+          con la <strong>regularización</strong>.
+        </p>
+      </section>
+
+      <div class="band"><span class="num">— 01 · COMPLEJIDAD vs GENERALIZACIÓN —</span><span class="rule"></span></div>
+      <h2 class="section-title">Sube la <em>complejidad</em>.</h2>
+
+      <div class="toolbar">
+        <div class="tgroup">
+          <span class="tlabel">Grado del modelo</span>
+          <input type="range" id="deg" min="1" max="12" value="1" />
+          <span class="rval" id="degval">1</span>
+        </div>
+        <div class="tgroup">
+          <span class="tlabel">Regularización&nbsp;(λ)</span>
+          <input type="range" id="lam" min="0" max="100" value="0" />
+          <span class="rval" id="lamval">0</span>
+        </div>
+        <button class="btn" id="newBtn">↺ Nuevos datos</button>
+      </div>
+
+      <div class="stage">
+        <div class="board">
+          <canvas id="cv" width="720" height="440"></canvas>
+          <div class="legend">
+            <span><span class="swatch" style="background:#c9c3b3"></span> señal real</span>
+            <span><i class="dot" style="background:#1a1f6c"></i> datos de entrenamiento</span>
+            <span><i class="dot" style="background:#fff;border:1.5px solid #0796a3"></i> validación</span>
+            <span><span class="swatch" style="background:#ff5700"></span> modelo ajustado</span>
+          </div>
+        </div>
+        <div class="side">
+          <div class="statcard">
+            <div class="statrow"><span class="k">Grado del polinomio</span><span class="v" id="stDeg" style="color:var(--ink)">1</span></div>
+            <div class="statrow"><span class="k">Error de entrenamiento</span><span class="v" id="stTrain" style="color:#1a1f6c">—</span></div>
+            <div class="statrow"><span class="k">Error de validación</span><span class="v" id="stVal" style="color:#0796a3">—</span></div>
+            <div class="statrow"><span class="k">Regularización λ</span><span class="v" id="stLam" style="color:var(--accent-deep)">0</span></div>
+          </div>
+          <div class="verdict ok" id="verdict"></div>
+          <div class="curvebox">
+            <p class="cl">Error vs. grado (con la λ actual)</p>
+            <canvas id="curveCv" width="360" height="170"></canvas>
+            <div class="legend" style="margin:6px 2px 2px">
+              <span><span class="swatch" style="background:#1a1f6c"></span> train</span>
+              <span><span class="swatch" style="background:#0796a3"></span> validación</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        El modelo es un <em>polinomio</em> de grado ajustable — una forma limpia
+        de subir y bajar la «capacidad». El error de <em>validación</em> se mide
+        sobre puntos que el modelo <strong>no</strong> usa para ajustarse: por eso
+        es el que de verdad mide la generalización. Subir λ penaliza los
+        coeficientes grandes y suaviza la curva.
+      </div>
+
+      <div class="band"><span class="num">— 02 · TUS RETOS —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto"><span class="tag">underfit</span><h4>Demasiado simple</h4><p>Deja el grado en 1 (una recta). ¿Por qué el error es alto <em>tanto</em> en train como en validación? Eso es sesgo alto.</p></div>
+        <div class="reto"><span class="tag">overfit</span><h4>Persiguiendo el ruido</h4><p>Sube el grado a 10–12 con λ=0. El error de train casi desaparece, pero ¿qué le pasa al de validación? Esa es la brecha.</p></div>
+        <div class="reto"><span class="tag">regularizar</span><h4>Arréglalo</h4><p>Con el grado alto, sube λ poco a poco. ¿Se suaviza la curva? ¿Baja el error de validación? Acabas de regularizar.</p></div>
+      </div>
+
+      <div class="band"><span class="num">— SIGUIENTE —</span><span class="rule"></span></div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t8.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Generalización →</span>
+        </a>
+        <a class="close-cta" href="./lab-t8.html">
+          <span class="eyebrow">Manos a la obra</span>
+          <span class="title">Laboratorio · dropout y early stopping →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 8 — overfitting con regresión polinómica
+      // Ajuste por mínimos cuadrados con regularización (ridge).
+      // =====================================================
+      const XR = [-1, 1];
+      const YR = [-1.4, 1.4];
+      const N_TRAIN = 11;
+      const N_VAL = 24;
+      const NOISE = 0.10;
+      const MAXDEG = 12;
+      const FLOOR = NOISE * NOISE; // MSE irreducible (suelo de ruido)
+
+      // --- PRNG reproducible (para "reiniciar" con misma nube salvo botón) ---
+      function makeRng(seed) {
+        let s = seed >>> 0;
+        return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+      }
+      function gauss(rng) {
+        let u = 0, v = 0;
+        while (u === 0) u = rng();
+        while (v === 0) v = rng();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      }
+      // señal real: una curva con curvatura suficiente para que una recta
+      // (grado 1) se quede claramente corta (underfit visible)
+      function signal(x) { return 0.7 * Math.sin(3.3 * x); }
+
+      let train = [], val = [], seed = 7;
+      function genData() {
+        const rng = makeRng(seed);
+        train = [];
+        for (let i = 0; i < N_TRAIN; i++) {
+          const x = XR[0] + (i / (N_TRAIN - 1)) * (XR[1] - XR[0]);
+          train.push({ x, y: signal(x) + NOISE * gauss(rng) });
+        }
+        val = [];
+        for (let i = 0; i < N_VAL; i++) {
+          const x = XR[0] + rng() * (XR[1] - XR[0]);
+          val.push({ x, y: signal(x) + NOISE * gauss(rng) });
+        }
+      }
+
+      // --- álgebra: resolver (XᵀX + λI) w = Xᵀy por eliminación gaussiana ---
+      function polyFit(points, degree, lambda) {
+        const m = degree + 1;
+        // matriz de diseño normalizada por potencias de x
+        const A = Array.from({ length: m }, () => new Array(m).fill(0));
+        const b = new Array(m).fill(0);
+        for (const p of points) {
+          const pows = new Array(m);
+          pows[0] = 1;
+          for (let k = 1; k < m; k++) pows[k] = pows[k - 1] * p.x;
+          for (let i = 0; i < m; i++) {
+            b[i] += pows[i] * p.y;
+            for (let j = 0; j < m; j++) A[i][j] += pows[i] * pows[j];
+          }
+        }
+        // regularización ridge (no penalizamos el término independiente)
+        // + un épsilon diminuto para estabilidad numérica en grados altos
+        for (let i = 0; i < m; i++) A[i][i] += (i === 0 ? 0 : lambda) + 1e-9;
+        return solve(A, b);
+      }
+      function solve(A, b) {
+        const n = b.length;
+        const M = A.map((row, i) => [...row, b[i]]);
+        for (let col = 0; col < n; col++) {
+          let piv = col;
+          for (let r = col + 1; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[piv][col])) piv = r;
+          [M[col], M[piv]] = [M[piv], M[col]];
+          const d = M[col][col];
+          if (Math.abs(d) < 1e-12) continue;
+          for (let r = 0; r < n; r++) {
+            if (r === col) continue;
+            const f = M[r][col] / d;
+            for (let c = col; c <= n; c++) M[r][c] -= f * M[col][c];
+          }
+        }
+        const w = new Array(n);
+        for (let i = 0; i < n; i++) w[i] = M[i][n] / (M[i][i] || 1e-12);
+        return w;
+      }
+      function evalPoly(w, x) {
+        let y = 0, p = 1;
+        for (let k = 0; k < w.length; k++) { y += w[k] * p; p *= x; }
+        return y;
+      }
+      function mse(w, points) {
+        let s = 0;
+        for (const p of points) { const e = evalPoly(w, p.x) - p.y; s += e * e; }
+        return s / points.length;
+      }
+
+      // --- lienzo principal ---
+      const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height, PAD = 30;
+      function sx(x) { return PAD + ((x - XR[0]) / (XR[1] - XR[0])) * (W - 2 * PAD); }
+      function sy(y) { return H - PAD - ((y - YR[0]) / (YR[1] - YR[0])) * (H - 2 * PAD); }
+
+      function drawMain(w) {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#fbfaf6"; ctx.fillRect(0, 0, W, H);
+        // ejes
+        ctx.strokeStyle = "#e2ded0"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(PAD, sy(0)); ctx.lineTo(W - PAD, sy(0)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx(0), PAD); ctx.lineTo(sx(0), H - PAD); ctx.stroke();
+        // señal real
+        ctx.beginPath();
+        for (let i = 0; i <= 200; i++) {
+          const x = XR[0] + (i / 200) * (XR[1] - XR[0]);
+          const X = sx(x), Y = sy(signal(x));
+          i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
+        }
+        ctx.strokeStyle = "#c9c3b3"; ctx.lineWidth = 3; ctx.stroke();
+        // modelo ajustado (recortado al marco)
+        ctx.save();
+        ctx.beginPath(); ctx.rect(PAD, PAD, W - 2 * PAD, H - 2 * PAD); ctx.clip();
+        ctx.beginPath();
+        for (let i = 0; i <= 300; i++) {
+          const x = XR[0] + (i / 300) * (XR[1] - XR[0]);
+          const X = sx(x), Y = sy(evalPoly(w, x));
+          i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
+        }
+        ctx.strokeStyle = "#ff5700"; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.restore();
+        // puntos de validación (huecos)
+        for (const p of val) {
+          ctx.beginPath(); ctx.arc(sx(p.x), sy(p.y), 4, 0, 2 * Math.PI);
+          ctx.fillStyle = "#fff"; ctx.fill();
+          ctx.lineWidth = 1.5; ctx.strokeStyle = "#0796a3"; ctx.stroke();
+        }
+        // puntos de entrenamiento (rellenos)
+        for (const p of train) {
+          ctx.beginPath(); ctx.arc(sx(p.x), sy(p.y), 4.5, 0, 2 * Math.PI);
+          ctx.fillStyle = "#1a1f6c"; ctx.fill();
+        }
+      }
+
+      // --- curva error vs grado ---
+      const curveCv = document.getElementById("curveCv"), cctx = curveCv.getContext("2d");
+      function drawCurve(curDeg, lambda) {
+        const w = curveCv.width, h = curveCv.height, pad = 24;
+        cctx.clearRect(0, 0, w, h); cctx.fillStyle = "#fff"; cctx.fillRect(0, 0, w, h);
+        const trErr = [], vaErr = [];
+        for (let d = 1; d <= MAXDEG; d++) {
+          const ww = polyFit(train, d, lambda);
+          trErr.push(mse(ww, train)); vaErr.push(Math.min(mse(ww, val), 2));
+        }
+        const maxE = Math.max(0.05, ...trErr, ...vaErr);
+        const X = (d) => pad + ((d - 1) / (MAXDEG - 1)) * (w - pad - 8);
+        const Y = (e) => (h - pad) - (Math.min(e, maxE) / maxE) * (h - pad - 8);
+        // ejes
+        cctx.strokeStyle = "#e2ded0"; cctx.lineWidth = 1;
+        cctx.beginPath(); cctx.moveTo(pad, h - pad); cctx.lineTo(w - 4, h - pad); cctx.stroke();
+        cctx.beginPath(); cctx.moveTo(pad, 6); cctx.lineTo(pad, h - pad); cctx.stroke();
+        // marcador del grado actual
+        cctx.strokeStyle = "rgba(255,87,0,0.35)"; cctx.lineWidth = 2;
+        cctx.beginPath(); cctx.moveTo(X(curDeg), 6); cctx.lineTo(X(curDeg), h - pad); cctx.stroke();
+        // curvas
+        const plot = (arr, color) => {
+          cctx.beginPath();
+          arr.forEach((e, i) => { const x = X(i + 1), y = Y(e); i === 0 ? cctx.moveTo(x, y) : cctx.lineTo(x, y); });
+          cctx.strokeStyle = color; cctx.lineWidth = 2; cctx.stroke();
+        };
+        plot(trErr, "#1a1f6c");
+        plot(vaErr, "#0796a3");
+        cctx.fillStyle = "#7c80a6"; cctx.font = "10px 'Inter Tight'";
+        cctx.fillText("grado →", w - 52, h - 8);
+      }
+
+      // --- controles / render ---
+      const degEl = document.getElementById("deg"), degVal = document.getElementById("degval");
+      const lamEl = document.getElementById("lam"), lamVal = document.getElementById("lamval");
+      function lambdaOf() { // slider 0..100 → 0 .. 0.3 (log salvo el 0)
+        const t = +lamEl.value;
+        if (t === 0) return 0;
+        return 0.0002 * Math.pow(0.3 / 0.0002, (t - 1) / 99);
+      }
+
+      function render() {
+        const deg = +degEl.value;
+        const lambda = lambdaOf();
+        const w = polyFit(train, deg, lambda);
+        const tr = mse(w, train), va = mse(w, val);
+        drawMain(w);
+        drawCurve(deg, lambda);
+        degVal.textContent = deg;
+        lamVal.textContent = lambda === 0 ? "0" : lambda.toFixed(3);
+        document.getElementById("stDeg").textContent = deg;
+        document.getElementById("stTrain").textContent = tr.toFixed(4);
+        document.getElementById("stVal").textContent = va.toFixed(4);
+        document.getElementById("stLam").textContent = lambda === 0 ? "0" : lambda.toFixed(3);
+        setVerdict(deg, tr, va, lambda);
+      }
+
+      function setVerdict(deg, tr, va, lambda) {
+        // Umbrales anclados al suelo de ruido (FLOOR = varianza del ruido):
+        // un modelo que generaliza bien tiene val cerca de ese suelo.
+        const el = document.getElementById("verdict");
+        const gap = va - tr;
+        if (tr > 3.5 * FLOOR) {
+          el.className = "verdict warn";
+          el.innerHTML = `🟡 <b>Underfit</b>: el modelo es demasiado simple. Su error de entrenamiento ya es alto (${tr.toFixed(3)}): no capta el patrón (sesgo alto). Sube el grado.`;
+        } else if (gap > 2.2 * FLOOR && va > 3.5 * FLOOR) {
+          el.className = "verdict bad";
+          el.innerHTML = `🔴 <b>Overfit</b>: borda el entrenamiento (${tr.toFixed(3)}) pero falla en validación (${va.toFixed(3)}). Persigue el ruido. ${lambda === 0 ? "Sube λ para regularizar." : "Sigue subiendo λ."}`;
+        } else {
+          el.className = "verdict ok";
+          el.innerHTML = `✅ <b>Buen ajuste</b>: train ${tr.toFixed(3)} y validación ${va.toFixed(3)} son bajos y parecidos. Generaliza bien.`;
+        }
+      }
+
+      degEl.addEventListener("input", render);
+      lamEl.addEventListener("input", render);
+      document.getElementById("newBtn").addEventListener("click", () => {
+        seed = (seed * 1103515245 + 12345) >>> 0 % 100000;
+        genData(); render();
+      });
+
+      genData();
+      render();
+    </script>
+  </body>
+</html>
