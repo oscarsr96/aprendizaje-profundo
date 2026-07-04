@@ -402,6 +402,9 @@
       .card-tema8 {
         background: linear-gradient(160deg, #fbfaf6 0%, #eae6f2 100%);
       }
+      .card-tema9 {
+        background: linear-gradient(160deg, #fbfaf6 0%, #f2e6ea 100%);
+      }
       .card-repaso {
         background: linear-gradient(160deg, #fbfaf6 0%, #f0ebdd 100%);
       }
@@ -1078,6 +1081,7 @@
             <a class="toc-link" href="#tema-6">Tema 6</a>
             <a class="toc-link" href="#tema-7">Tema 7</a>
             <a class="toc-link" href="#tema-8">Tema 8</a>
+            <a class="toc-link" href="#tema-9">Tema 9</a>
           </nav>
         </aside>
 
@@ -2082,6 +2086,120 @@
                 <p>
                   Diez retos autocorregibles sobre overfitting, sesgo/varianza,
                   train/val/test, dropout, regularización y early stopping.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 min</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <section class="section" id="tema-9">
+            <div class="level-band">
+              <span class="level-name">Tema 9 · Evaluación</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">Más allá del <em>accuracy</em>.</h2>
+
+            <div class="picker picker-four">
+              <a class="card card-tema9" href="./sesion-t9.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="120" y="120" width="80" height="80" />
+                      <rect x="200" y="120" width="80" height="80" />
+                      <rect x="120" y="200" width="80" height="80" />
+                      <rect x="200" y="200" width="80" height="80" />
+                    </g>
+                    <circle cx="160" cy="160" r="16" fill="currentColor" />
+                    <circle cx="240" cy="240" r="16" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Datos y <em>evaluación</em></h2>
+                <p>
+                  La trampa del accuracy, matriz de confusión, precision, recall
+                  y F1, el umbral de decisión y la curva ROC-AUC.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 min</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema9" href="./practica-t9.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="80" y="80" width="240" height="240" rx="10" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M80 300 Q120 150 200 110 Q280 90 320 84" fill="none" stroke="currentColor" stroke-width="3" />
+                    <path d="M80 320 L320 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.5" />
+                    <circle cx="168" cy="150" r="12" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>Mueve el <em>umbral</em></h2>
+                <p>
+                  Arrastra el listón y observa cambiar la matriz de confusión,
+                  precision, recall, F1 y el punto sobre la ROC.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>umbral + ROC</span>
+                </div>
+                <span class="card-go"
+                  >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema9" href="./lab-t9.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M110 280 Q140 190 200 175 Q270 160 300 158" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M110 290 L300 175" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.5" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Evaluar de <em>verdad</em></h2>
+                <p>
+                  Notebook: métricas, matriz de confusión y ROC de un
+                  clasificador desbalanceado en Python. Colab o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>scikit-learn · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t9.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Sabes <em>evaluar</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre matriz de confusión,
+                  precision, recall, F1, umbral de decisión y ROC-AUC.
                 </p>
                 <div class="card-meta">
                   <span>10 retos</span>

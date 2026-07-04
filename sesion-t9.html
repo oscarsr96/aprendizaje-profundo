@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 9</title>
+    <meta
+      name="description"
+      content="Tema 9 de Aprendizaje Profundo en CUNEF. Datos y evaluación: preprocesado y normalización, desbalanceo, métricas (accuracy, precision, recall, F1), matriz de confusión, ROC-AUC y umbral de decisión."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 9</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">9 · Evaluación</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Más allá del<br /><em>accuracy</em>.</h1>
+          <p class="cover-sub">
+            «Mi modelo acierta el 99 %» puede ser una <em>trampa</em>. Este tema
+            va de medir de verdad: <em>matriz de confusión</em>,
+            <em>precision</em> y <em>recall</em>, <em>F1</em>, la curva
+            <em>ROC</em> y el <em>umbral de decisión</em>.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="120" y="120" width="80" height="80" />
+              <rect x="200" y="120" width="80" height="80" />
+              <rect x="120" y="200" width="80" height="80" />
+              <rect x="200" y="200" width="80" height="80" />
+            </g>
+            <circle cx="160" cy="160" r="7" fill="currentColor" opacity="0.7" />
+            <circle cx="240" cy="240" r="7" fill="currentColor" opacity="0.7" />
+            <circle cx="240" cy="160" r="4" fill="currentColor" opacity="0.35" />
+            <circle cx="160" cy="240" r="4" fill="currentColor" opacity="0.35" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">La trampa del accuracy</span><span class="agenda-desc">Por qué acertar mucho no siempre significa acertar bien.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">La matriz de confusión</span><span class="agenda-desc">TP, FP, FN, TN: las cuatro casillas que lo explican todo.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">Precision, recall y F1</span><span class="agenda-desc">Las métricas que sí distinguen tipos de error.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Umbral y curva ROC</span><span class="agenda-desc">Mover el listón; ROC-AUC y datos desbalanceados.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="La trampa del accuracy">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">La trampa<br />del <em>accuracy</em>.</h2>
+          <p class="divider-sub">
+            La métrica más intuitiva es también la que más engaña cuando las
+            clases no están equilibradas.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — El clasificador tramposo -->
+      <section class="slide" data-title="El 99 % que engaña">
+        <div class="slide-inner">
+          <span class="kicker">Un ejemplo incómodo</span>
+          <h2 class="h2">Un 99 % que no vale <em>nada</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Detectar una enfermedad rara que afecta a 1 de cada 100 personas.
+                Un modelo que dice <em>siempre «sano»</em> acierta el
+                <strong>99 %</strong> de las veces.
+              </p>
+              <p class="note">
+                Pero no detecta ni un solo enfermo: es <em>inútil</em>. El
+                accuracy alto viene solo de la clase mayoritaria. Con datos
+                <strong>desbalanceados</strong>, el accuracy miente.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>«Siempre sano»</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">99 sanos → 99 aciertos ✓</span>
+                <span class="pt-t">1 enfermo → 1 fallo grave ✗</span>
+                <span class="pt-f">99 % accuracy, 0 % de utilidad</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — Accuracy definición -->
+      <section class="slide" data-title="Qué es el accuracy">
+        <div class="slide-inner">
+          <span class="kicker">La métrica de partida</span>
+          <h2 class="h2">Accuracy: aciertos <em>entre</em> total.</h2>
+          <p class="lead">
+            <code>accuracy = aciertos / total</code>. Es útil y clara… cuando las
+            clases están <em>equilibradas</em> y todos los errores cuestan lo
+            mismo.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Pero un fallo no siempre es un fallo cualquiera: dar por sano a un
+              enfermo no es lo mismo que dar por enfermo a un sano. Necesitamos
+              métricas que <em>distingan tipos de error</em>.
+            </p>
+            <p class="note">
+              Para eso, primero hay que abrir la caja: la <strong>matriz de
+              confusión</strong>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="La matriz de confusión">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">La matriz de<br /><em>confusión</em>.</h2>
+          <p class="divider-sub">
+            Cuatro casillas que separan los aciertos y los errores por tipo. De
+            aquí sale <em>todo</em> lo demás.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — Las cuatro casillas -->
+      <section class="slide" data-title="Las cuatro casillas">
+        <div class="slide-inner">
+          <span class="kicker">TP · FP · FN · TN</span>
+          <h2 class="h2">Predicho <em>vs.</em> real.</h2>
+          <svg viewBox="0 0 760 230" style="width:100%; height:auto; margin: 4px 0 8px">
+            <g font-family="Inter Tight" font-size="13" fill="#3b4080" text-anchor="middle">
+              <text x="240" y="24" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">REAL: Positivo</text>
+              <text x="470" y="24" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">REAL: Negativo</text>
+              <text x="70" y="80" font-family="JetBrains Mono" font-size="11" fill="#7c80a6" transform="rotate(-90 70 80)">PRED: Pos</text>
+              <text x="70" y="180" font-family="JetBrains Mono" font-size="11" fill="#7c80a6" transform="rotate(-90 70 180)">PRED: Neg</text>
+              <rect x="130" y="40" width="220" height="80" rx="8" fill="#0796a3"/><text x="240" y="72" fill="#fff" font-weight="600">Verdadero positivo</text><text x="240" y="94" fill="#fff" font-family="JetBrains Mono">TP</text>
+              <rect x="360" y="40" width="220" height="80" rx="8" fill="#f4d9cf"/><text x="470" y="72" fill="#c8410f" font-weight="600">Falso positivo</text><text x="470" y="94" fill="#c8410f" font-family="JetBrains Mono">FP · falsa alarma</text>
+              <rect x="130" y="130" width="220" height="80" rx="8" fill="#f4d9cf"/><text x="240" y="162" fill="#c8410f" font-weight="600">Falso negativo</text><text x="240" y="184" fill="#c8410f" font-family="JetBrains Mono">FN · se escapa</text>
+              <rect x="360" y="130" width="220" height="80" rx="8" fill="#0796a3"/><text x="470" y="162" fill="#fff" font-weight="600">Verdadero negativo</text><text x="470" y="184" fill="#fff" font-family="JetBrains Mono">TN</text>
+            </g>
+          </svg>
+          <p class="note">
+            La diagonal (<strong>TP</strong> y <strong>TN</strong>) son aciertos.
+            Fuera de ella, los dos <em>tipos</em> de error: <strong>FP</strong>
+            (falsa alarma) y <strong>FN</strong> (algo real que se escapa).
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Los dos errores cuestan distinto -->
+      <section class="slide" data-title="No todos los errores">
+        <div class="slide-inner">
+          <span class="kicker">FP vs FN</span>
+          <h2 class="h2">No todos los errores <em>cuestan</em> igual.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Falso negativo (FN)</h3>
+              <p>Un caso positivo que se te <em>escapa</em>.</p>
+              <ul class="neuron-notes"><li>Cáncer no detectado.</li><li>Fraude que pasa desapercibido.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Falso positivo (FP)</h3>
+              <p>Una <em>falsa alarma</em>: dices que sí cuando era no.</p>
+              <ul class="neuron-notes"><li>Persona sana asustada sin motivo.</li><li>Correo legítimo enviado a spam.</li></ul>
+            </div>
+          </div>
+          <p class="note">Según el problema, uno u otro es <strong>mucho más grave</strong>. La métrica que elijas debe reflejarlo.</p>
+        </div>
+      </section>
+
+      <!-- 08 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="Precision, recall, F1">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Precision,<br />recall y <em>F1</em>.</h2>
+          <p class="divider-sub">
+            Dos preguntas distintas sobre la clase positiva, y una forma de
+            combinarlas en un solo número.
+          </p>
+        </div>
+      </section>
+
+      <!-- 09 — Precision y recall -->
+      <section class="slide" data-title="Precision y recall">
+        <div class="slide-inner">
+          <span class="kicker">Dos preguntas distintas</span>
+          <h2 class="h2"><em>Precision</em> vs. <em>recall</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Precision</h4>
+              <div class="fn-formula">TP / (TP + FP)</div>
+              <p>De lo que marqué como positivo, ¿cuánto lo era de verdad?</p>
+              <span class="fn-use">→ ¿me fío de las alarmas?</span>
+            </div>
+            <div class="fn-card">
+              <h4>Recall (sensibilidad)</h4>
+              <div class="fn-formula">TP / (TP + FN)</div>
+              <p>De todos los positivos reales, ¿a cuántos pillé?</p>
+              <span class="fn-use">→ ¿se me escapa algo?</span>
+            </div>
+            <div class="fn-card">
+              <h4>F1</h4>
+              <div class="fn-formula">media armónica</div>
+              <p>Combina precision y recall en un número; castiga que una sea baja.</p>
+              <span class="fn-use">→ un solo resumen</span>
+            </div>
+          </div>
+          <p class="note">
+            <strong>Recall</strong> importa cuando un FN es grave (medicina,
+            fraude). <strong>Precision</strong> importa cuando molesta la falsa
+            alarma (spam, recomendaciones).
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — El tira y afloja -->
+      <section class="slide" data-title="El tira y afloja">
+        <div class="slide-inner">
+          <span class="kicker">No puedes maximizar las dos</span>
+          <h2 class="h2">Un <em>tira y afloja</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Subir el recall (pillar más positivos) suele bajar la precision
+                (más falsas alarmas), y al revés. Rara vez puedes tener ambas al
+                máximo.
+              </p>
+              <p class="note">
+                Por eso existe <strong>F1</strong> (su media armónica): un único
+                número que solo es alto si <em>las dos</em> lo son. Útil para
+                comparar modelos de un vistazo.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El equilibrio</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">marca casi todo → recall alto, precision baja</span>
+                <span class="pt-c">marca solo lo segurísimo → precision alta, recall bajo</span>
+                <span class="pt-f">F1 premia el equilibrio</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="Umbral y ROC">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">El umbral<br />y la <em>ROC</em>.</h2>
+          <p class="divider-sub">
+            El modelo da una <em>probabilidad</em>. Dónde pones el listón cambia
+            todas las métricas a la vez.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — El umbral de decisión -->
+      <section class="slide" data-title="El umbral de decisión">
+        <div class="slide-inner">
+          <span class="kicker">De probabilidad a decisión</span>
+          <h2 class="h2">¿Dónde pones el <em>listón</em>?</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un clasificador no dice «sí» o «no»: dice <em>«0.73 de
+                probabilidad»</em>. Tú eliges el <strong>umbral</strong> a partir
+                del cual llamas positivo (por defecto, 0.5).
+              </p>
+              <ul class="neuron-notes">
+                <li>Umbral <em>bajo</em> → más positivos → más recall, menos precision.</li>
+                <li>Umbral <em>alto</em> → solo los muy seguros → más precision, menos recall.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Mover el listón</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">cribado médico → umbral bajo (no perder enfermos)</span>
+                <span class="pt-c">bloquear cuentas → umbral alto (no molestar inocentes)</span>
+                <span class="pt-f">lo verás en la práctica</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 — La curva ROC -->
+      <section class="slide" data-title="La curva ROC">
+        <div class="slide-inner">
+          <span class="kicker">Todos los umbrales a la vez</span>
+          <h2 class="h2">La curva <em>ROC</em> y el AUC.</h2>
+          <svg viewBox="0 0 760 210" style="width:100%; height:auto; margin: 2px 0 8px">
+            <g transform="translate(40,10)">
+              <rect x="0" y="0" width="180" height="180" fill="#fbfaf6" stroke="#e2ded0"/>
+              <line x1="0" y1="180" x2="180" y2="0" stroke="#c9c3b3" stroke-dasharray="4 4"/>
+              <path d="M0 180 Q20 60 80 30 Q140 10 180 0" fill="none" stroke="#ff5700" stroke-width="2.5"/>
+              <text x="90" y="205" font-family="Inter Tight" font-size="11" fill="#7c80a6" text-anchor="middle">FPR (falsas alarmas)</text>
+              <text x="-12" y="90" font-family="Inter Tight" font-size="11" fill="#7c80a6" text-anchor="middle" transform="rotate(-90 -12 90)">TPR (recall)</text>
+            </g>
+            <g font-family="Inter Tight" font-size="14" fill="#3b4080">
+              <text x="280" y="50">· Cada punto de la curva es un <tspan font-style="italic">umbral</tspan> distinto.</text>
+              <text x="280" y="82">· La diagonal es el azar (AUC = 0.5).</text>
+              <text x="280" y="114">· Cuanto más pegada a la esquina superior izquierda, mejor.</text>
+              <text x="280" y="146" fill="#c8410f" font-weight="600">· AUC = área bajo la curva (1.0 = perfecto).</text>
+            </g>
+          </svg>
+          <p class="note">
+            El <strong>ROC-AUC</strong> resume la calidad del modelo a través de
+            <em>todos</em> los umbrales, en un solo número entre 0.5 (azar) y 1
+            (perfecto). No depende del umbral que acabes eligiendo.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — Datos y preprocesado -->
+      <section class="slide" data-title="Datos y preprocesado">
+        <div class="slide-inner">
+          <span class="kicker">Antes de medir: los datos</span>
+          <h2 class="h2">Buenos datos, <em>bien</em> tratados.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Preprocesado</h3>
+              <p>Normalizar / estandarizar las variables para que estén en escalas comparables.</p>
+              <ul class="neuron-notes"><li>Ayuda al entrenamiento (Tema 7).</li><li>Ajusta la escala solo con el <em>train</em>.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Desbalanceo</h3>
+              <p>Cuando una clase es rara, cuida las métricas y la partición.</p>
+              <ul class="neuron-notes"><li>Usa precision/recall/F1, no solo accuracy.</li><li>Estratifica los splits y valora reponderar.</li></ul>
+            </div>
+          </div>
+          <p class="note">Con <strong>validación cruzada</strong> (k-fold) obtienes una estimación más estable que con un único split.</p>
+        </div>
+      </section>
+
+      <!-- 15 — Cómo elegir (síntesis) -->
+      <section class="slide slide-exercise" data-title="Cómo elegir">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">La decisión práctica</span>
+          <h2 class="h2 h2-ex">¿Qué métrica <em>miro</em>?</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                No hay una métrica universal: depende de <em>qué error es más
+                caro</em> y de si las clases están equilibradas.
+              </p>
+              <ul class="neuron-notes">
+                <li>¿Clases equilibradas y errores simétricos? → accuracy vale.</li>
+                <li>¿FN grave (medicina, fraude)? → mira el <strong>recall</strong>.</li>
+                <li>¿FP molesto (spam)? → mira la <strong>precision</strong>.</li>
+                <li>¿Comparar modelos sin fijar umbral? → <strong>ROC-AUC</strong>.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En scikit-learn</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">from sklearn.metrics import \</span>
+                <span class="pt-c">&nbsp;&nbsp;classification_report, roc_auc_score</span>
+                <span class="pt-f">te da precision, recall y F1 de golpe</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 9</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · CUIDADO</span><h3>El accuracy engaña</h3><p>Con clases desbalanceadas, un accuracy alto puede esconder un modelo inútil. Mira más allá.</p></div>
+            <div class="close-item"><span class="close-num">02 · LA BASE</span><h3>Matriz de confusión</h3><p>TP, FP, FN, TN. De ahí salen precision (¿me fío?) y recall (¿se me escapa?), y su equilibrio F1.</p></div>
+            <div class="close-item"><span class="close-num">03 · LA PALANCA</span><h3>Umbral y ROC-AUC</h3><p>El umbral reparte precision y recall; la ROC-AUC resume la calidad a través de todos los umbrales.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Mueve el umbral y mira cambiar la matriz y la ROC en el interactivo, y evalúa un clasificador de verdad en el laboratorio.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 9</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>scikit-learn</strong> — <em>guía de "Model evaluation"</em> (métricas y validación cruzada).</li>
+            <li><strong>Fawcett, T.</strong> — <em>"An introduction to ROC analysis"</em> (2006).</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./practica-t9.html">
+              <span class="close-cta-eyebrow">Mueve el umbral</span>
+              <span class="close-cta-title">Práctica · matriz de confusión y ROC <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Cambia el listón y mira moverse las métricas.</span>
+            </a>
+            <a class="close-cta" href="./lab-t9.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · evaluar de verdad <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Métricas, matriz y ROC de un clasificador en Python.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

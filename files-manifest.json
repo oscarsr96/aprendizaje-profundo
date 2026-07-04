@@ -245,6 +245,18 @@
           "size": 8670
         }
       ]
+    },
+    {
+      "id": "tema-9",
+      "title": "Tema 9 · Evaluación",
+      "files": [
+        {
+          "name": "Lab_Tema9_Metricas_Matriz_ROC.ipynb",
+          "path": "files/tema-9/Lab_Tema9_Metricas_Matriz_ROC.ipynb",
+          "ext": "ipynb",
+          "size": 6625
+        }
+      ]
     }
   ]
 }
