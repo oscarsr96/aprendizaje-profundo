@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 4</title>
+    <meta
+      name="description"
+      content="Tema 4 de Aprendizaje Profundo en CUNEF. Redes convolucionales (CNN): convolución, filtros, pooling y la arquitectura completa para visión."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 4</span>
+      </a>
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span
+        ><span id="slideTotal">0</span>
+      </div>
+      <button
+        class="topbar-pdf"
+        id="pdfBtn"
+        type="button"
+        title="Descargar como PDF (P)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block">
+              <span class="meta-label">Asignatura</span>
+              <span class="meta-val">Aprendizaje Profundo</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Tema</span>
+              <span class="meta-val">4 · Redes convolucionales</span>
+            </div>
+            <div class="meta-block">
+              <span class="meta-label">Duración</span>
+              <span class="meta-val">~50 minutos</span>
+            </div>
+          </div>
+          <h1 class="cover-title">
+            Redes que<br />
+            <em>miran</em>.
+          </h1>
+          <p class="cover-sub">
+            Por qué una red densa es un desperdicio para imágenes y cómo la
+            <em>convolución</em>, los pesos compartidos y el
+            <em>pooling</em> construyen redes que ven — con muchísimos menos
+            parámetros.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="80" y="80" width="240" height="240" />
+              <path d="M80 140 H320 M80 200 H320 M80 260 H320" />
+              <path d="M140 80 V320 M200 80 V320 M260 80 V320" />
+              <rect x="140" y="140" width="120" height="120" stroke-width="1.4" />
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li>
+              <span class="agenda-num">01</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title">La intuición</span>
+                <span class="agenda-desc"
+                  >Patrones locales y repetidos: por qué una red densa sobra
+                  para imágenes.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">02</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Convolución y filtros</span>
+                <span class="agenda-desc"
+                  >El producto escalar deslizante, el stride y los feature
+                  maps.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">03</span>
+              <span class="agenda-time">15&prime;</span>
+              <div>
+                <span class="agenda-title">Pooling y arquitectura</span>
+                <span class="agenda-desc"
+                  >Max pooling y la CNN completa: conv → pool → flatten →
+                  clasificar.</span
+                >
+              </div>
+            </li>
+            <li>
+              <span class="agenda-num">04</span>
+              <span class="agenda-time">10&prime;</span>
+              <div>
+                <span class="agenda-title">En la práctica</span>
+                <span class="agenda-desc"
+                  >CNN en Keras y dónde brillan: visión, AlphaGo, voz y
+                  texto.</span
+                >
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="La intuición">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">La <em>intuición</em>.</h2>
+          <p class="divider-sub">
+            Antes de la convolución, la pregunta: sobre una imagen,
+            <em>¿de verdad hacen falta todas las conexiones</em> de una red
+            densa?
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — Aprender una imagen -->
+      <section class="slide" data-title="Aprender una imagen">
+        <div class="slide-inner">
+          <span class="kicker">Tres observaciones clave</span>
+          <h2 class="h2">Aprender una <em>imagen</em>.</h2>
+          <div class="train-loop">
+            <div class="tl-step">
+              <span class="tl-num">01 · Pequeños</span>
+              <h4>Patrones locales</h4>
+              <p>
+                Muchos patrones son más pequeños que la imagen entera — un
+                "pico", un borde, una esquina.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">02 · Baratos</span>
+              <h4>Pocos parámetros</h4>
+              <p>
+                Una región pequeña se puede representar con pocos parámetros: no
+                hace falta mirar toda la imagen a la vez.
+              </p>
+            </div>
+            <div class="tl-step">
+              <span class="tl-num">03 · Repetidos</span>
+              <h4>Se pueden compartir</h4>
+              <p>
+                El mismo patrón aparece en distintos lugares. Un detector puede
+                <em>moverse</em> por la imagen reutilizando sus pesos.
+              </p>
+            </div>
+          </div>
+          <p class="note">
+            Estas tres ideas —local, pequeño, repetido— son toda la motivación
+            de la convolución.
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 — Conexiones locales y pesos compartidos -->
+      <section class="slide" data-title="Local y compartido">
+        <div class="slide-inner">
+          <span class="kicker">Comprimir la red completa</span>
+          <h2 class="h2">Conexiones locales, pesos <em>compartidos</em>.</h2>
+          <div class="two-col">
+            <div>
+              <ul class="neuron-notes">
+                <li>
+                  <strong>Conexiones locales</strong> · cada neurona se conecta
+                  solo a una pequeña región (p. ej. 9 entradas, no todas).
+                </li>
+                <li>
+                  <strong>Pesos compartidos</strong> · los detectores que buscan
+                  el mismo patrón usan los <em>mismos</em> pesos.
+                </li>
+                <li>
+                  Resultado: <strong>muchísimos menos parámetros</strong> que una
+                  red densa.
+                </li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot prompt-dot-good"></span>
+                Densa vs convolucional
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">Densa · cada neurona ve TODOS los píxeles</span>
+                  <span class="pt-c">Conv · cada neurona ve una región 3×3</span>
+                  <span class="pt-t">y ese filtro se reutiliza en toda la imagen</span>
+                  <span class="pt-f">→ órdenes de magnitud menos pesos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="Convolución">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">Convolución<br />y <em>filtros</em>.</h2>
+          <p class="divider-sub">
+            El corazón de una CNN: deslizar filtros aprendibles por la imagen y
+            medir <em>cuánto encaja</em> cada patrón en cada sitio.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — La capa convolucional -->
+      <section class="slide" data-title="Capa convolucional">
+        <div class="slide-inner">
+          <span class="kicker">Filtros que detectan patrones</span>
+          <h2 class="h2">La capa <em>convolucional</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una CNN es una red con varias capas convolucionales. Cada capa
+                tiene varios <em>filtros</em> (p. ej. 3×3): son los parámetros
+                que se aprenden.
+              </p>
+            </div>
+            <ul class="neuron-notes">
+              <li>Cada filtro detecta un <strong>patrón pequeño</strong> (un "detector de pico").</li>
+              <li>Se <strong>desliza</strong> por toda la imagen con un cierto <em>stride</em>.</li>
+              <li>Varios filtros → varios <strong>mapas de activación</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 — La operación de convolución (diagrama) -->
+      <section class="slide" data-title="Operación de convolución">
+        <div class="slide-inner">
+          <span class="kicker">Producto escalar deslizante</span>
+          <h2 class="h2">La <em>operación</em> de convolución.</h2>
+          <svg viewBox="0 0 760 250" style="width: 100%; height: auto; margin: 6px 0 10px">
+            <!-- imagen 6x6 -->
+            <text x="114" y="22" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#7c80a6">imagen 6×6</text>
+            <!-- celdas con valor 1 (resto = 0) -->
+            <g fill="#1a1f6c">
+              <rect x="30" y="30" width="28" height="28"/>
+              <rect x="170" y="30" width="28" height="28"/>
+              <rect x="58" y="58" width="28" height="28"/>
+              <rect x="142" y="58" width="28" height="28"/>
+              <rect x="86" y="86" width="28" height="28"/>
+              <rect x="114" y="86" width="28" height="28"/>
+              <rect x="30" y="114" width="28" height="28"/>
+              <rect x="142" y="114" width="28" height="28"/>
+              <rect x="58" y="142" width="28" height="28"/>
+              <rect x="142" y="142" width="28" height="28"/>
+              <rect x="86" y="170" width="28" height="28"/>
+              <rect x="142" y="170" width="28" height="28"/>
+            </g>
+            <!-- rejilla -->
+            <g stroke="#c9c3b3" stroke-width="1" fill="none">
+              <path d="M30 30 H198 M30 58 H198 M30 86 H198 M30 114 H198 M30 142 H198 M30 170 H198 M30 198 H198"/>
+              <path d="M30 30 V198 M58 30 V198 M86 30 V198 M114 30 V198 M142 30 V198 M170 30 V198 M198 30 V198"/>
+            </g>
+            <!-- ventana 3x3 resaltada -->
+            <rect x="30" y="30" width="84" height="84" fill="rgba(255,87,0,0.12)" stroke="#ff5700" stroke-width="2.5" />
+            <!-- filtro -->
+            <text x="360" y="45" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#7c80a6">filtro 3×3</text>
+            <g font-family="JetBrains Mono" font-size="13" fill="#fff" text-anchor="middle">
+              <rect x="315" y="55" width="30" height="30" fill="#1a1f6c" /><text x="330" y="75">1</text>
+              <rect x="345" y="55" width="30" height="30" fill="#c8410f" /><text x="360" y="75">-1</text>
+              <rect x="375" y="55" width="30" height="30" fill="#c8410f" /><text x="390" y="75">-1</text>
+              <rect x="315" y="85" width="30" height="30" fill="#c8410f" /><text x="330" y="105">-1</text>
+              <rect x="345" y="85" width="30" height="30" fill="#1a1f6c" /><text x="360" y="105">1</text>
+              <rect x="375" y="85" width="30" height="30" fill="#c8410f" /><text x="390" y="105">-1</text>
+              <rect x="315" y="115" width="30" height="30" fill="#c8410f" /><text x="330" y="135">-1</text>
+              <rect x="345" y="115" width="30" height="30" fill="#c8410f" /><text x="360" y="135">-1</text>
+              <rect x="375" y="115" width="30" height="30" fill="#1a1f6c" /><text x="390" y="135">1</text>
+            </g>
+            <!-- operador -->
+            <text x="450" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="22" fill="#7c80a6">→</text>
+            <text x="450" y="128" text-anchor="middle" font-family="Inter Tight" font-size="11" fill="#7c80a6">·</text>
+            <!-- feature map -->
+            <text x="600" y="45" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#7c80a6">feature map</text>
+            <g font-family="JetBrains Mono" font-size="13" text-anchor="middle">
+              <rect x="540" y="55" width="34" height="34" fill="#ff5700" /><text x="557" y="77" fill="#fff">3</text>
+              <rect x="574" y="55" width="34" height="34" fill="#f0ebdd" stroke="#c9c3b3" /><text x="591" y="77" fill="#7c80a6">·</text>
+              <rect x="608" y="55" width="34" height="34" fill="#f0ebdd" stroke="#c9c3b3" /><text x="625" y="77" fill="#7c80a6">·</text>
+              <rect x="540" y="89" width="34" height="34" fill="#f0ebdd" stroke="#c9c3b3" /><text x="557" y="111" fill="#7c80a6">·</text>
+              <rect x="574" y="89" width="34" height="34" fill="#f0ebdd" stroke="#c9c3b3" /><text x="591" y="111" fill="#7c80a6">·</text>
+              <rect x="608" y="89" width="34" height="34" fill="#f0ebdd" stroke="#c9c3b3" /><text x="625" y="111" fill="#7c80a6">·</text>
+            </g>
+            <text x="600" y="150" text-anchor="middle" font-family="Inter Tight" font-style="italic" font-size="12" fill="#c8410f">producto escalar de la ventana con el filtro = 3</text>
+          </svg>
+          <p class="note">
+            En cada posición se calcula el <strong>producto escalar</strong>
+            entre el filtro y la región; el resultado forma el
+            <em>feature map</em>. El <strong>stride</strong> controla cuánto se
+            desplaza el filtro (1, 2, …).
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — RGB -->
+      <section class="slide" data-title="RGB">
+        <div class="slide-inner">
+          <span class="kicker">Imágenes en color</span>
+          <h2 class="h2">Tres <em>canales</em>: RGB.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una imagen en color no es una malla, sino un <em>volumen</em>:
+                tres canales (rojo, verde, azul) apilados.
+              </p>
+              <ul class="neuron-notes">
+                <li>Cada filtro se aplica a los <strong>tres canales a la vez</strong>.</li>
+                <li>Un filtro de 3×3 sobre RGB tiene 3×3×3 = <strong>27 pesos</strong>.</li>
+                <li>El conjunto de feature maps forma el <strong>volumen</strong> de salida.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head">
+                <span class="prompt-dot"></span>
+                Entrada como tensor
+              </div>
+              <div class="prompt-good">
+                <div class="prompt-text">
+                  <span class="pt-c">Blanco y negro · 28×28×1</span>
+                  <span class="pt-c">Color · 28×28×3</span>
+                  <span class="pt-t">(alto × ancho × canales)</span>
+                  <span class="pt-f">la profundidad = nº de canales</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="Pooling">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Pooling y<br /><em>arquitectura</em>.</h2>
+          <p class="divider-sub">
+            Encoger sin perder lo esencial, y ensamblar convolución y pooling
+            en una <em>CNN completa</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — Max pooling -->
+      <section class="slide" data-title="Max pooling">
+        <div class="slide-inner">
+          <span class="kicker">Submuestreo</span>
+          <h2 class="h2">Max <em>pooling</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Reduce el tamaño tomando el <em>máximo</em> de cada bloque (p.
+                ej. 2×2). Submuestrear no cambia el objeto: un pájaro sigue
+                siendo un pájaro.
+              </p>
+              <ul class="neuron-notes">
+                <li>Imagen más pequeña → <strong>menos parámetros</strong>.</li>
+                <li>Aporta cierta <strong>invariancia</strong> a pequeñas traslaciones.</li>
+              </ul>
+            </div>
+            <svg viewBox="0 0 300 170" style="width: 100%; max-width: 320px; height: auto">
+              <g font-family="JetBrains Mono" font-size="13" text-anchor="middle">
+                <!-- 4x4 -->
+                <g fill="#fff" stroke="#c9c3b3">
+                  <rect x="10" y="20" width="30" height="30"/><rect x="40" y="20" width="30" height="30"/>
+                  <rect x="70" y="20" width="30" height="30"/><rect x="100" y="20" width="30" height="30"/>
+                  <rect x="10" y="50" width="30" height="30"/><rect x="40" y="50" width="30" height="30"/>
+                  <rect x="70" y="50" width="30" height="30"/><rect x="100" y="50" width="30" height="30"/>
+                </g>
+                <g fill="#1a1f6c">
+                  <text x="25" y="40">3</text><text x="55" y="40">-1</text><text x="85" y="40">1</text><text x="115" y="40">2</text>
+                  <text x="25" y="70">0</text><text x="55" y="70">-3</text><text x="85" y="70">3</text><text x="115" y="70">0</text>
+                </g>
+                <rect x="10" y="20" width="60" height="60" fill="rgba(255,87,0,0.1)" stroke="#ff5700" stroke-width="2"/>
+                <rect x="70" y="20" width="60" height="60" fill="rgba(7,150,163,0.08)" stroke="#0796a3" stroke-width="2"/>
+                <text x="150" y="55" fill="#7c80a6" font-size="18">→</text>
+                <g fill="#fff" stroke="#c9c3b3">
+                  <rect x="180" y="35" width="30" height="30"/><rect x="210" y="35" width="30" height="30"/>
+                </g>
+                <text x="195" y="55" fill="#ff5700" font-weight="700">3</text>
+                <text x="225" y="55" fill="#0796a3" font-weight="700">3</text>
+                <text x="210" y="95" fill="#7c80a6" font-size="11">máx de cada 2×2</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — La CNN completa (arquitectura) -->
+      <section class="slide" data-title="La CNN completa">
+        <div class="slide-inner">
+          <span class="kicker">De la imagen a la decisión</span>
+          <h2 class="h2">La CNN <em>completa</em>.</h2>
+          <svg viewBox="0 0 760 220" style="width: 100%; height: auto; margin: 6px 0 12px">
+            <g text-anchor="middle" font-family="Inter Tight" font-size="11" fill="#7c80a6">
+              <!-- imagen -->
+              <rect x="20" y="60" width="70" height="70" fill="#1a1f6c" rx="4"/>
+              <text x="55" y="100" fill="#fff" font-family="JetBrains Mono">img</text>
+              <text x="55" y="150">28×28</text>
+              <!-- conv -->
+              <rect x="120" y="55" width="26" height="80" fill="#ff5700" rx="3"/>
+              <rect x="150" y="55" width="26" height="80" fill="#ff5700" opacity="0.8" rx="3"/>
+              <text x="150" y="150">conv</text>
+              <!-- pool -->
+              <rect x="200" y="68" width="24" height="54" fill="#0796a3" rx="3"/>
+              <rect x="228" y="68" width="24" height="54" fill="#0796a3" opacity="0.8" rx="3"/>
+              <text x="226" y="150">pool</text>
+              <!-- conv -->
+              <rect x="280" y="72" width="20" height="46" fill="#ff5700" rx="3"/>
+              <rect x="304" y="72" width="20" height="46" fill="#ff5700" opacity="0.8" rx="3"/>
+              <text x="302" y="150">conv</text>
+              <!-- pool -->
+              <rect x="350" y="80" width="18" height="30" fill="#0796a3" rx="3"/>
+              <rect x="372" y="80" width="18" height="30" fill="#0796a3" opacity="0.8" rx="3"/>
+              <text x="368" y="150">pool</text>
+              <!-- flatten -->
+              <g fill="#fe961f">
+                <rect x="420" y="55" width="10" height="80"/>
+              </g>
+              <text x="425" y="150">flatten</text>
+              <!-- FC -->
+              <g fill="#1a1f6c">
+                <circle cx="500" cy="70" r="7"/><circle cx="500" cy="95" r="7"/><circle cx="500" cy="120" r="7"/>
+                <circle cx="560" cy="82" r="7"/><circle cx="560" cy="108" r="7"/>
+              </g>
+              <g stroke="#7c80a6" stroke-width="0.8" opacity="0.5">
+                <line x1="500" y1="70" x2="560" y2="82"/><line x1="500" y1="70" x2="560" y2="108"/>
+                <line x1="500" y1="95" x2="560" y2="82"/><line x1="500" y1="95" x2="560" y2="108"/>
+                <line x1="500" y1="120" x2="560" y2="82"/><line x1="500" y1="120" x2="560" y2="108"/>
+              </g>
+              <text x="530" y="150">densa</text>
+              <!-- salida -->
+              <text x="660" y="86" text-anchor="start" font-family="Taviraj" font-style="italic" font-size="15" fill="#1a1f6c">gato</text>
+              <text x="660" y="112" text-anchor="start" font-family="Taviraj" font-style="italic" font-size="15" fill="#c9c3b3">perro</text>
+              <path d="M580 95 H645" stroke="#7c80a6" stroke-width="1.2" marker-end="url(#a4)"/>
+              <!-- flechas de flujo -->
+              <g stroke="#c9c3b3" stroke-width="1.2" fill="none">
+                <path d="M92 95 H118"/><path d="M178 95 H198"/><path d="M254 95 H278"/><path d="M326 95 H348"/><path d="M392 95 H418"/><path d="M432 95 H490"/>
+              </g>
+            </g>
+            <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#7c80a6"/></marker></defs>
+          </svg>
+          <p class="note">
+            Se alternan <strong>convolución</strong> y <strong>max pooling</strong>
+            varias veces; la imagen se hace más pequeña y profunda. Al final se
+            <em>aplana</em> y una red densa produce la clase.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — Cómo comprime una CNN -->
+      <section class="slide" data-title="Cómo comprime">
+        <div class="slide-inner">
+          <span class="kicker">Tres formas de reducir complejidad</span>
+          <h2 class="h2">Cómo <em>comprime</em> una CNN.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Conexiones locales</h4>
+              <div class="fn-formula">región 3×3</div>
+              <p>Cada neurona mira solo una región, no toda la imagen.</p>
+              <span class="fn-use">→ menos aristas</span>
+            </div>
+            <div class="fn-card">
+              <h4>Pesos compartidos</h4>
+              <div class="fn-formula">1 filtro · toda la imagen</div>
+              <p>El mismo filtro se reutiliza en cada posición.</p>
+              <span class="fn-use">→ menos pesos</span>
+            </div>
+            <div class="fn-card">
+              <h4>Max pooling</h4>
+              <div class="fn-formula">2×2 → 1</div>
+              <p>Reduce aún más el tamaño de las representaciones.</p>
+              <span class="fn-use">→ menos activaciones</span>
+            </div>
+          </div>
+          <p class="note">
+            Frente a una red densa, una CNN tiene
+            <strong>órdenes de magnitud menos parámetros</strong> — por eso
+            entrena mejor en visión.
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="En la práctica">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">En la <em>práctica</em>.</h2>
+          <p class="divider-sub">
+            En Keras casi no cambia nada… y las CNN están en casi todos los
+            sistemas de <em>visión</em> modernos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — CNN en Keras -->
+      <section class="slide" data-title="CNN en Keras">
+        <div class="slide-inner">
+          <span class="kicker">De vector a tensor</span>
+          <h2 class="h2">CNN en <em>Keras</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Solo cambia la <em>estructura de red</em> y el formato de
+                entrada: de un vector a un <strong>tensor 3-D</strong>.
+              </p>
+              <ul class="neuron-notes">
+                <li>Entrada <code>(28, 28, 1)</code> · 1 canal B/N, 3 si RGB.</li>
+                <li>Un filtro 3×3 tiene <strong>9 parámetros</strong>.</li>
+                <li>25 filtros → 25×9 = <strong>225 parámetros</strong> en esa capa.</li>
+              </ul>
+            </div>
+            <div class="code-block">
+              <span class="c-kw">from</span> keras <span class="c-kw">import</span> layers<br /><br />
+              <span class="c-com"># de vector a tensor 3-D</span><br />
+              layers.Conv2D(<span class="c-kw">25</span>, (3, 3), activation=<span class="c-kw">'relu'</span>,<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;input_shape=(28, 28, 1))<br />
+              layers.MaxPooling2D((2, 2))<br />
+              layers.Conv2D(<span class="c-kw">50</span>, (3, 3), activation=<span class="c-kw">'relu'</span>)<br />
+              layers.MaxPooling2D((2, 2))<br />
+              layers.Flatten()<br />
+              layers.Dense(<span class="c-kw">10</span>, activation=<span class="c-kw">'softmax'</span>)
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 — Aplicaciones -->
+      <section class="slide slide-exercise" data-title="Aplicaciones">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Dónde brillan</span>
+          <h2 class="h2 h2-ex">No solo <em>imágenes</em>.</h2>
+          <div class="two-col">
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">Visión</h3>
+              <ul class="neuron-notes">
+                <li><strong>Clasificación de imágenes</strong> · gato, perro, dígitos…</li>
+                <li><strong>AlphaGo</strong> · tablero 19×19; la CNN supera a la red densa (sin pooling).</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">Más allá</h3>
+              <ul class="neuron-notes">
+                <li><strong>Voz</strong> · los filtros se mueven por el espectrograma.</li>
+                <li><strong>Texto</strong> · convoluciones 1-D para clasificar.</li>
+                <li>Se combinan con <strong>LSTM</strong> para image/video captioning.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 4</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item">
+              <span class="close-num">01 · POR QUÉ</span>
+              <h3>Patrones locales y repetidos</h3>
+              <p>
+                Las CNN explotan que los patrones son pequeños y se repiten para
+                usar muchísimos menos parámetros.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">02 · CÓMO</span>
+              <h3>Convolución + pooling</h3>
+              <p>
+                La convolución desliza filtros aprendibles (feature maps); el
+                pooling submuestrea y da invariancia.
+              </p>
+            </div>
+            <div class="close-item">
+              <span class="close-num">03 · DÓNDE</span>
+              <h3>Dominan la visión</h3>
+              <p>
+                conv+pool se repiten, se aplana y una red densa clasifica. Base
+                de la visión moderna (y voz, texto, Go).
+              </p>
+            </div>
+          </div>
+          <div class="close-next">
+            <span>Siguiente · Tema 5</span>
+            <span
+              >Aprendizaje profundo en conjunto — cómo encajan todas las piezas
+              del curso.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 4</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Para afianzar el tema, dos recursos:</p>
+          <ul class="proj-list">
+            <li>
+              <strong>Prácticas de CNN</strong> — actividad y ejercicios en
+              Materiales del Tema 4 (incluye un notebook de Keras).
+            </li>
+            <li>
+              <strong>Hung-yi Lee</strong> — clase "Convolutional Neural
+              Network" (la base de estas diapositivas).
+            </li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./index.html">
+              <span class="close-cta-eyebrow">Volver al inicio</span>
+              <span class="close-cta-title"
+                >Ver todos los temas
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">Tema 5 en preparación.</span>
+            </a>
+            <a class="close-cta" href="./practica-t4.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title"
+                >Práctica · convolución
+                <span class="close-cta-arrow">→</span></span
+              >
+              <span class="close-cta-note">Desliza un filtro y ve el feature map.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- CONTROLES FLOTANTES -->
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- AYUDA -->
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

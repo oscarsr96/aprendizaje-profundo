@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 4 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 4 de Aprendizaje Profundo: desliza un filtro sobre una imagen y ve formarse el feature map. Convolución, stride y max pooling. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c;
+        --ink-soft: #3b4080;
+        --ink-mute: #7c80a6;
+        --paper: #ffffff;
+        --accent: #ff5700;
+        --accent-deep: #c8410f;
+        --gold: #fe961f;
+        --line: #e2ded0;
+        --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif;
+        --sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--paper);
+        background-image:
+          radial-gradient(ellipse at 15% 8%, rgba(26, 31, 108, 0.05) 0%, transparent 55%),
+          radial-gradient(ellipse at 88% 92%, rgba(255, 87, 0, 0.045) 0%, transparent 55%);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+      .bar {
+        position: sticky; top: 0; z-index: 20;
+        display: flex; align-items: center; gap: 14px;
+        padding: 13px 28px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .bar a.brand { display: flex; align-items: center; }
+      .bar-logo { height: 26px; width: auto; display: block; }
+      .bar-sub { color: var(--ink-mute); }
+      .bar-tag {
+        margin-left: auto; font-family: var(--mono); font-size: 11px;
+        letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep);
+        background: rgba(255, 87, 0, 0.1); padding: 4px 11px; border-radius: 20px; font-weight: 600;
+      }
+      main { max-width: 1080px; margin: 0 auto; padding: 42px 24px 90px; }
+      .kicker {
+        font-family: var(--mono); font-size: 11px; font-weight: 600;
+        letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+        border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block;
+      }
+      h1 {
+        font-family: var(--serif); font-weight: 500;
+        font-size: clamp(34px, 6vw, 56px); line-height: 1.02;
+        letter-spacing: -0.025em; margin: 18px 0 14px;
+      }
+      h1 em { font-style: italic; color: var(--accent); }
+      .lead { font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft); max-width: 64ch; }
+      .lead code, p code {
+        font-family: var(--mono); font-size: 0.88em;
+        background: rgba(26, 31, 108, 0.06); padding: 1px 6px; border-radius: 5px;
+      }
+      h2.section-title {
+        font-family: var(--serif); font-weight: 500;
+        font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.02em; margin: 0 0 6px;
+      }
+      h2.section-title em { font-style: italic; color: var(--accent); }
+      .band { display: flex; align-items: center; gap: 16px; margin: 54px 0 18px; }
+      .band .num {
+        font-family: var(--mono); font-size: 12px; font-weight: 700;
+        letter-spacing: 0.16em; color: var(--ink-mute); white-space: nowrap;
+      }
+      .band .rule { flex: 1; height: 1px; background: var(--line); }
+
+      /* toolbar */
+      .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 4px; }
+      .tgroup { display: flex; flex-direction: column; gap: 5px; }
+      .tgroup .tlabel {
+        font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+        text-transform: uppercase; color: var(--ink-mute);
+      }
+      .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 9px; overflow: hidden; }
+      .seg button {
+        font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-soft);
+        background: #fff; border: none; padding: 8px 13px; cursor: pointer;
+        transition: background 0.16s, color 0.16s;
+      }
+      .seg button + button { border-left: 1.5px solid var(--line); }
+      .seg button.active { background: var(--ink); color: #fff; }
+      .btn {
+        font-family: var(--sans); font-size: 14px; font-weight: 600;
+        border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 16px;
+        background: #fff; color: var(--ink); cursor: pointer;
+        transition: transform 0.12s, border-color 0.16s;
+      }
+      .btn:hover { transform: translateY(-1px); border-color: var(--ink-mute); }
+      .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 6px 16px rgba(255,87,0,0.25); }
+      .btn-accent:hover { border-color: var(--accent); }
+
+      /* stage */
+      .stage {
+        display: grid; grid-template-columns: auto auto 1fr; gap: 26px;
+        align-items: start; margin-top: 20px;
+      }
+      @media (max-width: 880px) { .stage { grid-template-columns: 1fr; } }
+      .board { background: #fbfaf6; border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: 0 14px 40px rgba(26,31,108,0.06); }
+      .board h3 {
+        font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+        text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px; font-weight: 600;
+      }
+      .grid { display: grid; gap: 2px; }
+      .cell {
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--mono); font-size: 12px; border-radius: 3px;
+        user-select: none;
+      }
+      .cell.img { width: 30px; height: 30px; cursor: pointer; border: 1px solid #e6e1d2; }
+      .cell.filt { width: 40px; height: 40px; cursor: pointer; font-weight: 700; }
+      .cell.fmap { width: 34px; height: 34px; border: 1px solid rgba(0,0,0,0.05); }
+      .cell.win { outline: 2.5px solid var(--accent); outline-offset: -2px; }
+      .cell.sel { outline: 2.5px solid var(--ink); outline-offset: -2px; }
+      .hint { font-size: 13px; color: var(--ink-mute); line-height: 1.5; margin-top: 10px; }
+
+      .calc {
+        display: flex; flex-direction: column; gap: 12px;
+      }
+      .calc-eq {
+        background: var(--ink); color: #fff; border-radius: 12px; padding: 14px 16px;
+        font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      }
+      .calc-eq .r { color: var(--gold); font-weight: 700; }
+      .calc-eq .lbl {
+        font-family: var(--sans); font-size: 11px; letter-spacing: 0.06em;
+        text-transform: uppercase; color: #a7abd6; display: block; margin-bottom: 6px;
+      }
+      .dims { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); line-height: 1.7; }
+      .dims b { color: var(--accent-deep); }
+
+      /* code */
+      .code-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+      @media (max-width: 880px) { .code-grid { grid-template-columns: 1fr; } }
+      pre.code {
+        background: #101340; color: #eef0f6; border-radius: 12px; padding: 18px 20px;
+        font-family: var(--mono); font-size: 12.5px; line-height: 1.6; overflow-x: auto; white-space: pre;
+      }
+      pre.code .cm { color: #7c80a6; }
+      pre.code .kw { color: var(--gold); }
+      pre.code .fn { color: #4fd1c5; }
+      .code-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+      .note {
+        border-left: 4px solid var(--ok); background: rgba(7,150,163,0.06); border-radius: 8px;
+        padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin-top: 14px;
+      }
+      .pool-stage { display: flex; gap: 30px; align-items: center; flex-wrap: wrap; }
+
+      /* retos */
+      .retos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 760px) { .retos { grid-template-columns: 1fr; } }
+      .reto { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px; background: #fbfaf6; }
+      .reto h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin-bottom: 6px; }
+      .reto p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+      .reto .tag { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); letter-spacing: 0.05em; }
+
+      .close-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+      @media (max-width: 620px) { .close-cta-grid { grid-template-columns: 1fr; } }
+      .close-cta {
+        border: 1.5px solid var(--line); border-radius: 12px; padding: 20px 22px;
+        text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px;
+        transition: border-color 0.18s, transform 0.16s;
+      }
+      .close-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .close-cta .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+      .close-cta .title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding-top: 20px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 4</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <section>
+        <span class="kicker">Tema 4 · Práctica</span>
+        <h1>Desliza un <em>filtro</em>.</h1>
+        <p class="lead">
+          Una convolución no es más que un <strong>producto escalar
+          deslizante</strong>: en cada posición, el filtro se multiplica por la
+          región de la imagen que cubre y se suman los productos. Ese número va
+          rellenando el <em>feature map</em>. Edita la imagen y el filtro,
+          desliza, y mira dónde se enciende el patrón.
+        </p>
+      </section>
+
+      <div class="band"><span class="num">— 01 · CONVOLUCIÓN —</span><span class="rule"></span></div>
+      <h2 class="section-title">Imagen × <em>filtro</em> = feature map.</h2>
+      <p class="lead" style="margin-top: 6px">
+        Clic en la <strong>imagen</strong> para alternar píxeles (0/1); clic en
+        el <strong>filtro</strong> para ciclar sus pesos (−1 → 0 → 1). El feature
+        map se colorea: <span style="color:#c8410f">naranja</span> = respuesta
+        alta, <span style="color:#0796a3">teal</span> = negativa.
+      </p>
+
+      <div class="toolbar">
+        <div class="tgroup">
+          <span class="tlabel">Imagen</span>
+          <div class="seg" id="imgPresets">
+            <button data-p="diag" class="active">Diagonal</button>
+            <button data-p="cross">X</button>
+            <button data-p="vert">Línea</button>
+            <button data-p="plus">Cruz</button>
+          </div>
+        </div>
+        <div class="tgroup">
+          <span class="tlabel">Filtro</span>
+          <div class="seg" id="filtPresets">
+            <button data-f="diag" class="active">Diagonal</button>
+            <button data-f="vedge">Borde │</button>
+            <button data-f="hedge">Borde ─</button>
+            <button data-f="blur">Media</button>
+          </div>
+        </div>
+        <div class="tgroup">
+          <span class="tlabel">Stride</span>
+          <div class="seg" id="strideSeg">
+            <button data-s="1" class="active">1</button>
+            <button data-s="2">2</button>
+          </div>
+        </div>
+        <div class="tgroup">
+          <span class="tlabel">Recorrido</span>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-accent" id="animBtn">▶ deslizar</button>
+            <button class="btn" id="stepBtn">paso</button>
+            <button class="btn" id="resetPos">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="board">
+          <h3>Imagen · 7×7</h3>
+          <div class="grid" id="imgGrid"></div>
+          <div class="board" style="margin-top:14px; padding:12px 14px; box-shadow:none">
+            <h3>Filtro · 3×3</h3>
+            <div class="grid" id="filtGrid"></div>
+          </div>
+        </div>
+        <div class="board">
+          <h3>Feature map</h3>
+          <div class="grid" id="fmapGrid"></div>
+          <p class="hint" id="fmapHint"></p>
+        </div>
+        <div class="calc">
+          <div class="calc-eq">
+            <span class="lbl">Posición actual · producto escalar</span>
+            <div id="calcSum"></div>
+          </div>
+          <div class="dims" id="dims"></div>
+        </div>
+      </div>
+
+      <div class="band"><span class="num">— 02 · POOLING Y CÓDIGO —</span><span class="rule"></span></div>
+      <h2 class="section-title">Encoger con <em>max pooling</em>.</h2>
+      <p class="lead" style="margin-top: 6px">
+        El max pooling 2×2 se queda con el <strong>máximo</strong> de cada bloque:
+        reduce el tamaño a la mitad conservando las respuestas más fuertes.
+      </p>
+      <div class="board" style="margin-top: 16px; display:inline-block">
+        <div class="pool-stage">
+          <div>
+            <h3>Feature map</h3>
+            <div class="grid" id="poolIn"></div>
+          </div>
+          <div style="font-size:22px; color:var(--ink-mute)">→</div>
+          <div>
+            <h3>Tras max pooling 2×2</h3>
+            <div class="grid" id="poolOut"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-grid" style="margin-top: 24px">
+        <div>
+          <div class="code-label">NumPy · tu convolución</div>
+          <pre class="code" id="codeNumpy"></pre>
+          <div class="note">
+            Este bucle reproduce lo que ves: desliza el filtro con el stride
+            elegido y guarda el producto escalar en cada posición.
+          </div>
+        </div>
+        <div>
+          <div class="code-label">Keras · así se apila</div>
+          <pre class="code" id="codeKeras"></pre>
+          <div class="note">
+            <code>Conv2D</code> aprende los filtros (no los fijas tú),
+            <code>MaxPooling2D</code> encoge, y al final <code>Flatten</code> +
+            <code>Dense</code> clasifican.
+          </div>
+        </div>
+      </div>
+
+      <div class="band"><span class="num">— 03 · TUS RETOS —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto">
+          <span class="tag">detectar</span>
+          <h4>Un borde vertical</h4>
+          <p>
+            Pon la imagen en "Línea" y elige el filtro que da la respuesta más
+            fuerte. ¿Por qué el "Borde │" se enciende y la "Media" no?
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">stride</span>
+          <h4>El efecto del salto</h4>
+          <p>
+            Cambia el stride de 1 a 2. ¿Qué le pasa al tamaño del feature map?
+            ¿Y a la información que conserva?
+          </p>
+        </div>
+        <div class="reto">
+          <span class="tag">tamaño</span>
+          <h4>Cuenta parámetros</h4>
+          <p>
+            Un filtro 3×3 sobre B/N tiene 9 pesos. ¿Y sobre RGB? ¿Y si la capa
+            tiene 25 filtros?
+          </p>
+        </div>
+      </div>
+
+      <div class="band"><span class="num">— SIGUIENTE —</span><span class="rule"></span></div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t4.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Redes convolucionales →</span>
+        </a>
+        <a class="close-cta" href="./repaso-t4.html">
+          <span class="eyebrow">Ponerte a prueba</span>
+          <span class="title">Repaso del Tema 4 →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 4 — visualizador de convolución
+      // =====================================================
+      const N = 7;
+      const $ = (id) => document.getElementById(id);
+
+      const IMG_PRESETS = {
+        diag: (r, c) => (r === c ? 1 : 0),
+        cross: (r, c) => (r === c || r + c === N - 1 ? 1 : 0),
+        vert: (r, c) => (c === 3 ? 1 : 0),
+        plus: (r, c) => (r === 3 || c === 3 ? 1 : 0),
+      };
+      const FILT_PRESETS = {
+        diag: [[1, -1, -1], [-1, 1, -1], [-1, -1, 1]],
+        vedge: [[1, 0, -1], [1, 0, -1], [1, 0, -1]],
+        hedge: [[1, 1, 1], [0, 0, 0], [-1, -1, -1]],
+        blur: [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+      };
+
+      let img = [];
+      let filt = [];
+      let stride = 1;
+      let pos = 0; // índice en outPositions
+      let timer = null;
+
+      function loadImg(name) {
+        const f = IMG_PRESETS[name];
+        img = Array.from({ length: N }, (_, r) =>
+          Array.from({ length: N }, (_, c) => f(r, c)),
+        );
+      }
+      function loadFilt(name) {
+        filt = FILT_PRESETS[name].map((row) => row.slice());
+      }
+
+      // posiciones (r,c) de la esquina superior-izq de la ventana
+      function outPositions() {
+        const out = [];
+        for (let r = 0; r + 3 <= N; r += stride)
+          for (let c = 0; c + 3 <= N; c += stride) out.push([r, c]);
+        return out;
+      }
+      function outDim() {
+        return Math.floor((N - 3) / stride) + 1;
+      }
+      function dot(r0, c0) {
+        let s = 0;
+        for (let i = 0; i < 3; i++)
+          for (let j = 0; j < 3; j++) s += img[r0 + i][c0 + j] * filt[i][j];
+        return s;
+      }
+      function featureMap() {
+        const D = outDim();
+        const m = Array.from({ length: D }, () => Array(D).fill(0));
+        const positions = outPositions();
+        positions.forEach(([r, c], k) => {
+          m[Math.floor(k / D)][k % D] = dot(r, c);
+        });
+        return m;
+      }
+      function maxPool(m) {
+        const D = m.length;
+        const P = Math.floor(D / 2);
+        if (P < 1) return null;
+        const out = Array.from({ length: P }, () => Array(P).fill(0));
+        for (let r = 0; r < P; r++)
+          for (let c = 0; c < P; c++) {
+            out[r][c] = Math.max(
+              m[2 * r][2 * c], m[2 * r][2 * c + 1],
+              m[2 * r + 1][2 * c], m[2 * r + 1][2 * c + 1],
+            );
+          }
+        return out;
+      }
+
+      // color divergente para el feature map
+      function heat(v, maxAbs) {
+        if (v === 0) return "#ffffff";
+        const a = Math.min(0.9, 0.18 + (Math.abs(v) / maxAbs) * 0.72);
+        return v > 0
+          ? `rgba(255,87,0,${a.toFixed(2)})`
+          : `rgba(7,150,163,${a.toFixed(2)})`;
+      }
+
+      // ---- render ----
+      function renderImg() {
+        const g = $("imgGrid");
+        g.style.gridTemplateColumns = `repeat(${N}, 30px)`;
+        const [wr, wc] = outPositions()[pos];
+        g.innerHTML = "";
+        for (let r = 0; r < N; r++)
+          for (let c = 0; c < N; c++) {
+            const d = document.createElement("div");
+            const on = img[r][c] === 1;
+            const inWin = r >= wr && r < wr + 3 && c >= wc && c < wc + 3;
+            d.className = "cell img" + (inWin ? " win" : "");
+            d.style.background = on ? "#1a1f6c" : "#fff";
+            d.style.color = on ? "#fff" : "#c9c3b3";
+            d.textContent = img[r][c];
+            d.addEventListener("click", () => {
+              img[r][c] = img[r][c] ? 0 : 1;
+              updateAll();
+            });
+            g.appendChild(d);
+          }
+      }
+      function renderFilt() {
+        const g = $("filtGrid");
+        g.style.gridTemplateColumns = "repeat(3, 40px)";
+        g.innerHTML = "";
+        for (let i = 0; i < 3; i++)
+          for (let j = 0; j < 3; j++) {
+            const v = filt[i][j];
+            const d = document.createElement("div");
+            d.className = "cell filt";
+            d.style.background = v > 0 ? "#1a1f6c" : v < 0 ? "#c8410f" : "#f0ebdd";
+            d.style.color = v === 0 ? "#7c80a6" : "#fff";
+            d.textContent = v;
+            d.addEventListener("click", () => {
+              filt[i][j] = v === 1 ? -1 : v + 1; // -1 -> 0 -> 1 -> -1
+              updateAll();
+            });
+            g.appendChild(d);
+          }
+      }
+      function renderFmap(m) {
+        const g = $("fmapGrid");
+        const D = m.length;
+        g.style.gridTemplateColumns = `repeat(${D}, 34px)`;
+        let maxAbs = 1;
+        m.forEach((row) => row.forEach((v) => (maxAbs = Math.max(maxAbs, Math.abs(v)))));
+        g.innerHTML = "";
+        for (let r = 0; r < D; r++)
+          for (let c = 0; c < D; c++) {
+            const d = document.createElement("div");
+            const sel = r * D + c === pos;
+            d.className = "cell fmap" + (sel ? " sel" : "");
+            d.style.background = heat(m[r][c], maxAbs);
+            d.style.color = Math.abs(m[r][c]) / maxAbs > 0.55 ? "#fff" : "#1a1f6c";
+            d.textContent = m[r][c];
+            g.appendChild(d);
+          }
+        $("fmapHint").textContent = `${D}×${D} · el recuadro marca la posición del cálculo`;
+      }
+      function renderPool(m) {
+        const pin = $("poolIn");
+        const D = m.length;
+        pin.style.gridTemplateColumns = `repeat(${D}, 26px)`;
+        let maxAbs = 1;
+        m.forEach((row) => row.forEach((v) => (maxAbs = Math.max(maxAbs, Math.abs(v)))));
+        pin.innerHTML = "";
+        m.forEach((row) =>
+          row.forEach((v) => {
+            const d = document.createElement("div");
+            d.className = "cell fmap";
+            d.style.width = "26px";
+            d.style.height = "26px";
+            d.style.background = heat(v, maxAbs);
+            d.style.color = Math.abs(v) / maxAbs > 0.55 ? "#fff" : "#1a1f6c";
+            d.style.fontSize = "11px";
+            d.textContent = v;
+            pin.appendChild(d);
+          }),
+        );
+        const pooled = maxPool(m);
+        const pout = $("poolOut");
+        pout.innerHTML = "";
+        if (!pooled) {
+          pout.innerHTML = '<p class="hint">feature map demasiado pequeño</p>';
+          return;
+        }
+        const P = pooled.length;
+        pout.style.gridTemplateColumns = `repeat(${P}, 30px)`;
+        pooled.forEach((row) =>
+          row.forEach((v) => {
+            const d = document.createElement("div");
+            d.className = "cell fmap";
+            d.style.background = heat(v, maxAbs);
+            d.style.color = Math.abs(v) / maxAbs > 0.55 ? "#fff" : "#1a1f6c";
+            d.textContent = v;
+            pout.appendChild(d);
+          }),
+        );
+      }
+
+      function renderCalc() {
+        const [wr, wc] = outPositions()[pos];
+        const terms = [];
+        for (let i = 0; i < 3; i++)
+          for (let j = 0; j < 3; j++) {
+            const a = img[wr + i][wc + j],
+              b = filt[i][j];
+            if (b !== 0) terms.push(`${a}·${b < 0 ? "(" + b + ")" : b}`);
+          }
+        const total = dot(wr, wc);
+        const expr = terms.length ? terms.join(" + ") : "0";
+        $("calcSum").innerHTML =
+          `Σ = ${expr}<br>= <span class="r">${total}</span>`;
+        const D = outDim();
+        const inParams = 3 * 3;
+        $("dims").innerHTML =
+          `entrada &nbsp;<b>7×7×1</b><br>` +
+          `filtro &nbsp;&nbsp;<b>3×3</b> · stride ${stride}<br>` +
+          `salida &nbsp;&nbsp;<b>${D}×${D}</b><br>` +
+          `parámetros del filtro &nbsp;<b>${inParams}</b>`;
+      }
+
+      function renderCode() {
+        const rows = filt.map((r) => "[" + r.join(", ") + "]").join(",\n     ");
+        $("codeNumpy").innerHTML =
+          `<span class="kw">import</span> numpy <span class="kw">as</span> np\n\n` +
+          `img = ...            <span class="cm"># imagen 7×7</span>\n` +
+          `W = np.array([${rows}])\n` +
+          `s = ${stride}                <span class="cm"># stride</span>\n\n` +
+          `D = (7 - 3)//s + 1\n` +
+          `fmap = np.zeros((D, D))\n` +
+          `<span class="kw">for</span> r <span class="kw">in</span> range(D):\n` +
+          `    <span class="kw">for</span> c <span class="kw">in</span> range(D):\n` +
+          `        reg = img[r*s:r*s+3, c*s:c*s+3]\n` +
+          `        fmap[r, c] = (reg * W).sum()   <span class="cm"># producto escalar</span>`;
+      }
+
+      $("codeKeras").innerHTML =
+        `<span class="kw">from</span> keras <span class="kw">import</span> layers\n\n` +
+        `model = keras.<span class="fn">Sequential</span>([\n` +
+        `    layers.<span class="fn">Conv2D</span>(25, (3, 3), activation=<span class="cm">"relu"</span>,\n` +
+        `                  input_shape=(28, 28, 1)),\n` +
+        `    layers.<span class="fn">MaxPooling2D</span>((2, 2)),\n` +
+        `    layers.<span class="fn">Conv2D</span>(50, (3, 3), activation=<span class="cm">"relu"</span>),\n` +
+        `    layers.<span class="fn">MaxPooling2D</span>((2, 2)),\n` +
+        `    layers.<span class="fn">Flatten</span>(),\n` +
+        `    layers.<span class="fn">Dense</span>(10, activation=<span class="cm">"softmax"</span>),\n` +
+        `])`;
+
+      // ---- update ----
+      function updateAll() {
+        const positions = outPositions();
+        if (pos >= positions.length) pos = 0;
+        const m = featureMap();
+        renderImg();
+        renderFilt();
+        renderFmap(m);
+        renderPool(m);
+        renderCalc();
+        renderCode();
+      }
+
+      // ---- controles ----
+      $("imgPresets").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-p]");
+        if (!b) return;
+        segActive("imgPresets", b);
+        loadImg(b.dataset.p);
+        pos = 0;
+        updateAll();
+      });
+      $("filtPresets").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-f]");
+        if (!b) return;
+        segActive("filtPresets", b);
+        loadFilt(b.dataset.f);
+        updateAll();
+      });
+      $("strideSeg").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-s]");
+        if (!b) return;
+        segActive("strideSeg", b);
+        stride = parseInt(b.dataset.s, 10);
+        pos = 0;
+        updateAll();
+      });
+      function segActive(id, btn) {
+        $(id).querySelectorAll("button").forEach((x) => x.classList.remove("active"));
+        btn.classList.add("active");
+      }
+      function step() {
+        const n = outPositions().length;
+        pos = (pos + 1) % n;
+        updateAll();
+      }
+      $("stepBtn").addEventListener("click", step);
+      $("resetPos").addEventListener("click", () => {
+        pos = 0;
+        updateAll();
+      });
+      $("animBtn").addEventListener("click", () => {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+          $("animBtn").textContent = "▶ deslizar";
+          return;
+        }
+        $("animBtn").textContent = "⏸ parar";
+        timer = setInterval(step, 550);
+      });
+
+      // ---- init ----
+      loadImg("diag");
+      loadFilt("diag");
+      updateAll();
+    </script>
+  </body>
+</html>
