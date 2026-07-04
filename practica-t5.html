@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 5 · Práctica</title>
+    <meta
+      name="description"
+      content="Práctica interactiva del Tema 5 de Aprendizaje Profundo: un ataque adversario (FGSM). Un ruido imperceptible voltea la predicción de un clasificador. CUNEF Universidad."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1f6c; --ink-soft: #3b4080; --ink-mute: #7c80a6;
+        --paper: #ffffff; --accent: #ff5700; --accent-deep: #c8410f;
+        --gold: #fe961f; --line: #e2ded0; --ok: #0796a3;
+        --serif: "Taviraj", Georgia, serif; --sans: "Inter Tight", system-ui, sans-serif; --mono: "JetBrains Mono", Menlo, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        font-family: var(--sans); color: var(--ink); background: var(--paper);
+        background-image: radial-gradient(ellipse at 15% 8%, rgba(26,31,108,0.05) 0%, transparent 55%), radial-gradient(ellipse at 88% 92%, rgba(255,87,0,0.045) 0%, transparent 55%);
+        -webkit-font-smoothing: antialiased; min-height: 100vh;
+      }
+      .bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 13px 28px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); font-size: 13px; }
+      .bar a.brand { display: flex; align-items: center; }
+      .bar-logo { height: 26px; width: auto; display: block; }
+      .bar-sub { color: var(--ink-mute); }
+      .bar-tag { margin-left: auto; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-deep); background: rgba(255,87,0,0.1); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+      main { max-width: 1080px; margin: 0 auto; padding: 42px 24px 90px; }
+      .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--accent); padding-bottom: 6px; display: inline-block; }
+      h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 6vw, 56px); line-height: 1.02; letter-spacing: -0.025em; margin: 18px 0 14px; }
+      h1 em { font-style: italic; color: var(--accent); }
+      .lead { font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft); max-width: 64ch; }
+      .lead code, p code { font-family: var(--mono); font-size: 0.88em; background: rgba(26,31,108,0.06); padding: 1px 6px; border-radius: 5px; }
+      h2.section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.02em; margin: 0 0 6px; }
+      h2.section-title em { font-style: italic; color: var(--accent); }
+      .band { display: flex; align-items: center; gap: 16px; margin: 54px 0 18px; }
+      .band .num { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; color: var(--ink-mute); white-space: nowrap; }
+      .band .rule { flex: 1; height: 1px; background: var(--line); }
+
+      .imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 8px; }
+      @media (max-width: 760px) { .imgs { grid-template-columns: 1fr; } }
+      .imgcard { background: #fbfaf6; border: 1px solid var(--line); border-radius: 14px; padding: 16px; box-shadow: 0 14px 40px rgba(26,31,108,0.06); text-align: center; }
+      .imgcard h3 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 12px; font-weight: 600; }
+      canvas { width: 168px; height: 168px; image-rendering: pixelated; border-radius: 8px; border: 1px solid var(--line); background: #fff; }
+      .op { font-family: var(--serif); font-size: 28px; color: var(--ink-mute); }
+      .verdict { margin-top: 12px; font-family: var(--sans); }
+      .verdict .cls { font-family: var(--serif); font-style: italic; font-size: 22px; }
+      .verdict .pct { font-family: var(--mono); font-size: 13px; color: var(--ink-mute); }
+      .verdict.panda .cls { color: var(--ok); }
+      .verdict.gibon .cls { color: var(--accent); }
+
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 24px; }
+      .slider-wrap { flex: 1; min-width: 260px; }
+      .slider-wrap label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; }
+      .slider-wrap label b { color: var(--accent); }
+      .slider-wrap input { width: 100%; accent-color: var(--accent); }
+      .btn { font-family: var(--sans); font-size: 14px; font-weight: 600; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 16px; background: #fff; color: var(--ink); cursor: pointer; transition: transform 0.12s, border-color 0.16s; }
+      .btn:hover { transform: translateY(-1px); border-color: var(--ink-mute); }
+      .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 6px 16px rgba(255,87,0,0.25); }
+
+      .readout { background: var(--ink); color: #fff; border-radius: 12px; padding: 16px 18px; margin-top: 20px; font-family: var(--mono); font-size: 13px; line-height: 1.8; }
+      .readout .lbl { font-family: var(--sans); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #a7abd6; }
+      .readout .r { color: var(--gold); font-weight: 700; }
+      .flip-note { margin-top: 6px; }
+      .flip-note.yes { color: #4fd1c5; }
+      .flip-note.no { color: #a7abd6; }
+
+      .code-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; margin-top: 20px; }
+      @media (max-width: 880px) { .code-grid { grid-template-columns: 1fr; } }
+      pre.code { background: #101340; color: #eef0f6; border-radius: 12px; padding: 18px 20px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+      pre.code .cm { color: #7c80a6; } pre.code .kw { color: var(--gold); } pre.code .fn { color: #4fd1c5; }
+      .code-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 8px; }
+      .note { border-left: 4px solid var(--ok); background: rgba(7,150,163,0.06); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin-top: 14px; }
+
+      .retos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 760px) { .retos { grid-template-columns: 1fr; } }
+      .reto { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px; background: #fbfaf6; }
+      .reto h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; margin-bottom: 6px; }
+      .reto p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+      .reto .tag { font-family: var(--mono); font-size: 11px; color: var(--accent-deep); letter-spacing: 0.05em; }
+
+      .close-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+      @media (max-width: 620px) { .close-cta-grid { grid-template-columns: 1fr; } }
+      .close-cta { border: 1.5px solid var(--line); border-radius: 12px; padding: 20px 22px; text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.18s, transform 0.16s; }
+      .close-cta:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .close-cta .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mute); }
+      .close-cta .title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+      footer { margin-top: 60px; border-top: 1px solid var(--line); padding-top: 20px; display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-mute); flex-wrap: wrap; gap: 10px; }
+      footer a { color: var(--ink-mute); }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="bar-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+      </a>
+      <span class="bar-sub">· Aprendizaje Profundo · Tema 5</span>
+      <span class="bar-tag">Práctica interactiva</span>
+    </header>
+
+    <main>
+      <section>
+        <span class="kicker">Tema 5 · Práctica</span>
+        <h1>Engaña a la <em>red</em>.</h1>
+        <p class="lead">
+          Un clasificador da su veredicto: <em>panda</em>. Le sumamos un ruido
+          tan pequeño que el ojo no lo distingue… y la predicción se vuelve
+          <em>gibón</em>. Esto es un <strong>ataque adversario</strong>: mueve
+          el deslizador y compruébalo. El truco es que la perturbación se alinea
+          con los pesos en <em>todos</em> los píxeles a la vez.
+        </p>
+      </section>
+
+      <div class="band"><span class="num">— 01 · ATAQUE ADVERSARIO (FGSM) —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ruido invisible, veredicto <em>distinto</em>.</h2>
+
+      <div class="imgs">
+        <div class="imgcard">
+          <h3>Original</h3>
+          <canvas id="cOrig" width="12" height="12"></canvas>
+          <div class="verdict" id="vOrig"><span class="cls"></span><br><span class="pct"></span></div>
+        </div>
+        <div class="imgcard">
+          <h3>+ perturbación (× amplificada)</h3>
+          <canvas id="cPert" width="12" height="12"></canvas>
+          <div class="verdict"><span class="pct">δ = ε · signo(w)</span></div>
+        </div>
+        <div class="imgcard">
+          <h3>= imagen adversaria</h3>
+          <canvas id="cAdv" width="12" height="12"></canvas>
+          <div class="verdict" id="vAdv"><span class="cls"></span><br><span class="pct"></span></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="slider-wrap">
+          <label>fuerza del ruido · ε = <b id="epsVal">0.00</b></label>
+          <input type="range" id="eps" min="0" max="0.15" step="0.005" value="0" />
+        </div>
+        <button class="btn btn-accent" id="flipBtn">Buscar el ε que la voltea</button>
+        <button class="btn" id="resetBtn">↺ ε = 0</button>
+      </div>
+
+      <div class="readout">
+        <span class="lbl">Por qué funciona</span><br>
+        diferencia por píxel &nbsp;=&nbsp; ε = <span id="roEps" class="r">0.00</span> &nbsp;<span style="color:#a7abd6">(imperceptible)</span><br>
+        cambio en el score &nbsp;=&nbsp; −ε · Σ|wᵢ| = −<span id="roEps2">0.00</span> · <span id="roSum">0</span> = <span id="roDelta" class="r">0.00</span><br>
+        <span style="color:#a7abd6">Σ|wᵢ| sobre los 144 píxeles: cada pixelito aporta poco, pero sumados vuelcan la decisión.</span>
+        <div class="flip-note no" id="flipNote"></div>
+      </div>
+
+      <div class="band"><span class="num">— 02 · CÓDIGO Y DEFENSA —</span><span class="rule"></span></div>
+      <h2 class="section-title">FGSM en <em>una línea</em>.</h2>
+      <div class="code-grid">
+        <div>
+          <div class="code-label">NumPy · Fast Gradient Sign Method</div>
+          <pre class="code" id="codeNumpy"></pre>
+          <div class="note">
+            En un clasificador lineal el gradiente del score respecto a la
+            entrada es, simplemente, <code>w</code>. Movernos en la dirección de
+            <code>signo(w)</code> es el ataque más eficiente por unidad de ruido.
+          </div>
+        </div>
+        <div>
+          <div class="code-label">Defensa · aumento de datos</div>
+          <pre class="code" id="codeKeras"></pre>
+          <div class="note">
+            La mitigación clásica: <strong>aumento de datos</strong> y
+            <em>entrenamiento adversario</em> — enseñarle a la red versiones
+            perturbadas para que aprenda a resistirlas.
+          </div>
+        </div>
+      </div>
+
+      <div class="band"><span class="num">— 03 · TUS RETOS —</span><span class="rule"></span></div>
+      <h2 class="section-title">Ahora <em>tú</em>.</h2>
+      <div class="retos" style="margin-top: 18px">
+        <div class="reto"><span class="tag">umbral</span><h4>El ε mínimo</h4><p>¿Cuál es el ε más pequeño que voltea la clase? Pulsa el botón y fíjate en lo diminuto que es.</p></div>
+        <div class="reto"><span class="tag">imperceptible</span><h4>¿Se nota?</h4><p>Compara la original y la adversaria con ε justo por encima del umbral. ¿Distingues alguna diferencia?</p></div>
+        <div class="reto"><span class="tag">dimensión</span><h4>El poder del nº de píxeles</h4><p>El cambio de score es ε·Σ|wᵢ|. ¿Por qué imágenes más grandes son <em>más</em> fáciles de atacar?</p></div>
+      </div>
+
+      <div class="band"><span class="num">— FIN DEL CURSO —</span><span class="rule"></span></div>
+      <div class="close-cta-grid">
+        <a class="close-cta" href="./sesion-t5.html">
+          <span class="eyebrow">Repasar la teoría</span>
+          <span class="title">Sesión · Panorámica del DL →</span>
+        </a>
+        <a class="close-cta" href="./index.html">
+          <span class="eyebrow">Volver al inicio</span>
+          <span class="title">Ver todos los temas →</span>
+        </a>
+      </div>
+
+      <footer>
+        <span>CUNEF Universidad · Aprendizaje Profundo</span>
+        <a href="./index.html">← Volver al inicio</a>
+      </footer>
+    </main>
+
+    <script>
+      // =====================================================
+      // Práctica Tema 5 — ataque adversario (FGSM lineal)
+      // =====================================================
+      const $ = (id) => document.getElementById(id);
+      const N = 12;
+
+      // pesos fijos del clasificador (deterministas)
+      const w = [];
+      let S = 0; // Σ|w|
+      for (let r = 0; r < N; r++) {
+        w[r] = [];
+        for (let c = 0; c < N; c++) {
+          const v = Math.sin((r + 1) * 0.7) * Math.cos((c + 1) * 0.9);
+          w[r][c] = v;
+          S += Math.abs(v);
+        }
+      }
+      // imagen "panda": blob central en tonos medios (deja margen al ruido)
+      const x0 = [];
+      for (let r = 0; r < N; r++) {
+        x0[r] = [];
+        for (let c = 0; c < N; c++) {
+          const d2 = (r - 5.5) ** 2 + (c - 5.5) ** 2;
+          x0[r][c] = 0.5 + 0.22 * Math.exp(-d2 / 18);
+        }
+      }
+      function dot(a, b) {
+        let s = 0;
+        for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) s += a[r][c] * b[r][c];
+        return s;
+      }
+      // sesgo para que el score de x0 sea 2.5 → prob(panda) ≈ 0.92
+      const B = 2.5 - dot(w, x0);
+      const sigmoid = (m) => 1 / (1 + Math.exp(-m));
+
+      function adv(eps) {
+        const x = [];
+        for (let r = 0; r < N; r++) {
+          x[r] = [];
+          for (let c = 0; c < N; c++) {
+            const d = -eps * Math.sign(w[r][c]);
+            x[r][c] = Math.min(1, Math.max(0, x0[r][c] + d));
+          }
+        }
+        return x;
+      }
+      function score(x) { return dot(w, x) + B; }
+      function probPanda(x) { return sigmoid(score(x)); }
+
+      // ---- render ----
+      function drawGray(canvas, x) {
+        const ctx = canvas.getContext("2d");
+        const im = ctx.createImageData(N, N);
+        for (let r = 0; r < N; r++)
+          for (let c = 0; c < N; c++) {
+            const g = Math.round(255 * (1 - x[r][c])); // oscuro = valor alto
+            const i = (r * N + c) * 4;
+            im.data[i] = g; im.data[i + 1] = g; im.data[i + 2] = g; im.data[i + 3] = 255;
+          }
+        ctx.putImageData(im, 0, 0);
+      }
+      function drawPert(canvas, eps) {
+        const ctx = canvas.getContext("2d");
+        const im = ctx.createImageData(N, N);
+        for (let r = 0; r < N; r++)
+          for (let c = 0; c < N; c++) {
+            const s = -Math.sign(w[r][c]); // dirección del ruido (±)
+            const i = (r * N + c) * 4;
+            if (eps === 0 || s === 0) {
+              im.data[i] = 245; im.data[i + 1] = 243; im.data[i + 2] = 236;
+            } else if (s > 0) {
+              im.data[i] = 255; im.data[i + 1] = 87; im.data[i + 2] = 0; // naranja
+            } else {
+              im.data[i] = 7; im.data[i + 1] = 150; im.data[i + 2] = 163; // teal
+            }
+            im.data[i + 3] = 255;
+          }
+        ctx.putImageData(im, 0, 0);
+      }
+
+      function verdict(el, p) {
+        const isPanda = p >= 0.5;
+        el.className = "verdict " + (isPanda ? "panda" : "gibon");
+        el.querySelector(".cls").textContent = isPanda ? "panda" : "gibón";
+        const pct = Math.round((isPanda ? p : 1 - p) * 100);
+        el.querySelector(".pct").textContent = pct + " % de confianza";
+      }
+
+      function fmt(v, d = 2) { return v.toFixed(d); }
+
+      function renderCode(eps) {
+        $("codeNumpy").innerHTML =
+          `<span class="kw">import</span> numpy <span class="kw">as</span> np\n\n` +
+          `<span class="cm"># clasificador lineal fijo</span>\n` +
+          `<span class="kw">def</span> <span class="fn">prob</span>(x):\n` +
+          `    <span class="kw">return</span> 1/(1+np.exp(-(np.<span class="fn">sum</span>(w*x)+b)))\n\n` +
+          `eps = ${fmt(eps)}\n` +
+          `grad = w                      <span class="cm"># ∂score/∂x  (lineal)</span>\n` +
+          `x_adv = np.<span class="fn">clip</span>(x - eps*np.<span class="fn">sign</span>(grad), 0, 1)\n\n` +
+          `<span class="cm"># prob(x)     = ${fmt(probPanda(x0))}  → panda</span>\n` +
+          `<span class="cm"># prob(x_adv) = ${fmt(probPanda(adv(eps)))}  → ${probPanda(adv(eps)) >= 0.5 ? "panda" : "gibón"}</span>`;
+      }
+      $("codeKeras").innerHTML =
+        `<span class="kw">from</span> keras <span class="kw">import</span> layers\n\n` +
+        `data_augmentation = keras.<span class="fn">Sequential</span>([\n` +
+        `    layers.<span class="fn">RandomFlip</span>(<span class="cm">"horizontal"</span>),\n` +
+        `    layers.<span class="fn">RandomRotation</span>(0.1),\n` +
+        `    layers.<span class="fn">RandomZoom</span>(0.1),\n` +
+        `])\n\n` +
+        `<span class="cm"># + entrenamiento adversario: añadir</span>\n` +
+        `<span class="cm"># ejemplos perturbados al conjunto de train</span>`;
+
+      // ---- update ----
+      function update(eps) {
+        const xa = adv(eps);
+        drawGray($("cOrig"), x0);
+        drawPert($("cPert"), eps);
+        drawGray($("cAdv"), xa);
+        verdict($("vOrig"), probPanda(x0));
+        verdict($("vAdv"), probPanda(xa));
+        $("epsVal").textContent = fmt(eps);
+        $("roEps").textContent = fmt(eps);
+        $("roEps2").textContent = fmt(eps);
+        $("roSum").textContent = Math.round(S);
+        $("roDelta").textContent = fmt(-eps * S);
+        const flipped = probPanda(xa) < 0.5;
+        const note = $("flipNote");
+        note.className = "flip-note " + (flipped ? "yes" : "no");
+        note.textContent = flipped
+          ? "✓ la red ahora dice «gibón» — y las dos imágenes se ven casi idénticas."
+          : "aún dice «panda»: sube ε hasta que el score cruce 0.";
+        renderCode(eps);
+      }
+
+      function findFlip() {
+        for (let e = 0; e <= 0.15001; e += 0.005) {
+          if (probPanda(adv(e)) < 0.5) return Math.round(e * 200) / 200;
+        }
+        return 0.15;
+      }
+
+      // ---- eventos ----
+      $("eps").addEventListener("input", () => update(parseFloat($("eps").value)));
+      $("resetBtn").addEventListener("click", () => {
+        $("eps").value = 0;
+        update(0);
+      });
+      $("flipBtn").addEventListener("click", () => {
+        const e = findFlip();
+        $("eps").value = e;
+        update(e);
+      });
+
+      // ---- init ----
+      update(0);
+    </script>
+  </body>
+</html>
