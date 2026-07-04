@@ -575,6 +575,77 @@
         </div>
       </section>
 
+      <!-- 14b — DIVISOR: Transfer learning -->
+      <section class="slide slide-divider" data-title="Transfer learning">
+        <div class="divider-inner">
+          <span class="divider-num">— extra —</span>
+          <h2 class="divider-title">No empieces<br />de <em>cero</em>.</h2>
+          <p class="divider-sub">
+            Entrenar una CNN grande desde cero pide muchísimos datos y GPU. El
+            <em>transfer learning</em> reaprovecha una red ya entrenada.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14c — Transfer learning: la idea -->
+      <section class="slide" data-title="Reaprovechar una red">
+        <div class="slide-inner">
+          <span class="kicker">Transfer learning</span>
+          <h2 class="h2">Reaprovechar lo <em>aprendido</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una CNN entrenada en millones de imágenes (ImageNet) ya ha
+                aprendido a detectar <em>bordes, texturas y formas</em>. Esas
+                primeras capas sirven para <em>casi cualquier</em> problema de
+                visión.
+              </p>
+              <p class="note">
+                La idea: partir de esa red preentrenada (MobileNet, ResNet…),
+                <strong>congelar</strong> su base y entrenar solo una cabeza
+                nueva para tu tarea. Es el mismo «preentrenar + fine-tuning» que
+                verás en NLP (Tema 6).
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Las capas ya saben ver</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">capas bajas → bordes y texturas (genéricas)</span>
+                <span class="pt-c">capas altas → formas y objetos (específicas)</span>
+                <span class="pt-f">reutilizas las bajas, reentrenas las altas</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14d — Transfer learning en Keras -->
+      <section class="slide" data-title="Transfer learning en Keras">
+        <div class="slide-inner">
+          <span class="kicker">Congelar la base, entrenar la cabeza</span>
+          <h2 class="h2">En <em>Keras</em>, en 6 líneas.</h2>
+          <div class="two-col">
+            <div>
+              <ul class="neuron-notes">
+                <li>Cargas la base preentrenada <strong>sin</strong> su capa final.</li>
+                <li>La <strong>congelas</strong> (<code>trainable = False</code>).</li>
+                <li>Le añades tu <strong>cabeza</strong> de clasificación.</li>
+                <li>Entrenas con <em>pocos datos</em> y en pocos minutos.</li>
+              </ul>
+              <p class="note">Con pocas imágenes por clase ya obtienes muy buena precisión — imposible entrenando desde cero.</p>
+            </div>
+            <div class="code-block">
+              <span class="c-kw">from</span> keras.applications <span class="c-kw">import</span> MobileNetV2<br /><br />
+              base = MobileNetV2(include_top=<span class="c-kw">False</span>,<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;input_shape=(<span class="c-kw">160</span>,<span class="c-kw">160</span>,<span class="c-kw">3</span>), pooling=<span class="c-kw">'avg'</span>)<br />
+              base.trainable = <span class="c-kw">False</span> <span class="c-com"># congelar</span><br /><br />
+              model = keras.Sequential([base,<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;layers.Dense(<span class="c-kw">1</span>, activation=<span class="c-kw">'sigmoid'</span>)])
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- 15 — Aplicaciones -->
       <section class="slide slide-exercise" data-title="Aplicaciones">
         <div class="slide-inner">
