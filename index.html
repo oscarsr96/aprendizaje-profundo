@@ -239,6 +239,49 @@
         right: -28px;
       }
 
+      /* Fila de 4 (Teoría · Práctica · Laboratorio · Repaso) */
+      .picker-four {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 720px) {
+        .picker-four {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (min-width: 721px) and (max-width: 1040px) {
+        .picker-four {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .picker-four .card {
+        gap: 9px;
+        padding: 24px 22px 20px;
+        border-radius: 12px;
+      }
+      .picker-four .card h2 {
+        font-size: clamp(19px, 2.1vw, 23px);
+      }
+      .picker-four .card p {
+        font-size: 13px;
+        line-height: 1.48;
+      }
+      .picker-four .card-meta {
+        flex-wrap: wrap;
+        font-size: 11px;
+        row-gap: 2px;
+      }
+      .picker-four .card-go {
+        font-size: 13px;
+        margin-top: 10px;
+      }
+      .picker-four .card-orn {
+        width: 116px;
+        height: 116px;
+        top: -24px;
+        right: -24px;
+      }
+
       .card {
         position: relative;
         display: flex;
@@ -1035,7 +1078,7 @@
             </div>
             <h2 class="level-title">Cómo <em>aprende</em> una red.</h2>
 
-            <div class="picker picker-three">
+            <div class="picker picker-four">
               <a class="card card-tema1" href="./sesion1.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1123,6 +1166,33 @@
                 </div>
                 <span class="card-go"
                   >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema1" href="./lab-t1.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Tu primera red en <em>Keras</em></h2>
+                <p>
+                  Actividad en notebook: entrena una red para clasificar
+                  imágenes de ropa (Fashion-MNIST). Ábrela en Colab o descárgala.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
                 >
               </a>
 
@@ -1418,7 +1488,7 @@
             </div>
             <h2 class="level-title">Redes que <em>miran</em>.</h2>
 
-            <div class="picker picker-three">
+            <div class="picker picker-four">
               <a class="card card-tema4" href="./sesion-t4.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1506,6 +1576,34 @@
                 </div>
                 <span class="card-go"
                   >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema4" href="./lab-t4.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Una <em>CNN</em> de verdad</h2>
+                <p>
+                  Actividad en notebook: construye y entrena una red
+                  convolucional en Keras para clasificar imágenes. Colab o
+                  descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
                 >
               </a>
 
