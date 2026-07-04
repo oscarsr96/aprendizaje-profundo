@@ -221,6 +221,12 @@
       "title": "Tema 5 · Aprendizaje profundo (panorámica)",
       "files": [
         {
+          "name": "Lab_Tema5_GAN_MNIST.ipynb",
+          "path": "files/tema-5/Lab_Tema5_GAN_MNIST.ipynb",
+          "ext": "ipynb",
+          "size": 9066
+        },
+        {
           "name": "T5. Aprendizaje profundo (mejorado).pptx",
           "path": "files/tema-5/T5. Aprendizaje profundo (mejorado).pptx",
           "ext": "pptx",
