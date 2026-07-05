@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 3 · Redes de base radial (RBF)</title>
+    <meta
+      name="description"
+      content="Subtema 3.3 de Aprendizaje Profundo en CUNEF. Redes de base radial (RBF): la neurona que mide distancia a un centro, la gaussiana como activación, la arquitectura de una capa oculta, el entrenamiento en dos pasos (k-means + mínimos cuadrados) y cuándo usarlas frente a un MLP."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 3 · Redes de base radial (RBF)</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">3.3 · Redes de base radial (RBF)</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~40 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Neuronas que miden<br /><em>distancia</em>.</h1>
+          <p class="cover-sub">
+            Un MLP pregunta «¿de qué <em>lado</em> del hiperplano estás?». Una
+            neurona de base radial pregunta otra cosa: «¿estás <em>cerca</em> de
+            este centro?». Ese pequeño cambio da lugar a una red rápida de
+            entrenar y muy buena interpolando.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <circle cx="200" cy="200" r="30" />
+              <circle cx="200" cy="200" r="60" />
+              <circle cx="200" cy="200" r="90" />
+              <circle cx="200" cy="200" r="120" />
+            </g>
+            <circle cx="200" cy="200" r="7" fill="currentColor" opacity="0.7" />
+            <circle cx="128" cy="200" r="4" fill="currentColor" opacity="0.35" />
+            <circle cx="272" cy="200" r="4" fill="currentColor" opacity="0.35" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~40&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">La idea de base radial</span><span class="agenda-desc">Medir distancia a un centro en lugar de un producto escalar; la gaussiana.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">16&prime;</span>
+              <div><span class="agenda-title">La red RBF y cómo se entrena</span><span class="agenda-desc">Una capa oculta, entrenamiento en dos pasos y comparación con el MLP.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">Cuándo usarlas</span><span class="agenda-desc">Su nicho y su límite en dimensión alta.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="La idea de base radial">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">La idea de<br />base <em>radial</em>.</h2>
+          <p class="divider-sub">
+            Cambiamos la pregunta que hace la neurona: de «¿de qué lado?» a
+            «¿a qué <em>distancia</em>?».
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — Producto escalar vs distancia -->
+      <section class="slide" data-title="Producto escalar vs distancia">
+        <div class="slide-inner">
+          <span class="kicker">Dos formas de mirar el espacio</span>
+          <h2 class="h2">Lado <em>vs.</em> cercanía.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Neurona MLP</h3>
+              <p>Calcula un <em>producto escalar</em> w·x + b: te sitúa respecto a un <strong>hiperplano</strong>.</p>
+              <ul class="neuron-notes"><li>Pregunta: ¿de qué <em>lado</em> estás?</li><li>Corta el espacio en dos mitades.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Neurona RBF</h3>
+              <p>Calcula una <em>distancia</em> ‖x − c‖ a un <strong>centro</strong> c.</p>
+              <ul class="neuron-notes"><li>Pregunta: ¿estás <em>cerca</em> de c?</li><li>Se activa fuerte cerca, se apaga al alejarte.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            El MLP piensa en <strong>fronteras</strong>; la RBF piensa en
+            <strong>bolas</strong> alrededor de puntos de referencia.
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 — La gaussiana como activación -->
+      <section class="slide" data-title="La gaussiana">
+        <div class="slide-inner">
+          <span class="kicker">La activación de base radial</span>
+          <h2 class="h2">La <em>gaussiana</em>: cerca sí, lejos no.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                La activación típica es una <em>campana</em> de Gauss centrada en c:
+              </p>
+              <div class="fn-formula" style="margin: 6px 0 14px">φ(x) = exp( − ‖x − c‖² / 2σ² )</div>
+              <ul class="neuron-notes">
+                <li><strong>c</strong> = el centro (<em>dónde</em> vive la neurona).</li>
+                <li><strong>σ</strong> = la anchura (<em>hasta dónde llega</em> su alcance).</li>
+                <li>En x = c la respuesta es máxima (vale 1) y decae al alejarse.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Su tarjeta de identidad</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">estás en c → φ = 1 (respuesta máxima)</span>
+                <span class="pt-c">a una anchura σ → la campana ya cae</span>
+                <span class="pt-t">muy lejos de c → φ ≈ 0 (no dice nada)</span>
+                <span class="pt-f">σ pequeña = campana estrecha; σ grande = campana ancha</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — Local vs global -->
+      <section class="slide" data-title="Local vs global">
+        <div class="slide-inner">
+          <span class="kicker">La diferencia de fondo</span>
+          <h2 class="h2">Respuesta <em>local</em>, no global.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una neurona RBF solo «opina» en su <em>vecindario</em>: fuera de
+                su campana, calla. Su influencia es <strong>local</strong>.
+              </p>
+              <p class="note">
+                En el MLP, en cambio, cada neurona parte el espacio entero: su
+                efecto es <strong>global</strong> y se extiende a todo el plano.
+                Por eso una RBF se entiende como una suma de «bultos» locales que
+                cubren la zona con datos.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>La imagen mental</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">RBF → colinas de arena, cada una sobre su centro</span>
+                <span class="pt-c">MLP → cuchillas que cortan todo el espacio</span>
+                <span class="pt-f">la salida RBF suma esas colinas locales</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="La red RBF y su entrenamiento">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">La red RBF<br />y cómo se <em>entrena</em>.</h2>
+          <p class="divider-sub">
+            Una sola capa oculta y un entrenamiento en <em>dos pasos</em> que la
+            hace sorprendentemente rápida.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Arquitectura -->
+      <section class="slide" data-title="Arquitectura">
+        <div class="slide-inner">
+          <span class="kicker">Tres capas, una oculta</span>
+          <h2 class="h2">Entrada → capa <em>RBF</em> → salida.</h2>
+          <svg viewBox="0 0 760 220" style="width:100%; height:auto; margin: 4px 0 10px">
+            <g font-family="Inter Tight" font-size="12" fill="#3b4080" text-anchor="middle">
+              <text x="120" y="24" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">ENTRADA</text>
+              <text x="380" y="24" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">CAPA RBF (centros)</text>
+              <text x="640" y="24" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">SALIDA (lineal)</text>
+              <circle cx="120" cy="90" r="16" fill="#101340"/><circle cx="120" cy="150" r="16" fill="#101340"/>
+              <circle cx="380" cy="70" r="18" fill="#0796a3"/><circle cx="380" cy="120" r="18" fill="#0796a3"/><circle cx="380" cy="170" r="18" fill="#0796a3"/>
+              <circle cx="640" cy="120" r="16" fill="#ff5700"/>
+              <g stroke="#c9c3b3" stroke-width="1">
+                <line x1="136" y1="90" x2="362" y2="70"/><line x1="136" y1="90" x2="362" y2="120"/><line x1="136" y1="90" x2="362" y2="170"/>
+                <line x1="136" y1="150" x2="362" y2="70"/><line x1="136" y1="150" x2="362" y2="120"/><line x1="136" y1="150" x2="362" y2="170"/>
+              </g>
+              <g stroke="#fe961f" stroke-width="1.5">
+                <line x1="398" y1="70" x2="624" y2="120"/><line x1="398" y1="120" x2="624" y2="120"/><line x1="398" y1="170" x2="624" y2="120"/>
+              </g>
+              <text x="380" y="205" font-size="11" fill="#7c80a6">cada neurona = una gaussiana con su centro c y su anchura σ</text>
+            </g>
+          </svg>
+          <p class="note">
+            La capa oculta mide la distancia a cada centro (gaussianas); la capa
+            de salida es una simple <strong>combinación lineal</strong> de esas
+            respuestas. Una única capa oculta basta.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — Entrenamiento en dos pasos -->
+      <section class="slide" data-title="Entrenamiento en dos pasos">
+        <div class="slide-inner">
+          <span class="kicker">Por eso es rápida</span>
+          <h2 class="h2">Se entrena en <em>dos pasos</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Paso 1 · Colocar centros</h3>
+              <p>Elegir dónde van los centros c y su anchura σ, sin usar las etiquetas.</p>
+              <ul class="neuron-notes"><li>Centros con <strong>k-means</strong> (no supervisado).</li><li>σ a partir de la distancia entre centros.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Paso 2 · Ajustar la salida</h3>
+              <p>Con los centros fijos, calcular los pesos de la capa lineal.</p>
+              <ul class="neuron-notes"><li>Es un problema <strong>lineal</strong>.</li><li>Se resuelve por <strong>mínimos cuadrados</strong>, de una vez.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            No hace falta <strong>backpropagation</strong> a través de toda la red:
+            fijados los centros, ajustar la salida es álgebra lineal. De ahí su
+            velocidad.
+          </p>
+        </div>
+      </section>
+
+      <!-- 09 — RBF vs MLP -->
+      <section class="slide" data-title="RBF vs MLP">
+        <div class="slide-inner">
+          <span class="kicker">Dos filosofías</span>
+          <h2 class="h2">RBF <em>vs.</em> MLP.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Alcance</h4>
+              <div class="fn-formula">local · vs · global</div>
+              <p>RBF responde por vecindarios; el MLP parte el espacio entero.</p>
+              <span class="fn-use">→ bultos vs fronteras</span>
+            </div>
+            <div class="fn-card">
+              <h4>Entrenamiento</h4>
+              <div class="fn-formula">2 pasos · vs · backprop</div>
+              <p>RBF: k-means + mínimos cuadrados. MLP: descenso de gradiente.</p>
+              <span class="fn-use">→ rápida vs flexible</span>
+            </div>
+            <div class="fn-card">
+              <h4>Punto fuerte</h4>
+              <div class="fn-formula">interpolar · vs · profundizar</div>
+              <p>RBF interpola muy bien; el MLP escala en profundidad y extrapola mejor.</p>
+              <span class="fn-use">→ nicho vs generalista</span>
+            </div>
+          </div>
+          <p class="note">
+            No es «mejor o peor»: son <strong>herramientas distintas</strong>. La
+            RBF brilla en su nicho; la red profunda domina cuando hay muchos datos
+            y dimensiones.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="Cuándo usarlas">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Cuándo<br /><em>usarlas</em>.</h2>
+          <p class="divider-sub">
+            Su nicho es real… y su límite también. Saber cuál es cada uno es la
+            clave.
+          </p>
+        </div>
+      </section>
+
+      <!-- 11 — Nicho y límite -->
+      <section class="slide" data-title="Nicho y límite">
+        <div class="slide-inner">
+          <span class="kicker">Dónde encajan y dónde no</span>
+          <h2 class="h2">Su <em>nicho</em> y su límite.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">Brillan cuando el problema es de <em>baja dimensión</em> y se busca respuesta rápida:</p>
+              <ul class="neuron-notes">
+                <li><strong>Interpolación</strong> y aproximación de funciones.</li>
+                <li>Sistemas de <strong>control</strong> y series pequeñas.</li>
+                <li>Entrenamiento y respuesta muy rápidos.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>El límite: la dimensionalidad</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">cubrir con campanas 2D → pocos centros</span>
+                <span class="pt-t">cubrir 1000D → hacen falta <em>muchísimos</em> centros</span>
+                <span class="pt-f">maldición de la dimensionalidad → no dominan en visión/lenguaje</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            En alta dimensión, cubrir el espacio con campanas locales exige un
+            número inviable de centros. Por eso en <strong>visión</strong> y
+            <strong>lenguaje</strong> mandan las <strong>redes profundas</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 3 · Redes de base radial (RBF)</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · LA IDEA</span><h3>Distancia, no lado</h3><p>La neurona RBF mide distancia a un centro (¿estás cerca?), no un producto escalar (¿de qué lado?).</p></div>
+            <div class="close-item"><span class="close-num">02 · LA GAUSSIANA</span><h3>Campana local: c y σ</h3><p>φ(x)=exp(−‖x−c‖²/2σ²). El centro c dice dónde; la anchura σ, cuánto alcanza. Respuesta local.</p></div>
+            <div class="close-item"><span class="close-num">03 · LA RED</span><h3>Rápida en 2 pasos</h3><p>Una capa oculta: centros por k-means y salida por mínimos cuadrados. Sin backprop completo.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Su sitio</span>
+            <span>Interpolación y baja dimensión: ahí brilla. En alta dimensión (visión, lenguaje), la maldición de la dimensionalidad se lo deja a las redes profundas.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 3 · Redes de base radial (RBF)</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Broomhead &amp; Lowe</strong> — <em>"Multivariable functional interpolation and adaptive networks"</em> (1988).</li>
+            <li><strong>Bishop, C.</strong> — <em>Neural Networks for Pattern Recognition</em>, cap. de funciones de base radial (1995).</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./repaso-rbf.html">
+              <span class="close-cta-eyebrow">Comprueba lo aprendido</span>
+              <span class="close-cta-title">Repaso · Redes de base radial <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Seis retos sobre distancia, gaussiana, arquitectura y entrenamiento.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
