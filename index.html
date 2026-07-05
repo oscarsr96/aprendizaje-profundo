@@ -1695,10 +1695,156 @@
               <span class="level-rule" aria-hidden="true"></span>
             </div>
             <h2 class="level-title">Aprender sin <em>etiquetas</em>.</h2>
-            <p class="soon-line">Autoencoders y redes de base radial (RBF) — en preparación.</p>
+
+            <div class="subtema-band"><span class="subtema-name">3.1 · No supervisado y autoencoders</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-four">
+              <a class="card card-tema3" href="./sesion-autoencoders.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="70" cy="120" r="7" /><circle cx="70" cy="200" r="7" /><circle cx="70" cy="280" r="7" />
+                      <circle cx="150" cy="160" r="7" /><circle cx="150" cy="240" r="7" />
+                      <circle cx="200" cy="200" r="11" fill="currentColor" />
+                      <circle cx="250" cy="160" r="7" /><circle cx="250" cy="240" r="7" />
+                      <circle cx="330" cy="120" r="7" /><circle cx="330" cy="200" r="7" /><circle cx="330" cy="280" r="7" />
+                      <path d="M77 120 L143 160 M77 200 L143 160 M77 200 L143 240 M77 280 L143 240 M157 160 L191 200 M157 240 L191 200 M209 200 L243 160 M209 200 L243 240 M257 160 L323 120 M257 160 L323 200 M257 240 L323 200 M257 240 L323 280" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Aprender sin <em>etiquetas</em></h2>
+                <p>
+                  Aprendizaje no supervisado y autoencoders: el cuello de botella
+                  que obliga a la red a quedarse con lo esencial. Encoder, código
+                  latente, decoder, reconstrucción y usos (comprimir, limpiar,
+                  detectar anomalías).
+                </p>
+                <div class="card-meta">
+                  <span>22 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 minutos</span>
+                  <span class="sep">·</span>
+                  <span>incluye espacio latente</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema3" href="./practica-autoencoders.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="70" width="260" height="260" fill="none" stroke="currentColor" stroke-width="2" />
+                    <rect x="120" y="120" width="160" height="160" fill="none" stroke="currentColor" stroke-width="2" />
+                    <circle cx="200" cy="200" r="48" fill="currentColor" />
+                    <path d="M70 200 H330 M200 70 V330" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>El cuello de botella en <em>vivo</em></h2>
+                <p>
+                  Interactivo: mueve el tamaño del código (k) y observa cómo la
+                  reconstrucción gana o pierde detalle. El compromiso entre
+                  comprimir y reconstruir, en tiempo real.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>sin instalar nada</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el interactivo <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema3" href="./lab-autoencoders.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Autoencoder en <em>Keras</em></h2>
+                <p>
+                  Notebook: un autoencoder denoising sobre MNIST que aprende a
+                  quitar ruido, e interpolación en el espacio latente entre dos
+                  dígitos. Colab o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-autoencoders.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Has pillado los <em>autoencoders</em>?</h2>
+                <p>
+                  Diez retos autocorregibles: no supervisado, cuello de botella,
+                  reconstrucción, denoising, PCA vs autoencoder y detección de
+                  anomalías. Con explicación en cada respuesta.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
 
             <div class="subtema-band"><span class="subtema-name">3.2 · Modelos generativos (GAN)</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-three">
+              <a class="card card-tema5" href="./sesion-generativos.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="120" cy="200" r="52" />
+                      <circle cx="280" cy="200" r="52" />
+                      <path d="M182 184 H238" stroke-width="2.5" />
+                      <path d="M228 176 l14 8 l-14 8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M218 216 H162" stroke-width="2.5" />
+                      <path d="M172 208 l-14 8 l14 8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </g>
+                    <circle cx="120" cy="200" r="15" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Máquinas que <em>imaginan</em></h2>
+                <p>
+                  Modelos generativos: de discriminar a generar. La idea
+                  adversaria (generador vs discriminador), el ruido que se
+                  convierte en imagen, y una panorámica de GAN, VAE y difusión.
+                </p>
+                <div class="card-meta">
+                  <span>17 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~45 minutos</span>
+                  <span class="sep">·</span>
+                  <span>incluye ética y deepfakes</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
               <a class="card card-tema5" href="./lab-t5.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
@@ -1724,6 +1870,84 @@
                 </div>
                 <span class="card-go"
                   >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-generativos.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Has pillado lo <em>generativo</em>?</h2>
+                <p>
+                  Ocho retos autocorregibles: discriminar vs generar, generador y
+                  discriminador, el ruido latente, mode collapse, GAN vs VAE vs
+                  difusión y una de ética.
+                </p>
+                <div class="card-meta">
+                  <span>8 retos</span>
+                  <span class="sep">·</span>
+                  <span>~4 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+
+            <div class="subtema-band"><span class="subtema-name">3.3 · Redes de base radial (RBF)</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-three">
+              <a class="card card-tema6" href="./sesion-rbf.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <circle cx="200" cy="200" r="180" fill="none" stroke="currentColor" stroke-width="2" />
+                    <circle cx="200" cy="200" r="120" fill="none" stroke="currentColor" stroke-width="2" />
+                    <circle cx="200" cy="200" r="60" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Neuronas que miden <em>distancia</em></h2>
+                <p>
+                  Redes de base radial (RBF): en vez de un hiperplano, una
+                  activación local alrededor de un centro. La gaussiana, el
+                  entrenamiento en dos pasos y cuándo ganan a un MLP.
+                </p>
+                <div class="card-meta">
+                  <span>14 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~40 minutos</span>
+                  <span class="sep">·</span>
+                  <span>RBF vs MLP</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-rbf.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Has pillado las <em>RBF</em>?</h2>
+                <p>
+                  Seis retos autocorregibles: distancia vs producto escalar,
+                  centro y anchura, la arquitectura de tres capas, el
+                  entrenamiento en dos pasos y sus límites en alta dimensión.
+                </p>
+                <div class="card-meta">
+                  <span>6 retos</span>
+                  <span class="sep">·</span>
+                  <span>~4 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
                 >
               </a>
             </div>
