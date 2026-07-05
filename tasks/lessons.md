@@ -13,6 +13,16 @@ pesos seguían saliendo con los valores viejos; parecía un bug del cálculo per
 (`...html?v=2`) para forzar recarga sin caché. Si un valor "no cambia" tras editar,
 sospechar de la caché antes que del código.
 
+**Ampliación (2026-07-05):** el `?v=` en la URL del HTML **solo** cachebustea el HTML;
+los assets enlazados (`./script.js`, `./styles.css`) siguen sirviéndose de la caché de
+memoria (misma URL compartida por los 13 decks, cacheada desde la primera carga de la
+sesión). Para verificar cambios en script.js/styles.css hay que cachebustear **también su
+`<link>`/`<script>`** temporalmente (`./script.js?v=N`), y revertirlo antes de commitear.
+Síntomas de esto: la clase nueva se aplica en el DOM pero "no tiene estilo" (styles.css viejo),
+o la lógica nueva "no corre" (`typeof miFuncion === 'undefined'`, script.js viejo). En
+producción no es problema: una visita nueva revalida por Last-Modified/etag; solo muerde en
+la verificación local dentro de una misma sesión de navegador.
+
 ## Ejecutar por subagentes sobre un fichero muy acoplado → 1 subagente por fase, no micro-tareas
 
 Al ejecutar un plan con subagentes, si varias tareas editan el **mismo fichero grande** de
