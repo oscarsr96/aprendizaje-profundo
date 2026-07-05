@@ -1,6 +1,18 @@
 {
   "groups": [
     {
+      "id": "autoencoders",
+      "title": "autoencoders",
+      "files": [
+        {
+          "name": "Lab_Autoencoder_MNIST.ipynb",
+          "path": "files/autoencoders/Lab_Autoencoder_MNIST.ipynb",
+          "ext": "ipynb",
+          "size": 12123
+        }
+      ]
+    },
+    {
       "id": "general",
       "title": "General",
       "files": [

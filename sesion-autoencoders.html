@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 3 · No supervisado y autoencoders</title>
+    <meta
+      name="description"
+      content="Tema 3 de Aprendizaje Profundo en CUNEF. Aprendizaje no supervisado y autoencoders: la idea del cuello de botella, el espacio latente, variantes (undercomplete, denoising, PCA vs autoencoder, VAE) y usos (compresión, eliminación de ruido, detección de anomalías, representaciones)."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 3 · No supervisado y autoencoders</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">3.1 · No supervisado y autoencoders</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Aprender sin<br /><em>etiquetas</em>.</h1>
+          <p class="cover-sub">
+            No siempre hay un profesor que diga «esto es un gato». A veces solo
+            tenemos <em>datos</em>, sin respuestas. Este tema va de encontrar
+            <em>estructura</em> en ellos, y de una idea preciosa para lograrlo:
+            el <em>autoencoder</em> y su <em>cuello de botella</em>.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <path d="M110 120 L200 170 L110 220" />
+              <path d="M290 120 L200 170 L290 220" />
+              <rect x="185" y="155" width="30" height="30" />
+            </g>
+            <circle cx="110" cy="120" r="6" fill="currentColor" opacity="0.7" />
+            <circle cx="110" cy="220" r="6" fill="currentColor" opacity="0.7" />
+            <circle cx="290" cy="120" r="6" fill="currentColor" opacity="0.5" />
+            <circle cx="290" cy="220" r="6" fill="currentColor" opacity="0.5" />
+            <circle cx="200" cy="170" r="5" fill="currentColor" opacity="0.35" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">10&prime;</span>
+              <div><span class="agenda-title">Aprendizaje no supervisado</span><span class="agenda-desc">Datos sin etiqueta: la pregunta ya no es «¿qué es?», sino «¿qué estructura tiene?».</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">La idea del autoencoder</span><span class="agenda-desc">Encoder, código y decoder: comprimir para quedarse con lo esencial.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">Variantes y qué aprenden</span><span class="agenda-desc">PCA, undercomplete, denoising y una pincelada de VAE.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Para qué sirven</span><span class="agenda-desc">Comprimir, limpiar ruido, detectar anomalías y aprender representaciones.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="Aprendizaje no supervisado">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">Aprendizaje<br />no <em>supervisado</em>.</h2>
+          <p class="divider-sub">
+            Cuando nadie nos da las respuestas, el objetivo cambia: ya no
+            predecimos una etiqueta, <em>descubrimos</em> la forma de los datos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — Supervisado vs no supervisado -->
+      <section class="slide" data-title="Con etiqueta vs sin etiqueta">
+        <div class="slide-inner">
+          <span class="kicker">Dos mundos distintos</span>
+          <h2 class="h2">De «¿qué es?» a «¿qué <em>estructura</em> tiene?».</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Supervisado</h4>
+              <div class="fn-formula">(X, y)</div>
+              <p>Cada dato viene con su respuesta. El modelo aprende a predecir <em>y</em> a partir de <em>X</em>.</p>
+              <span class="fn-use">→ ¿qué es esto?</span>
+            </div>
+            <div class="fn-card">
+              <h4>No supervisado</h4>
+              <div class="fn-formula">solo X</div>
+              <p>No hay respuestas. El modelo busca <em>patrones</em>, grupos, ejes de variación.</p>
+              <span class="fn-use">→ ¿cómo se organiza?</span>
+            </div>
+          </div>
+          <p class="note">
+            Sin etiqueta no hay «acierto» que perseguir. La pregunta pasa de
+            <strong>«¿qué es cada dato?»</strong> a <strong>«¿qué estructura
+            tiene el conjunto?»</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 — El dato sin etiqueta es barato -->
+      <section class="slide" data-title="Datos: baratos vs caros">
+        <div class="slide-inner">
+          <span class="kicker">Por qué importa</span>
+          <h2 class="h2">El dato sobra; la <em>etiqueta</em> escasea.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Internet está lleno de imágenes, texto y sonido <em>sin
+                etiquetar</em>: son abundantes y prácticamente gratis. Lo caro es
+                que un humano marque cada uno («esto es un tumor», «esto es
+                spam»).
+              </p>
+              <p class="note">
+                Aprender de los datos <em>tal cual</em>, sin pagar el etiquetado,
+                es enorme. Ahí es donde brilla lo no supervisado.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Barato vs caro</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">millones de imágenes sin etiqueta → gratis</span>
+                <span class="pt-t">etiquetar cada una a mano → lento y caro</span>
+                <span class="pt-f">¿y si aprendemos sin etiquetas?</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — Tres familias -->
+      <section class="slide" data-title="Tres familias">
+        <div class="slide-inner">
+          <span class="kicker">El mapa del terreno</span>
+          <h2 class="h2">Tres formas de <em>mirar</em> sin etiquetas.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Agrupar</h3>
+              <p>Reunir los datos parecidos en grupos (<em>clustering</em>).</p>
+              <ul class="neuron-notes"><li>Segmentar clientes.</li><li>k-means, jerárquico…</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Reducir dimensión</h3>
+              <p>Resumir muchas variables en pocas sin perder lo importante.</p>
+              <ul class="neuron-notes"><li>Visualizar, comprimir.</li><li>PCA… y autoencoders.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Generar</h3>
+              <p>Aprender cómo son los datos para crear ejemplos nuevos.</p>
+              <ul class="neuron-notes"><li>Imágenes, texto…</li><li>VAE, difusión…</li></ul>
+            </div>
+          </div>
+          <p class="note">El <strong>autoencoder</strong> vive entre <em>reducir dimensión</em> y <em>generar</em>: comprime los datos y, con ello, aprende a reconstruirlos.</p>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="La idea del autoencoder">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">La idea del<br /><em>autoencoder</em>.</h2>
+          <p class="divider-sub">
+            Una red que aprende a <em>copiarse a sí misma</em>… pero obligada a
+            pasar por un embudo. En ese embudo está toda la magia.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Anatomía -->
+      <section class="slide" data-title="Anatomía">
+        <div class="slide-inner">
+          <span class="kicker">Encoder · código · decoder</span>
+          <h2 class="h2">Entra <em>X</em>, sale <em>X̂</em>.</h2>
+          <svg viewBox="0 0 760 220" style="width:100%; height:auto; margin: 4px 0 8px">
+            <g font-family="Inter Tight" font-size="12" fill="#3b4080" text-anchor="middle">
+              <!-- entrada -->
+              <rect x="40" y="50" width="70" height="120" rx="8" fill="#eef0f6" stroke="#c9c3b3"/>
+              <text x="75" y="196" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">X (entrada)</text>
+              <!-- encoder -->
+              <path d="M150 55 L250 95 L250 125 L150 165 Z" fill="#0796a3" opacity="0.85"/>
+              <text x="200" y="114" fill="#fff" font-weight="600">encoder</text>
+              <!-- código -->
+              <rect x="300" y="90" width="40" height="40" rx="6" fill="#ff5700"/>
+              <text x="320" y="150" font-family="JetBrains Mono" font-size="11" fill="#c8410f">código z</text>
+              <text x="320" y="80" font-family="JetBrains Mono" font-size="10" fill="#7c80a6">cuello de botella</text>
+              <!-- decoder -->
+              <path d="M390 95 L490 55 L490 165 L390 125 Z" fill="#3b4080" opacity="0.85"/>
+              <text x="440" y="114" fill="#fff" font-weight="600">decoder</text>
+              <!-- salida -->
+              <rect x="530" y="50" width="70" height="120" rx="8" fill="#eef0f6" stroke="#c9c3b3"/>
+              <text x="565" y="196" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">X̂ (reconstrucción)</text>
+              <!-- flechas -->
+              <text x="640" y="115" font-size="26" fill="#0796a3">≈</text>
+            </g>
+          </svg>
+          <p class="note">
+            El <strong>encoder</strong> comprime la entrada en un <strong>código</strong>
+            pequeño (el <em>cuello de botella</em>); el <strong>decoder</strong>
+            intenta reconstruir la entrada a partir de ese código. La salida X̂
+            debería parecerse a la entrada X.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — El truco: código pequeño -->
+      <section class="slide" data-title="El truco del embudo">
+        <div class="slide-inner">
+          <span class="kicker">Por qué funciona</span>
+          <h2 class="h2">Si no cabe todo, se queda lo <em>esencial</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Si el código fuera <em>igual de grande</em> que la entrada, la red
+                haría trampa: copiaría el dato tal cual y no aprendería nada.
+              </p>
+              <p class="note">
+                El truco es un código <strong>más pequeño</strong> que la entrada.
+                Al no poder guardarlo todo, la red se ve <em>obligada</em> a
+                quedarse con lo que de verdad importa: es una <strong>compresión
+                con pérdida, pero aprendida</strong> de los propios datos.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El embudo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">784 números (imagen) → 32 → 784</span>
+                <span class="pt-c">no cabe copiar todo → resume</span>
+                <span class="pt-f">el cuello de botella fuerza lo esencial</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — Pérdida y auto-supervisión -->
+      <section class="slide" data-title="La pérdida">
+        <div class="slide-inner">
+          <span class="kicker">Cómo se entrena</span>
+          <h2 class="h2">Su objetivo es <em>él mismo</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                La pérdida es el <strong>error de reconstrucción</strong>: cuánto
+                se diferencia la salida de la entrada.
+              </p>
+              <p class="lead" style="margin-top:10px">
+                <code>L = ‖X − X̂‖²</code>
+              </p>
+              <p class="note">
+                Fíjate: <em>no hay etiquetas</em>. La entrada es su propio
+                objetivo. Por eso se dice que es <strong>auto-supervisión</strong>:
+                los datos se supervisan a sí mismos.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Sin etiquetas</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">objetivo = la propia entrada</span>
+                <span class="pt-c">minimizar ‖X − X̂‖²</span>
+                <span class="pt-f">se entrena con backprop, como siempre</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 — Espacio latente -->
+      <section class="slide" data-title="Espacio latente">
+        <div class="slide-inner">
+          <span class="kicker">El código, por dentro</span>
+          <h2 class="h2">Cada dato, un <em>punto</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El código de cada dato es un <strong>vector de pocas dimensiones</strong>.
+                Todos juntos forman el <em>espacio latente</em>: un mapa comprimido
+                donde vive la información esencial.
+              </p>
+              <ul class="neuron-notes">
+                <li>Datos parecidos → puntos <em>cercanos</em>.</li>
+                <li>Los ejes suelen capturar factores de variación (grosor, inclinación…).</li>
+                <li>Moverte por ese espacio y decodificar genera datos intermedios.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Idea clave</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">784 dimensiones → 2 o 32</span>
+                <span class="pt-c">cada dígito → un punto</span>
+                <span class="pt-f">el latente es un resumen navegable</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="Variantes">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Variantes y<br />qué <em>aprenden</em>.</h2>
+          <p class="divider-sub">
+            No hay un solo autoencoder. Según cómo lo diseñes, aprende cosas
+            distintas: desde PCA hasta separar la señal del ruido.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — PCA vs autoencoder -->
+      <section class="slide" data-title="PCA vs autoencoder">
+        <div class="slide-inner">
+          <span class="kicker">Lo lineal y lo curvo</span>
+          <h2 class="h2">Un autoencoder lineal <em>es</em> PCA.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Si el encoder y el decoder son <em>lineales</em> y minimizas el
+                error cuadrático, el autoencoder acaba encontrando casi lo mismo
+                que el <strong>PCA</strong>: los ejes de mayor variación.
+              </p>
+              <p class="note">
+                La gracia llega con las <strong>no linealidades</strong>: entonces
+                puede doblar el espacio y aprender <em>variedades curvas</em> que
+                el PCA, recto, nunca captaría.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Lineal → curvo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">lineal + MSE ≈ PCA</span>
+                <span class="pt-c">+ activaciones no lineales</span>
+                <span class="pt-f">→ reducción de dimensión no lineal</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 — undercomplete vs regularizado -->
+      <section class="slide" data-title="Undercomplete vs regularizado">
+        <div class="slide-inner">
+          <span class="kicker">Cómo evitar que memorice</span>
+          <h2 class="h2">Estrechar… o <em>poner reglas</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Undercomplete</h4>
+              <div class="fn-formula">código &lt; entrada</div>
+              <p>El código es más pequeño que la entrada: comprime por la fuerza del embudo.</p>
+              <span class="fn-use">→ el embudo hace el trabajo</span>
+            </div>
+            <div class="fn-card">
+              <h4>Regularizado</h4>
+              <div class="fn-formula">sparse / denoising</div>
+              <p>El código puede ser grande, pero se le añaden reglas para que no memorice.</p>
+              <span class="fn-use">→ penalizar / añadir ruido</span>
+            </div>
+            <div class="fn-card">
+              <h4>El riesgo</h4>
+              <div class="fn-formula">overcomplete</div>
+              <p>Código igual o mayor que la entrada, sin reglas: tiende a copiar y no aprende nada útil.</p>
+              <span class="fn-use">→ trampa: copia sin más</span>
+            </div>
+          </div>
+          <p class="note">
+            Si el código es demasiado holgado y no lo <strong>regularizas</strong>,
+            el autoencoder <em>memoriza</em> en vez de aprender. Hay que forzarlo:
+            estrechando el embudo o añadiendo reglas.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — Denoising -->
+      <section class="slide" data-title="Denoising">
+        <div class="slide-inner">
+          <span class="kicker">Aprender a limpiar</span>
+          <h2 class="h2">Entra <em>sucio</em>, sale <em>limpio</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En un <strong>denoising autoencoder</strong> le damos la entrada
+                <em>con ruido</em> y le pedimos que reconstruya la versión
+                <em>limpia</em>.
+              </p>
+              <p class="note">
+                Para lograrlo no puede copiar: tiene que <strong>entender</strong>
+                qué parte es señal y qué parte es ruido, y quedarse solo con la
+                señal. Esta idea —quitar ruido paso a paso— es el germen de los
+                modelos de <em>difusión</em> que generan imágenes hoy.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El montaje</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">entrada: X + ruido</span>
+                <span class="pt-c">objetivo: X limpio</span>
+                <span class="pt-f">aprende a separar señal de ruido</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 — VAE puente -->
+      <section class="slide" data-title="VAE: un puente">
+        <div class="slide-inner">
+          <span class="kicker">Un adelanto</span>
+          <h2 class="h2">Del que <em>comprime</em> al que <em>crea</em>.</h2>
+          <p class="lead">
+            Un autoencoder normal aprende un punto por dato. El <strong>VAE</strong>
+            (autoencoder variacional) aprende, en su lugar, una <em>pequeña nube
+            de probabilidad</em> en el espacio latente.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Eso lo convierte en <strong>generativo</strong>: puedes muestrear un
+              punto de esa zona, decodificarlo y obtener un dato <em>nuevo</em>
+              que nunca existió, pero verosímil.
+            </p>
+            <p class="note">
+              Lo veremos en el <strong>subtema 3.2</strong>. Por ahora, quédate
+              con la idea: el autoencoder es también la puerta de entrada a los
+              modelos generativos.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — DIVISOR 4 -->
+      <section class="slide slide-divider" data-title="Para qué sirven">
+        <div class="divider-inner">
+          <span class="divider-num">— 04 —</span>
+          <h2 class="divider-title">Para qué<br /><em>sirven</em>.</h2>
+          <p class="divider-sub">
+            Comprimir, limpiar ruido, detectar lo anómalo y aprender
+            representaciones. Cuatro usos que salen de una sola idea.
+          </p>
+        </div>
+      </section>
+
+      <!-- 17 — Cuatro usos -->
+      <section class="slide" data-title="Cuatro usos">
+        <div class="slide-inner">
+          <span class="kicker">De la idea a la práctica</span>
+          <h2 class="h2">Cuatro cosas que sabe <em>hacer</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · COMPRIMIR</span><h3>Reducir dimensión</h3><p>Alternativa <em>no lineal</em> a PCA: resumir en 2–3 dimensiones para visualizar, o comprimir para almacenar.</p></div>
+            <div class="close-item"><span class="close-num">02 · LIMPIAR</span><h3>Eliminar ruido</h3><p>El denoising autoencoder reconstruye la versión limpia: quita grano, tacha, interferencias.</p></div>
+            <div class="close-item"><span class="close-num">03 · REPRESENTAR</span><h3>Rasgos útiles</h3><p>El encoder, ya entrenado, es un buen extractor de características para otra tarea (preentrenamiento).</p></div>
+          </div>
+          <p class="note">Y un cuarto uso que merece slide propio: <strong>detectar anomalías</strong> por el error de reconstrucción.</p>
+        </div>
+      </section>
+
+      <!-- 18 — Detección de anomalías -->
+      <section class="slide" data-title="Detección de anomalías">
+        <div class="slide-inner">
+          <span class="kicker">Lo raro reconstruye mal</span>
+          <h2 class="h2">Si reconstruye mal, es <em>sospechoso</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Entrena el autoencoder solo con datos <em>normales</em>. Aprende a
+                reconstruirlos muy bien. Cuando llega algo <strong>raro</strong>
+                —nunca visto— lo reconstruye <em>mal</em>: el error se dispara.
+              </p>
+              <p class="note">
+                Ese error alto es la <strong>alarma</strong>. No hace falta
+                etiquetar fraudes ni fallos de antemano: basta con saber cómo es
+                lo normal.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Regla</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">error de reconstrucción bajo → normal</span>
+                <span class="pt-t">error alto → anomalía (alarma)</span>
+                <span class="pt-f">fraude, fallos de máquina, intrusiones…</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 — Ejercicio -->
+      <section class="slide slide-exercise" data-title="Ejercicio">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Para pensar</span>
+          <h2 class="h2 h2-ex">¿Y si el cuello tiene solo <em>2 neuronas</em>?</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Imagina que estrujas cada imagen hasta <em>dos únicos números</em>.
+                ¿Qué se pierde? ¿Qué se conserva? ¿Podrías dibujar todos los
+                dígitos en un plano?
+              </p>
+              <ul class="neuron-notes">
+                <li>Con k pequeño: reconstrucción borrosa, pero se ve la <em>estructura</em>.</li>
+                <li>Al subir k: más detalle, menos error.</li>
+                <li>¿Dónde está el equilibrio entre comprimir y reconstruir bien?</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Pruébalo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">mueve el tamaño del código k = 1…16</span>
+                <span class="pt-c">mira original vs reconstrucción</span>
+                <span class="pt-f">→ en la práctica interactiva</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 20 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 3 · No supervisado y autoencoders</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · SIN ETIQUETAS</span><h3>Se aprende estructura</h3><p>Cuando no hay respuestas, el objetivo es descubrir la forma de los datos: agrupar, reducir, generar.</p></div>
+            <div class="close-item"><span class="close-num">02 · EL EMBUDO</span><h3>El cuello de botella</h3><p>Un código pequeño obliga a quedarse con lo esencial. La reconstrucción es auto-supervisión: el dato es su propio objetivo.</p></div>
+            <div class="close-item"><span class="close-num">03 · CUATRO USOS</span><h3>Comprimir, limpiar, detectar, representar</h3><p>De reducir dimensión a quitar ruido, señalar anomalías (error alto = alarma) o preentrenar un extractor de rasgos.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Estruja una imagen con el cuello de botella en el interactivo, y entrena un autoencoder denoising sobre MNIST en el laboratorio.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 3 · No supervisado y autoencoders</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Goodfellow, Bengio &amp; Courville</strong> — <em>"Deep Learning"</em>, cap. 14 (Autoencoders).</li>
+            <li><strong>Kingma &amp; Welling</strong> — <em>"Auto-Encoding Variational Bayes"</em> (2013) — puente al subtema 3.2.</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./practica-autoencoders.html">
+              <span class="close-cta-eyebrow">El cuello de botella en vivo</span>
+              <span class="close-cta-title">Práctica · el tamaño del código <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Mueve k y mira cómo cambia la reconstrucción.</span>
+            </a>
+            <a class="close-cta" href="./lab-autoencoders.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · autoencoder en MNIST <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Denoising e interpolación en el espacio latente.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
