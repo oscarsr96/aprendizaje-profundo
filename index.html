@@ -442,6 +442,27 @@
         color: var(--accent);
       }
 
+      .subtema-band {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 30px 0 10px;
+      }
+      .subtema-band .subtema-name {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-deep);
+        white-space: nowrap;
+      }
+      .subtema-band .subtema-rule {
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
       /* Layout: índice lateral + contenido */
       .layout {
         display: grid;
@@ -1073,15 +1094,11 @@
         <aside class="toc">
           <nav aria-label="Secciones del material">
             <span class="toc-title">Temario</span>
-            <a class="toc-link" href="#tema-1">Tema 1</a>
-            <a class="toc-link" href="#tema-2">Tema 2</a>
-            <a class="toc-link" href="#tema-3">Tema 3</a>
-            <a class="toc-link" href="#tema-4">Tema 4</a>
-            <a class="toc-link" href="#tema-5">Tema 5</a>
-            <a class="toc-link" href="#tema-6">Tema 6</a>
-            <a class="toc-link" href="#tema-7">Tema 7</a>
-            <a class="toc-link" href="#tema-8">Tema 8</a>
-            <a class="toc-link" href="#tema-9">Tema 9</a>
+            <a class="toc-link" href="#tema-1">Tema 1 · Introducción</a>
+            <a class="toc-link" href="#tema-2">Tema 2 · Fundamentos</a>
+            <a class="toc-link" href="#tema-3">Tema 3 · No supervisado</a>
+            <a class="toc-link" href="#tema-4">Tema 4 · Arquitecturas</a>
+            <a class="toc-link" href="#tema-5">Tema 5 · Implementación</a>
           </nav>
         </aside>
 
@@ -1089,11 +1106,73 @@
           <!-- ===== TEMA 1 ===== -->
           <section class="section" id="tema-1">
             <div class="level-band">
-              <span class="level-name">Tema 1 · Introducción</span>
+              <span class="level-name">Tema 1 · Introducción al Aprendizaje Profundo</span>
               <span class="level-rule" aria-hidden="true"></span>
             </div>
-            <h2 class="level-title">Cómo <em>aprende</em> una red.</h2>
+            <h2 class="level-title">El porqué y el <em>estado del arte</em>.</h2>
 
+            <div class="subtema-band"><span class="subtema-name">1.1 · Panorámica y estado del arte</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-three">
+              <a class="card card-tema5" href="./sesion-t5.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <circle cx="200" cy="200" r="160" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M60 200 H340 M200 60 V340 M120 120 L280 280 M280 120 L120 280" stroke="currentColor" stroke-width="1.4" />
+                    <circle cx="200" cy="200" r="40" fill="currentColor" opacity="0.35" />
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Aprendizaje <em>profundo</em></h2>
+                <p>
+                  La panorámica: qué hizo posible el deep learning, cómo la
+                  profundidad da abstracción y los grandes tipos de problema —
+                  clasificar, predecir, representar y generar.
+                </p>
+                <div class="card-meta">
+                  <span>20 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t5.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Ves la <em>foto completa</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre la panorámica del deep
+                  learning: por qué despegó, abstracción, sesgos, ImageNet,
+                  ataques adversarios, representación y generación.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 minutos</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <!-- ===== TEMA 2 ===== -->
+          <section class="section" id="tema-2">
+            <div class="level-band">
+              <span class="level-name">Tema 2 · Fundamentos de Redes Neuronales</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">De la neurona al <em>entrenamiento</em>.</h2>
+
+            <div class="subtema-band"><span class="subtema-name">2.1 · El perceptrón</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
               <a class="card card-tema1" href="./sesion1.html">
                 <div class="card-orn" aria-hidden="true">
@@ -1244,16 +1323,8 @@
                 >
               </a>
             </div>
-          </section>
 
-          <!-- ===== TEMA 2 ===== -->
-          <section class="section" id="tema-2">
-            <div class="level-band">
-              <span class="level-name">Tema 2 · Perceptrón multicapa</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">De una neurona a una <em>red</em>.</h2>
-
+            <div class="subtema-band"><span class="subtema-name">2.2 · Perceptrón multicapa (MLP)</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
               <a class="card card-tema2" href="./sesion-t2.html">
                 <div class="card-orn" aria-hidden="true">
@@ -1390,120 +1461,84 @@
                 >
               </a>
             </div>
-          </section>
 
-          <!-- ===== TEMA 3 ===== -->
-          <section class="section" id="tema-3">
-            <div class="level-band">
-              <span class="level-name">Tema 3 · Redes LSTM</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Redes con <em>memoria</em>.</h2>
-
+            <div class="subtema-band"><span class="subtema-name">2.3 · Entrenamiento</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
-              <a class="card card-tema3" href="./sesion-t3.html">
+              <a class="card card-tema7" href="./sesion-t7.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <rect
-                      x="70"
-                      y="150"
-                      width="260"
-                      height="100"
-                      rx="20"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    />
-                    <path
-                      d="M40 175 H360"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    />
-                    <g fill="currentColor">
-                      <circle cx="140" cy="205" r="16" />
-                      <circle cx="200" cy="205" r="16" />
-                      <circle cx="260" cy="205" r="16" />
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M50 130 Q150 320 220 260 Q290 200 360 300" />
                     </g>
+                    <g fill="currentColor">
+                      <circle cx="80" cy="150" r="12" />
+                      <circle cx="150" cy="268" r="12" />
+                      <circle cx="212" cy="256" r="12" />
+                    </g>
+                    <circle cx="235" cy="240" r="16" fill="currentColor" opacity="0.5" />
                   </svg>
                 </div>
                 <span class="card-tag">Teoría</span>
-                <h2>Redes <em>LSTM</em></h2>
+                <h2>Entrenar de <em>verdad</em></h2>
                 <p>
-                  Por qué las redes recurrentes olvidan y cómo la celda LSTM
-                  añade puertas para recordar. Del vanishing gradient a la
-                  atención y los Transformers.
+                  Descenso del gradiente, batch/mini-batch/SGD, learning rate y
+                  su scheduling, momentum, RMSProp y Adam.
                 </p>
                 <div class="card-meta">
-                  <span>19 diapositivas</span>
+                  <span>18 diapositivas</span>
                   <span class="sep">·</span>
-                  <span>~50 minutos</span>
-                  <span class="sep">·</span>
-                  <span>incluye la celda LSTM</span>
+                  <span>~50 min</span>
                 </div>
                 <span class="card-go"
                   >Entrar a la sesión <span class="arrow">→</span></span
                 >
               </a>
 
-              <a class="card card-tema3" href="./practica-t3.html">
+              <a class="card card-tema7" href="./practica-t7.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <path
-                      d="M40 160 H360"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="3"
-                    />
-                    <circle cx="150" cy="160" r="16" fill="currentColor" />
-                    <circle
-                      cx="250"
-                      cy="160"
-                      r="16"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="3"
-                    />
-                    <path
-                      d="M60 260 q90 -70 140 0 t140 0"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                    />
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <ellipse cx="200" cy="200" rx="150" ry="60" />
+                      <ellipse cx="200" cy="200" rx="100" ry="38" />
+                      <ellipse cx="200" cy="200" rx="52" ry="18" />
+                      <path d="M70 150 L150 235 L200 205 L250 220 L330 200" stroke-width="2.5" />
+                    </g>
+                    <circle cx="200" cy="200" r="10" fill="currentColor" />
+                    <circle cx="70" cy="150" r="9" fill="currentColor" />
                   </svg>
                 </div>
                 <span class="card-tag">Práctica</span>
-                <h2>La cinta de <em>memoria</em></h2>
+                <h2>Baja la <em>colina</em></h2>
                 <p>
-                  Simulador interactivo: mueve las puertas forget, input y
-                  output y ve cómo evoluciona el estado de memoria de una celda
-                  LSTM paso a paso.
+                  Playground del descenso del gradiente: elige optimizador y
+                  learning rate, y mira la bola bajar… o divergir.
                 </p>
                 <div class="card-meta">
                   <span>interactivo</span>
                   <span class="sep">·</span>
-                  <span>3 escenarios</span>
+                  <span>3 optimizadores</span>
                 </div>
                 <span class="card-go"
                   >Abrir la práctica <span class="arrow">→</span></span
                 >
               </a>
 
-              <a class="card card-tema3" href="./lab-t3.html">
+              <a class="card card-tema7" href="./lab-t7.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
                     <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
                     <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
                     <circle cx="96" cy="115" r="6" fill="currentColor" />
                     <circle cx="120" cy="115" r="6" fill="currentColor" />
-                    <path d="M100 250 q30 -55 60 0 t60 0 t60 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-                    <path d="M100 230 L300 230" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.5" />
+                    <path d="M100 280 Q150 190 200 230 Q250 260 300 180" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M100 290 Q150 250 200 265 Q250 275 300 240" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
                   </svg>
                 </div>
                 <span class="card-tag">Laboratorio</span>
-                <h2>Una <em>LSTM</em> que recuerda</h2>
+                <h2>Curvas de <em>pérdida</em></h2>
                 <p>
-                  Notebook: entrena una LSTM en Keras para predecir una serie
-                  temporal y compárala con un MLP. Colab o descarga.
+                  Notebook: entrena el mismo MLP en Keras variando optimizador y
+                  LR, y compara las curvas. Colab o descarga.
                 </p>
                 <div class="card-meta">
                   <span>notebook</span>
@@ -1515,32 +1550,23 @@
                 >
               </a>
 
-              <a class="card card-repaso" href="./repaso-t3.html">
+              <a class="card card-repaso" href="./repaso-t7.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <path
-                      d="M120 150 a80 80 0 1 1 80 110 v30"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="18"
-                      stroke-linecap="round"
-                    />
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
                     <circle cx="200" cy="330" r="14" fill="currentColor" />
                   </svg>
                 </div>
                 <span class="card-tag">Repaso</span>
-                <h2>¿Dominas las <em>redes LSTM</em>?</h2>
+                <h2>¿Sabes <em>entrenar</em>?</h2>
                 <p>
-                  Diez retos autocorregibles sobre el gradiente que se
-                  desvanece, las tres puertas de la celda, el entrenamiento y
-                  las variantes (GRU, Bi-LSTM, atención).
+                  Diez retos autocorregibles sobre el descenso del gradiente, el
+                  learning rate, los batches y los optimizadores modernos.
                 </p>
                 <div class="card-meta">
                   <span>10 retos</span>
                   <span class="sep">·</span>
-                  <span>~5 minutos</span>
-                  <span class="sep">·</span>
-                  <span>opción única, múltiple y clasificar</span>
+                  <span>~5 min</span>
                 </div>
                 <span class="card-go"
                   >Ponerme a prueba <span class="arrow">→</span></span
@@ -1548,16 +1574,170 @@
               </a>
             </div>
 
+            <div class="subtema-band"><span class="subtema-name">2.4 · Sobreajuste y regularización</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-four">
+              <a class="card card-tema8" href="./sesion-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M50 300 Q140 100 200 200 Q260 300 350 130" />
+                      <path d="M50 280 L110 220 L160 235 L210 205 L260 240 L310 200 L350 180" stroke-width="2.5" opacity="0.55" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="110" cy="220" r="7" /><circle cx="160" cy="235" r="7" />
+                      <circle cx="210" cy="205" r="7" /><circle cx="260" cy="240" r="7" />
+                      <circle cx="310" cy="200" r="7" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="card-tag">Teoría</span>
+                <h2>Generalización y <em>regularización</em></h2>
+                <p>
+                  Overfitting y underfitting, sesgo/varianza, train/val/test,
+                  dropout, weight decay, early stopping y augmentation.
+                </p>
+                <div class="card-meta">
+                  <span>18 diapositivas</span>
+                  <span class="sep">·</span>
+                  <span>~50 min</span>
+                </div>
+                <span class="card-go"
+                  >Entrar a la sesión <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema8" href="./practica-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M60 300 L120 200 L160 240 L200 150 L240 250 L280 170 L340 260" stroke-linejoin="round" />
+                    </g>
+                    <g fill="currentColor">
+                      <circle cx="120" cy="200" r="8" /><circle cx="160" cy="240" r="8" />
+                      <circle cx="200" cy="150" r="8" /><circle cx="240" cy="250" r="8" />
+                      <circle cx="280" cy="170" r="8" />
+                    </g>
+                    <path d="M60 260 Q200 150 340 210" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4" />
+                  </svg>
+                </div>
+                <span class="card-tag">Práctica</span>
+                <h2>Provoca el <em>overfitting</em></h2>
+                <p>
+                  Sube el grado del modelo y mira separarse las curvas de train y
+                  validación; luego arréglalo con regularización.
+                </p>
+                <div class="card-meta">
+                  <span>interactivo</span>
+                  <span class="sep">·</span>
+                  <span>grado + λ</span>
+                </div>
+                <span class="card-go"
+                  >Abrir la práctica <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema8" href="./lab-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M100 270 Q170 200 300 195" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M100 280 Q160 250 210 250 Q270 250 300 215" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Overfitting y su <em>cura</em></h2>
+                <p>
+                  Notebook: provoca overfitting en Keras y arréglalo con dropout,
+                  L2 y early stopping. Colab o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-repaso" href="./repaso-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <circle cx="200" cy="330" r="14" fill="currentColor" />
+                  </svg>
+                </div>
+                <span class="card-tag">Repaso</span>
+                <h2>¿Generalizas o <em>memorizas</em>?</h2>
+                <p>
+                  Diez retos autocorregibles sobre overfitting, sesgo/varianza,
+                  train/val/test, dropout, regularización y early stopping.
+                </p>
+                <div class="card-meta">
+                  <span>10 retos</span>
+                  <span class="sep">·</span>
+                  <span>~5 min</span>
+                </div>
+                <span class="card-go"
+                  >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+          </section>
+
+          <!-- ===== TEMA 3 ===== -->
+          <section class="section" id="tema-3">
+            <div class="level-band">
+              <span class="level-name">Tema 3 · Aprendizaje No Supervisado y Redes Alternativas</span>
+              <span class="level-rule" aria-hidden="true"></span>
+            </div>
+            <h2 class="level-title">Aprender sin <em>etiquetas</em>.</h2>
+            <p class="soon-line">Autoencoders y redes de base radial (RBF) — en preparación.</p>
+
+            <div class="subtema-band"><span class="subtema-name">3.2 · Modelos generativos (GAN)</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-three">
+              <a class="card card-tema5" href="./lab-t5.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <g fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="100" cy="140" r="7" /><circle cx="100" cy="200" r="7" /><circle cx="100" cy="260" r="7" />
+                      <path d="M110 140 L180 200 M110 200 L180 200 M110 260 L180 200" />
+                      <path d="M190 200 H250" />
+                    </g>
+                    <rect x="250" y="150" width="100" height="100" rx="10" fill="currentColor" opacity="0.18" stroke="currentColor" stroke-width="2" />
+                    <path d="M268 225 L288 195 L305 215 L322 180 L338 210" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Generar con una <em>GAN</em></h2>
+                <p>
+                  Notebook: entrena una GAN mínima en Keras para fabricar dígitos
+                  MNIST desde ruido. Colab (con GPU) o descarga.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>GAN · Keras · Colab</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
           </section>
 
           <!-- ===== TEMA 4 ===== -->
           <section class="section" id="tema-4">
             <div class="level-band">
-              <span class="level-name">Tema 4 · Redes convolucionales</span>
+              <span class="level-name">Tema 4 · Arquitecturas y Modelos Profundos</span>
               <span class="level-rule" aria-hidden="true"></span>
             </div>
-            <h2 class="level-title">Redes que <em>miran</em>.</h2>
+            <h2 class="level-title">Redes que ven, recuerdan y <em>atienden</em>.</h2>
 
+            <div class="subtema-band"><span class="subtema-name">4.1 · Redes convolucionales (CNN)</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
               <a class="card card-tema4" href="./sesion-t4.html">
                 <div class="card-orn" aria-hidden="true">
@@ -1707,134 +1887,156 @@
               </a>
             </div>
 
-          </section>
-
-          <!-- ===== TEMA 5 ===== -->
-          <section class="section" id="tema-5">
-            <div class="level-band">
-              <span class="level-name">Tema 5 · Aprendizaje profundo</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">La <em>foto</em> completa.</h2>
-
+            <div class="subtema-band"><span class="subtema-name">4.2 · Modelos dinámicos: RNN / LSTM</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
-              <a class="card card-tema5" href="./sesion-t5.html">
+              <a class="card card-tema3" href="./sesion-t3.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <circle cx="200" cy="200" r="160" fill="none" stroke="currentColor" stroke-width="2" />
-                    <path d="M60 200 H340 M200 60 V340 M120 120 L280 280 M280 120 L120 280" stroke="currentColor" stroke-width="1.4" />
-                    <circle cx="200" cy="200" r="40" fill="currentColor" opacity="0.35" />
+                    <rect
+                      x="70"
+                      y="150"
+                      width="260"
+                      height="100"
+                      rx="20"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M40 175 H360"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <g fill="currentColor">
+                      <circle cx="140" cy="205" r="16" />
+                      <circle cx="200" cy="205" r="16" />
+                      <circle cx="260" cy="205" r="16" />
+                    </g>
                   </svg>
                 </div>
                 <span class="card-tag">Teoría</span>
-                <h2>Aprendizaje <em>profundo</em></h2>
+                <h2>Redes <em>LSTM</em></h2>
                 <p>
-                  La panorámica: qué hizo posible el deep learning, cómo la
-                  profundidad da abstracción y los grandes tipos de problema —
-                  clasificar, predecir, representar y generar.
+                  Por qué las redes recurrentes olvidan y cómo la celda LSTM
+                  añade puertas para recordar. Del vanishing gradient a la
+                  atención y los Transformers.
                 </p>
                 <div class="card-meta">
-                  <span>20 diapositivas</span>
+                  <span>19 diapositivas</span>
                   <span class="sep">·</span>
                   <span>~50 minutos</span>
+                  <span class="sep">·</span>
+                  <span>incluye la celda LSTM</span>
                 </div>
                 <span class="card-go"
                   >Entrar a la sesión <span class="arrow">→</span></span
                 >
               </a>
 
-              <a class="card card-tema5" href="./practica-t5.html">
+              <a class="card card-tema3" href="./practica-t3.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <rect x="70" y="90" width="120" height="120" fill="currentColor" opacity="0.25" />
-                    <g fill="currentColor">
-                      <circle cx="220" cy="110" r="8" /><circle cx="260" cy="140" r="8" />
-                      <circle cx="300" cy="115" r="8" /><circle cx="245" cy="185" r="8" />
-                      <circle cx="295" cy="180" r="8" /><circle cx="330" cy="150" r="8" />
-                    </g>
-                    <rect x="210" y="240" width="130" height="70" fill="none" stroke="currentColor" stroke-width="2" />
-                    <path d="M70 300 h120" stroke="currentColor" stroke-width="3" />
+                    <path
+                      d="M40 160 H360"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    />
+                    <circle cx="150" cy="160" r="16" fill="currentColor" />
+                    <circle
+                      cx="250"
+                      cy="160"
+                      r="16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    />
+                    <path
+                      d="M60 260 q90 -70 140 0 t140 0"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                    />
                   </svg>
                 </div>
                 <span class="card-tag">Práctica</span>
-                <h2>Engaña a la <em>red</em></h2>
+                <h2>La cinta de <em>memoria</em></h2>
                 <p>
-                  Demo interactiva de un ataque adversario (FGSM): súmale un
-                  ruido imperceptible a una imagen y mira cómo la predicción se
-                  voltea de «panda» a «gibón».
+                  Simulador interactivo: mueve las puertas forget, input y
+                  output y ve cómo evoluciona el estado de memoria de una celda
+                  LSTM paso a paso.
                 </p>
                 <div class="card-meta">
                   <span>interactivo</span>
                   <span class="sep">·</span>
-                  <span>ataque adversario</span>
+                  <span>3 escenarios</span>
                 </div>
                 <span class="card-go"
                   >Abrir la práctica <span class="arrow">→</span></span
                 >
               </a>
 
-              <a class="card card-tema5" href="./lab-t5.html">
+              <a class="card card-tema3" href="./lab-t3.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <g fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="100" cy="140" r="7" /><circle cx="100" cy="200" r="7" /><circle cx="100" cy="260" r="7" />
-                      <path d="M110 140 L180 200 M110 200 L180 200 M110 260 L180 200" />
-                      <path d="M190 200 H250" />
-                    </g>
-                    <rect x="250" y="150" width="100" height="100" rx="10" fill="currentColor" opacity="0.18" stroke="currentColor" stroke-width="2" />
-                    <path d="M268 225 L288 195 L305 215 L322 180 L338 210" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M100 250 q30 -55 60 0 t60 0 t60 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M100 230 L300 230" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.5" />
                   </svg>
                 </div>
                 <span class="card-tag">Laboratorio</span>
-                <h2>Generar con una <em>GAN</em></h2>
+                <h2>Una <em>LSTM</em> que recuerda</h2>
                 <p>
-                  Notebook: entrena una GAN mínima en Keras para fabricar dígitos
-                  MNIST desde ruido. Colab (con GPU) o descarga.
+                  Notebook: entrena una LSTM en Keras para predecir una serie
+                  temporal y compárala con un MLP. Colab o descarga.
                 </p>
                 <div class="card-meta">
                   <span>notebook</span>
                   <span class="sep">·</span>
-                  <span>GAN · Keras · Colab</span>
+                  <span>Keras · Colab</span>
                 </div>
                 <span class="card-go"
                   >Abrir el laboratorio <span class="arrow">→</span></span
                 >
               </a>
 
-              <a class="card card-repaso" href="./repaso-t5.html">
+              <a class="card card-repaso" href="./repaso-t3.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
+                    <path
+                      d="M120 150 a80 80 0 1 1 80 110 v30"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="18"
+                      stroke-linecap="round"
+                    />
                     <circle cx="200" cy="330" r="14" fill="currentColor" />
                   </svg>
                 </div>
                 <span class="card-tag">Repaso</span>
-                <h2>¿Ves la <em>foto completa</em>?</h2>
+                <h2>¿Dominas las <em>redes LSTM</em>?</h2>
                 <p>
-                  Diez retos autocorregibles sobre la panorámica del deep
-                  learning: por qué despegó, abstracción, sesgos, ImageNet,
-                  ataques adversarios, representación y generación.
+                  Diez retos autocorregibles sobre el gradiente que se
+                  desvanece, las tres puertas de la celda, el entrenamiento y
+                  las variantes (GRU, Bi-LSTM, atención).
                 </p>
                 <div class="card-meta">
                   <span>10 retos</span>
                   <span class="sep">·</span>
                   <span>~5 minutos</span>
+                  <span class="sep">·</span>
+                  <span>opción única, múltiple y clasificar</span>
                 </div>
                 <span class="card-go"
                   >Ponerme a prueba <span class="arrow">→</span></span
                 >
               </a>
             </div>
-          </section>
 
-          <!-- ===== TEMA 6 ===== -->
-          <section class="section" id="tema-6">
-            <div class="level-band">
-              <span class="level-name">Tema 6 · Atención y Transformers</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Aprender a <em>atender</em>.</h2>
-
+            <div class="subtema-band"><span class="subtema-name">4.3 · Atención y Transformers</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
               <a class="card card-tema6" href="./sesion-t6.html">
                 <div class="card-orn" aria-hidden="true">
@@ -1940,254 +2142,50 @@
                 >
               </a>
             </div>
-          </section>
 
-          <section class="section" id="tema-7">
-            <div class="level-band">
-              <span class="level-name">Tema 7 · Entrenamiento</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Bajar la <em>colina</em>.</h2>
-
-            <div class="picker picker-four">
-              <a class="card card-tema7" href="./sesion-t7.html">
+            <div class="subtema-band"><span class="subtema-name">4.4 · Limitaciones y desafíos</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-three">
+              <a class="card card-tema5" href="./practica-t5.html">
                 <div class="card-orn" aria-hidden="true">
                   <svg viewBox="0 0 400 400">
-                    <g fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M50 130 Q150 320 220 260 Q290 200 360 300" />
-                    </g>
+                    <rect x="70" y="90" width="120" height="120" fill="currentColor" opacity="0.25" />
                     <g fill="currentColor">
-                      <circle cx="80" cy="150" r="12" />
-                      <circle cx="150" cy="268" r="12" />
-                      <circle cx="212" cy="256" r="12" />
+                      <circle cx="220" cy="110" r="8" /><circle cx="260" cy="140" r="8" />
+                      <circle cx="300" cy="115" r="8" /><circle cx="245" cy="185" r="8" />
+                      <circle cx="295" cy="180" r="8" /><circle cx="330" cy="150" r="8" />
                     </g>
-                    <circle cx="235" cy="240" r="16" fill="currentColor" opacity="0.5" />
-                  </svg>
-                </div>
-                <span class="card-tag">Teoría</span>
-                <h2>Entrenar de <em>verdad</em></h2>
-                <p>
-                  Descenso del gradiente, batch/mini-batch/SGD, learning rate y
-                  su scheduling, momentum, RMSProp y Adam.
-                </p>
-                <div class="card-meta">
-                  <span>18 diapositivas</span>
-                  <span class="sep">·</span>
-                  <span>~50 min</span>
-                </div>
-                <span class="card-go"
-                  >Entrar a la sesión <span class="arrow">→</span></span
-                >
-              </a>
-
-              <a class="card card-tema7" href="./practica-t7.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <g fill="none" stroke="currentColor" stroke-width="2">
-                      <ellipse cx="200" cy="200" rx="150" ry="60" />
-                      <ellipse cx="200" cy="200" rx="100" ry="38" />
-                      <ellipse cx="200" cy="200" rx="52" ry="18" />
-                      <path d="M70 150 L150 235 L200 205 L250 220 L330 200" stroke-width="2.5" />
-                    </g>
-                    <circle cx="200" cy="200" r="10" fill="currentColor" />
-                    <circle cx="70" cy="150" r="9" fill="currentColor" />
+                    <rect x="210" y="240" width="130" height="70" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 300 h120" stroke="currentColor" stroke-width="3" />
                   </svg>
                 </div>
                 <span class="card-tag">Práctica</span>
-                <h2>Baja la <em>colina</em></h2>
+                <h2>Engaña a la <em>red</em></h2>
                 <p>
-                  Playground del descenso del gradiente: elige optimizador y
-                  learning rate, y mira la bola bajar… o divergir.
+                  Demo interactiva de un ataque adversario (FGSM): súmale un
+                  ruido imperceptible a una imagen y mira cómo la predicción se
+                  voltea de «panda» a «gibón».
                 </p>
                 <div class="card-meta">
                   <span>interactivo</span>
                   <span class="sep">·</span>
-                  <span>3 optimizadores</span>
+                  <span>ataque adversario</span>
                 </div>
                 <span class="card-go"
                   >Abrir la práctica <span class="arrow">→</span></span
                 >
               </a>
-
-              <a class="card card-tema7" href="./lab-t7.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
-                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
-                    <circle cx="96" cy="115" r="6" fill="currentColor" />
-                    <circle cx="120" cy="115" r="6" fill="currentColor" />
-                    <path d="M100 280 Q150 190 200 230 Q250 260 300 180" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-                    <path d="M100 290 Q150 250 200 265 Q250 275 300 240" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
-                  </svg>
-                </div>
-                <span class="card-tag">Laboratorio</span>
-                <h2>Curvas de <em>pérdida</em></h2>
-                <p>
-                  Notebook: entrena el mismo MLP en Keras variando optimizador y
-                  LR, y compara las curvas. Colab o descarga.
-                </p>
-                <div class="card-meta">
-                  <span>notebook</span>
-                  <span class="sep">·</span>
-                  <span>Keras · Colab</span>
-                </div>
-                <span class="card-go"
-                  >Abrir el laboratorio <span class="arrow">→</span></span
-                >
-              </a>
-
-              <a class="card card-repaso" href="./repaso-t7.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
-                    <circle cx="200" cy="330" r="14" fill="currentColor" />
-                  </svg>
-                </div>
-                <span class="card-tag">Repaso</span>
-                <h2>¿Sabes <em>entrenar</em>?</h2>
-                <p>
-                  Diez retos autocorregibles sobre el descenso del gradiente, el
-                  learning rate, los batches y los optimizadores modernos.
-                </p>
-                <div class="card-meta">
-                  <span>10 retos</span>
-                  <span class="sep">·</span>
-                  <span>~5 min</span>
-                </div>
-                <span class="card-go"
-                  >Ponerme a prueba <span class="arrow">→</span></span
-                >
-              </a>
             </div>
           </section>
 
-          <section class="section" id="tema-8">
+          <!-- ===== TEMA 5 ===== -->
+          <section class="section" id="tema-5">
             <div class="level-band">
-              <span class="level-name">Tema 8 · Generalización</span>
+              <span class="level-name">Tema 5 · Implementación y Aplicaciones Prácticas</span>
               <span class="level-rule" aria-hidden="true"></span>
             </div>
-            <h2 class="level-title">Aprender, no <em>memorizar</em>.</h2>
+            <h2 class="level-title">De la teoría al <em>código</em>.</h2>
 
-            <div class="picker picker-four">
-              <a class="card card-tema8" href="./sesion-t8.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <g fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M50 300 Q140 100 200 200 Q260 300 350 130" />
-                      <path d="M50 280 L110 220 L160 235 L210 205 L260 240 L310 200 L350 180" stroke-width="2.5" opacity="0.55" />
-                    </g>
-                    <g fill="currentColor">
-                      <circle cx="110" cy="220" r="7" /><circle cx="160" cy="235" r="7" />
-                      <circle cx="210" cy="205" r="7" /><circle cx="260" cy="240" r="7" />
-                      <circle cx="310" cy="200" r="7" />
-                    </g>
-                  </svg>
-                </div>
-                <span class="card-tag">Teoría</span>
-                <h2>Generalización y <em>regularización</em></h2>
-                <p>
-                  Overfitting y underfitting, sesgo/varianza, train/val/test,
-                  dropout, weight decay, early stopping y augmentation.
-                </p>
-                <div class="card-meta">
-                  <span>18 diapositivas</span>
-                  <span class="sep">·</span>
-                  <span>~50 min</span>
-                </div>
-                <span class="card-go"
-                  >Entrar a la sesión <span class="arrow">→</span></span
-                >
-              </a>
-
-              <a class="card card-tema8" href="./practica-t8.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <g fill="none" stroke="currentColor" stroke-width="2.5">
-                      <path d="M60 300 L120 200 L160 240 L200 150 L240 250 L280 170 L340 260" stroke-linejoin="round" />
-                    </g>
-                    <g fill="currentColor">
-                      <circle cx="120" cy="200" r="8" /><circle cx="160" cy="240" r="8" />
-                      <circle cx="200" cy="150" r="8" /><circle cx="240" cy="250" r="8" />
-                      <circle cx="280" cy="170" r="8" />
-                    </g>
-                    <path d="M60 260 Q200 150 340 210" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4" />
-                  </svg>
-                </div>
-                <span class="card-tag">Práctica</span>
-                <h2>Provoca el <em>overfitting</em></h2>
-                <p>
-                  Sube el grado del modelo y mira separarse las curvas de train y
-                  validación; luego arréglalo con regularización.
-                </p>
-                <div class="card-meta">
-                  <span>interactivo</span>
-                  <span class="sep">·</span>
-                  <span>grado + λ</span>
-                </div>
-                <span class="card-go"
-                  >Abrir la práctica <span class="arrow">→</span></span
-                >
-              </a>
-
-              <a class="card card-tema8" href="./lab-t8.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
-                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
-                    <circle cx="96" cy="115" r="6" fill="currentColor" />
-                    <circle cx="120" cy="115" r="6" fill="currentColor" />
-                    <path d="M100 270 Q170 200 300 195" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-                    <path d="M100 280 Q160 250 210 250 Q270 250 300 215" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5" />
-                  </svg>
-                </div>
-                <span class="card-tag">Laboratorio</span>
-                <h2>Overfitting y su <em>cura</em></h2>
-                <p>
-                  Notebook: provoca overfitting en Keras y arréglalo con dropout,
-                  L2 y early stopping. Colab o descarga.
-                </p>
-                <div class="card-meta">
-                  <span>notebook</span>
-                  <span class="sep">·</span>
-                  <span>Keras · Colab</span>
-                </div>
-                <span class="card-go"
-                  >Abrir el laboratorio <span class="arrow">→</span></span
-                >
-              </a>
-
-              <a class="card card-repaso" href="./repaso-t8.html">
-                <div class="card-orn" aria-hidden="true">
-                  <svg viewBox="0 0 400 400">
-                    <path d="M120 150 a80 80 0 1 1 80 110 v30" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" />
-                    <circle cx="200" cy="330" r="14" fill="currentColor" />
-                  </svg>
-                </div>
-                <span class="card-tag">Repaso</span>
-                <h2>¿Generalizas o <em>memorizas</em>?</h2>
-                <p>
-                  Diez retos autocorregibles sobre overfitting, sesgo/varianza,
-                  train/val/test, dropout, regularización y early stopping.
-                </p>
-                <div class="card-meta">
-                  <span>10 retos</span>
-                  <span class="sep">·</span>
-                  <span>~5 min</span>
-                </div>
-                <span class="card-go"
-                  >Ponerme a prueba <span class="arrow">→</span></span
-                >
-              </a>
-            </div>
-          </section>
-
-          <section class="section" id="tema-9">
-            <div class="level-band">
-              <span class="level-name">Tema 9 · Evaluación</span>
-              <span class="level-rule" aria-hidden="true"></span>
-            </div>
-            <h2 class="level-title">Más allá del <em>accuracy</em>.</h2>
-
+            <div class="subtema-band"><span class="subtema-name">5.1 · Validación y métricas de evaluación</span><span class="subtema-rule" aria-hidden="true"></span></div>
             <div class="picker picker-four">
               <a class="card card-tema9" href="./sesion-t9.html">
                 <div class="card-orn" aria-hidden="true">
@@ -2290,6 +2288,243 @@
                 </div>
                 <span class="card-go"
                   >Ponerme a prueba <span class="arrow">→</span></span
+                >
+              </a>
+            </div>
+
+            <div class="subtema-band"><span class="subtema-name">5.2 · Librerías y casos aplicados</span><span class="subtema-rule" aria-hidden="true"></span></div>
+            <div class="picker picker-four">
+              <a class="card card-tema5" href="./lab-t1.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Red neuronal artificial (ANN)</h2>
+                <p>
+                  Tu primera red en Keras: clasifica Fashion-MNIST con una ANN simple.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 1 · Fundamentos</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t2.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>MLP en Keras</h2>
+                <p>
+                  Construye y entrena un perceptrón multicapa sobre el dataset Wine.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 1 · Fundamentos</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t3.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>LSTM</h2>
+                <p>
+                  Entrena una LSTM en Keras para predecir una serie temporal.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 2 · Arquitecturas</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t4.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>CNN</h2>
+                <p>
+                  Clasifica imágenes con una CNN y aplica transfer learning con MobileNetV2.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 2 · Arquitecturas</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t5.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>GAN</h2>
+                <p>
+                  Entrena una GAN mínima para fabricar dígitos MNIST desde ruido.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 2 · No supervisado</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t6.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Transformers</h2>
+                <p>
+                  Ajusta DistilBERT para clasificar sentimiento (fine-tuning).
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 2 · Arquitecturas</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t7.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Optimizadores</h2>
+                <p>
+                  Compara curvas de pérdida variando optimizador y learning rate.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 1 · Fundamentos</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t8.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Regularización</h2>
+                <p>
+                  Provoca overfitting y arréglalo con dropout, L2 y early stopping.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 1 · Fundamentos</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
+                >
+              </a>
+
+              <a class="card card-tema5" href="./lab-t9.html">
+                <div class="card-orn" aria-hidden="true">
+                  <svg viewBox="0 0 400 400">
+                    <rect x="70" y="90" width="260" height="220" rx="16" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path d="M70 140 H330" stroke="currentColor" stroke-width="2" />
+                    <circle cx="96" cy="115" r="6" fill="currentColor" />
+                    <circle cx="120" cy="115" r="6" fill="currentColor" />
+                    <path d="M150 200 l-30 25 l30 25 M250 200 l30 25 l-30 25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M205 190 l-20 70" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                </div>
+                <span class="card-tag">Laboratorio</span>
+                <h2>Evaluación</h2>
+                <p>
+                  Métricas, matriz de confusión y ROC de un clasificador desbalanceado.
+                </p>
+                <div class="card-meta">
+                  <span>notebook</span>
+                  <span class="sep">·</span>
+                  <span>Tema 5 · Implementación</span>
+                </div>
+                <span class="card-go"
+                  >Abrir el laboratorio <span class="arrow">→</span></span
                 >
               </a>
             </div>
