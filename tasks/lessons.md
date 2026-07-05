@@ -29,6 +29,33 @@ ficheros: un subagente con la tabla completa.
 la fase entera con contexto completo; reserva la granularidad fina para tareas realmente
 independientes. Verifica su diff tú mismo en el navegador (autoridad para HTML de presentación).
 
+## Subagentes en paralelo sí, cuando los bundles tocan ficheros DISJUNTOS
+
+La lección anterior ("1 subagente por fase en ficheros acoplados") es sobre NO partir UN
+fichero entre agentes. Su reverso también es cierto: cuando el trabajo son varios bundles
+con slugs propios que no se solapan (Fase C: autoencoders / generativos / rbf, cada uno sus
+`sesion-*`, `practica-*`, etc.), **sí** conviene un subagente por bundle EN PARALELO.
+
+**Why:** en Fase C lancé 3 subagentes a la vez (uno por subtema del Tema 3); no colisionaron
+porque ninguno tocaba `index.html` (esa parte, acoplada, la cableé yo entre bundles). Salió
+a la primera y en paralelo.
+
+**How to apply:** reparte por bundle (conjunto de ficheros que van juntos), no por micro-tarea
+ni por fichero. Prohíbe explícitamente a los subagentes tocar el fichero compartido (`index.html`);
+haz tú esa costura y verifica en navegador.
+
+## Interactivo honesto sin entrenar en el navegador → base fija (DCT), con nota de honestidad
+
+Para el interactivo de autoencoders ("mueve k y mira la reconstrucción") no se puede entrenar
+una red en el navegador. Solución honesta y sin libs: compresión por **base fija** (DCT 2D:
+quedarse con k coeficientes en zigzag y reconstruir por IDCT). Es un autoencoder lineal
+undercomplete de facto y el error decrece de forma monótona con k.
+
+**Why:** transmite el mensaje real (tamaño del código ↔ calidad de reconstrucción) sin mentir.
+**How to apply:** cuando simules un modelo que no puedes entrenar en cliente, usa un stand-in
+matemáticamente correcto y añade una **nota visible** ("un autoencoder real aprende su propia
+base; aquí usamos una fija para ver el efecto en vivo"). No lo disfraces de lo que no es.
+
 ## Antes de "reordenar temas": contrastar con la Guía Docente oficial
 
 El sitio había derivado a 9 "temas" planos, pero la Guía Docente oficial (G227) tiene **5
