@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CUNEF · Aprendizaje Profundo · Tema 3 · Modelos generativos</title>
+    <meta
+      name="description"
+      content="Subtema 3.2 de Aprendizaje Profundo en CUNEF. Modelos generativos: generar vs discriminar, la idea adversaria de las GAN (generador vs discriminador, ruido latente z, juego minimax), y panorámica GAN/VAE/difusión con sus retos y ética."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <a class="brand" href="./index.html" title="Volver al inicio">
+        <img class="brand-logo" src="./assets/cunef-logo.png" alt="CUNEF" />
+        <span class="brand-sep">·</span>
+        <span class="brand-text">Aprendizaje Profundo · Tema 3 · Modelos generativos</span>
+      </a>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="counter">
+        <span id="slideNum">1</span><span class="counter-sep">/</span><span id="slideTotal">0</span>
+      </div>
+      <button class="topbar-pdf" id="pdfBtn" type="button" title="Descargar como PDF (P)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        PDF
+      </button>
+    </div>
+
+    <main id="deck">
+      <!-- 00 — PORTADA -->
+      <section class="slide slide-cover" data-title="Portada">
+        <div class="cover-grid">
+          <div class="cover-meta">
+            <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
+            <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">3.2 · Modelos generativos (GAN)</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~45 minutos</span></div>
+          </div>
+          <h1 class="cover-title">Máquinas que<br /><em>imaginan</em>.</h1>
+          <p class="cover-sub">
+            Hasta ahora los modelos <em>decidían</em>: ¿es esto un 7? Hoy damos
+            un salto: enseñar a una red a <em>crear</em> ejemplos nuevos que
+            nunca existieron. Es la idea detrás de las
+            <em>GAN</em> y de las imágenes generadas por IA.
+          </p>
+          <div class="cover-foot">
+            <span>→ Usa las flechas del teclado para avanzar</span>
+            <span class="cover-foot-dot">·</span>
+            <span>Pulsa <kbd>?</kbd> para ayuda</span>
+          </div>
+        </div>
+        <div class="cover-ornament" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <g fill="none" stroke="currentColor" stroke-width="0.5">
+              <rect x="120" y="120" width="80" height="80" />
+              <rect x="200" y="120" width="80" height="80" />
+              <rect x="120" y="200" width="80" height="80" />
+              <rect x="200" y="200" width="80" height="80" />
+            </g>
+            <circle cx="160" cy="160" r="7" fill="currentColor" opacity="0.7" />
+            <circle cx="240" cy="240" r="7" fill="currentColor" opacity="0.7" />
+            <circle cx="240" cy="160" r="4" fill="currentColor" opacity="0.35" />
+            <circle cx="160" cy="240" r="4" fill="currentColor" opacity="0.35" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- 01 — AGENDA -->
+      <section class="slide" data-title="Agenda">
+        <div class="slide-inner">
+          <span class="kicker">Agenda · ~45&nbsp;min</span>
+          <h2 class="h2">Lo que vamos a ver.</h2>
+          <ol class="agenda">
+            <li><span class="agenda-num">01</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Generar vs. discriminar</span><span class="agenda-desc">Aprender la frontera entre clases o aprender la distribución de los datos.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">18&prime;</span>
+              <div><span class="agenda-title">La idea adversaria</span><span class="agenda-desc">Dos redes en duelo: el falsificador y el detective. El juego minimax.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">15&prime;</span>
+              <div><span class="agenda-title">Panorámica y retos</span><span class="agenda-desc">GAN, VAE y difusión; inestabilidad, mode collapse y ética.</span></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 02 — DIVISOR 1 -->
+      <section class="slide slide-divider" data-title="Generar vs discriminar">
+        <div class="divider-inner">
+          <span class="divider-num">— 01 —</span>
+          <h2 class="divider-title">Generar<br />vs. <em>discriminar</em>.</h2>
+          <p class="divider-sub">
+            Todo lo que hemos hecho hasta ahora era <em>discriminar</em>. Generar
+            es un objetivo distinto: producir datos <em>nuevos</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 — Frontera vs distribución -->
+      <section class="slide" data-title="Frontera vs distribución">
+        <div class="slide-inner">
+          <span class="kicker">Dos objetivos distintos</span>
+          <h2 class="h2">La <em>frontera</em> o la <em>distribución</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Discriminar (lo hecho)</h3>
+              <p>Aprender la <em>frontera</em> que separa las clases.</p>
+              <ul class="neuron-notes"><li>«Dado un dato, ¿de qué clase es?»</li><li>Basta con saber dónde cae la línea entre gatos y perros.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Generar (lo nuevo)</h3>
+              <p>Aprender la <em>distribución</em> de los datos para producir ejemplos.</p>
+              <ul class="neuron-notes"><li>«¿Cómo es un gato, en general?»</li><li>Si la conoces, puedes <em>dibujar</em> gatos que no existen.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            Discriminar solo necesita la <strong>separación</strong>. Generar
+            necesita entender <strong>cómo son los datos por dentro</strong>: es
+            un problema más difícil y más ambicioso.
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 — ¿es un 7? vs dibújame un 7 -->
+      <section class="slide" data-title="¿Es un 7? vs dibuja un 7">
+        <div class="slide-inner">
+          <span class="kicker">La misma cifra, dos preguntas</span>
+          <h2 class="h2">«¿Es un 7?» vs. «<em>dibújame</em> un 7».</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un clasificador responde <em>«¿es un 7?»</em> con un sí o un no.
+                Un modelo generativo hace algo mucho más exigente:
+                <strong>dibujar un 7 nuevo</strong> que no esté en ningún dataset
+                y que aun así parezca escrito por una persona.
+              </p>
+              <p class="note">
+                Para eso no basta con reconocer sietes: hay que haber
+                <em>interiorizado</em> qué hace que un trazo parezca un 7.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Discriminativo vs generativo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">discriminativo → ¿es un 7? → sí / no</span>
+                <span class="pt-c">generativo → dame un 7 → 🖊️ un 7 inédito</span>
+                <span class="pt-f">crear es más difícil que juzgar</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — Puente desde 3.1 -->
+      <section class="slide" data-title="Puente desde 3.1">
+        <div class="slide-inner">
+          <span class="kicker">Enlazando con el subtema anterior</span>
+          <h2 class="h2">Ya habíamos <em>generado</em> algo.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En 3.1 vimos el <strong>autoencoder</strong>: comprime un dato a
+                un <em>espacio latente</em> pequeño y lo reconstruye. Su primo, el
+                <strong>VAE</strong>, ya <em>genera</em>: muestreas un punto del
+                latente y el decodificador produce un dato nuevo.
+              </p>
+              <p class="note">
+                La <strong>GAN</strong> es <em>otra ruta</em> hacia el mismo
+                destino —crear muestras realistas—, pero con una idea muy
+                distinta: no reconstruir, sino <em>competir</em>.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Dos rutas a generar</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">VAE → del latente al dato, reconstruyendo</span>
+                <span class="pt-c">GAN → del ruido al dato, compitiendo</span>
+                <span class="pt-f">mismo objetivo, filosofías distintas</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
+      <section class="slide slide-divider" data-title="La idea adversaria">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">La idea<br /><em>adversaria</em>.</h2>
+          <p class="divider-sub">
+            El truco de las GAN: poner a dos redes a <em>competir</em>, y dejar
+            que esa competición las haga mejorar a ambas.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Dos redes en duelo -->
+      <section class="slide" data-title="Dos redes en duelo">
+        <div class="slide-inner">
+          <span class="kicker">El falsificador y el detective</span>
+          <h2 class="h2">Dos redes en <em>duelo</em>.</h2>
+          <svg viewBox="0 0 760 190" style="width:100%; height:auto; margin:6px 0 10px">
+            <g text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">
+              <text x="60" y="55" font-family="JetBrains Mono" fill="#7c80a6">ruido z</text>
+              <path d="M60 65 V80" stroke="#c9c3b3"/>
+              <rect x="20" y="80" width="90" height="46" rx="6" fill="#ff5700"/>
+              <text x="65" y="108" fill="#fff" font-weight="600">Generador</text>
+              <path d="M110 103 H175" stroke="#c9c3b3" marker-end="url(#g5)"/>
+              <rect x="180" y="80" width="90" height="46" rx="6" fill="none" stroke="#1a1f6c" stroke-width="1.5"/>
+              <text x="225" y="102" fill="#1a1f6c">imagen</text>
+              <text x="225" y="118" fill="#c8410f" font-style="italic">falsa</text>
+              <rect x="180" y="20" width="90" height="40" rx="6" fill="none" stroke="#0796a3" stroke-width="1.5"/>
+              <text x="225" y="38" fill="#0796a3">imagen</text>
+              <text x="225" y="53" fill="#0796a3" font-style="italic">real</text>
+              <path d="M270 103 H345" stroke="#c9c3b3" marker-end="url(#g5)"/>
+              <path d="M270 40 H320 V95 H345" fill="none" stroke="#c9c3b3" marker-end="url(#g5)"/>
+              <rect x="350" y="72" width="110" height="60" rx="6" fill="#1a1f6c"/>
+              <text x="405" y="98" fill="#fff" font-weight="600">Discriminador</text>
+              <text x="405" y="116" fill="#fff">¿real o falsa?</text>
+              <path d="M460 102 H520" stroke="#c9c3b3" marker-end="url(#g5)"/>
+              <text x="565" y="98" font-family="Taviraj" font-style="italic" font-size="15" fill="#1a1f6c">real / falso</text>
+              <path d="M405 132 Q405 175 120 175 Q65 175 65 128" fill="none" stroke="#c8410f" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#g5b)"/>
+              <text x="240" y="172" fill="#c8410f" font-style="italic" font-size="11">el generador aprende a engañar</text>
+            </g>
+            <defs>
+              <marker id="g5" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3"/></marker>
+              <marker id="g5b" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c8410f"/></marker>
+            </defs>
+          </svg>
+          <p class="note">
+            El <strong>generador</strong> es un falsificador: fabrica imágenes.
+            El <strong>discriminador</strong> es un detective: decide si cada
+            imagen es real o falsa. Se entrenan <em>enfrentados</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 08 — De ruido a imagen -->
+      <section class="slide" data-title="De ruido a imagen">
+        <div class="slide-inner">
+          <span class="kicker">El punto de partida: z</span>
+          <h2 class="h2">De <em>ruido</em> a imagen.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El generador no parte de nada útil: parte de un vector de
+                <strong>ruido aleatorio</strong>, la <em>z</em> latente. Su
+                trabajo es transformar ese ruido en una imagen que engañe al
+                detective.
+              </p>
+              <ul class="neuron-notes">
+                <li><em>z</em> es la «semilla»: cambiarla cambia la imagen generada.</li>
+                <li>El discriminador ve tanto imágenes reales como las falsas del generador.</li>
+                <li>Es un <strong>juego minimax</strong>: uno quiere maximizar el engaño, el otro minimizarlo.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>El juego, en una línea</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">z (ruido) → Generador → imagen falsa</span>
+                <span class="pt-c">imagen (real o falsa) → Discriminador → prob.</span>
+                <span class="pt-f">G quiere engañar · D quiere acertar</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — El equilibrio -->
+      <section class="slide" data-title="El equilibrio">
+        <div class="slide-inner">
+          <span class="kicker">¿Cuándo para el duelo?</span>
+          <h2 class="h2">El equilibrio: <em>50/50</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                A medida que el generador mejora, sus falsificaciones son cada vez
+                más creíbles. El punto ideal llega cuando el discriminador ya
+                <strong>no sabe distinguir</strong>: acierta como quien lanza una
+                moneda, ~<strong>50/50</strong>.
+              </p>
+              <p class="note">
+                Lo elegante: el discriminador actúa de <em>profesor</em> del
+                generador <strong>sin necesidad de etiquetas de clase</strong>.
+                La señal de aprendizaje sale de la propia competición.
+              </p>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>El punto dulce</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">al principio → D acierta fácil (falsas toscas)</span>
+                <span class="pt-c">al mejorar G → D duda cada vez más</span>
+                <span class="pt-f">equilibrio → D ≈ 50 % (no distingue)</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 — Intuición del entrenamiento -->
+      <section class="slide" data-title="Intuición del entrenamiento">
+        <div class="slide-inner">
+          <span class="kicker">¿Cómo aprende el falsificador?</span>
+          <h2 class="h2">Gradientes que <em>enseñan</em> a engañar.</h2>
+          <p class="lead">
+            El discriminador, al juzgar, le dice al generador <em>en qué
+            dirección</em> cambiar para parecer más real. Esa señal viaja como
+            <strong>gradiente</strong> (Tema 2 · Entrenamiento) y empuja al
+            generador hacia lo que engaña al detective.
+          </p>
+          <div class="two-col">
+            <p class="lead">
+              Se alternan: un paso mejora al discriminador (detectar mejor), otro
+              mejora al generador (engañar mejor). Turnándose, <em>ambos</em>
+              suben de nivel.
+            </p>
+            <p class="note">
+              No hay etiqueta «esto es un 7»: la única guía es <strong>«¿coló o no
+              coló?»</strong>. De ahí la fuerza —y la fragilidad— del método.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — DIVISOR 3 -->
+      <section class="slide slide-divider" data-title="Panorámica y retos">
+        <div class="divider-inner">
+          <span class="divider-num">— 03 —</span>
+          <h2 class="divider-title">Panorámica<br />y <em>retos</em>.</h2>
+          <p class="divider-sub">
+            Las GAN no están solas en la familia generativa. Y generar bien tiene
+            trampas técnicas… y responsabilidades.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — La familia generativa -->
+      <section class="slide" data-title="La familia generativa">
+        <div class="slide-inner">
+          <span class="kicker">GAN no es la única vía</span>
+          <h2 class="h2">GAN, VAE y <em>difusión</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>GAN</h4>
+              <div class="fn-formula">generador vs. discriminador</div>
+              <p>Dos redes que compiten; muestras muy nítidas, pero entrenamiento delicado.</p>
+              <span class="fn-use">→ el duelo de hoy</span>
+            </div>
+            <div class="fn-card">
+              <h4>VAE</h4>
+              <div class="fn-formula">codificar → latente → decodificar</div>
+              <p>Aprende un latente ordenado y muestrea de él; estable, algo más borroso.</p>
+              <span class="fn-use">→ visto en 3.1</span>
+            </div>
+            <div class="fn-card">
+              <h4>Difusión</h4>
+              <div class="fn-formula">denoising iterativo</div>
+              <p>Parte de puro ruido y lo va <em>limpiando</em> paso a paso hasta una imagen.</p>
+              <span class="fn-use">→ el estado del arte hoy</span>
+            </div>
+          </div>
+          <p class="note">
+            La <strong>difusión</strong> engancha con la idea de «quitar ruido»
+            del autoencoder de 3.1: en lugar de reconstruir de golpe, reconstruye
+            en <em>muchos pasitos</em>. Es lo que mueve a los generadores de
+            imágenes actuales.
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — Los retos técnicos -->
+      <section class="slide" data-title="Retos técnicos">
+        <div class="slide-inner">
+          <span class="kicker">Entrenar una GAN es difícil</span>
+          <h2 class="h2">Cuando el duelo <em>se rompe</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Inestabilidad</h3>
+              <p>El equilibrio entre las dos redes es <em>frágil</em>.</p>
+              <ul class="neuron-notes"><li>Si el discriminador gana demasiado, el generador deja de recibir señal útil.</li><li>El entrenamiento puede oscilar sin converger.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Mode collapse</h3>
+              <p>El generador se <em>atasca</em> en unas pocas muestras.</p>
+              <ul class="neuron-notes"><li>Encuentra un «truco» que engaña y lo repite siempre.</li><li>Genera variedad pobre: muchos 7 casi idénticos.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            Por eso entrenar GAN tiene fama de <strong>artesanía</strong>: mucho
+            ajuste fino para mantener a los dos rivales <em>parejos</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — Usos y ética -->
+      <section class="slide slide-exercise" data-title="Usos y ética">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Poder… y responsabilidad</span>
+          <h2 class="h2 h2-ex">Para qué sirve, y a qué <em>obliga</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Generar datos abre usos muy valiosos, pero la misma tecnología
+                que crea rostros que no existen sirve para <em>falsificar</em> a
+                personas reales.
+              </p>
+              <ul class="neuron-notes">
+                <li>Síntesis de imágenes y arte.</li>
+                <li>Aumento de datos cuando faltan ejemplos.</li>
+                <li>Super-resolución y restauración.</li>
+                <li><strong>Deepfakes</strong> → desinformación y suplantación.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>La regla de oro</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">generar contenido → declarar que es sintético</span>
+                <span class="pt-c">usar rostros/voces → consentimiento</span>
+                <span class="pt-f">la potencia exige responsabilidad</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 — Ideas -->
+      <section class="slide" data-title="Ideas">
+        <div class="slide-inner">
+          <span class="kicker">Resumen del Tema 3 · Modelos generativos</span>
+          <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
+          <div class="close-grid">
+            <div class="close-item"><span class="close-num">01 · EL OBJETIVO</span><h3>Generar = distribución</h3><p>Discriminar aprende la frontera; generar aprende la distribución de los datos para crear ejemplos nuevos.</p></div>
+            <div class="close-item"><span class="close-num">02 · EL MOTOR</span><h3>Generador vs discriminador</h3><p>Dos redes en duelo: el falsificador (de z al dato) y el detective (real/falso). Equilibrio ≈ 50/50, sin etiquetas de clase.</p></div>
+            <div class="close-item"><span class="close-num">03 · LOS LÍMITES</span><h3>Retos y ética</h3><p>Inestabilidad y mode collapse en el entrenamiento; y responsabilidad ante los deepfakes.</p></div>
+          </div>
+          <div class="close-next">
+            <span>Práctica y laboratorio</span>
+            <span>Lleva el duelo generador/discriminador al código y observa cómo, partiendo de ruido, empiezan a aparecer muestras reconocibles.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Cierre -->
+      <section class="slide slide-close" data-title="Cierre">
+        <div class="slide-inner">
+          <span class="kicker">Cierre del Tema 3 · Modelos generativos</span>
+          <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
+          <p class="lead">Dos referencias para profundizar:</p>
+          <ul class="proj-list">
+            <li><strong>Goodfellow et al.</strong> — <em>"Generative Adversarial Nets"</em> (2014), el paper original de las GAN.</li>
+            <li><strong>Goodfellow, Bengio &amp; Courville</strong> — <em>Deep Learning</em>, cap. sobre modelos generativos.</li>
+          </ul>
+          <div class="close-cta-grid">
+            <a class="close-cta" href="./repaso-generativos.html">
+              <span class="close-cta-eyebrow">Comprueba lo aprendido</span>
+              <span class="close-cta-title">Repaso · modelos generativos <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Ocho retos autocorregibles sobre GAN.</span>
+            </a>
+            <a class="close-cta" href="./lab-t5.html">
+              <span class="close-cta-eyebrow">Manos a la obra</span>
+              <span class="close-cta-title">Laboratorio · generar con una GAN <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Del ruido a la imagen, paso a paso en Python.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="controls">
+      <button class="ctrl" id="prevBtn" type="button" title="Anterior (←)" aria-label="Slide anterior">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button class="ctrl" id="nextBtn" type="button" title="Siguiente (→)" aria-label="Slide siguiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
+
+    <div class="help" id="help" hidden>
+      <div class="help-inner">
+        <h3>Atajos</h3>
+        <ul>
+          <li><kbd>→</kbd> <kbd>↓</kbd> <kbd>Espacio</kbd> Siguiente</li>
+          <li><kbd>←</kbd> <kbd>↑</kbd> Anterior</li>
+          <li><kbd>Home</kbd> Primera · <kbd>End</kbd> Última</li>
+          <li><kbd>P</kbd> Descargar como PDF</li>
+          <li><kbd>?</kbd> Ayuda · <kbd>Esc</kbd> Cerrar</li>
+        </ul>
+        <button id="helpClose" type="button">Cerrar</button>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
