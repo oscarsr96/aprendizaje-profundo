@@ -317,6 +317,14 @@ body::before {
   margin: 0 auto;
 }
 
+/* Logo CUNEF Universidad en la portada (también sale en el PDF). */
+.cover-logo {
+  display: block;
+  height: 30px;
+  width: auto;
+  margin-bottom: 34px;
+}
+
 .cover-meta {
   display: flex;
   gap: 48px;
