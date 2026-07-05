@@ -192,94 +192,20 @@
       .picker-two {
         grid-template-columns: repeat(2, 1fr);
       }
-      .picker-three {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
-      }
-      @media (max-width: 720px) {
-        .picker-two {
-          grid-template-columns: 1fr;
-        }
-        .picker-three {
-          grid-template-columns: 1fr;
-        }
-      }
-      @media (min-width: 721px) and (max-width: 960px) {
-        .picker-three {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      /* Tarjetas compactas para la fila de 3 */
-      .picker-three .card {
-        gap: 10px;
-        padding: 26px 24px 22px;
-        border-radius: 12px;
-      }
-      .picker-three .card h2 {
-        font-size: clamp(20px, 2.4vw, 25px);
-      }
-      .picker-three .card p {
-        font-size: 13.5px;
-        line-height: 1.5;
-      }
-      .picker-three .card-meta {
-        flex-wrap: wrap;
-        font-size: 11px;
-        row-gap: 2px;
-      }
-      .picker-three .card-go {
-        font-size: 13px;
-        margin-top: 10px;
-      }
-      .picker-three .card-orn {
-        width: 130px;
-        height: 130px;
-        top: -28px;
-        right: -28px;
-      }
-
-      /* Fila de 4 (Teoría · Práctica · Laboratorio · Repaso) */
+      /* Rejilla de 2 columnas con tarjetas grandes (estilo cunef_claude_sessions).
+         picker-three y picker-four caen a 2 columnas; el resto de cards fila
+         completa las reparte en 2×2 / 2+1 automáticamente. */
+      .picker-three,
       .picker-four {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
       }
       @media (max-width: 720px) {
+        .picker-two,
+        .picker-three,
         .picker-four {
           grid-template-columns: 1fr;
         }
-      }
-      @media (min-width: 721px) and (max-width: 1040px) {
-        .picker-four {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-      .picker-four .card {
-        gap: 9px;
-        padding: 24px 22px 20px;
-        border-radius: 12px;
-      }
-      .picker-four .card h2 {
-        font-size: clamp(19px, 2.1vw, 23px);
-      }
-      .picker-four .card p {
-        font-size: 13px;
-        line-height: 1.48;
-      }
-      .picker-four .card-meta {
-        flex-wrap: wrap;
-        font-size: 11px;
-        row-gap: 2px;
-      }
-      .picker-four .card-go {
-        font-size: 13px;
-        margin-top: 10px;
-      }
-      .picker-four .card-orn {
-        width: 116px;
-        height: 116px;
-        top: -24px;
-        right: -24px;
       }
 
       .card {
@@ -332,7 +258,9 @@
       .card-meta {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 8px;
+        row-gap: 2px;
         font-family: var(--mono);
         font-size: 12px;
         color: var(--ink-mute);
