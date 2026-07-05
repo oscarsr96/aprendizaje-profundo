@@ -2322,3 +2322,41 @@ body::before {
     gap: 12px;
   }
 }
+
+/* ===== Revelado progresivo de fragmentos (sesiones de teoría) =====
+   Se copia el comportamiento de cunef_claude_sessions: el contenido de cada
+   slide aparece paso a paso al avanzar. visibility:hidden (no display:none)
+   conserva el hueco → el escalado fit-to-screen no salta al revelar. */
+.frag {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s linear 0.25s;
+}
+.frag.is-revealed {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .frag,
+  .frag.is-revealed {
+    transition: none;
+  }
+}
+/* En PDF / impresión todo debe verse (no dejar fragmentos ocultos). */
+@media print {
+  .frag,
+  .frag.is-revealed {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+}
