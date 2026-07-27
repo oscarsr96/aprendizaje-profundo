@@ -261,6 +261,18 @@ document.addEventListener("keydown", (e) => {
   // Ignorar si el foco está en un input
   if (e.target.matches("input, textarea")) return;
 
+  // Con la rejilla abierta es un diálogo modal: solo Escape/G (cerrar) y
+  // Tab (trampa de foco). Bloqueamos la navegación de la presentación de fondo.
+  if (
+    gridIsOpen() &&
+    e.key !== "Escape" &&
+    e.key !== "g" &&
+    e.key !== "G" &&
+    e.key !== "Tab"
+  ) {
+    return;
+  }
+
   if (
     e.key === "ArrowRight" ||
     e.key === "ArrowDown" ||
@@ -288,8 +300,13 @@ document.addEventListener("keydown", (e) => {
   } else if (e.key === "p" || e.key === "P") {
     e.preventDefault();
     window.print();
+  } else if (e.key === "g" || e.key === "G") {
+    e.preventDefault();
+    if (gridIsOpen()) closeGrid();
+    else openGrid();
   } else if (e.key === "Escape") {
-    helpEl.hidden = true;
+    if (gridIsOpen()) closeGrid();
+    else helpEl.hidden = true;
   }
 });
 
@@ -360,6 +377,109 @@ helpEl.addEventListener("click", (e) => {
   if (e.target === helpEl) helpEl.hidden = true;
 });
 
+// =========================================================
+// Vista rejilla (tecla G) — visión general de todas las slides
+// (portado de cunef_claude_sessions)
+// =========================================================
+let gridEl = null;
+
+function buildGrid() {
+  gridEl = document.createElement("div");
+  gridEl.className = "grid-view";
+  gridEl.hidden = true;
+  gridEl.setAttribute("role", "dialog");
+  gridEl.setAttribute("aria-modal", "true");
+  gridEl.setAttribute("aria-label", "Vista general de diapositivas");
+  const inner = document.createElement("div");
+  inner.className = "grid-view-inner";
+  slides.forEach(function (s, i) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "grid-item";
+    const thumb = document.createElement("div");
+    thumb.className = "grid-thumb";
+    const clone = s.cloneNode(true);
+    clone.classList.remove("active");
+    clone.classList.add("grid-thumb-slide");
+    clone.setAttribute("aria-hidden", "true");
+    // El clon anula cualquier escala de ajuste de la slide original
+    clone.style.transform = "";
+    const cloneBox = clone.querySelector(
+      ".slide-inner, .divider-inner, .cover-grid",
+    );
+    if (cloneBox) cloneBox.style.transform = "";
+    // Evita ids duplicados en el documento
+    clone.querySelectorAll("[id]").forEach(function (n) {
+      n.removeAttribute("id");
+    });
+    thumb.appendChild(clone);
+    const label = document.createElement("span");
+    label.className = "grid-label";
+    label.textContent = i + 1 + " · " + (s.dataset.title || "");
+    item.appendChild(thumb);
+    item.appendChild(label);
+    item.addEventListener("click", function () {
+      closeGrid();
+      showSlide(i);
+    });
+    inner.appendChild(item);
+  });
+  gridEl.appendChild(inner);
+  // Cerrar al clicar el fondo (fuera de las miniaturas), como el panel de ayuda
+  gridEl.addEventListener("click", function (e) {
+    if (e.target === gridEl) closeGrid();
+  });
+  // Trampa de foco: Tab cicla entre las miniaturas sin salir del diálogo
+  gridEl.addEventListener("keydown", function (e) {
+    if (e.key !== "Tab") return;
+    const items = gridEl.querySelectorAll(".grid-item");
+    if (!items.length) return;
+    const firstItem = items[0];
+    const lastItem = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === firstItem) {
+      e.preventDefault();
+      lastItem.focus();
+    } else if (!e.shiftKey && document.activeElement === lastItem) {
+      e.preventDefault();
+      firstItem.focus();
+    }
+  });
+  document.body.appendChild(gridEl);
+}
+
+// Escala cada miniatura para encajar la slide (1280px de diseño) en su ancho real
+function fitThumbs() {
+  if (!gridEl) return;
+  gridEl.querySelectorAll(".grid-thumb").forEach(function (t) {
+    t.style.setProperty("--thumb-scale", (t.clientWidth / 1280).toFixed(4));
+  });
+}
+
+let gridReturnFocus = null;
+
+function openGrid() {
+  if (!gridEl) buildGrid();
+  gridReturnFocus = document.activeElement;
+  gridEl.hidden = false;
+  fitThumbs();
+  const first = gridEl.querySelector(".grid-item");
+  if (first) first.focus();
+}
+
+function closeGrid() {
+  if (gridEl) gridEl.hidden = true;
+  if (gridReturnFocus && typeof gridReturnFocus.focus === "function") {
+    gridReturnFocus.focus();
+  }
+  gridReturnFocus = null;
+}
+
+function gridIsOpen() {
+  return gridEl && !gridEl.hidden;
+}
+
+window.addEventListener("resize", fitThumbs);
+
 // Swipe en móvil
 let touchStartX = 0;
 document.addEventListener(
@@ -373,6 +493,7 @@ document.addEventListener(
 document.addEventListener(
   "touchend",
   (e) => {
+    if (gridIsOpen()) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     if (Math.abs(dx) > 60) {
       if (dx < 0) next();
