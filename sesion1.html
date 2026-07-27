@@ -324,35 +324,89 @@
         <div class="slide-inner">
           <span class="kicker">Aprender a re-mirar el problema</span>
           <h2 class="h2">Cambiar la <em>representación</em>.</h2>
-          <div class="two-col">
-            <div>
-              <p class="lead">
-                Un modelo de ML no aprende "reglas" en abstracto: aprende
-                <em>transformaciones de los datos</em> que hacen el problema más
-                fácil. A esas transformaciones las llamamos representaciones.
-              </p>
-              <p class="lead">
-                En el plano <code>(x₁, x₂)</code> los puntos del círculo y los
-                de fuera no se separan con una recta. Si cambiamos la
-                representación a <code>r² = x₁² + x₂²</code>, basta con un
-                umbral.
-              </p>
+          <p class="lead">
+            Un modelo no aprende "reglas" en abstracto: aprende
+            <em>transformaciones de los datos</em> —representaciones— que vuelven
+            fácil un problema difícil. El mismo círculo, con dos miradas:
+          </p>
+          <div class="repr-legend">
+            <span><span class="sw" style="background: #ff5700"></span>dentro del círculo · clase 1</span>
+            <span><span class="sw" style="background: #1a1f6c"></span>fuera · clase 0</span>
+          </div>
+          <div class="repr-viz">
+            <div class="repr-panel">
+              <div class="repr-cap"><span class="repr-step">Antes</span> plano <code>(x₁, x₂)</code></div>
+              <svg viewBox="0 0 236 205" style="width: 100%; height: auto">
+                <line x1="20" y1="118" x2="216" y2="118" stroke="#e2ded0" />
+                <line x1="118" y1="26" x2="118" y2="200" stroke="#e2ded0" />
+                <circle cx="118" cy="118" r="46" fill="#ff5700" fill-opacity="0.06" stroke="#c9c3b3" stroke-width="1.4" stroke-dasharray="4,4" />
+                <line x1="52" y1="44" x2="196" y2="192" stroke="#9a9ab0" stroke-width="1.6" />
+                <text x="192" y="186" text-anchor="end" font-family="Taviraj" font-style="italic" font-size="12" fill="#9a9ab0">una recta</text>
+                <circle cx="124.9" cy="106.5" r="4.5" fill="#ff5700" />
+                <circle cx="101.9" cy="111.1" r="4.5" fill="#ff5700" />
+                <circle cx="138.7" cy="131.8" r="4.5" fill="#ff5700" />
+                <circle cx="106.5" cy="141.0" r="4.5" fill="#ff5700" />
+                <circle cx="141.0" cy="97.3" r="4.5" fill="#ff5700" />
+                <circle cx="92.7" cy="127.2" r="4.5" fill="#ff5700" />
+                <circle cx="122.6" cy="146.5" r="4.5" fill="#ff5700" />
+                <circle cx="89.5" cy="101.9" r="4.5" fill="#ff5700" />
+                <circle cx="170.9" cy="97.3" r="4.5" fill="#1a1f6c" />
+                <circle cx="69.7" cy="90.4" r="4.5" fill="#1a1f6c" />
+                <circle cx="150.2" cy="69.7" r="4.5" fill="#1a1f6c" />
+                <circle cx="81.2" cy="161.7" r="4.5" fill="#1a1f6c" />
+                <circle cx="180.1" cy="143.3" r="4.5" fill="#1a1f6c" />
+                <circle cx="60.5" cy="150.2" r="4.5" fill="#1a1f6c" />
+                <circle cx="131.8" cy="51.3" r="4.5" fill="#1a1f6c" />
+                <circle cx="97.3" cy="180.1" r="4.5" fill="#1a1f6c" />
+                <circle cx="184.7" cy="78.9" r="4.5" fill="#1a1f6c" />
+                <circle cx="46.7" cy="104.2" r="4.5" fill="#1a1f6c" />
+                <text x="210" y="131" font-family="JetBrains Mono" font-size="11" fill="#9a9ab0">x₁</text>
+                <text x="123" y="34" font-family="JetBrains Mono" font-size="11" fill="#9a9ab0">x₂</text>
+              </svg>
+              <p class="repr-foot repr-foot-bad">Ninguna <strong>recta</strong> deja el dentro a un lado y el fuera al otro.</p>
             </div>
-            <div class="code-block">
-              <span class="c-com"
-                ># Cambiar de representación en un problema 2D</span
-              ><br />
-              <span class="c-kw">import</span> numpy
-              <span class="c-kw">as</span> np<br />
-              X = np.random.randn(400, 2)<br />
-              <span class="c-com"># dentro de un círculo → 1, fuera → 0</span
-              ><br />
-              y = (np.sum(X**2, axis=1) &lt; 1.0).astype(<span class="c-kw"
-                >int</span
-              >)<br /><br />
-              <span class="c-com"># Nueva característica</span><br />
-              r2 = np.sum(X**2, axis=1)<br />
-              <span class="c-com"># r² separa casi con un umbral</span>
+            <div class="repr-panel">
+              <div class="repr-cap"><span class="repr-step">Después</span> nueva característica <code>r² = x₁² + x₂²</code></div>
+              <svg viewBox="0 0 452 182" style="width: 100%; height: auto">
+                <g font-family="Inter Tight" font-size="11" fill="#7c80a6">
+                  <rect x="40" y="56" width="121.9" height="104" fill="#ff5700" fill-opacity="0.06" />
+                  <rect x="161.9" y="56" width="276.1" height="104" fill="#1a1f6c" fill-opacity="0.05" />
+                  <line x1="40" y1="120" x2="444" y2="120" stroke="#c9c3b3" marker-end="url(#raxis)" />
+                  <g text-anchor="middle" font-family="JetBrains Mono">
+                    <line x1="40" y1="116" x2="40" y2="124" stroke="#c9c3b3" /><text x="40" y="138">0</text>
+                    <line x1="161.9" y1="116" x2="161.9" y2="124" stroke="#c9c3b3" /><text x="161.9" y="138" fill="#ff5700">1</text>
+                    <line x1="283.75" y1="116" x2="283.75" y2="124" stroke="#c9c3b3" /><text x="283.75" y="138">2</text>
+                    <line x1="405.6" y1="116" x2="405.6" y2="124" stroke="#c9c3b3" /><text x="405.6" y="138">3</text>
+                  </g>
+                  <line x1="161.9" y1="46" x2="161.9" y2="166" stroke="#ff5700" stroke-width="1.6" stroke-dasharray="5,4" />
+                  <text x="161.9" y="38" text-anchor="middle" font-family="Taviraj" font-style="italic" font-size="14" fill="#ff5700">umbral r² = 1</text>
+                  <text x="101" y="74" text-anchor="middle" fill="#ff5700" font-style="italic">dentro</text>
+                  <text x="300" y="74" text-anchor="middle" fill="#1a1f6c" font-style="italic">fuera</text>
+                  <text x="444" y="110" text-anchor="end" font-family="JetBrains Mono" fill="#9a9ab0">r²</text>
+                  <circle cx="50.4" cy="98.0" r="4.5" fill="#ff5700" />
+                  <circle cx="57.7" cy="109.0" r="4.5" fill="#ff5700" />
+                  <circle cx="75.6" cy="120.0" r="4.5" fill="#ff5700" />
+                  <circle cx="78.1" cy="131.0" r="4.5" fill="#ff5700" />
+                  <circle cx="95.1" cy="142.0" r="4.5" fill="#ff5700" />
+                  <circle cx="81.7" cy="98.0" r="4.5" fill="#ff5700" />
+                  <circle cx="88.1" cy="109.0" r="4.5" fill="#ff5700" />
+                  <circle cx="101.8" cy="120.0" r="4.5" fill="#ff5700" />
+                  <circle cx="225.9" cy="131.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="218.2" cy="142.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="234.1" cy="98.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="228.0" cy="109.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="299.0" cy="120.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="290.1" cy="131.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="307.2" cy="142.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="286.8" cy="98.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="384.3" cy="109.0" r="4.5" fill="#1a1f6c" />
+                  <circle cx="343.8" cy="120.0" r="4.5" fill="#1a1f6c" />
+                </g>
+                <defs>
+                  <marker id="raxis" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3" /></marker>
+                </defs>
+              </svg>
+              <p class="repr-foot repr-foot-good">Cada punto → un número. Un solo <strong>umbral</strong> los separa.</p>
             </div>
           </div>
           <p class="note">
