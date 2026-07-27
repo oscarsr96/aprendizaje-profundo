@@ -287,7 +287,7 @@ body::before {
 
 .note {
   font-family: var(--sans);
-  font-size: 17px;
+  font-size: 18px;
   color: var(--ink-mute);
   margin-top: 20px;
   padding-left: 16px;
@@ -1870,7 +1870,7 @@ body::before {
 .flow-card h3 {
   font-family: var(--serif);
   font-style: italic;
-  font-size: 22px;
+  font-size: 25px;
   margin-bottom: 18px;
   color: var(--ink);
 }
@@ -1886,7 +1886,7 @@ body::before {
 
 .flow-tag {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 18px;
   padding: 8px 12px;
   border: 1px solid var(--line);
   background: var(--paper);
@@ -1908,7 +1908,7 @@ body::before {
   border-radius: 3px;
   font-family: var(--serif);
   font-style: italic;
-  font-size: 16px;
+  font-size: 19px;
 }
 
 .flow-box.box-ml {
@@ -1917,7 +1917,7 @@ body::before {
 
 .flow-card p {
   font-family: var(--sans);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -2030,15 +2030,15 @@ body::before {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .neuron-notes li {
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 19px;
   line-height: 1.55;
   color: var(--ink-soft);
-  padding-left: 22px;
+  padding-left: 26px;
   position: relative;
 }
 
@@ -2290,7 +2290,7 @@ body::before {
   border-left: 3px solid var(--accent);
   padding: 18px 22px;
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.6;
   color: var(--ink);
   overflow-x: auto;
