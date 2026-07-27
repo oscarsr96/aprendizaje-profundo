@@ -1970,6 +1970,93 @@ body::before {
   color: var(--accent-deep);
 }
 
+/* =========================================================
+   Línea de tiempo horizontal (.histline)
+   Eje con nodos por hito; el último es la "pieza que falta"
+   (nodo hueco + conector discontinuo).
+   ========================================================= */
+.histline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 56px;
+}
+.histline-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.histline-date {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+/* Carril que sostiene el nodo y dibuja el segmento hacia el siguiente hito */
+.histline-rail {
+  display: block;
+  align-self: stretch;
+  position: relative;
+  height: 18px;
+  margin-bottom: 22px;
+}
+.histline-rail::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+/* El último nodo no tiene continuación */
+.histline-item:last-child .histline-rail::before {
+  display: none;
+}
+/* El salto hacia "el detonante" es incierto → conector discontinuo */
+.histline-item:has(+ .is-missing) .histline-rail::before {
+  background: none;
+  height: 0;
+  border-top: 2px dashed var(--accent);
+}
+.histline-dot {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 5px var(--paper);
+  z-index: 1;
+}
+/* Nodo "pieza que falta": hueco y punteado */
+.is-missing .histline-dot {
+  background: var(--paper);
+  border: 2px dashed var(--accent);
+}
+.histline-title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink);
+  padding-right: 22px;
+}
+.histline-desc {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  padding-right: 22px;
+}
+
 /* Perceptrón — diagrama de neurona */
 .neuron {
   display: grid;
@@ -2320,6 +2407,15 @@ body::before {
   .train-loop,
   .fn-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .histline {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 16px;
+    margin-top: 32px;
+  }
+  .histline-rail::before,
+  .histline-item:has(+ .is-missing) .histline-rail::before {
+    display: none;
   }
   .types-grid,
   .apps-grid {
