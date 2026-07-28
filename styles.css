@@ -2250,6 +2250,13 @@ body::before {
   border-bottom: 1px dashed var(--line);
 }
 
+.fn-card .fn-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 4px 0 2px;
+}
+
 .fn-card p {
   font-family: var(--sans);
   font-size: 13px;

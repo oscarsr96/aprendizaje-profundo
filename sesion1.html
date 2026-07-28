@@ -1160,6 +1160,14 @@
             <div class="fn-card">
               <h4>Sigmoide</h4>
               <div class="fn-formula">σ(x) = 1 / (1 + e⁻ˣ)</div>
+              <svg class="fn-plot" viewBox="0 0 200 96">
+                <line x1="14" y1="80" x2="186" y2="80" stroke="#e2ded0" />
+                <line x1="14" y1="14" x2="186" y2="14" stroke="#c9c3b3" stroke-dasharray="3,3" />
+                <line x1="100" y1="12" x2="100" y2="82" stroke="#e2ded0" />
+                <path d="M14.0 79.8 L22.6 79.7 L34.1 79.3 L45.5 78.6 L57.0 76.9 L65.6 74.5 L74.2 70.6 L82.8 64.7 L91.4 56.6 L100.0 47.0 L108.6 37.4 L117.2 29.3 L125.8 23.4 L134.4 19.5 L145.9 16.6 L157.3 15.2 L168.8 14.5 L186.0 14.2" fill="none" stroke="#ff5700" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="11" y="17" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">1</text>
+                <text x="11" y="83" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">0</text>
+              </svg>
               <p>
                 Aplasta a (0, 1). Útil cuando la salida representa una
                 probabilidad binaria.
@@ -1169,6 +1177,15 @@
             <div class="fn-card">
               <h4>Tanh</h4>
               <div class="fn-formula">tanh(x) ∈ (−1, 1)</div>
+              <svg class="fn-plot" viewBox="0 0 200 96">
+                <line x1="14" y1="45" x2="186" y2="45" stroke="#e2ded0" />
+                <line x1="14" y1="14" x2="186" y2="14" stroke="#c9c3b3" stroke-dasharray="3,3" />
+                <line x1="14" y1="76" x2="186" y2="76" stroke="#c9c3b3" stroke-dasharray="3,3" />
+                <line x1="100" y1="12" x2="100" y2="78" stroke="#e2ded0" />
+                <path d="M14.0 75.8 L25.5 75.7 L36.9 75.2 L48.4 74.4 L59.9 72.4 L68.5 69.8 L77.1 65.6 L85.7 59.3 L94.3 51.1 L100.0 45.0 L105.7 38.9 L114.3 30.7 L122.9 24.4 L131.5 20.2 L140.1 17.6 L151.6 15.6 L163.1 14.8 L174.5 14.3 L186.0 14.2" fill="none" stroke="#ff5700" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="11" y="17" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">1</text>
+                <text x="11" y="79" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">−1</text>
+              </svg>
               <p>
                 Centrada en 0, suele entrenar mejor que sigmoide en capas
                 internas.
@@ -1178,6 +1195,12 @@
             <div class="fn-card">
               <h4>ReLU</h4>
               <div class="fn-formula">max(0, x)</div>
+              <svg class="fn-plot" viewBox="0 0 200 96">
+                <line x1="14" y1="80" x2="186" y2="80" stroke="#e2ded0" />
+                <line x1="100" y1="12" x2="100" y2="82" stroke="#e2ded0" />
+                <path d="M14 80 L100 80 L186 14" fill="none" stroke="#ff5700" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="11" y="83" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">0</text>
+              </svg>
               <p>
                 Pasa los positivos, anula los negativos. Barata, evita
                 gradientes que se desvanecen.
@@ -1187,6 +1210,14 @@
             <div class="fn-card">
               <h4>Softmax</h4>
               <div class="fn-formula">eˣⁱ / Σ eˣʲ</div>
+              <svg class="fn-plot" viewBox="0 0 200 96">
+                <line x1="14" y1="80" x2="186" y2="80" stroke="#e2ded0" />
+                <rect x="36" y="21.1" width="24" height="58.9" fill="#ff5700" />
+                <rect x="70" y="59.1" width="24" height="20.9" fill="#1a1f6c" fill-opacity="0.5" />
+                <rect x="104" y="70.5" width="24" height="9.5" fill="#1a1f6c" fill-opacity="0.5" />
+                <rect x="138" y="74.3" width="24" height="5.7" fill="#1a1f6c" fill-opacity="0.5" />
+                <text x="100" y="15" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#9a9ab0">Σ = 1</text>
+              </svg>
               <p>
                 Convierte un vector en distribución de probabilidad (suma 1).
               </p>
