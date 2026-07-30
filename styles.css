@@ -718,6 +718,35 @@ body::before {
     "WONK" 1;
 }
 
+/* Definición breve de un término (etiqueta mono + acento) */
+.def {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 16px;
+  margin: 14px 0 18px;
+  max-width: 78ch;
+}
+.def-term {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent);
+}
+.def-body {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.def-body em {
+  font-style: italic;
+  color: var(--ink);
+}
+
 /* =========================================================
    SLIDES DIVISORES (oscuros)
    ========================================================= */
