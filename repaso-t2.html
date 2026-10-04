@@ -706,9 +706,9 @@
           q: "La neurona artificial imita a la biológica. Empareja cada parte con su función.",
           buckets: ["Recibe la entrada", "Integra / suma", "Transmite la salida"],
           items: [
+            { text: "Axón", bucket: 2 },
             { text: "Dendritas", bucket: 0 },
             { text: "Cuerpo celular (soma)", bucket: 1 },
-            { text: "Axón", bucket: 2 },
           ],
           explain:
             "Las dendritas reciben las entradas (xᵢ), el cuerpo las integra (Σ wᵢxᵢ + b) y el axón transmite la salida (y). La neurona artificial imita este esquema de forma matemática.",
@@ -718,11 +718,11 @@
           q: "¿Cuál es el valor neto z que calcula una neurona artificial antes de la activación?",
           options: [
             "z = max(0, x)",
-            "z = Σ wᵢ·xᵢ + b",
             "z = Π wᵢ·xᵢ",
-            "z = f(x₁, x₂, …) directamente",
+            "z = f(x₁, x₂, …)",
+            "z = Σ wᵢ·xᵢ + b",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "El valor neto es la suma de las entradas ponderadas por sus pesos más el sesgo o tendencia (bias). Después, la activación f comprime z para producir la salida.",
         },
@@ -731,12 +731,12 @@
           q: "¿Qué propiedades aportan las redes neuronales artificiales frente a un sistema de reglas fijo?",
           hint: "Marca todas las que apliquen.",
           options: [
-            "Auto-organización y adaptatividad ante nuevos datos",
-            "Procesado no lineal de la información",
+            "Ejecución secuencial, una operación cada vez",
+            "Auto-organización y adaptación a nuevos datos",
+            "Procesado no lineal de la información de entrada",
             "Procesado en paralelo con muchas unidades",
-            "Ejecución estrictamente secuencial, una operación cada vez",
           ],
-          correct: [0, 1, 2],
+          correct: [1,  2,  3],
           explain:
             "Auto-organización, procesado no lineal y procesado paralelo son las tres propiedades clave. Justo lo contrario de una ejecución rígidamente secuencial.",
         },
@@ -744,12 +744,12 @@
           type: "choice",
           q: "En una red 'totalmente conectada', ¿cómo se enlazan las neuronas?",
           options: [
-            "Cada neurona se conecta solo a una región de la capa siguiente",
-            "Cada neurona enlaza con todas las neuronas de la capa siguiente",
-            "Cada neurona forma su propia subred independiente por clase",
+            "Cada neurona enlaza con todas las de la capa siguiente",
+            "Cada neurona se une solo a una región de la capa siguiente",
+            "Cada neurona forma una subred independiente por clase",
             "Las neuronas de una misma capa se conectan entre sí",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             "Totalmente conectada = cada neurona enlaza con todas las de la capa siguiente. Si solo se conecta a una región, es localmente conectada. Una subred por clase sería OCON.",
         },
@@ -758,9 +758,9 @@
           q: "¿Cada afirmación describe una red feedforward o una recurrente?",
           buckets: ["Feedforward", "Recurrente"],
           items: [
+            { text: "Hay realimentación y un estado interno (memoria)", bucket: 1 },
             { text: "La información avanza en un único sentido hacia la salida", bucket: 0 },
             { text: "El perceptrón simple y el MLP", bucket: 0 },
-            { text: "Hay realimentación y un estado interno (memoria)", bucket: 1 },
             { text: "Salidas que vuelven hacia capas anteriores", bucket: 1 },
           ],
           explain:
@@ -772,9 +772,9 @@
           buckets: ["Supervisado", "No supervisado"],
           items: [
             { text: "Necesita un 'profesor' que indique la salida correcta", bucket: 0 },
-            { text: "Ajusta pesos por corrección de error (regla delta)", bucket: 0 },
             { text: "Nadie dice si la salida es correcta", bucket: 1 },
             { text: "Busca regularidades y categorías ocultas en los datos", bucket: 1 },
+            { text: "Ajusta pesos por corrección de error (regla delta)", bucket: 0 },
           ],
           explain:
             "Supervisado: hay una salida deseada que guía el ajuste (corrección de error, refuerzo). No supervisado (o auto-supervisado): solo hay datos y se busca estructura.",
@@ -783,12 +783,12 @@
           type: "choice",
           q: "En la regla delta Δwᵢ = η · (d − y) · xᵢ, ¿qué representa el término (d − y)?",
           options: [
-            "La tasa de aprendizaje",
-            "El error: la diferencia entre la salida deseada y la obtenida",
-            "El valor de la entrada",
-            "El sesgo (bias) de la neurona",
+            "La tasa de aprendizaje que fija cada paso",
+            "El valor de la entrada que multiplica a ese peso",
+            "El error: salida deseada menos salida obtenida",
+            "El sesgo (bias) que se suma en la neurona",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "d es la salida deseada e y la real, así que (d − y) es el error. η es la tasa de aprendizaje y xᵢ la entrada. Si el error es 0, el peso no cambia.",
         },
@@ -796,10 +796,10 @@
           type: "choice",
           q: "¿Por qué el perceptrón simple NO puede resolver el problema XOR?",
           options: [
-            "Porque tiene demasiados pesos que ajustar",
-            "Porque XOR no es linealmente separable: una sola recta no separa las clases",
-            "Porque XOR necesita más de dos entradas",
-            "Porque la regla delta nunca converge",
+            "Tiene demasiados pesos para ajustarlos a la vez",
+            "XOR no es linealmente separable con una recta",
+            "XOR necesita más de dos entradas para definirse",
+            "Su activación no admite entradas binarias",
           ],
           correct: 1,
           explain:
@@ -809,12 +809,12 @@
           type: "choice",
           q: "¿Qué se consigue al añadir capas ocultas y pasar al perceptrón multicapa (MLP)?",
           options: [
-            "Reducir el número de parámetros de la red",
-            "Transformar el espacio para aprender fronteras no lineales, como el XOR",
+            "Reducir el número total de parámetros de la red",
             "Eliminar la necesidad de funciones de activación",
-            "Convertir la red en recurrente",
+            "Convertir la red en recurrente, con memoria",
+            "Aprender fronteras no lineales, como la del XOR",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "Cada capa oculta transforma la representación; con activaciones no lineales el MLP aprende fronteras complejas. Con suficientes neuronas es un aproximador universal.",
         },
@@ -822,12 +822,12 @@
           type: "choice",
           q: "¿Qué hace el algoritmo de backpropagation al entrenar un MLP?",
           options: [
-            "Propaga las entradas hacia delante para obtener la salida",
-            "Propaga el error desde la salida hacia atrás para ajustar los pesos",
-            "Inicializa los pesos de forma aleatoria",
-            "Elimina las capas que no aportan a la predicción",
+            "Propaga el error hacia atrás para ajustar los pesos",
+            "Propaga las entradas hacia delante hasta la salida",
+            "Inicializa al azar todos los pesos antes de entrenar",
+            "Elimina las capas que no aportan nada a la predicción",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             "Backpropagation propaga el error de la salida hacia atrás por la red para ajustar todos los pesos. Es la generalización de la regla delta que hace entrenable al MLP.",
         },

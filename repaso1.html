@@ -704,12 +704,12 @@
           type: "choice",
           q: "Para empezar: ¿qué es el deep learning?",
           options: [
-            "Cualquier sistema informático que automatiza una tarea intelectual",
-            "Un subconjunto del machine learning que aprende representaciones en muchas capas",
-            "Un lenguaje de programación especializado en IA",
-            "Un sinónimo moderno de inteligencia artificial",
+            "Cualquier sistema que automatice una tarea intelectual",
+            "Un lenguaje de programación especializado en la IA",
+            "Parte del ML que aprende representaciones en capas",
+            "Un nombre más moderno para la inteligencia artificial",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "IA ⊃ ML ⊃ DL. El deep learning es la parte del ML que aprende representaciones en una pila de capas, típicamente con redes neuronales.",
         },
@@ -720,8 +720,8 @@
           items: [
             { text: "Reglas + Datos → Programa → Respuestas", bucket: 0 },
             { text: "Datos + Respuestas → Aprende → Reglas", bucket: 1 },
-            { text: "El humano escribe la lógica a mano", bucket: 0 },
             { text: "El sistema descubre las reglas por sí mismo", bucket: 1 },
+            { text: "El humano escribe la lógica a mano", bucket: 0 },
           ],
           explain:
             "El paradigma cambia de dirección. En ML, la salida del proceso son las propias reglas — el modelo aprende a generalizar a partir de ejemplos.",
@@ -730,12 +730,12 @@
           type: "choice",
           q: '¿Qué significa exactamente lo "profundo" del deep learning?',
           options: [
-            "Que el modelo razona como un humano",
             "Que aprende muchas capas de representación apiladas",
-            "Que necesita ordenadores muy potentes para entrenarse",
-            "Que se entrena durante muchísimas horas",
+            "Que el modelo razona de forma parecida a un humano",
+            "Que necesita ordenadores muy potentes para entrenar",
+            "Que se entrena durante muchísimas horas seguidas",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             '"Profundo" se refiere a la cantidad de capas. Cada capa transforma la salida de la anterior y, en conjunto, descubren representaciones útiles para la tarea.',
         },
@@ -744,13 +744,13 @@
           q: "Empareja cada elemento con su rol en el bucle de entrenamiento.",
           buckets: ["Datos", "Modelo", "Pérdida", "Optimizador"],
           items: [
-            { text: "Imágenes con sus etiquetas (X, y)", bucket: 0 },
-            { text: "Capas con pesos W y sesgos b", bucket: 1 },
             {
               text: "Mide el error entre la predicción y la verdad",
               bucket: 2,
             },
+            { text: "Imágenes con sus etiquetas (X, y)", bucket: 0 },
             { text: "Ajusta los pesos para reducir el error", bucket: 3 },
+            { text: "Capas con pesos W y sesgos b", bucket: 1 },
           ],
           explain:
             "Datos → Modelo → Pérdida → Optimizador. Ese ciclo (forward, loss, backward, update) repetido sobre lotes es entrenar.",
@@ -759,12 +759,12 @@
           type: "choice",
           q: "En el ejemplo del perceptrón fiesta con entradas (1, 1, 0), pesos (1, 1, 1) y umbral 1, ¿qué decide la neurona?",
           options: [
-            "NO ir a la fiesta",
-            "SÍ ir a la fiesta",
-            "No se puede decidir sin más información",
+            "NO ir: la suma no llega al umbral",
+            "No se puede saber sin más información",
             "Depende de la función de activación",
+            "SÍ ir: la suma supera el umbral",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "Suma = 1·1 + 1·1 + 1·0 = 2. Como 2 > 1 (umbral), la salida es 1: SÍ ir de fiesta.",
         },
@@ -772,10 +772,10 @@
           type: "choice",
           q: "¿Por qué necesitamos funciones de activación NO lineales?",
           options: [
-            "Para que el entrenamiento sea más rápido",
-            "Porque sin no-linealidad, varias capas equivalen a una sola",
-            "Para evitar el sobreajuste",
-            "Para reducir el número de parámetros",
+            "Para que el entrenamiento sea bastante más rápido",
+            "Sin no-linealidad, varias capas equivalen a una",
+            "Para evitar que la red sobreajuste los datos",
+            "Para reducir el número de parámetros de la red",
           ],
           correct: 1,
           explain:
@@ -791,10 +791,10 @@
             "Salida de regresión",
           ],
           items: [
-            { text: "ReLU", bucket: 0 },
             { text: "Sigmoide", bucket: 1 },
-            { text: "Softmax", bucket: 2 },
             { text: "Lineal (sin activación)", bucket: 3 },
+            { text: "ReLU", bucket: 0 },
+            { text: "Softmax", bucket: 2 },
           ],
           explain:
             "Regla práctica: ReLU por defecto en ocultas; sigmoide para binaria; softmax para multiclase; lineal para regresión continua.",
@@ -805,11 +805,11 @@
           hint: "Marca todas las que apliquen.",
           options: [
             "Binary cross-entropy (BCE)",
-            "Categorical cross-entropy (CCE)",
             "Error cuadrático medio (MSE)",
-            "Log-loss",
+            "Log-loss (pérdida logarítmica)",
+            "Categorical cross-entropy (CCE)",
           ],
-          correct: [0, 1, 3],
+          correct: [0,  2,  3],
           explain:
             "Cross-entropy (binaria, categórica) y log-loss son las pérdidas naturales de clasificación. MSE es para regresión: mezclar softmax + MSE entrena peor.",
         },
@@ -819,16 +819,16 @@
           buckets: ["Supervisado", "No supervisado", "Por refuerzo"],
           items: [
             {
+              text: "Un agente aprende a jugar al ajedrez mediante recompensas",
+              bucket: 2,
+            },
+            {
               text: "Predecir si un email es spam usando correos etiquetados",
               bucket: 0,
             },
             {
               text: "Agrupar clientes parecidos sin saber a qué categoría pertenecen",
               bucket: 1,
-            },
-            {
-              text: "Un agente aprende a jugar al ajedrez mediante recompensas",
-              bucket: 2,
             },
             {
               text: "Detectar dígitos manuscritos a partir de imágenes etiquetadas",
@@ -845,10 +845,10 @@
           options: [
             "Reduce la ingeniería manual de características",
             "Aprovecha hardware paralelo (GPU/TPU) para escalar",
-            "Permite reutilizar modelos preentrenados (transfer learning)",
-            "Elimina la necesidad de datos etiquetados",
+            "Elimina la necesidad de tener datos etiquetados",
+            "Reutiliza modelos preentrenados (transfer learning)",
           ],
-          correct: [0, 1, 2],
+          correct: [0,  1,  3],
           explain:
             "Pipeline simple + escalabilidad + reutilización son las tres ventajas. Lo del etiquetado no: muchos modelos siguen necesitándolo (aunque la auto-supervisión ayuda).",
         },

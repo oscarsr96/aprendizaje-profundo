@@ -705,12 +705,12 @@
           type: "choice",
           q: "¿Qué es el problema del gradiente que se desvanece (vanishing gradient)?",
           options: [
-            "Que la red tiene demasiados parámetros para la memoria disponible",
-            "Que al retropropagar, el gradiente decae exponencialmente y las capas/pasos lejanos casi no aprenden",
-            "Que el gradiente apunta siempre en la dirección equivocada",
-            "Que la función de pérdida no tiene mínimo",
+            "La red tiene demasiados parámetros para la memoria",
+            "El gradiente cambia de signo en cada paso y no converge",
+            "El gradiente se hace casi cero en capas o pasos lejanos",
+            "La función de pérdida no tiene ningún mínimo que buscar",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "Al retropropagar por muchos pasos, los gradientes se multiplican: si la derivada es <1 decaen exponencialmente (vanishing); si es >1 explotan (exploding). Por eso cuesta entrenar RNN sobre muchos pasos.",
         },
@@ -718,12 +718,12 @@
           type: "choice",
           q: "¿Por qué una RNN simple no aprende bien las dependencias a largo plazo?",
           options: [
-            "Porque no puede procesar secuencias",
-            "Porque no logra retener información durante muchos pasos de tiempo",
-            "Porque solo funciona con imágenes",
-            "Porque no tiene pesos que ajustar",
+            "No puede procesar datos que lleguen en secuencia",
+            "Solo sirve para imágenes, no para datos en secuencia",
+            "No tiene pesos que se puedan ajustar al entrenar",
+            "No logra retener información durante muchos pasos",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "La RNN simple pierde la información lejana (por el vanishing gradient), así que no puede, por ejemplo, recordar el sujeto para concordar con un verbo muchas palabras después.",
         },
@@ -732,9 +732,9 @@
           q: "La celda LSTM tiene tres puertas. Empareja cada una con su función.",
           buckets: ["Forget gate", "Input gate", "Output gate"],
           items: [
-            { text: "Decide qué información se descarta del estado", bucket: 0 },
             { text: "Decide qué información nueva se añade al estado", bucket: 1 },
             { text: "Decide qué se expone como salida hₜ", bucket: 2 },
+            { text: "Decide qué información se descarta del estado", bucket: 0 },
           ],
           explain:
             "Forget = qué se borra, Input = qué se añade, Output = qué se expone. Las tres regulan la memoria de la celda y evitan que el gradiente se desvanezca.",
@@ -743,12 +743,12 @@
           type: "choice",
           q: "¿Qué es el 'cell state' Cₜ de una LSTM?",
           options: [
-            "La salida final de la red",
-            "Un vector de memoria (como una cinta transportadora) del que las puertas añaden o quitan información",
-            "El número de neuronas de la capa",
-            "La tasa de aprendizaje del optimizador",
+            "Un vector de memoria que las puertas modifican",
+            "La salida final que produce la red en cada paso",
+            "El número de neuronas de la capa recurrente",
+            "La tasa de aprendizaje que usa el optimizador",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             "Cₜ es el estado de memoria, de la misma dimensión que hₜ. Fluye casi sin transformaciones (por eso el gradiente sobrevive); el forget gate borra y el input gate escribe.",
         },
@@ -759,8 +759,8 @@
           items: [
             { text: "Decide CUÁNTO dejar pasar (0 = nada, 1 = todo)", bucket: 0 },
             { text: "Propone QUÉ valores nuevos podrían entrar", bucket: 1 },
-            { text: "Actúa como filtro/compuerta", bucket: 0 },
             { text: "Genera el candidato a sumar o restar al estado", bucket: 1 },
+            { text: "Actúa como filtro/compuerta", bucket: 0 },
           ],
           explain:
             "La sigmoide (0–1) regula cuánto pasa (una compuerta); la tanh (−1 a 1) produce el contenido candidato. El estado se actualiza olvidando (×) y añadiendo (+).",
@@ -770,12 +770,12 @@
           q: "¿Qué es cierto sobre el entrenamiento de una LSTM?",
           hint: "Marca todas las que apliquen.",
           options: [
+            "ADAM es un optimizador habitual para entrenarla",
+            "Se entrena sin necesidad de función de pérdida",
             "Se usa backpropagation a través del tiempo (BPTT)",
-            "ADAM es un optimizador habitual",
-            "Suele necesitar muchos datos y GPU",
-            "Se entrena sin función de pérdida",
+            "Suele necesitar muchos datos y tiempo de GPU",
           ],
-          correct: [0, 1, 2],
+          correct: [0,  2,  3],
           explain:
             "BPTT despliega la red por la secuencia; ADAM (Kingma & Ba, 2015) es el optimizador típico; y hace falta mucho cómputo y datos. Como toda red, sí necesita una función de pérdida.",
         },
@@ -784,9 +784,9 @@
           q: "Empareja cada arquitectura recurrente con la tarea que resuelve.",
           buckets: ["Etiquetado (seq→seq)", "Clasificación (seq→1)", "Seq2seq (encoder–decoder)"],
           items: [
+            { text: "Traducir una frase de un idioma a otro", bucket: 2 },
             { text: "Una etiqueta POS por cada palabra", bucket: 0 },
             { text: "Clasificar el sentimiento de una reseña entera", bucket: 1 },
-            { text: "Traducir una frase de un idioma a otro", bucket: 2 },
           ],
           explain:
             "Etiquetado: una salida por paso. Clasificación: del estado final a una sola salida. Seq2seq: una LSTM codifica y otra genera (traducción, subtítulos).",
@@ -795,12 +795,12 @@
           type: "choice",
           q: "¿Qué aporta una Bi-LSTM frente a una LSTM normal?",
           options: [
-            "Menos parámetros y más velocidad",
-            "Procesa la secuencia en los dos sentidos y aprovecha el contexto pasado y futuro",
-            "Elimina el estado de celda",
-            "Convierte la red en feedforward",
+            "Tiene menos parámetros y por eso entrena más rápido",
+            "Elimina el estado de celda para simplificar la red",
+            "Lee la secuencia en ambos sentidos: pasado y futuro",
+            "Convierte la red recurrente en una red feedforward",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "Una Bi-LSTM usa dos LSTM (hacia delante y hacia atrás) cuyas salidas se concatenan, de modo que cada elemento ve el contexto pasado y futuro.",
         },
@@ -808,10 +808,10 @@
           type: "choice",
           q: "¿En qué se diferencia una GRU de una LSTM?",
           options: [
-            "Añade una cuarta puerta",
-            "Tiene menos puertas y no usa un estado de celda separado, así que entrena más rápido",
-            "Solo funciona hacia atrás",
-            "No tiene puertas",
+            "Añade una cuarta puerta para controlar la memoria",
+            "Tiene menos puertas y no usa estado de celda aparte",
+            "Solo procesa la secuencia de atrás hacia delante",
+            "No tiene puertas: es una RNN simple con otro nombre",
           ],
           correct: 1,
           explain:
@@ -821,12 +821,12 @@
           type: "choice",
           q: "¿Qué permite el mecanismo de atención?",
           options: [
-            "Reducir el tamaño del dataset",
-            "Que la red se centre en distintas partes de la entrada en cada paso",
-            "Eliminar la necesidad de entrenar",
-            "Convertir la secuencia en una imagen",
+            "Reducir el tamaño del dataset necesario para entrenar",
+            "Eliminar la necesidad de entrenar la red con muchos datos",
+            "Convertir la secuencia de entrada en una imagen 2D",
+            "Fijarse en distintas partes de la entrada en cada paso",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "La atención deja a la red enfocar partes relevantes de la entrada en cada paso (regiones de una imagen, palabras de la frase origen). Es la base de los Transformers posteriores.",
         },
