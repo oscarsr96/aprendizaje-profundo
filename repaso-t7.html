@@ -707,11 +707,11 @@
           q: "En esencia, ¿qué es 'entrenar' una red neuronal?",
           options: [
             "Guardar los datos de entrenamiento en la red",
-            "Ajustar los pesos para minimizar una función de pérdida, a pasitos",
             "Elegir a mano el valor de cada peso",
+            "Ajustar los pesos para minimizar una función de pérdida, a pasitos",
             "Aumentar el número de capas hasta que acierte",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "Entrenar es un problema de optimización: buscar los pesos que hacen la pérdida lo más pequeña posible, mejorándolos poco a poco con el gradiente.",
         },
@@ -719,12 +719,12 @@
           type: "choice",
           q: "¿Qué indica el gradiente ∇L de la pérdida?",
           options: [
-            "El valor mínimo de la pérdida",
             "La dirección de máximo ascenso: hacia dónde crece más rápido la pérdida",
+            "El valor mínimo de la pérdida",
             "El learning rate óptimo",
             "El número de épocas necesarias",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             "El gradiente apunta hacia donde la pérdida sube más rápido. Por eso para bajar nos movemos en sentido contrario, −∇L.",
         },
@@ -733,11 +733,11 @@
           q: "La regla de actualización es w ← w − η·∇L. ¿Qué papel tiene η (eta)?",
           options: [
             "Es el número de capas",
-            "Es el learning rate: el tamaño de cada paso cuesta abajo",
             "Es el valor de la pérdida",
             "Es el tamaño del batch",
+            "Es el learning rate: el tamaño de cada paso cuesta abajo",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "η es el learning rate. Multiplica al gradiente y fija cuánto nos movemos en cada paso: el hiperparámetro que más suele importar.",
         },
@@ -746,11 +746,11 @@
           q: "Si el learning rate es demasiado grande, lo típico es que…",
           options: [
             "El entrenamiento sea simplemente más lento",
-            "La pérdida rebote o incluso diverja (crezca sin parar / NaN)",
             "El modelo generalice siempre mejor",
+            "La pérdida rebote o incluso diverja (crezca sin parar / NaN)",
             "No pase nada, η no afecta a la estabilidad",
           ],
-          correct: 1,
+          correct: 2,
           explain:
             "Con pasos demasiado grandes la bola se pasa de largo, rebota por las paredes del valle y puede divergir. Con η demasiado pequeño, en cambio, entrena lentísimo.",
         },
@@ -759,9 +759,9 @@
           q: "Empareja cada estrategia con cuántos ejemplos usa por paso.",
           buckets: ["Batch (lote completo)", "SGD (estocástico)", "Mini-batch"],
           items: [
+            { text: "Un puñado (p. ej. 32, 64, 128) por actualización", bucket: 2 },
             { text: "Todo el dataset antes de cada actualización", bucket: 0 },
             { text: "Un solo ejemplo por actualización", bucket: 1 },
-            { text: "Un puñado (p. ej. 32, 64, 128) por actualización", bucket: 2 },
           ],
           explain:
             "Batch = gradiente exacto pero lento; SGD = un ejemplo, rápido pero ruidoso; mini-batch = el equilibrio que se usa en la práctica y aprovecha la GPU.",
@@ -778,12 +778,12 @@
           type: "choice",
           q: "¿Qué es el 'learning rate scheduling' (programar el LR)?",
           options: [
-            "Fijar el learning rate para siempre",
             "Ir cambiando el learning rate durante el entrenamiento (p. ej. empezar grande y reducirlo)",
+            "Fijar el learning rate para siempre",
             "Usar un learning rate distinto para cada dato",
             "Entrenar sin learning rate",
           ],
-          correct: 1,
+          correct: 0,
           explain:
             "Es habitual empezar con pasos grandes (avanzar rápido) y reducir η al acercarse al valle para afinar. El warmup (arrancar pequeño) es clave en Transformers.",
         },
@@ -792,11 +792,11 @@
           q: "¿Qué añade el 'momentum' al descenso del gradiente?",
           options: [
             "Más capas a la red",
-            "Una velocidad acumulada (inercia): los pasos previos empujan al siguiente",
             "Un learning rate mayor siempre",
             "Elimina la necesidad del gradiente",
+            "Una velocidad acumulada (inercia): los pasos previos empujan al siguiente",
           ],
-          correct: 1,
+          correct: 3,
           explain:
             "El momentum acumula una velocidad, como una bola pesada. En valles alargados cancela el zigzag del SGD y acelera en la dirección buena.",
         },
@@ -818,12 +818,12 @@
           q: "¿Qué afirmaciones sobre el entrenamiento son correctas?",
           hint: "Marca todas las que apliquen.",
           options: [
-            "El learning rate suele ser el hiperparámetro más importante",
             "En la práctica se entrena casi siempre con mini-batches",
-            "Los métodos adaptativos (RMSProp, Adam) dan a cada peso su propio tamaño de paso",
             "Un learning rate más alto siempre entrena mejor",
+            "El learning rate suele ser el hiperparámetro más importante",
+            "Los métodos adaptativos (RMSProp, Adam) dan a cada peso su propio tamaño de paso",
           ],
-          correct: [0, 1, 2],
+          correct: [0, 2, 3],
           explain:
             "El LR es la palanca principal, se usa mini-batch, y los adaptativos ajustan el paso por peso. Lo que NO es cierto es que subir el LR siempre mejore: pasado un punto, diverge.",
         },
