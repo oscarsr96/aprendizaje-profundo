@@ -582,30 +582,63 @@
               <h4>Red A</h4>
               <div class="fn-formula">train 99 % · val 74 %</div>
               <p>La validación lleva 10 épocas subiendo su pérdida.</p>
-              <span class="fn-use">→ overfit: early stopping, dropout, L2, más datos</span>
+              <span class="fn-use">→ ¿diagnóstico?</span>
             </div>
             <div class="fn-card">
               <h4>Red B</h4>
               <div class="fn-formula">train 68 % · val 66 %</div>
               <p>Las dos curvas se aplanan juntas, muy arriba.</p>
-              <span class="fn-use">→ underfit: más capacidad, menos regularización</span>
+              <span class="fn-use">→ ¿diagnóstico?</span>
             </div>
             <div class="fn-card">
               <h4>Red C</h4>
               <div class="fn-formula">train 91 % · val 89 %</div>
               <p>Ambas pérdidas siguen bajando en la última época.</p>
-              <span class="fn-use">→ va bien: deja que entrene más</span>
+              <span class="fn-use">→ ¿diagnóstico?</span>
             </div>
           </div>
           <p class="note">
-            Antes de leer la flecha, decide tú. La clave no es el número aislado
-            sino la <strong>brecha</strong> entre train y validación y hacia
-            dónde se <em>mueven</em> las curvas.
+            Decide tú antes de pasar de diapositiva. Pista: la clave no es el
+            número aislado sino la <strong>brecha</strong> entre train y
+            validación y hacia dónde se <em>mueven</em> las curvas.
           </p>
         </div>
       </section>
 
-      <!-- 21 — Ideas -->
+      <!-- 21 — Ejercicio: soluciones -->
+      <section class="slide" data-title="Diagnóstico">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">El <em>diagnóstico</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Red A · overfit</h4>
+              <div class="fn-formula">brecha de 25 puntos</div>
+              <p>Train casi perfecto, validación muy por debajo y empeorando: está memorizando.</p>
+              <span class="fn-use">→ early stopping, dropout, L2, más datos</span>
+            </div>
+            <div class="fn-card">
+              <h4>Red B · underfit</h4>
+              <div class="fn-formula">brecha de 2 puntos</div>
+              <p>Sin brecha, pero las dos se estancan bajas: el modelo no da para más.</p>
+              <span class="fn-use">→ más capacidad, menos regularización</span>
+            </div>
+            <div class="fn-card">
+              <h4>Red C · va bien</h4>
+              <div class="fn-formula">brecha de 2 puntos</div>
+              <p>Brecha pequeña y ambas pérdidas aún bajando: no ha terminado de aprender.</p>
+              <span class="fn-use">→ deja que entrene más épocas</span>
+            </div>
+          </div>
+          <p class="note">
+            B y C tienen la misma brecha: lo que las distingue es el
+            <strong>nivel</strong> de acierto y si las curvas siguen
+            <em>moviéndose</em>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 22 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
           <span class="kicker">Resumen del Tema 2</span>
@@ -622,7 +655,7 @@
         </div>
       </section>
 
-      <!-- 22 — Cierre -->
+      <!-- 23 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
           <span class="kicker">Cierre del Tema 2</span>
