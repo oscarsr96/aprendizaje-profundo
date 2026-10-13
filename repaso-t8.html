@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Repaso Tema 2</title>
     <meta
       name="description"
-      content="Cuestionario autocorregible del Tema 2 de Aprendizaje Profundo. 10 retos sobre generalización: overfitting, sesgo/varianza, dropout, regularización y early stopping. CUNEF Universidad."
+      content="Cuestionario autocorregible del Tema 2 de Aprendizaje Profundo. 12 retos sobre generalización: overfitting, sesgo/varianza, validación cruzada, dropout, regularización y early stopping. CUNEF Universidad."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -619,7 +619,7 @@
         <span class="bar-sub">· Aprendizaje Profundo · Repaso · Tema 2 · Sobreajuste y regularización</span>
       </span>
       <div class="bar-progress"><div class="bar-fill" id="barFill"></div></div>
-      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/10</span>
+      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/12</span>
     </header>
 
     <main>
@@ -636,7 +636,7 @@
             respuesta.
           </p>
           <div class="hero-meta">
-            <div><span class="n">10</span><span class="l">Retos</span></div>
+            <div><span class="n">12</span><span class="l">Retos</span></div>
             <div><span class="n">~5′</span><span class="l">Minutos</span></div>
             <div><span class="n">0</span><span class="l">Riesgo</span></div>
           </div>
@@ -650,7 +650,7 @@
       <section class="screen" id="quizScreen" hidden>
         <div class="card">
           <div class="qmeta">
-            <span id="qCounter">Reto 1 / 10</span>
+            <span id="qCounter">Reto 1 / 12</span>
             <span class="tag" id="qType">Opción única</span>
           </div>
           <h2 class="qtext" id="qText"></h2>
@@ -675,7 +675,7 @@
           <div class="ring" id="ring">
             <div class="ring-inner">
               <div class="ring-pct" id="ringPct">0%</div>
-              <div class="ring-sub" id="ringSub">0 / 10</div>
+              <div class="ring-sub" id="ringSub">0 / 12</div>
             </div>
           </div>
           <h2 id="resTitle"></h2>
@@ -818,6 +818,32 @@
           correct: 1,
           explain:
             "Más datos reducen la varianza sin sacrificar capacidad: es el regularizador más potente. Cuando no es posible, se combinan dropout, weight decay, early stopping, augmentation…",
+        },
+        {
+          type: "choice",
+          q: "¿Qué diferencia práctica hay entre la regularización L1 y la L2?",
+          options: [
+            "L2 lleva muchos pesos a cero exacto; L1 solo los encoge",
+            "L1 lleva muchos pesos a cero exacto; L2 solo los encoge",
+            "L1 solo se aplica a los sesgos; L2 solo a los pesos",
+            "Son idénticas: solo cambia el nombre según la librería",
+          ],
+          correct: 1,
+          explain:
+            "El gradiente de L1 (λ·signo(w)) empuja con fuerza constante y deja a cero los pesos poco útiles: modelos dispersos. El de L2 (2λw) es proporcional al peso: encoge sin llegar a cero.",
+        },
+        {
+          type: "choice",
+          q: "¿Cuándo compensa usar validación cruzada (k-fold)?",
+          options: [
+            "Con datasets enormes, para entrenar en menos tiempo total",
+            "Siempre, porque sustituye por completo al conjunto de test",
+            "Con pocos datos, para una estimación de error más estable",
+            "Solo cuando la red no tiene ninguna capa de dropout puesta",
+          ],
+          correct: 2,
+          explain:
+            "Con pocos datos, una única partición train/val es ruidosa. k-fold entrena k veces rotando el trozo de validación y promedia: más estable, pero cuesta k entrenamientos. El test sigue aparte.",
         },
         {
           type: "multi",

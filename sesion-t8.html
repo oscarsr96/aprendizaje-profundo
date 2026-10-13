@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Tema 2 · Sobreajuste y regularización</title>
     <meta
       name="description"
-      content="Tema 2 de Aprendizaje Profundo en CUNEF. Generalización y regularización: sesgo y varianza, overfitting, train/val/test, dropout, weight decay, early stopping, data augmentation y batch norm."
+      content="Tema 2 de Aprendizaje Profundo en CUNEF. Generalización y regularización: sesgo y varianza, curva en U, overfitting, train/val/test, validación cruzada, dropout, regularización L1 y L2 (weight decay), early stopping, data augmentation y batch norm."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +44,7 @@
           <div class="cover-meta">
             <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
             <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">2.4 · Sobreajuste y regularización</span></div>
-            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~60 minutos</span></div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
               <span class="meta-val">Óscar Sánchez Rueda</span>
@@ -81,17 +81,17 @@
       <!-- 01 — AGENDA -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <span class="kicker">Agenda · ~60&nbsp;min</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
-            <li><span class="agenda-num">01</span><span class="agenda-time">12&prime;</span>
-              <div><span class="agenda-title">Overfitting y underfitting</span><span class="agenda-desc">Memorizar vs. generalizar; sesgo y varianza.</span></div></li>
-            <li><span class="agenda-num">02</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">Train / validación / test</span><span class="agenda-desc">Por qué partimos los datos y cómo se detecta el overfitting.</span></div></li>
-            <li><span class="agenda-num">03</span><span class="agenda-time">16&prime;</span>
-              <div><span class="agenda-title">La caja de herramientas</span><span class="agenda-desc">Dropout, weight decay, early stopping, augmentation, batch norm.</span></div></li>
-            <li><span class="agenda-num">04</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">Más datos, y una receta</span><span class="agenda-desc">El regularizador definitivo y cómo combinarlo todo.</span></div></li>
+            <li><span class="agenda-num">01</span><span class="agenda-time">14&prime;</span>
+              <div><span class="agenda-title">Overfitting y underfitting</span><span class="agenda-desc">Memorizar vs. generalizar; sesgo, varianza y la curva en U.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Train / validación / test</span><span class="agenda-desc">Por qué partimos los datos, validación cruzada y cómo se detecta el overfitting.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">22&prime;</span>
+              <div><span class="agenda-title">La caja de herramientas</span><span class="agenda-desc">Dropout por dentro, L1 vs L2, early stopping, augmentation, batch norm.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">Más datos, y una receta</span><span class="agenda-desc">El regularizador definitivo, cómo combinarlo todo y un ejercicio de diagnóstico.</span></div></li>
           </ol>
         </div>
       </section>
@@ -199,7 +199,41 @@
         </div>
       </section>
 
-      <!-- 06 — DIVISOR 2 -->
+      <!-- 06 — Curva en U -->
+      <section class="slide" data-title="La curva en U">
+        <div class="slide-inner">
+          <span class="kicker">El compromiso, en una gráfica</span>
+          <h2 class="h2">La curva en <em>U</em>.</h2>
+          <svg viewBox="0 0 760 220" style="width:100%; height:auto; margin: 4px 0 10px">
+            <rect x="60" y="20" width="317" height="160" fill="#7c80a6" opacity="0.06"/>
+            <rect x="377" y="20" width="343" height="160" fill="#ff5700" opacity="0.05"/>
+            <g stroke="#c9c3b3" stroke-width="1">
+              <line x1="60" y1="20" x2="60" y2="180"/><line x1="60" y1="180" x2="720" y2="180"/>
+            </g>
+            <path d="M70 62 Q260 170 710 176" fill="none" stroke="#0796a3" stroke-width="2.5"/>
+            <path d="M70 58 Q360 196 710 70" fill="none" stroke="#ff5700" stroke-width="2.5"/>
+            <line x1="377" y1="20" x2="377" y2="180" stroke="#1a1f6c" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="377" cy="127" r="5" fill="#1a1f6c"/>
+            <g font-family="Inter Tight" font-size="12.5">
+              <text x="600" y="198" fill="#7c80a6">capacidad del modelo →</text>
+              <text x="30" y="30" fill="#7c80a6" transform="rotate(-90 30 100)">error</text>
+              <text x="560" y="168" fill="#0796a3">entrenamiento</text>
+              <text x="560" y="80" fill="#ff5700">validación</text>
+              <text x="120" y="40" fill="#3b4080">zona de underfit (sesgo)</text>
+              <text x="470" y="40" fill="#3b4080">zona de overfit (varianza)</text>
+              <text x="387" y="118" fill="#1a1f6c" font-style="italic" font-family="Taviraj">el punto justo</text>
+            </g>
+          </svg>
+          <p class="note">
+            Al dar más <em>capacidad</em> (más capas, más neuronas, más épocas)
+            el error de entrenamiento baja siempre. El de validación baja… hasta
+            que empieza a <strong>subir</strong>. Regularizar es mover ese
+            mínimo hacia la derecha: poder usar una red grande sin que memorice.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — DIVISOR 2 -->
       <section class="slide slide-divider" data-title="Train / val / test">
         <div class="divider-inner">
           <span class="divider-num">— 02 —</span>
@@ -211,7 +245,7 @@
         </div>
       </section>
 
-      <!-- 07 — Los tres conjuntos -->
+      <!-- 08 — Los tres conjuntos -->
       <section class="slide" data-title="Los tres conjuntos">
         <div class="slide-inner">
           <span class="kicker">Train · Validación · Test</span>
@@ -243,7 +277,49 @@
         </div>
       </section>
 
-      <!-- 08 — Las dos curvas -->
+      <!-- 09 — Validación cruzada -->
+      <section class="slide" data-title="Validación cruzada">
+        <div class="slide-inner">
+          <span class="kicker">Cuando hay pocos datos</span>
+          <h2 class="h2">Validación <em>cruzada</em> (k-fold).</h2>
+          <svg viewBox="0 0 760 180" style="width:100%; height:auto; margin: 4px 0 8px">
+            <g font-family="Inter Tight" font-size="12.5" fill="#7c80a6">
+              <text x="20" y="31">Ronda 1</text>
+              <rect x="110" y="14" width="94" height="24" rx="4" fill="#ff5700" opacity="0.85"/><rect x="210" y="14" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="310" y="14" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="410" y="14" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="510" y="14" width="94" height="24" rx="4" fill="#e8e6f0"/>
+              <text x="630" y="31" fill="#3b4080">→ error<tspan font-size="10" dy="3">1</tspan></text>
+              <text x="20" y="63">Ronda 2</text>
+              <rect x="110" y="46" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="210" y="46" width="94" height="24" rx="4" fill="#ff5700" opacity="0.85"/><rect x="310" y="46" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="410" y="46" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="510" y="46" width="94" height="24" rx="4" fill="#e8e6f0"/>
+              <text x="630" y="63" fill="#3b4080">→ error<tspan font-size="10" dy="3">2</tspan></text>
+              <text x="20" y="95">Ronda 3</text>
+              <rect x="110" y="78" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="210" y="78" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="310" y="78" width="94" height="24" rx="4" fill="#ff5700" opacity="0.85"/><rect x="410" y="78" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="510" y="78" width="94" height="24" rx="4" fill="#e8e6f0"/>
+              <text x="630" y="95" fill="#3b4080">→ error<tspan font-size="10" dy="3">3</tspan></text>
+              <text x="20" y="127">Ronda 4</text>
+              <rect x="110" y="110" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="210" y="110" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="310" y="110" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="410" y="110" width="94" height="24" rx="4" fill="#ff5700" opacity="0.85"/><rect x="510" y="110" width="94" height="24" rx="4" fill="#e8e6f0"/>
+              <text x="630" y="127" fill="#3b4080">→ error<tspan font-size="10" dy="3">4</tspan></text>
+              <text x="20" y="159">Ronda 5</text>
+              <rect x="110" y="142" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="210" y="142" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="310" y="142" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="410" y="142" width="94" height="24" rx="4" fill="#e8e6f0"/><rect x="510" y="142" width="94" height="24" rx="4" fill="#ff5700" opacity="0.85"/>
+              <text x="630" y="159" fill="#3b4080">→ error<tspan font-size="10" dy="3">5</tspan></text>
+            </g>
+          </svg>
+          <div class="two-col">
+            <p class="lead">
+              Partimos los datos de entrenamiento en <em>k</em> trozos (aquí 5).
+              Entrenamos k veces, usando cada vez un trozo distinto como
+              <span style="color:#ff5700">validación</span>, y promediamos los k
+              errores.
+            </p>
+            <p class="note">
+              Con pocos datos, una única partición es <em>ruidosa</em>: depende
+              de qué ejemplos cayeron en validación. El promedio es más estable.
+              El precio: <strong>k entrenamientos</strong>, por eso en deep
+              learning con datasets grandes se usa poco. El test, igualmente,
+              se queda aparte.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 — Las dos curvas -->
       <section class="slide" data-title="Las dos curvas">
         <div class="slide-inner">
           <span class="kicker">Cómo se ve el overfitting</span>
@@ -271,7 +347,7 @@
         </div>
       </section>
 
-      <!-- 09 — DIVISOR 3 -->
+      <!-- 11 — DIVISOR 3 -->
       <section class="slide slide-divider" data-title="La caja de herramientas">
         <div class="divider-inner">
           <span class="divider-num">— 03 —</span>
@@ -283,7 +359,7 @@
         </div>
       </section>
 
-      <!-- 10 — Dropout -->
+      <!-- 12 — Dropout -->
       <section class="slide" data-title="Dropout">
         <div class="slide-inner">
           <span class="kicker">Herramienta 1</span>
@@ -313,7 +389,43 @@
         </div>
       </section>
 
-      <!-- 11 — Weight decay -->
+      <!-- 13 — Dropout por dentro -->
+      <section class="slide" data-title="Dropout por dentro">
+        <div class="slide-inner">
+          <span class="kicker">Herramienta 1 · por qué funciona</span>
+          <h2 class="h2">Muchas redes <em>en una</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Cada paso de entrenamiento usa una <em>subred</em> distinta,
+                elegida al azar. Con n neuronas hay 2<sup>n</sup> subredes
+                posibles que comparten pesos: entrenar con dropout es entrenar
+                un <em>ensemble</em> enorme a la vez.
+              </p>
+              <ul class="neuron-notes">
+                <li>Evita la <em>co-adaptación</em>: ninguna neurona puede apoyarse en que otra corrija sus errores.</li>
+                <li>Valores típicos: <code>0.2–0.5</code>; más en capas densas grandes, menos en convolucionales.</li>
+                <li>Efecto secundario: el entrenamiento necesita más épocas.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>El reescalado</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">entreno: apaga con prob. p</span>
+                <span class="pt-c">&nbsp;&nbsp;y las vivas × 1/(1−p)</span>
+                <span class="pt-c">test: todas activas, sin tocar</span>
+                <span class="pt-f">p = 0.5 → las vivas se multiplican ×2</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Ese ×1/(1−p) (<em>inverted dropout</em>) mantiene la activación
+            media igual en entrenamiento y en test. Keras lo hace por ti.
+          </p>
+        </div>
+      </section>
+
+      <!-- 14 — Weight decay -->
       <section class="slide" data-title="Regularización L2">
         <div class="slide-inner">
           <span class="kicker">Herramienta 2</span>
@@ -337,7 +449,35 @@
         </div>
       </section>
 
-      <!-- 12 — Early stopping -->
+      <!-- 15 — L1 vs L2 -->
+      <section class="slide" data-title="L1 vs L2">
+        <div class="slide-inner">
+          <span class="kicker">Herramienta 2 · dos sabores</span>
+          <h2 class="h2"><em>L1</em> frente a <em>L2</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>L2 · <code>λ·Σw²</code></h3>
+              <p>Su gradiente, <em>2λw</em>, es proporcional al peso: encoge mucho los grandes y apenas los pequeños.</p>
+              <ul class="neuron-notes"><li>Pesos pequeños y repartidos, casi nunca cero exacto.</li><li>La opción por defecto en redes neuronales.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>L1 · <code>λ·Σ|w|</code></h3>
+              <p>Su gradiente, <em>λ·signo(w)</em>, empuja con la misma fuerza a todos: los pesos poco útiles llegan a <em>cero</em>.</p>
+              <ul class="neuron-notes"><li>Modelos <em>dispersos</em> (sparse): selecciona entradas.</li><li>Útil si sospechas que sobran muchas variables.</li></ul>
+            </div>
+          </div>
+          <div class="prompt-box" style="margin-top:14px">
+            <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En Keras, por capa</div>
+            <div class="prompt-good"><div class="prompt-text">
+              <span class="pt-c">Dense(64, activation="relu",</span>
+              <span class="pt-c">&nbsp;&nbsp;kernel_regularizer=regularizers.l2(1e-4))</span>
+              <span class="pt-f">también regularizers.l1(…) o l1_l2(l1=…, l2=…)</span>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 — Early stopping -->
       <section class="slide" data-title="Early stopping">
         <div class="slide-inner">
           <span class="kicker">Herramienta 3</span>
@@ -368,7 +508,7 @@
         </div>
       </section>
 
-      <!-- 13 — Augmentation + batchnorm -->
+      <!-- 17 — Augmentation + batchnorm -->
       <section class="slide" data-title="Augmentation y batch norm">
         <div class="slide-inner">
           <span class="kicker">Herramientas 4 y 5</span>
@@ -389,7 +529,7 @@
         </div>
       </section>
 
-      <!-- 14 — DIVISOR 4 -->
+      <!-- 18 — DIVISOR 4 -->
       <section class="slide slide-divider" data-title="Más datos">
         <div class="divider-inner">
           <span class="divider-num">— 04 —</span>
@@ -401,7 +541,7 @@
         </div>
       </section>
 
-      <!-- 15 — Más datos + receta -->
+      <!-- 19 — Más datos + receta -->
       <section class="slide slide-exercise" data-title="Una receta">
         <div class="slide-inner">
           <span class="kicker kicker-ex">Cómo atacarlo en la práctica</span>
@@ -432,7 +572,40 @@
         </div>
       </section>
 
-      <!-- 16 — Ideas -->
+      <!-- 20 — Ejercicio: diagnostica -->
+      <section class="slide slide-exercise" data-title="Diagnostica">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · aplica la receta</span>
+          <h2 class="h2 h2-ex">¿Qué le pasa a cada <em>red</em>?</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Red A</h4>
+              <div class="fn-formula">train 99 % · val 74 %</div>
+              <p>La validación lleva 10 épocas subiendo su pérdida.</p>
+              <span class="fn-use">→ overfit: early stopping, dropout, L2, más datos</span>
+            </div>
+            <div class="fn-card">
+              <h4>Red B</h4>
+              <div class="fn-formula">train 68 % · val 66 %</div>
+              <p>Las dos curvas se aplanan juntas, muy arriba.</p>
+              <span class="fn-use">→ underfit: más capacidad, menos regularización</span>
+            </div>
+            <div class="fn-card">
+              <h4>Red C</h4>
+              <div class="fn-formula">train 91 % · val 89 %</div>
+              <p>Ambas pérdidas siguen bajando en la última época.</p>
+              <span class="fn-use">→ va bien: deja que entrene más</span>
+            </div>
+          </div>
+          <p class="note">
+            Antes de leer la flecha, decide tú. La clave no es el número aislado
+            sino la <strong>brecha</strong> entre train y validación y hacia
+            dónde se <em>mueven</em> las curvas.
+          </p>
+        </div>
+      </section>
+
+      <!-- 21 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
           <span class="kicker">Resumen del Tema 2</span>
@@ -449,7 +622,7 @@
         </div>
       </section>
 
-      <!-- 17 — Cierre -->
+      <!-- 22 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
           <span class="kicker">Cierre del Tema 2</span>
