@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Repaso Tema 3 · Redes de base radial</title>
     <meta
       name="description"
-      content="Cuestionario autocorregible del subtema 3.3 de Aprendizaje Profundo. Seis retos sobre redes de base radial (RBF): distancia vs producto escalar, el centro c y la anchura σ, la arquitectura de una capa oculta, el entrenamiento en dos pasos y su límite en dimensión alta. CUNEF Universidad."
+      content="Cuestionario autocorregible del subtema 3.3 de Aprendizaje Profundo. Nueve retos sobre redes de base radial (RBF): distancia vs producto escalar, el centro c y la anchura σ, el XOR, la arquitectura de una capa oculta, el entrenamiento en dos pasos y su límite en dimensión alta. CUNEF Universidad."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -619,7 +619,7 @@
         <span class="bar-sub">Aprendizaje Profundo · Tema 3 · Redes de base radial (RBF)</span>
       </span>
       <div class="bar-progress"><div class="bar-fill" id="barFill"></div></div>
-      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/6</span>
+      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/9</span>
     </header>
 
     <main>
@@ -629,15 +629,15 @@
           <span class="hero-kicker">Tema 3 · Redes de base radial · Repaso</span>
           <h1>¿Cerca <br />del <em>centro</em>?</h1>
           <p>
-            Seis retos para comprobar lo que te llevas de las redes de base
+            Nueve retos para comprobar lo que te llevas de las redes de base
             radial: distancia frente a producto escalar, el papel del centro c y
-            de la anchura σ, la arquitectura de una capa oculta, el entrenamiento
+            de la anchura σ, el XOR, la extrapolación, la arquitectura de una capa oculta, el entrenamiento
             en dos pasos (k-means + mínimos cuadrados) y su límite en dimensión
             alta. Con explicación en cada respuesta.
           </p>
           <div class="hero-meta">
-            <div><span class="n">6</span><span class="l">Retos</span></div>
-            <div><span class="n">~4′</span><span class="l">Minutos</span></div>
+            <div><span class="n">9</span><span class="l">Retos</span></div>
+            <div><span class="n">~5′</span><span class="l">Minutos</span></div>
             <div><span class="n">0</span><span class="l">Riesgo</span></div>
           </div>
           <button class="btn btn-primary btn-lg" id="startBtn">
@@ -650,7 +650,7 @@
       <section class="screen" id="quizScreen" hidden>
         <div class="card">
           <div class="qmeta">
-            <span id="qCounter">Reto 1 / 6</span>
+            <span id="qCounter">Reto 1 / 9</span>
             <span class="tag" id="qType">Opción única</span>
           </div>
           <h2 class="qtext" id="qText"></h2>
@@ -675,7 +675,7 @@
           <div class="ring" id="ring">
             <div class="ring-inner">
               <div class="ring-pct" id="ringPct">0%</div>
-              <div class="ring-sub" id="ringSub">0 / 6</div>
+              <div class="ring-sub" id="ringSub">0 / 9</div>
             </div>
           </div>
           <h2 id="resTitle"></h2>
@@ -779,6 +779,45 @@
           correct: 2,
           explain:
             "Cubrir el espacio con gaussianas locales es barato en 2D pero inviable en dimensión alta: el número de centros explota (maldición de la dimensionalidad). Por eso brillan en interpolación y baja dimensión, mientras en visión/lenguaje mandan las redes profundas.",
+        },
+        {
+          type: "choice",
+          q: "Usas campanas con una anchura σ muy pequeña respecto a la distancia entre centros. ¿Qué es lo más probable?",
+          options: [
+            "Todas las neuronas responden igual y la salida queda plana",
+            "Picos aislados con huecos entre centros: la red sobreajusta",
+            "La red se convierte en un MLP y aprende fronteras lineales",
+            "El entrenamiento necesita backpropagation en lugar de k-means",
+          ],
+          correct: 1,
+          explain:
+            "Con σ muy pequeña cada campana solo cubre sus propios datos: entre centros la salida cae a cero (picos aislados) y la red memoriza, es decir, sobreajusta. Con σ demasiado grande pasa lo contrario: todo se aplana y subajusta.",
+        },
+        {
+          type: "choice",
+          q: "Con dos centros en (0,0) y (1,1), ¿por qué la red RBF puede resolver el XOR?",
+          options: [
+            "Porque la capa de salida usa muchas capas ocultas no lineales",
+            "Porque k-means etiqueta los cuatro puntos con su clase correcta",
+            "Porque la gaussiana es lineal y conserva la forma del problema",
+            "Porque en el espacio (φ₁, φ₂) las clases ya se separan con una recta",
+          ],
+          correct: 3,
+          explain:
+            "La capa RBF transforma los puntos: (0,0) y (1,1) quedan cerca de un eje, y (0,1) y (1,0) caen juntos en (0.37, 0.37). En ese nuevo espacio una recta separa las clases (teorema de Cover) y la salida lineal basta.",
+        },
+        {
+          type: "choice",
+          q: "Una entrada nueva cae muy lejos de todos los centros de una red RBF entrenada. ¿Qué devuelve la red?",
+          options: [
+            "Casi solo el sesgo b, porque todas las campanas se apagan",
+            "Una extrapolación fiable siguiendo la tendencia de los datos",
+            "Un error de ejecución, porque la distancia sale infinita",
+            "El valor máximo posible, porque la distancia es muy grande",
+          ],
+          correct: 0,
+          explain:
+            "Lejos de todos los centros, cada φ ≈ 0 y la salida y = Σwφ + b se reduce a b. La RBF no extrapola: solo sabe responder en la zona donde había datos y centros.",
         },
       ];
 

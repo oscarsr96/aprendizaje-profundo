@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Tema 3 · Redes de base radial (RBF)</title>
     <meta
       name="description"
-      content="Subtema 3.3 de Aprendizaje Profundo en CUNEF. Redes de base radial (RBF): la neurona que mide distancia a un centro, la gaussiana como activación, la arquitectura de una capa oculta, el entrenamiento en dos pasos (k-means + mínimos cuadrados) y cuándo usarlas frente a un MLP."
+      content="Subtema 3.3 de Aprendizaje Profundo en CUNEF. Redes de base radial (RBF): la neurona que mide distancia a un centro, la gaussiana como activación y el papel de la anchura σ, la arquitectura de una capa oculta, el ejemplo del XOR, el entrenamiento en dos pasos (k-means + mínimos cuadrados) en detalle, cuántos centros usar, su parentesco con el kernel RBF de las SVM y cuándo usarlas frente a un MLP."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +44,7 @@
           <div class="cover-meta">
             <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
             <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">3.3 · Redes de base radial (RBF)</span></div>
-            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~40 minutos</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~65 minutos</span></div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
               <span class="meta-val">Óscar Sánchez Rueda</span>
@@ -81,15 +81,15 @@
       <!-- 01 — AGENDA -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~40&nbsp;min</span>
+          <span class="kicker">Agenda · ~65&nbsp;min</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
-            <li><span class="agenda-num">01</span><span class="agenda-time">14&prime;</span>
-              <div><span class="agenda-title">La idea de base radial</span><span class="agenda-desc">Medir distancia a un centro en lugar de un producto escalar; la gaussiana.</span></div></li>
-            <li><span class="agenda-num">02</span><span class="agenda-time">16&prime;</span>
-              <div><span class="agenda-title">La red RBF y cómo se entrena</span><span class="agenda-desc">Una capa oculta, entrenamiento en dos pasos y comparación con el MLP.</span></div></li>
-            <li><span class="agenda-num">03</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">Cuándo usarlas</span><span class="agenda-desc">Su nicho y su límite en dimensión alta.</span></div></li>
+            <li><span class="agenda-num">01</span><span class="agenda-time">18&prime;</span>
+              <div><span class="agenda-title">La idea de base radial</span><span class="agenda-desc">Medir distancia a un centro; la gaussiana con números, el papel de σ y otras funciones radiales.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">30&prime;</span>
+              <div><span class="agenda-title">La red RBF y cómo se entrena</span><span class="agenda-desc">Sumar campanas, el XOR, k-means + mínimos cuadrados, cuántos centros y el código.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">17&prime;</span>
+              <div><span class="agenda-title">Cuándo usarlas</span><span class="agenda-desc">Su nicho, la maldición de la dimensionalidad, sus parientes (SVM) y un ejercicio a mano.</span></div></li>
           </ol>
         </div>
       </section>
@@ -160,7 +160,92 @@
         </div>
       </section>
 
-      <!-- 05 — Local vs global -->
+      <!-- 05 — Con números -->
+      <section class="slide" data-title="Con números">
+        <div class="slide-inner">
+          <span class="kicker">Una neurona RBF, a mano</span>
+          <h2 class="h2">La campana, con <em>números</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Tomemos una neurona con centro <strong>c = (1, 2)</strong> y
+                anchura <strong>σ = 1</strong>. Con σ = 1 la fórmula queda
+                φ(x) = exp(−‖x − c‖² / 2).
+              </p>
+              <ul class="neuron-notes">
+                <li>Primero la <em>distancia al cuadrado</em>: (x₁ − 1)² + (x₂ − 2)².</li>
+                <li>Después se divide por 2σ² y se aplica la exponencial negativa.</li>
+                <li>Fíjate en lo rápido que cae: a 2 unidades ya casi no responde.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Cuatro entradas</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">x = (1, 2) → ‖x−c‖² = 0 → φ = 1</span>
+                <span class="pt-c">x = (2, 2) → ‖x−c‖² = 1 → φ = e<sup>−0.5</sup> ≈ 0.61</span>
+                <span class="pt-c">x = (3, 3) → ‖x−c‖² = 5 → φ = e<sup>−2.5</sup> ≈ 0.08</span>
+                <span class="pt-t">x = (4, 6) → ‖x−c‖² = 25 → φ ≈ 0.000004</span>
+                <span class="pt-f">solo depende de la distancia, no de la dirección</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            (2, 2) y (0, 2) dan exactamente lo mismo: están a la misma
+            distancia de c. Eso es lo que significa <strong>radial</strong>: la
+            respuesta es simétrica en todas las direcciones, como los círculos
+            de una piedra en el agua.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — El papel de σ -->
+      <section class="slide" data-title="El papel de σ">
+        <div class="slide-inner">
+          <span class="kicker">El hiperparámetro que lo cambia todo</span>
+          <h2 class="h2">La anchura <em>σ</em>.</h2>
+          <svg viewBox="0 0 760 215" style="width:100%; height:auto; margin: 4px 0 10px">
+            <g stroke="#c9c3b3" stroke-width="1">
+              <line x1="60" y1="180" x2="700" y2="180"/>
+              <line x1="380" y1="28" x2="380" y2="186" stroke-dasharray="3 4"/>
+            </g>
+            <path d="M60 152 L76 147 L92 142 L108 136 L124 130 L140 123 L156 115 L172 108 L188 100 L204 92 L220 84 L236 76 L252 69 L268 62 L284 55 L300 49 L316 44 L332 40 L348 37 L364 36 L380 35 L396 36 L412 37 L428 40 L444 44 L460 49 L476 55 L492 62 L508 69 L524 76 L540 84 L556 92 L572 100 L588 108 L604 115 L620 123 L636 130 L652 136 L668 142 L684 147 L700 152" fill="none" stroke="#7c80a6" stroke-width="2.2"/>
+            <path d="M60 180 L76 180 L92 180 L108 180 L124 179 L140 178 L156 177 L172 175 L188 172 L204 167 L220 160 L236 151 L252 140 L268 126 L284 109 L300 92 L316 75 L332 59 L348 46 L364 38 L380 35 L396 38 L412 46 L428 59 L444 75 L460 92 L476 109 L492 126 L508 140 L524 151 L540 160 L556 167 L572 172 L588 175 L604 177 L620 178 L636 179 L652 180 L668 180 L684 180 L700 180" fill="none" stroke="#0796a3" stroke-width="2.5"/>
+            <path d="M60 180 L76 180 L92 180 L108 180 L124 180 L140 180 L156 180 L172 180 L188 180 L204 180 L220 180 L236 180 L252 180 L268 180 L284 178 L300 174 L316 160 L332 133 L348 92 L364 52 L380 35 L396 52 L412 92 L428 133 L444 160 L460 174 L476 178 L492 180 L508 180 L524 180 L540 180 L556 180 L572 180 L588 180 L604 180 L620 180 L636 180 L652 180 L668 180 L684 180 L700 180" fill="none" stroke="#ff5700" stroke-width="2.5"/>
+            <g font-family="Inter Tight" font-size="12.5">
+              <text x="372" y="202" fill="#7c80a6">c</text>
+              <text x="410" y="66" fill="#ff5700">σ pequeña</text>
+              <text x="470" y="118" fill="#0796a3">σ media</text>
+              <text x="600" y="106" fill="#7c80a6">σ grande</text>
+            </g>
+          </svg>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>σ demasiado pequeña</h4>
+              <div class="fn-formula">picos aislados</div>
+              <p>Cada neurona solo ve sus datos; entre centros la salida cae a cero y quedan «agujeros».</p>
+              <span class="fn-use">→ sobreajuste (varianza)</span>
+            </div>
+            <div class="fn-card">
+              <h4>σ adecuada</h4>
+              <div class="fn-formula">campanas que se solapan</div>
+              <p>Las campanas vecinas se tocan un poco: la suma es una curva suave y continua.</p>
+              <span class="fn-use">→ el punto justo</span>
+            </div>
+            <div class="fn-card">
+              <h4>σ demasiado grande</h4>
+              <div class="fn-formula">todo se aplana</div>
+              <p>Todas las neuronas responden casi igual en todas partes: la red pierde detalle.</p>
+              <span class="fn-use">→ subajuste (sesgo)</span>
+            </div>
+          </div>
+          <p class="note">
+            Es el mismo compromiso <strong>sesgo–varianza</strong> del Tema 2.4,
+            con otra cara: aquí la «capacidad» la controla la anchura de las campanas.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Local vs global -->
       <section class="slide" data-title="Local vs global">
         <div class="slide-inner">
           <span class="kicker">La diferencia de fondo</span>
@@ -190,7 +275,44 @@
         </div>
       </section>
 
-      <!-- 06 — DIVISOR 2 -->
+      <!-- 08 — Familia de funciones radiales -->
+      <section class="slide" data-title="Funciones radiales">
+        <div class="slide-inner">
+          <span class="kicker">La gaussiana no es la única</span>
+          <h2 class="h2">La familia <em>radial</em>.</h2>
+          <p class="lead">
+            Llamamos <em>radial</em> a cualquier función que dependa solo de
+            r = ‖x − c‖. La gaussiana es la favorita, pero hay más:
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Gaussiana</h4>
+              <div class="fn-formula">exp(−r² / 2σ²)</div>
+              <p>Máxima en el centro y se apaga al alejarse. Suave y local.</p>
+              <span class="fn-use">→ la opción por defecto</span>
+            </div>
+            <div class="fn-card">
+              <h4>Multicuádrica inversa</h4>
+              <div class="fn-formula">1 / √(r² + σ²)</div>
+              <p>También local, pero decae más despacio: «colas» más largas.</p>
+              <span class="fn-use">→ local, menos abrupta</span>
+            </div>
+            <div class="fn-card">
+              <h4>Multicuádrica</h4>
+              <div class="fn-formula">√(r² + σ²)</div>
+              <p><em>Crece</em> con la distancia: no es local, pero interpola muy bien superficies.</p>
+              <span class="fn-use">→ interpolación numérica</span>
+            </div>
+          </div>
+          <p class="note">
+            En redes neuronales casi siempre verás la <strong>gaussiana</strong>:
+            su respuesta local es la que da a la red RBF su carácter. En el resto
+            del tema, «función de base radial» = gaussiana.
+          </p>
+        </div>
+      </section>
+
+      <!-- 09 — DIVISOR 2 -->
       <section class="slide slide-divider" data-title="La red RBF y su entrenamiento">
         <div class="divider-inner">
           <span class="divider-num">— 02 —</span>
@@ -202,7 +324,7 @@
         </div>
       </section>
 
-      <!-- 07 — Arquitectura -->
+      <!-- 10 — Arquitectura -->
       <section class="slide" data-title="Arquitectura">
         <div class="slide-inner">
           <span class="kicker">Tres capas, una oculta</span>
@@ -233,7 +355,86 @@
         </div>
       </section>
 
-      <!-- 08 — Entrenamiento en dos pasos -->
+      <!-- 11 — La salida suma campanas -->
+      <section class="slide" data-title="Sumar campanas">
+        <div class="slide-inner">
+          <span class="kicker">Qué calcula la capa de salida</span>
+          <h2 class="h2">Una función hecha de <em>campanas</em>.</h2>
+          <div class="fn-formula" style="margin: 0 0 6px">y(x) = w₁·φ₁(x) + w₂·φ₂(x) + … + w<sub>K</sub>·φ<sub>K</sub>(x) + b</div>
+          <svg viewBox="0 0 760 205" style="width:100%; height:auto; margin: 4px 0 8px">
+            <line x1="60" y1="122" x2="700" y2="122" stroke="#c9c3b3" stroke-width="1"/>
+            <path d="M60 118 L76 115 L92 110 L108 104 L124 94 L140 83 L156 70 L172 58 L188 47 L204 40 L220 37 L236 40 L252 47 L268 58 L284 70 L300 83 L316 94 L332 104 L348 110 L364 115 L380 118 L396 120 L412 121 L428 122 L444 122 L460 122 L476 122 L492 122 L508 122 L524 122 L540 122 L556 122 L572 122 L588 122 L604 122 L620 122 L636 122 L652 122 L668 122 L684 122 L700 122" fill="none" stroke="#0796a3" stroke-width="1.6" stroke-dasharray="5 4"/>
+            <path d="M60 122 L76 122 L92 122 L108 122 L124 122 L140 122 L156 122 L172 122 L188 123 L204 123 L220 124 L236 126 L252 129 L268 133 L284 139 L300 145 L316 153 L332 160 L348 167 L364 171 L380 173 L396 171 L412 167 L428 160 L444 153 L460 145 L476 139 L492 133 L508 129 L524 126 L540 124 L556 123 L572 123 L588 122 L604 122 L620 122 L636 122 L652 122 L668 122 L684 122 L700 122" fill="none" stroke="#0796a3" stroke-width="1.6" stroke-dasharray="5 4"/>
+            <path d="M60 122 L76 122 L92 122 L108 122 L124 122 L140 122 L156 122 L172 122 L188 122 L204 122 L220 122 L236 122 L252 122 L268 122 L284 122 L300 122 L316 122 L332 122 L348 121 L364 120 L380 119 L396 117 L412 113 L428 107 L444 100 L460 91 L476 81 L492 71 L508 62 L524 56 L540 54 L556 56 L572 62 L588 71 L604 81 L620 91 L636 100 L652 107 L668 113 L684 117 L700 119" fill="none" stroke="#0796a3" stroke-width="1.6" stroke-dasharray="5 4"/>
+            <path d="M60 118 L76 115 L92 110 L108 104 L124 94 L140 83 L156 71 L172 58 L188 48 L204 41 L220 39 L236 44 L252 54 L268 69 L284 87 L300 106 L316 125 L332 142 L348 155 L364 163 L380 166 L396 164 L412 157 L428 145 L444 131 L460 114 L476 97 L492 82 L508 69 L524 60 L540 56 L556 57 L572 63 L588 71 L604 81 L620 91 L636 100 L652 107 L668 113 L684 117 L700 119" fill="none" stroke="#ff5700" stroke-width="2.8"/>
+            <g font-family="Inter Tight" font-size="12.5">
+              <text x="200" y="26" fill="#0796a3">w₁ = +1.0</text>
+              <text x="350" y="194" fill="#0796a3">w₂ = −0.6</text>
+              <text x="512" y="40" fill="#0796a3">w₃ = +0.8</text>
+              <text x="600" y="150" fill="#ff5700">salida y(x) = suma</text>
+            </g>
+          </svg>
+          <p class="note">
+            Cada neurona aporta una campana (<span style="color:#0796a3">discontinua</span>),
+            escalada por su peso; un peso <strong>negativo</strong> la convierte en
+            un valle. La salida es la <span style="color:#ff5700">suma</span>. Con
+            suficientes campanas se aproxima cualquier función continua: la red
+            RBF también es un <strong>aproximador universal</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 — El XOR -->
+      <section class="slide" data-title="El XOR">
+        <div class="slide-inner">
+          <span class="kicker">El ejemplo clásico</span>
+          <h2 class="h2">Dos campanas resuelven el <em>XOR</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El XOR no es separable por una recta (el perceptrón falla). Pon
+                dos centros, <strong>c₁ = (0, 0)</strong> y <strong>c₂ = (1, 1)</strong>,
+                con <span style="white-space:nowrap">φ = exp(−‖x − c‖²)</span>:
+              </p>
+              <div class="prompt-box">
+                <div class="prompt-head"><span class="prompt-dot"></span>Del plano (x₁, x₂) al plano (φ₁, φ₂)</div>
+                <div class="prompt-good"><div class="prompt-text">
+                  <span class="pt-c">(0,0) · XOR 0 → φ = (1.00, 0.14)</span>
+                  <span class="pt-c">(1,1) · XOR 0 → φ = (0.14, 1.00)</span>
+                  <span class="pt-t">(0,1) · XOR 1 → φ = (0.37, 0.37)</span>
+                  <span class="pt-t">(1,0) · XOR 1 → φ = (0.37, 0.37)</span>
+                  <span class="pt-f">φ₁ + φ₂ &gt; 0.9 → clase 0 · si no → clase 1</span>
+                </div></div>
+              </div>
+            </div>
+            <svg viewBox="0 0 420 240" style="width:100%; height:auto">
+              <g stroke="#c9c3b3" stroke-width="1">
+                <line x1="80" y1="20" x2="80" y2="200"/><line x1="80" y1="200" x2="400" y2="200"/>
+              </g>
+              <line x1="80" y1="38" x2="350" y2="200" stroke="#1a1f6c" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <circle cx="380" cy="176" r="8" fill="#0796a3"/>
+              <circle cx="120" cy="20" r="8" fill="#0796a3"/>
+              <circle cx="190" cy="134" r="8" fill="#ff5700"/>
+              <g font-family="Inter Tight" font-size="12.5">
+                <text x="360" y="222" fill="#7c80a6">φ₁</text>
+                <text x="52" y="34" fill="#7c80a6">φ₂</text>
+                <text x="362" y="158" fill="#0796a3">(0,0)</text>
+                <text x="134" y="25" fill="#0796a3">(1,1)</text>
+                <text x="120" y="160" fill="#ff5700">(0,1) y (1,0)</text>
+                <text x="232" y="96" fill="#1a1f6c" font-style="italic" font-family="Taviraj">frontera lineal</text>
+              </g>
+            </svg>
+          </div>
+          <p class="note">
+            La capa RBF ha <strong>cambiado la representación</strong>: en el
+            nuevo espacio una recta basta. Es el <em>teorema de Cover</em>
+            (1965): proyectar de forma no lineal a otro espacio hace más probable
+            la separabilidad lineal. Lo demás lo hace la capa de salida.
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — Entrenamiento en dos pasos -->
       <section class="slide" data-title="Entrenamiento en dos pasos">
         <div class="slide-inner">
           <span class="kicker">Por eso es rápida</span>
@@ -258,7 +459,171 @@
         </div>
       </section>
 
-      <!-- 09 — RBF vs MLP -->
+      <!-- 14 — Paso 1: k-means -->
+      <section class="slide" data-title="Paso 1 · k-means">
+        <div class="slide-inner">
+          <span class="kicker">Paso 1 en detalle · no supervisado</span>
+          <h2 class="h2">Dónde poner los centros: <em>k-means</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Queremos centros donde <em>hay datos</em>. k-means agrupa los
+                ejemplos en K grupos y devuelve el centro de cada uno:
+              </p>
+              <ol class="neuron-notes">
+                <li>Elige K y coloca K centros al azar (p. ej. K ejemplos).</li>
+                <li><strong>Asigna</strong> cada ejemplo a su centro más cercano.</li>
+                <li><strong>Mueve</strong> cada centro a la media de sus ejemplos.</li>
+                <li>Repite 2–3 hasta que los centros dejen de moverse.</li>
+              </ol>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Y la anchura σ</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">regla global: σ = d<sub>máx</sub> / √(2K)</span>
+                <span class="pt-c">&nbsp;&nbsp;d<sub>máx</sub> = mayor distancia entre centros</span>
+                <span class="pt-c">regla local: σ<sub>j</sub> ∝ distancia media</span>
+                <span class="pt-c">&nbsp;&nbsp;a los vecinos más cercanos de c<sub>j</sub></span>
+                <span class="pt-f">objetivo: que las campanas se solapen un poco</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Este paso <strong>no mira las etiquetas</strong>: es aprendizaje no
+            supervisado, el mismo espíritu del Tema 3.1. Solo describe
+            <em>dónde viven</em> los datos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 15 — Paso 2: mínimos cuadrados -->
+      <section class="slide" data-title="Paso 2 · mínimos cuadrados">
+        <div class="slide-inner">
+          <span class="kicker">Paso 2 en detalle · supervisado</span>
+          <h2 class="h2">Los pesos de salida, <em>de una vez</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Con centros y σ fijos, pasamos los N ejemplos por la capa RBF y
+                apilamos sus respuestas en una matriz <strong>Φ</strong> de
+                tamaño N × K. Buscamos los pesos w tales que:
+              </p>
+              <div class="fn-formula" style="margin: 6px 0 14px">Φ · w ≈ y</div>
+              <ul class="neuron-notes">
+                <li>Fila i de Φ = respuestas de las K neuronas al ejemplo i.</li>
+                <li>Es una <strong>regresión lineal</strong> sobre las φ: nada más.</li>
+                <li>Solución cerrada: no hay épocas, ni tasa de aprendizaje.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>La solución</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">w = (ΦᵀΦ)⁻¹ Φᵀ y</span>
+                <span class="pt-c">&nbsp;&nbsp;= Φ⁺ y (pseudoinversa)</span>
+                <span class="pt-c">con regularización L2 (ridge):</span>
+                <span class="pt-c">w = (ΦᵀΦ + λI)⁻¹ Φᵀ y</span>
+                <span class="pt-f">el mismo λ del Tema 2.4, ahora en fórmula cerrada</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Como el problema es lineal en w, el error tiene <strong>un único
+            mínimo</strong>: nada de mínimos locales ni de ajustar el learning
+            rate. Esa es la gran ventaja práctica de la RBF.
+          </p>
+        </div>
+      </section>
+
+      <!-- 16 — Cuántos centros -->
+      <section class="slide" data-title="Cuántos centros">
+        <div class="slide-inner">
+          <span class="kicker">El otro hiperparámetro</span>
+          <h2 class="h2">¿Cuántos <em>centros</em>?</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>K = N</h4>
+              <div class="fn-formula">un centro por ejemplo</div>
+              <p>Interpolación exacta: la red pasa por todos los puntos, ruido incluido. Φ es N × N.</p>
+              <span class="fn-use">→ memoriza: sobreajuste</span>
+            </div>
+            <div class="fn-card">
+              <h4>K ≪ N</h4>
+              <div class="fn-formula">pocos centros, bien puestos</div>
+              <p>Cada centro resume una zona con muchos ejemplos: la curva suaviza el ruido.</p>
+              <span class="fn-use">→ generaliza</span>
+            </div>
+            <div class="fn-card">
+              <h4>K muy pequeño</h4>
+              <div class="fn-formula">2 o 3 campanas</div>
+              <p>No hay campanas suficientes para seguir la forma de la función.</p>
+              <span class="fn-use">→ subajuste</span>
+            </div>
+          </div>
+          <p class="note">
+            K y σ se eligen como cualquier hiperparámetro: probando valores y
+            mirando el error en <strong>validación</strong> (o con validación
+            cruzada, ya que el entrenamiento es tan barato).
+          </p>
+        </div>
+      </section>
+
+      <!-- 17 — Entrenarlo todo con gradiente -->
+      <section class="slide" data-title="Todo con gradiente">
+        <div class="slide-inner">
+          <span class="kicker">La alternativa</span>
+          <h2 class="h2">¿Y si lo entrenamos <em>todo</em>?</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Dos pasos (híbrido)</h3>
+              <p>k-means para c y σ, mínimos cuadrados para w.</p>
+              <ul class="neuron-notes"><li>Rapidísimo y sin mínimos locales en w.</li><li>Pero los centros no saben nada de la tarea: pueden quedar mal colocados para separar clases.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Totalmente supervisado</h3>
+              <p>c, σ y w se ajustan a la vez por <strong>descenso del gradiente</strong>, como un MLP.</p>
+              <ul class="neuron-notes"><li>Suele dar algo más de precisión.</li><li>Vuelven los mínimos locales, las épocas y el learning rate.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            Lo habitual es combinar: <strong>inicializar</strong> con k-means y
+            mínimos cuadrados y, si hace falta, <strong>afinar</strong> después
+            con gradiente. Se parte de un buen punto y se mejora poco a poco.
+          </p>
+        </div>
+      </section>
+
+      <!-- 18 — En Python -->
+      <section class="slide" data-title="En Python">
+        <div class="slide-inner">
+          <span class="kicker">Los dos pasos, en código</span>
+          <h2 class="h2">Una red RBF en <em>pocas líneas</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-kw">import</span> numpy <span class="c-kw">as</span> np<br />
+              <span class="c-kw">from</span> sklearn.cluster <span class="c-kw">import</span> KMeans<br />
+              <span class="c-kw">from</span> scipy.spatial.distance <span class="c-kw">import</span> cdist<br /><br />
+              <span class="c-com"># paso 1: centros y anchura</span><br />
+              C = KMeans(n_clusters=<span class="c-kw">20</span>).fit(X).cluster_centers_<br />
+              sigma = cdist(C, C).max() / np.sqrt(<span class="c-kw">2</span> * <span class="c-kw">20</span>)<br /><br />
+              <span class="c-com"># paso 2: capa RBF + mínimos cuadrados</span><br />
+              <span class="c-kw">def</span> phi(X):<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">return</span> np.exp(-cdist(X, C)**<span class="c-kw">2</span> / (<span class="c-kw">2</span>*sigma**<span class="c-kw">2</span>))<br />
+              w = np.linalg.lstsq(phi(X), y, rcond=<span class="c-kw">None</span>)[<span class="c-kw">0</span>]<br /><br />
+              y_pred = phi(X_nuevo) @ w
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li><code>cdist</code> calcula todas las distancias ejemplo–centro de golpe: es la capa RBF.</li>
+                <li><code>lstsq</code> resuelve Φw ≈ y por mínimos cuadrados: es la capa de salida.</li>
+                <li>Sin bucle de entrenamiento, sin épocas: se entrena en milisegundos.</li>
+                <li>Keras no trae una capa RBF de serie; en el enfoque «todo con gradiente» se programa como capa propia.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 — RBF vs MLP -->
       <section class="slide" data-title="RBF vs MLP">
         <div class="slide-inner">
           <span class="kicker">Dos filosofías</span>
@@ -291,7 +656,7 @@
         </div>
       </section>
 
-      <!-- 10 — DIVISOR 3 -->
+      <!-- 20 — DIVISOR 3 -->
       <section class="slide slide-divider" data-title="Cuándo usarlas">
         <div class="divider-inner">
           <span class="divider-num">— 03 —</span>
@@ -303,7 +668,7 @@
         </div>
       </section>
 
-      <!-- 11 — Nicho y límite -->
+      <!-- 21 — Nicho y límite -->
       <section class="slide" data-title="Nicho y límite">
         <div class="slide-inner">
           <span class="kicker">Dónde encajan y dónde no</span>
@@ -334,7 +699,142 @@
         </div>
       </section>
 
-      <!-- 12 — Ideas -->
+      <!-- 22 — La maldición en números -->
+      <section class="slide" data-title="La maldición en números">
+        <div class="slide-inner">
+          <span class="kicker">Por qué no escalan</span>
+          <h2 class="h2">La maldición, en <em>números</em>.</h2>
+          <p class="lead">
+            Para cubrir el espacio con campanas locales, pongamos solo
+            <strong>10 centros por eje</strong>. ¿Cuántos centros hacen falta?
+          </p>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>d = 2</h4>
+              <div class="fn-formula">10² = 100</div>
+              <p>Una rejilla de 10 × 10. Trivial: se entrena en un instante.</p>
+              <span class="fn-use">→ terreno RBF</span>
+            </div>
+            <div class="fn-card">
+              <h4>d = 10</h4>
+              <div class="fn-formula">10¹⁰ centros</div>
+              <p>Diez mil millones de campanas. Ya no cabe en memoria.</p>
+              <span class="fn-use">→ inviable</span>
+            </div>
+            <div class="fn-card">
+              <h4>d = 784 (MNIST)</h4>
+              <div class="fn-formula">10⁷⁸⁴ centros</div>
+              <p>Más que átomos en el universo (~10⁸⁰), por muchísimo.</p>
+              <span class="fn-use">→ absurdo</span>
+            </div>
+          </div>
+          <p class="note">
+            k-means ayuda (solo pone centros donde hay datos), pero en alta
+            dimensión los datos están tan dispersos que «cerca» deja de
+            significar algo. Las redes profundas, en cambio, <strong>aprenden
+            representaciones</strong> que reducen la dimensión útil.
+          </p>
+        </div>
+      </section>
+
+      <!-- 23 — Parientes: SVM y procesos gaussianos -->
+      <section class="slide" data-title="Parientes">
+        <div class="slide-inner">
+          <span class="kicker">La gaussiana, en otros modelos</span>
+          <h2 class="h2">Sus <em>parientes</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>SVM con kernel RBF</h3>
+              <p>El kernel más usado en las SVM es la misma gaussiana: K(x, x′) = exp(−γ‖x − x′‖²).</p>
+              <ul class="neuron-notes"><li>γ = 1 / 2σ²: γ grande = campanas estrechas.</li><li>Los centros son los <em>vectores de soporte</em>, que el propio algoritmo elige.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Procesos gaussianos</h3>
+              <p>Su kernel por defecto también es la gaussiana (<em>squared exponential</em>).</p>
+              <ul class="neuron-notes"><li>Interpolan con una medida de <strong>incertidumbre</strong>.</li><li>Muy usados en optimización bayesiana de hiperparámetros.</li></ul>
+            </div>
+          </div>
+          <div class="prompt-box" style="margin-top:14px">
+            <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Lo has visto en scikit-learn</div>
+            <div class="prompt-good"><div class="prompt-text">
+              <span class="pt-c">SVC(kernel="rbf", gamma=0.5)&nbsp;&nbsp;# γ = 0.5 ↔ σ = 1</span>
+              <span class="pt-f">el «rbf» de ese parámetro es exactamente la campana de este tema</span>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24 — Ejercicio: calcula la salida -->
+      <section class="slide slide-exercise" data-title="Calcula">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · a mano</span>
+          <h2 class="h2 h2-ex">¿Qué <em>responde</em> la red?</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>La red</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">c₁ = (0, 0) · c₂ = (2, 0) · σ = 1</span>
+                <span class="pt-c">φ(x) = exp(−‖x − c‖² / 2)</span>
+                <span class="pt-c">w₁ = 2 · w₂ = −1 · b = 0</span>
+                <span class="pt-f">ayuda: e<sup>−0.5</sup> ≈ 0.61 · e<sup>−2</sup> ≈ 0.14 · e<sup>−8</sup> ≈ 0.0003</span>
+              </div></div>
+            </div>
+            <div class="fn-grid" style="grid-template-columns: 1fr">
+              <div class="fn-card">
+                <h4>a) x = (0, 0)</h4>
+                <span class="fn-use">→ φ₁, φ₂ e y = ¿?</span>
+              </div>
+              <div class="fn-card">
+                <h4>b) x = (1, 0)</h4>
+                <span class="fn-use">→ φ₁, φ₂ e y = ¿?</span>
+              </div>
+              <div class="fn-card">
+                <h4>c) x = (6, 0)</h4>
+                <span class="fn-use">→ φ₁, φ₂ e y = ¿? ¿Qué te dice?</span>
+              </div>
+            </div>
+          </div>
+          <p class="note">
+            Calcula primero la distancia al cuadrado a cada centro, luego cada φ
+            y, por último, y = w₁φ₁ + w₂φ₂ + b. Decide antes de pasar de diapositiva.
+          </p>
+        </div>
+      </section>
+
+      <!-- 25 — Ejercicio: soluciones -->
+      <section class="slide" data-title="Soluciones">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Las <em>cuentas</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>a) x = (0, 0)</h4>
+              <div class="fn-formula">d² = 0 y 4</div>
+              <p>φ₁ = 1 · φ₂ = e<sup>−2</sup> ≈ 0.14<br />y = 2·1 − 0.14 ≈ <strong>1.86</strong></p>
+              <span class="fn-use">→ manda la neurona 1</span>
+            </div>
+            <div class="fn-card">
+              <h4>b) x = (1, 0)</h4>
+              <div class="fn-formula">d² = 1 y 1</div>
+              <p>φ₁ = φ₂ = e<sup>−0.5</sup> ≈ 0.61<br />y = 2·0.61 − 0.61 ≈ <strong>0.61</strong></p>
+              <span class="fn-use">→ a medio camino, se compensan</span>
+            </div>
+            <div class="fn-card">
+              <h4>c) x = (6, 0)</h4>
+              <div class="fn-formula">d² = 36 y 16</div>
+              <p>φ₁ ≈ 0 · φ₂ = e<sup>−8</sup> ≈ 0.0003<br />y ≈ <strong>0</strong> (= b)</p>
+              <span class="fn-use">→ lejos de todo, la red «calla»</span>
+            </div>
+          </div>
+          <p class="note">
+            El caso c) es la lección: fuera de la zona con centros, todas las
+            campanas se apagan y la salida cae al sesgo b. Una RBF
+            <strong>no extrapola</strong>: solo sabe responder donde vio datos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 26 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
           <span class="kicker">Resumen del Tema 3 · Redes de base radial (RBF)</span>
@@ -346,12 +846,12 @@
           </div>
           <div class="close-next">
             <span>Su sitio</span>
-            <span>Interpolación y baja dimensión: ahí brilla. En alta dimensión (visión, lenguaje), la maldición de la dimensionalidad se lo deja a las redes profundas.</span>
+            <span>σ y K regulan el compromiso sesgo–varianza. Interpolación y baja dimensión: ahí brilla. Fuera de sus datos no extrapola, y en alta dimensión (visión, lenguaje) la maldición de la dimensionalidad se lo deja a las redes profundas.</span>
           </div>
         </div>
       </section>
 
-      <!-- 13 — Cierre -->
+      <!-- 27 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
           <span class="kicker">Cierre del Tema 3 · Redes de base radial (RBF)</span>
@@ -365,7 +865,7 @@
             <a class="close-cta" href="./repaso-rbf.html">
               <span class="close-cta-eyebrow">Comprueba lo aprendido</span>
               <span class="close-cta-title">Repaso · Redes de base radial <span class="close-cta-arrow">→</span></span>
-              <span class="close-cta-note">Seis retos sobre distancia, gaussiana, arquitectura y entrenamiento.</span>
+              <span class="close-cta-note">Nueve retos sobre distancia, σ, el XOR, arquitectura y entrenamiento.</span>
             </a>
             <a class="close-cta" href="./sesion-t4.html">
               <span class="close-cta-eyebrow">Seguir el curso</span>
