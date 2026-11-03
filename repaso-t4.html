@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Repaso Tema 4</title>
     <meta
       name="description"
-      content="Cuestionario autocorregible del Tema 4 de Aprendizaje Profundo. 10 retos sobre las redes convolucionales (CNN) para comprobar lo aprendido. CUNEF Universidad."
+      content="Cuestionario autocorregible del Tema 4 de Aprendizaje Profundo. 14 retos sobre las redes convolucionales (CNN): convolución, padding, parámetros, campo receptivo, pooling y arquitecturas, para comprobar lo aprendido. CUNEF Universidad."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -619,7 +619,7 @@
         <span class="bar-sub">· Aprendizaje Profundo · Repaso · Tema 4 · Redes convolucionales</span>
       </span>
       <div class="bar-progress"><div class="bar-fill" id="barFill"></div></div>
-      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/10</span>
+      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/14</span>
     </header>
 
     <main>
@@ -629,14 +629,15 @@
           <span class="hero-kicker">Tema 4 · Redes convolucionales · Repaso</span>
           <h1>¿Dominas las<br /><em>redes convolucionales</em>?</h1>
           <p>
-            Diez retos para comprobar lo que te llevas del Tema 4: patrones
+            Catorce retos para comprobar lo que te llevas del Tema 4.1: patrones
             locales y pesos compartidos, la convolución y los filtros, el
-            stride y los feature maps, el max pooling y la arquitectura
+            stride, el padding y los feature maps, cómo contar parámetros, el
+            campo receptivo, ResNet, el max pooling y la arquitectura
             completa de una CNN. Con explicación en cada respuesta.
           </p>
           <div class="hero-meta">
-            <div><span class="n">10</span><span class="l">Retos</span></div>
-            <div><span class="n">~5′</span><span class="l">Minutos</span></div>
+            <div><span class="n">14</span><span class="l">Retos</span></div>
+            <div><span class="n">~7′</span><span class="l">Minutos</span></div>
             <div><span class="n">0</span><span class="l">Riesgo</span></div>
           </div>
           <button class="btn btn-primary btn-lg" id="startBtn">
@@ -649,7 +650,7 @@
       <section class="screen" id="quizScreen" hidden>
         <div class="card">
           <div class="qmeta">
-            <span id="qCounter">Reto 1 / 10</span>
+            <span id="qCounter">Reto 1 / 14</span>
             <span class="tag" id="qType">Opción única</span>
           </div>
           <h2 class="qtext" id="qText"></h2>
@@ -674,7 +675,7 @@
           <div class="ring" id="ring">
             <div class="ring-inner">
               <div class="ring-pct" id="ringPct">0%</div>
-              <div class="ring-sub" id="ringSub">0 / 10</div>
+              <div class="ring-sub" id="ringSub">0 / 14</div>
             </div>
           </div>
           <h2 id="resTitle"></h2>
@@ -805,6 +806,58 @@
           correct: 2,
           explain:
             "La imagen es un volumen alto×ancho×3. Cada filtro abarca los tres canales a la vez (3×3×3 = 27 pesos) y produce un único feature map.",
+        },
+        {
+          type: "choice",
+          q: "Una capa Conv2D con 32 filtros de 3×3 recibe imágenes RGB. ¿Cuántos parámetros tiene?",
+          options: [
+            "288: 32 filtros × 9 pesos, uno por cada casilla",
+            "896: 32 filtros × (3·3·3 pesos + 1 sesgo)",
+            "864: 32 filtros × 27 pesos, sin contar sesgos",
+            "Depende del alto y el ancho de las imágenes",
+          ],
+          correct: 1,
+          explain:
+            "Cada filtro abarca los 3 canales (3·3·3 = 27 pesos) y tiene su sesgo: 28 parámetros. Con 32 filtros, 32 × 28 = 896. El tamaño de la imagen no influye: los pesos se comparten en todas las posiciones.",
+        },
+        {
+          type: "choice",
+          q: "Entrada de 28×28, filtro 3×3, stride 1 y padding \"valid\" (sin relleno). ¿Qué tamaño tiene el feature map?",
+          options: [
+            "26×26: el filtro no cabe en el borde y se pierden 2",
+            "28×28: la convolución nunca cambia el tamaño",
+            "14×14: la convolución divide siempre a la mitad",
+            "9×9: se divide el tamaño entre el lado del filtro",
+          ],
+          correct: 0,
+          explain:
+            "Con la fórmula ⌊(n + 2p − f)/s⌋ + 1 = (28 + 0 − 3)/1 + 1 = 26. Con padding \"same\" se mantendría 28×28; con stride 2 saldría 13×13.",
+        },
+        {
+          type: "choice",
+          q: "Apilas dos capas convolucionales 3×3 (stride 1). ¿Qué región de la imagen 've' una neurona de la segunda capa?",
+          options: [
+            "3×3, igual que las neuronas de la primera capa",
+            "9×9, porque se multiplican los tamaños 3 × 3",
+            "6×6, porque se suman los lados de ambos filtros",
+            "5×5: su campo receptivo crece al apilar capas",
+          ],
+          correct: 3,
+          explain:
+            "Ve 3×3 neuronas de la primera capa, y cada una ve 3×3 píxeles solapados: en total 5×5. Con tres capas, 7×7. Por eso las capas profundas detectan patrones grandes (partes, objetos) a partir de bordes.",
+        },
+        {
+          type: "choice",
+          q: "¿Qué aportó la conexión residual de ResNet (salida = F(x) + x)?",
+          options: [
+            "Eliminar por completo la necesidad de capas de pooling",
+            "Reducir el número de parámetros de cada convolución",
+            "Entrenar redes muy profundas: el gradiente usa el atajo",
+            "Sustituir la función ReLU por una activación lineal",
+          ],
+          correct: 2,
+          explain:
+            "El atajo x deja pasar la señal y el gradiente sin atravesar cada capa, así que no se desvanece. Cada bloque solo aprende la corrección F(x). Con eso se entrenaron redes de 152 capas.",
         },
         {
           type: "classify",

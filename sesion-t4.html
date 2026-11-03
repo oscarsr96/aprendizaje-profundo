@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Tema 4 · Redes convolucionales</title>
     <meta
       name="description"
-      content="Tema 4 de Aprendizaje Profundo en CUNEF. Redes convolucionales (CNN): convolución, filtros, pooling y la arquitectura completa para visión."
+      content="Tema 4.1 de Aprendizaje Profundo en CUNEF. Redes convolucionales (CNN): por qué no una red densa, convolución y filtros, padding y stride, cálculo de parámetros, campo receptivo, pooling, dimensiones capa a capa, arquitecturas famosas (LeNet, AlexNet, VGG, ResNet), data augmentation y transfer learning."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -68,7 +68,7 @@
             </div>
             <div class="meta-block">
               <span class="meta-label">Duración</span>
-              <span class="meta-val">~50 minutos</span>
+              <span class="meta-val">~75 minutos</span>
             </div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
@@ -106,12 +106,12 @@
       <!-- 01 — AGENDA -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <span class="kicker">Agenda · ~75&nbsp;min</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
             <li>
               <span class="agenda-num">01</span>
-              <span class="agenda-time">10&prime;</span>
+              <span class="agenda-time">14&prime;</span>
               <div>
                 <span class="agenda-title">La intuición</span>
                 <span class="agenda-desc"
@@ -122,34 +122,34 @@
             </li>
             <li>
               <span class="agenda-num">02</span>
-              <span class="agenda-time">15&prime;</span>
+              <span class="agenda-time">25&prime;</span>
               <div>
                 <span class="agenda-title">Convolución y filtros</span>
                 <span class="agenda-desc"
-                  >El producto escalar deslizante, el stride y los feature
-                  maps.</span
+                  >El producto escalar deslizante, filtros clásicos, padding,
+                  stride, parámetros y campo receptivo.</span
                 >
               </div>
             </li>
             <li>
               <span class="agenda-num">03</span>
-              <span class="agenda-time">15&prime;</span>
+              <span class="agenda-time">20&prime;</span>
               <div>
                 <span class="agenda-title">Pooling y arquitectura</span>
                 <span class="agenda-desc"
-                  >Max pooling y la CNN completa: conv → pool → flatten →
-                  clasificar.</span
+                  >Tipos de pooling, la CNN completa capa a capa y las
+                  arquitecturas que hicieron historia.</span
                 >
               </div>
             </li>
             <li>
               <span class="agenda-num">04</span>
-              <span class="agenda-time">10&prime;</span>
+              <span class="agenda-time">16&prime;</span>
               <div>
                 <span class="agenda-title">En la práctica</span>
                 <span class="agenda-desc"
-                  >CNN en Keras y dónde brillan: visión, AlphaGo, voz y
-                  texto.</span
+                  >CNN en Keras, data augmentation, transfer learning,
+                  aplicaciones y un ejercicio a mano.</span
                 >
               </div>
             </li>
@@ -208,7 +208,34 @@
         </div>
       </section>
 
-      <!-- 04 — Conexiones locales y pesos compartidos -->
+      <!-- 04 — El problema de la red densa -->
+      <section class="slide" data-title="La red densa no escala">
+        <div class="slide-inner">
+          <span class="kicker">Hagamos números</span>
+          <h2 class="h2">La red densa <em>no escala</em>.</h2>
+          <div class="flow">
+            <div class="flow-card">
+              <h3>Red densa</h3>
+              <p>Una foto de 224 × 224 en color son <strong>150.528</strong> entradas. Una primera capa de 1.000 neuronas:</p>
+              <div class="fn-formula">150.528 × 1.000 ≈ 150 millones de pesos</div>
+              <ul class="neuron-notes"><li>Solo en la primera capa.</li><li>Al aplanar, pierde quién es vecino de quién.</li></ul>
+            </div>
+            <div class="flow-card">
+              <h3>Capa convolucional</h3>
+              <p>64 filtros de 3 × 3 sobre los 3 canales, más un sesgo por filtro:</p>
+              <div class="fn-formula">64 × (3·3·3 + 1) = 1.792 parámetros</div>
+              <ul class="neuron-notes"><li>No depende del tamaño de la imagen.</li><li>Conserva la estructura 2-D.</li></ul>
+            </div>
+          </div>
+          <p class="note">
+            Casi <strong>cien mil veces menos</strong> parámetros. Menos pesos
+            significa menos memoria, entrenamiento más rápido y, sobre todo,
+            menos riesgo de <em>sobreajuste</em> (Tema 2.4).
+          </p>
+        </div>
+      </section>
+
+      <!-- 05 — Conexiones locales y pesos compartidos -->
       <section class="slide" data-title="Local y compartido">
         <div class="slide-inner">
           <span class="kicker">Comprimir la red completa</span>
@@ -248,7 +275,7 @@
         </div>
       </section>
 
-      <!-- 05 — DIVISOR 2 -->
+      <!-- 06 — DIVISOR 2 -->
       <section class="slide slide-divider" data-title="Convolución">
         <div class="divider-inner">
           <span class="divider-num">— 02 —</span>
@@ -260,7 +287,7 @@
         </div>
       </section>
 
-      <!-- 06 — La capa convolucional -->
+      <!-- 07 — La capa convolucional -->
       <section class="slide" data-title="Capa convolucional">
         <div class="slide-inner">
           <span class="kicker">Filtros que detectan patrones</span>
@@ -282,7 +309,7 @@
         </div>
       </section>
 
-      <!-- 07 — La operación de convolución (diagrama) -->
+      <!-- 08 — La operación de convolución (diagrama) -->
       <section class="slide" data-title="Operación de convolución">
         <div class="slide-inner">
           <span class="kicker">Producto escalar deslizante</span>
@@ -349,7 +376,72 @@
         </div>
       </section>
 
-      <!-- 08 — RGB -->
+      <!-- 09 — Filtros clásicos -->
+      <section class="slide" data-title="Filtros clásicos">
+        <div class="slide-inner">
+          <span class="kicker">Qué «ve» un filtro</span>
+          <h2 class="h2">Filtros hechos <em>a mano</em>.</h2>
+          <div class="fn-grid" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="fn-card">
+              <h4>Borde vertical</h4>
+              <div class="fn-formula">−1 0 1<br />−2 0 2<br />−1 0 1</div>
+              <p>Responde fuerte donde la imagen pasa de oscuro a claro de izquierda a derecha.</p>
+              <span class="fn-use">→ filtro de Sobel</span>
+            </div>
+            <div class="fn-card">
+              <h4>Borde horizontal</h4>
+              <div class="fn-formula">−1 −2 −1<br />&nbsp;0 &nbsp;0 &nbsp;0<br />&nbsp;1 &nbsp;2 &nbsp;1</div>
+              <p>El mismo filtro girado: detecta transiciones de arriba a abajo.</p>
+              <span class="fn-use">→ Sobel traspuesto</span>
+            </div>
+            <div class="fn-card">
+              <h4>Desenfoque</h4>
+              <div class="fn-formula">1/9 · (todo unos)</div>
+              <p>Promedia cada píxel con sus 8 vecinos: suaviza el ruido.</p>
+              <span class="fn-use">→ filtro de media</span>
+            </div>
+          </div>
+          <p class="note">
+            Durante décadas, la visión artificial <em>diseñaba</em> estos filtros
+            a mano. La gran idea de la CNN: los 9 números de cada filtro son
+            <strong>pesos que se aprenden</strong> por backpropagation. La red
+            descubre sola qué patrones le sirven.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 — Padding y stride -->
+      <section class="slide" data-title="Padding y stride">
+        <div class="slide-inner">
+          <span class="kicker">¿De qué tamaño sale el feature map?</span>
+          <h2 class="h2"><em>Padding</em> y stride.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Con entrada n × n, filtro f × f, relleno p y stride s, el feature
+                map mide:
+              </p>
+              <div class="fn-formula" style="margin: 6px 0 14px">⌊(n + 2p − f) / s⌋ + 1</div>
+              <ul class="neuron-notes">
+                <li><strong>Padding</strong> = rellenar el borde con ceros para que el filtro quepa también en las esquinas.</li>
+                <li>Keras: <code>padding="valid"</code> (sin relleno, encoge) o <code>"same"</code> (mismo tamaño con stride 1).</li>
+                <li><strong>Stride</strong> 2 = saltar de dos en dos: divide el tamaño a la mitad.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Entrada 28 × 28, filtro 3 × 3</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">valid, s = 1 → (28 − 3)/1 + 1 = 26</span>
+                <span class="pt-c">same,&nbsp; s = 1 → p = 1 → 28</span>
+                <span class="pt-c">valid, s = 2 → ⌊25/2⌋ + 1 = 13</span>
+                <span class="pt-f">sin padding, cada capa 3×3 quita 2 píxeles</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 — RGB -->
       <section class="slide" data-title="RGB">
         <div class="slide-inner">
           <span class="kicker">Imágenes en color</span>
@@ -384,7 +476,72 @@
         </div>
       </section>
 
-      <!-- 09 — DIVISOR 3 -->
+      <!-- 12 — Contar parámetros -->
+      <section class="slide" data-title="Contar parámetros">
+        <div class="slide-inner">
+          <span class="kicker">La cuenta que pregunta todo el mundo</span>
+          <h2 class="h2">¿Cuántos <em>parámetros</em> tiene una capa?</h2>
+          <div class="fn-formula" style="margin: 0 0 16px">nº filtros × (f × f × canales de entrada + 1)</div>
+          <div class="fn-grid" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="fn-card">
+              <h4>Sobre blanco y negro</h4>
+              <div class="fn-formula">32 × (3·3·1 + 1) = 320</div>
+              <p>Entrada 28×28×1, 32 filtros 3×3.</p>
+              <span class="fn-use">→ el +1 es el sesgo de cada filtro</span>
+            </div>
+            <div class="fn-card">
+              <h4>Sobre color</h4>
+              <div class="fn-formula">32 × (3·3·3 + 1) = 896</div>
+              <p>Misma capa, pero cada filtro abarca los 3 canales RGB.</p>
+              <span class="fn-use">→ el filtro es 3×3×3</span>
+            </div>
+            <div class="fn-card">
+              <h4>Segunda capa</h4>
+              <div class="fn-formula">64 × (3·3·32 + 1) = 18.496</div>
+              <p>Ahora la entrada tiene 32 canales: los 32 feature maps anteriores.</p>
+              <span class="fn-use">→ la profundidad se arrastra</span>
+            </div>
+          </div>
+          <p class="note">
+            Fíjate en lo que <strong>no</strong> aparece: el alto y el ancho de
+            la imagen. El número de parámetros de una capa convolucional no
+            depende del tamaño de la entrada, solo del filtro y de los canales.
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — Campo receptivo -->
+      <section class="slide" data-title="Campo receptivo">
+        <div class="slide-inner">
+          <span class="kicker">Capa a capa, se ve más lejos</span>
+          <h2 class="h2">Campo receptivo y <em>jerarquía</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una neurona de la 1.ª capa ve 3 × 3 píxeles. Una de la 2.ª ve
+                3 × 3 neuronas de la 1.ª, que juntas cubren <strong>5 × 5</strong>
+                píxeles. La 3.ª, <strong>7 × 7</strong>. Es su <em>campo receptivo</em>.
+              </p>
+              <ul class="neuron-notes">
+                <li>Cada pooling 2×2 hace que el campo crezca aún más rápido.</li>
+                <li>Dos capas 3×3 ven lo mismo que una 5×5 con menos pesos (18 frente a 25 por canal) y una no linealidad más. Es el truco de <strong>VGG</strong>.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Lo que aprende cada nivel</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">capa 1 → bordes y manchas de color</span>
+                <span class="pt-c">capa 2 → esquinas, texturas</span>
+                <span class="pt-c">capa 3 → partes: ojos, ruedas</span>
+                <span class="pt-c">capas altas → objetos completos</span>
+                <span class="pt-f">visualizado por Zeiler &amp; Fergus (2014)</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 — DIVISOR 3 -->
       <section class="slide slide-divider" data-title="Pooling">
         <div class="divider-inner">
           <span class="divider-num">— 03 —</span>
@@ -396,7 +553,7 @@
         </div>
       </section>
 
-      <!-- 10 — Max pooling -->
+      <!-- 15 — Max pooling -->
       <section class="slide" data-title="Max pooling">
         <div class="slide-inner">
           <span class="kicker">Submuestreo</span>
@@ -441,7 +598,46 @@
         </div>
       </section>
 
-      <!-- 11 — La CNN completa (arquitectura) -->
+      <!-- 16 — Otras formas de reducir -->
+      <section class="slide" data-title="Otros poolings">
+        <div class="slide-inner">
+          <span class="kicker">El max no es el único</span>
+          <h2 class="h2">Otras formas de <em>encoger</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Max pooling</h4>
+              <div class="fn-formula">máx del bloque</div>
+              <p>Se queda con la señal más fuerte: «¿está el patrón por aquí?».</p>
+              <span class="fn-use">→ el más usado tras conv</span>
+            </div>
+            <div class="fn-card">
+              <h4>Average pooling</h4>
+              <div class="fn-formula">media del bloque</div>
+              <p>Suaviza: cuenta cuánto patrón hay en promedio.</p>
+              <span class="fn-use">→ menos habitual entre capas</span>
+            </div>
+            <div class="fn-card">
+              <h4>Global average</h4>
+              <div class="fn-formula">h × w × c → c</div>
+              <p>Cada feature map entero se resume en un número. Sustituye a Flatten.</p>
+              <span class="fn-use">→ el <code>pooling='avg'</code> de MobileNet</span>
+            </div>
+            <div class="fn-card">
+              <h4>Conv con stride 2</h4>
+              <div class="fn-formula">aprende a reducir</div>
+              <p>En lugar de una regla fija, una convolución que salta de dos en dos.</p>
+              <span class="fn-use">→ común en redes modernas</span>
+            </div>
+          </div>
+          <p class="note">
+            Ningún pooling tiene <strong>parámetros</strong>: es una operación
+            fija. El global average pooling es la forma moderna de pasar de los
+            feature maps al clasificador sin una capa densa enorme.
+          </p>
+        </div>
+      </section>
+
+      <!-- 17 — La CNN completa (arquitectura) -->
       <section class="slide" data-title="La CNN completa">
         <div class="slide-inner">
           <span class="kicker">De la imagen a la decisión</span>
@@ -503,7 +699,38 @@
         </div>
       </section>
 
-      <!-- 12 — Cómo comprime una CNN -->
+      <!-- 18 — Siguiendo las dimensiones -->
+      <section class="slide" data-title="Siguiendo las dimensiones">
+        <div class="slide-inner">
+          <span class="kicker">La red de Keras, capa a capa</span>
+          <h2 class="h2">Siguiendo las <em>dimensiones</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Forma de salida · parámetros</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">entrada &nbsp;&nbsp;&nbsp;28×28×1</span>
+                <span class="pt-c">Conv 25 &nbsp;&nbsp;26×26×25 · 25×(9+1) = 250</span>
+                <span class="pt-c">MaxPool &nbsp;&nbsp;13×13×25 · 0</span>
+                <span class="pt-c">Conv 50 &nbsp;&nbsp;11×11×50 · 50×(225+1) = 11.300</span>
+                <span class="pt-c">MaxPool &nbsp;&nbsp;5×5×50 &nbsp;&nbsp;· 0</span>
+                <span class="pt-c">Flatten &nbsp;&nbsp;1.250 &nbsp;&nbsp;&nbsp;· 0</span>
+                <span class="pt-c">Dense 10 &nbsp;10 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;· 1.250×10+10 = 12.510</span>
+                <span class="pt-f">total: 24.060 parámetros</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>Cada conv 3×3 sin padding <strong>quita 2</strong> píxeles; cada pooling 2×2 <strong>divide entre 2</strong> (redondeando hacia abajo: 11 → 5).</li>
+                <li>El alto y el ancho <em>bajan</em>; los canales <em>suben</em> (1 → 25 → 50).</li>
+                <li>Más de la mitad de los parámetros están en la <strong>capa densa</strong> final, no en las convoluciones.</li>
+                <li>Es lo que imprime <code>model.summary()</code>: compruébalo siempre.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 — Cómo comprime una CNN -->
       <section class="slide" data-title="Cómo comprime">
         <div class="slide-inner">
           <span class="kicker">Tres formas de reducir complejidad</span>
@@ -536,7 +763,47 @@
         </div>
       </section>
 
-      <!-- 13 — DIVISOR 4 -->
+      <!-- 20 — Arquitecturas famosas -->
+      <section class="slide" data-title="Arquitecturas famosas">
+        <div class="slide-inner">
+          <span class="kicker">Cuatro hitos</span>
+          <h2 class="h2">Las CNN que hicieron <em>historia</em>.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>LeNet-5 · 1998</h4>
+              <div class="fn-formula">~60 mil parámetros</div>
+              <p>Yann LeCun. Leía dígitos de cheques bancarios: conv → pool → densa.</p>
+              <span class="fn-use">→ la plantilla original</span>
+            </div>
+            <div class="fn-card">
+              <h4>AlexNet · 2012</h4>
+              <div class="fn-formula">~60 millones</div>
+              <p>Gana ImageNet con un 15 % de error top-5 frente al 26 % del segundo. ReLU, dropout y GPU.</p>
+              <span class="fn-use">→ arranca la era deep learning</span>
+            </div>
+            <div class="fn-card">
+              <h4>VGG-16 · 2014</h4>
+              <div class="fn-formula">~138 millones</div>
+              <p>Solo filtros 3×3 apilados, muy regular. Más profundidad, mejor resultado.</p>
+              <span class="fn-use">→ simple y profunda</span>
+            </div>
+            <div class="fn-card">
+              <h4>ResNet · 2015</h4>
+              <div class="fn-formula">salida = F(x) + x</div>
+              <p>Conexiones residuales: el gradiente fluye por el «atajo». Hasta 152 capas y 3,6 % de error.</p>
+              <span class="fn-use">→ por fin, redes muy profundas</span>
+            </div>
+          </div>
+          <p class="note">
+            Antes de ResNet, apilar más capas llegaba a <em>empeorar</em> el
+            entrenamiento (el gradiente se desvanece, Tema 2). La conexión
+            residual le deja a cada bloque aprender solo la <strong>corrección</strong>
+            sobre su entrada.
+          </p>
+        </div>
+      </section>
+
+      <!-- 21 — DIVISOR 4 -->
       <section class="slide slide-divider" data-title="En la práctica">
         <div class="divider-inner">
           <span class="divider-num">— 04 —</span>
@@ -548,7 +815,7 @@
         </div>
       </section>
 
-      <!-- 14 — CNN en Keras -->
+      <!-- 22 — CNN en Keras -->
       <section class="slide" data-title="CNN en Keras">
         <div class="slide-inner">
           <span class="kicker">De vector a tensor</span>
@@ -561,8 +828,8 @@
               </p>
               <ul class="neuron-notes">
                 <li>Entrada <code>(28, 28, 1)</code> · 1 canal B/N, 3 si RGB.</li>
-                <li>Un filtro 3×3 tiene <strong>9 parámetros</strong>.</li>
-                <li>25 filtros → 25×9 = <strong>225 parámetros</strong> en esa capa.</li>
+                <li>Un filtro 3×3 tiene <strong>9 pesos + 1 sesgo</strong>.</li>
+                <li>25 filtros → 25×(9+1) = <strong>250 parámetros</strong> en esa capa.</li>
               </ul>
             </div>
             <div class="code-block">
@@ -580,7 +847,43 @@
         </div>
       </section>
 
-      <!-- 14b — DIVISOR: Transfer learning -->
+      <!-- 23 — Data augmentation -->
+      <section class="slide" data-title="Data augmentation">
+        <div class="slide-inner">
+          <span class="kicker">Más datos sin hacer más fotos</span>
+          <h2 class="h2">Data <em>augmentation</em> en Keras.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un gato volteado sigue siendo un gato. Aplicar transformaciones
+                aleatorias a cada imagen en cada época multiplica la variedad
+                de los datos.
+              </p>
+              <ul class="neuron-notes">
+                <li>Solo actúa <strong>al entrenar</strong>; en predicción, las capas no hacen nada.</li>
+                <li>Es regularización (Tema 2.4): la red no puede memorizar cada píxel.</li>
+                <li>Cuidado con el sentido común: voltear un «6» lo convierte en «9».</li>
+              </ul>
+            </div>
+            <div class="code-block">
+              aumento = keras.Sequential([<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;layers.RandomFlip(<span class="c-str">"horizontal"</span>),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;layers.RandomRotation(<span class="c-kw">0.1</span>),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;layers.RandomZoom(<span class="c-kw">0.1</span>),<br />
+              ])<br /><br />
+              <span class="c-com"># se pone al principio del modelo</span><br />
+              model = keras.Sequential([<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;keras.Input((<span class="c-kw">160</span>, <span class="c-kw">160</span>, <span class="c-kw">3</span>)),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;aumento,<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;layers.Conv2D(<span class="c-kw">32</span>, <span class="c-kw">3</span>, activation=<span class="c-str">"relu"</span>),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-com"># …</span><br />
+              ])
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24 — DIVISOR: Transfer learning -->
       <section class="slide slide-divider" data-title="Transfer learning">
         <div class="divider-inner">
           <span class="divider-num">— extra —</span>
@@ -592,7 +895,7 @@
         </div>
       </section>
 
-      <!-- 14c — Transfer learning: la idea -->
+      <!-- 25 — Transfer learning: la idea -->
       <section class="slide" data-title="Reaprovechar una red">
         <div class="slide-inner">
           <span class="kicker">Transfer learning</span>
@@ -624,7 +927,7 @@
         </div>
       </section>
 
-      <!-- 14d — Transfer learning en Keras -->
+      <!-- 26 — Transfer learning en Keras -->
       <section class="slide" data-title="Transfer learning en Keras">
         <div class="slide-inner">
           <span class="kicker">Congelar la base, entrenar la cabeza</span>
@@ -651,7 +954,7 @@
         </div>
       </section>
 
-      <!-- 15 — Aplicaciones -->
+      <!-- 27 — Aplicaciones -->
       <section class="slide slide-exercise" data-title="Aplicaciones">
         <div class="slide-inner">
           <span class="kicker kicker-ex">Dónde brillan</span>
@@ -676,7 +979,69 @@
         </div>
       </section>
 
-      <!-- 16 — Ideas -->
+      <!-- 28 — Ejercicio: dimensiones y parámetros -->
+      <section class="slide slide-exercise" data-title="Calcula">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · a mano</span>
+          <h2 class="h2 h2-ex">Sigue la <em>imagen</em> por la red.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># imágenes CIFAR-10: 32×32 en color</span><br />
+              keras.Input((<span class="c-kw">32</span>, <span class="c-kw">32</span>, <span class="c-kw">3</span>))<br />
+              layers.Conv2D(<span class="c-kw">16</span>, (3, 3), padding=<span class="c-str">"same"</span>)<br />
+              layers.MaxPooling2D((2, 2))<br />
+              layers.Conv2D(<span class="c-kw">32</span>, (3, 3))&nbsp;&nbsp;<span class="c-com"># valid</span><br />
+              layers.MaxPooling2D((2, 2))<br />
+              layers.Flatten()<br />
+              layers.Dense(<span class="c-kw">10</span>, activation=<span class="c-str">"softmax"</span>)
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>a) ¿Qué <strong>forma</strong> tiene la salida de cada capa?</li>
+                <li>b) ¿Cuántos <strong>parámetros</strong> tiene cada capa?</li>
+                <li>c) ¿Dónde se concentran la mayoría de los parámetros?</li>
+              </ul>
+              <p class="note">
+                Herramientas: ⌊(n + 2p − f)/s⌋ + 1 para el tamaño y
+                filtros × (f·f·canales + 1) para los parámetros. Decide antes de
+                pasar de diapositiva.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 29 — Ejercicio: soluciones -->
+      <section class="slide" data-title="Soluciones">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Las <em>cuentas</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Forma · parámetros</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">entrada &nbsp;32×32×3</span>
+                <span class="pt-c">Conv 16 &nbsp;32×32×16 · 16×(27+1) = 448</span>
+                <span class="pt-c">MaxPool &nbsp;16×16×16 · 0</span>
+                <span class="pt-c">Conv 32 &nbsp;14×14×32 · 32×(144+1) = 4.640</span>
+                <span class="pt-c">MaxPool &nbsp;7×7×32 &nbsp;&nbsp;· 0</span>
+                <span class="pt-c">Flatten &nbsp;1.568 &nbsp;&nbsp;&nbsp;· 0</span>
+                <span class="pt-c">Dense 10 10 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;· 1.568×10+10 = 15.690</span>
+                <span class="pt-f">total: 20.778</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>Con <code>"same"</code> la primera conv mantiene 32×32; la segunda, sin padding, quita 2: 16 → 14.</li>
+                <li>La segunda conv ve <strong>16 canales</strong>: cada filtro tiene 3·3·16 = 144 pesos.</li>
+                <li>c) El <strong>75 %</strong> de los parámetros está en la capa densa. Cambiar Flatten por <em>global average pooling</em> la dejaría en 32×10+10 = 330.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 30 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
           <span class="kicker">Resumen del Tema 4</span>
@@ -708,16 +1073,15 @@
             </div>
           </div>
           <div class="close-next">
-            <span>Siguiente · Tema 1</span>
+            <span>Siguiente · Tema 4.2</span>
             <span
-              >Aprendizaje profundo en conjunto — cómo encajan todas las piezas
-              del curso.</span
+              >Modelos dinámicos (RNN/LSTM): redes que recuerdan secuencias.</span
             >
           </div>
         </div>
       </section>
 
-      <!-- 17 — Cierre -->
+      <!-- 31 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
           <span class="kicker">Cierre del Tema 4</span>
