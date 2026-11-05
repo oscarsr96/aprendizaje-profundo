@@ -2669,3 +2669,22 @@ body::before {
     gap: 14px;
   }
 }
+
+/* Rejilla de 3 tarjetas (fn-grid-3): 3 → 2 → 1 columnas según el ancho */
+.fn-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.code-block {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .fn-grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .fn-grid,
+  .fn-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

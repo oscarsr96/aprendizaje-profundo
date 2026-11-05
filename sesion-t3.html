@@ -70,7 +70,7 @@
             </div>
             <div class="meta-block">
               <span class="meta-label">Duración</span>
-              <span class="meta-val">~50 minutos</span>
+              <span class="meta-val">~75 minutos</span>
             </div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
@@ -116,49 +116,50 @@
       <!-- ============================================================ -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <span class="kicker">Agenda · ~75&nbsp;min</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
             <li>
               <span class="agenda-num">01</span>
-              <span class="agenda-time">10&prime;</span>
+              <span class="agenda-time">15&prime;</span>
               <div>
                 <span class="agenda-title">El problema a resolver</span>
                 <span class="agenda-desc"
-                  >El gradiente que se desvanece y las dependencias a largo
-                  plazo en secuencias.</span
+                  >Secuencias, la RNN simple, el gradiente que se desvanece y
+                  las dependencias a largo plazo.</span
                 >
               </div>
             </li>
             <li>
               <span class="agenda-num">02</span>
-              <span class="agenda-time">15&prime;</span>
+              <span class="agenda-time">25&prime;</span>
               <div>
                 <span class="agenda-title">La celda LSTM</span>
                 <span class="agenda-desc"
-                  >Estado de memoria y tres puertas: olvido, entrada y
-                  salida.</span
+                  >Estado de memoria, tres puertas, por qué sobrevive el
+                  gradiente, cuántos parámetros. Ejercicio a mano.</span
                 >
               </div>
             </li>
             <li>
               <span class="agenda-num">03</span>
-              <span class="agenda-time">15&prime;</span>
+              <span class="agenda-time">20&prime;</span>
               <div>
                 <span class="agenda-title">Entrenamiento y aplicaciones</span>
                 <span class="agenda-desc"
-                  >Backprop en el tiempo, ADAM, seq2seq y NLP.</span
+                  >BPTT, trucos prácticos, Keras, series temporales y las
+                  cuatro arquitecturas. Ejercicio en grupos.</span
                 >
               </div>
             </li>
             <li>
               <span class="agenda-num">04</span>
-              <span class="agenda-time">10&prime;</span>
+              <span class="agenda-time">15&prime;</span>
               <div>
                 <span class="agenda-title">Variantes</span>
                 <span class="agenda-desc"
-                  >GRU, Bi-LSTM y la atención que llevó a los
-                  Transformers.</span
+                  >GRU, Bi-LSTM, la atención que llevó a los Transformers y
+                  cuándo sigue valiendo una LSTM.</span
                 >
               </div>
             </li>
@@ -181,7 +182,115 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 03 — Vanishing / exploding gradient -->
+      <!-- 03 — Secuencias -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Secuencias">
+        <div class="slide-inner">
+          <span class="kicker">El dato tiene orden</span>
+          <h2 class="h2">Datos en <em>secuencia</em>.</h2>
+          <p class="lead">
+            Texto, audio, series temporales, vídeo: el <em>orden</em> importa y
+            la longitud cambia de un ejemplo a otro. Un MLP no está hecho para
+            eso.
+          </p>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>El orden importa</h4>
+              <div class="fn-formula">«no me gustó» ≠ «me gustó, no»</div>
+              <p>Un MLP trata la entrada como una bolsa de números sin posición.</p>
+              <span class="fn-use">→ hace falta un estado</span>
+            </div>
+            <div class="fn-card">
+              <h4>Longitud variable</h4>
+              <div class="fn-formula">5 palabras · 300 palabras</div>
+              <p>Un MLP tiene un número fijo de entradas; una frase, no.</p>
+              <span class="fn-use">→ procesar paso a paso</span>
+            </div>
+            <div class="fn-card">
+              <h4>Mismo patrón, otra posición</h4>
+              <div class="fn-formula">pesos compartidos en t</div>
+              <p>Lo que vale para la palabra 3 debería valer para la 30.</p>
+              <span class="fn-use">→ como la CNN, pero en el tiempo</span>
+            </div>
+          </div>
+          <p class="note">
+            La respuesta es una red <strong>recurrente</strong>: lee un
+            elemento cada vez y arrastra un <em>estado</em> que resume lo visto
+            hasta ahora.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 04 — La RNN simple -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="La RNN simple">
+        <div class="slide-inner">
+          <span class="kicker">Antes de la LSTM</span>
+          <h2 class="h2">La RNN <em>simple</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Una sola celda, aplicada una y otra vez. En cada paso mezcla la
+                entrada nueva <code>xₜ</code> con el estado anterior
+                <code>hₜ₋₁</code>:
+              </p>
+              <div class="fn-formula" style="margin: 0 0 14px">hₜ = tanh(Wₕ·hₜ₋₁ + Wₓ·xₜ + b)</div>
+              <ul class="neuron-notes">
+                <li>Los <strong>mismos pesos</strong> <code>Wₕ, Wₓ</code> en todos los pasos.</li>
+                <li><code>hₜ</code> es a la vez la <em>memoria</em> y la <em>salida</em> del paso.</li>
+                <li>Desplegada en el tiempo es una red profunda con tantas capas como pasos.</li>
+              </ul>
+            </div>
+            <svg viewBox="0 0 360 250" style="width: 100%; height: auto">
+              <defs>
+                <marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0 0 L6 3 L0 6 Z" fill="#7c80a6" />
+                </marker>
+              </defs>
+              <g font-family="JetBrains Mono" font-size="12" fill="#fff" text-anchor="middle">
+                <rect x="40" y="98" width="56" height="44" rx="8" fill="#1a1f6c" />
+                <text x="68" y="124">h₁</text>
+                <rect x="125" y="98" width="56" height="44" rx="8" fill="#1a1f6c" />
+                <text x="153" y="124">h₂</text>
+                <rect x="210" y="98" width="56" height="44" rx="8" fill="#1a1f6c" />
+                <text x="238" y="124">h₃</text>
+                <rect x="295" y="98" width="56" height="44" rx="8" fill="#1a1f6c" />
+                <text x="323" y="124">h₄</text>
+              </g>
+              <g stroke="#7c80a6" stroke-width="1.6" fill="none">
+                <path d="M10 120 H40" marker-end="url(#ar2)" />
+                <path d="M96 120 H125" marker-end="url(#ar2)" />
+                <path d="M181 120 H210" marker-end="url(#ar2)" />
+                <path d="M266 120 H295" marker-end="url(#ar2)" />
+                <path d="M68 196 V142" marker-end="url(#ar2)" />
+                <path d="M153 196 V142" marker-end="url(#ar2)" />
+                <path d="M238 196 V142" marker-end="url(#ar2)" />
+                <path d="M323 196 V142" marker-end="url(#ar2)" />
+                <path d="M68 98 V64" marker-end="url(#ar2)" />
+                <path d="M153 98 V64" marker-end="url(#ar2)" />
+                <path d="M238 98 V64" marker-end="url(#ar2)" />
+                <path d="M323 98 V64" marker-end="url(#ar2)" />
+              </g>
+              <g font-family="JetBrains Mono" font-size="12" text-anchor="middle">
+                <text x="14" y="112" fill="#7c80a6">h₀</text>
+                <text x="68" y="214" fill="#1a1f6c">x₁</text>
+                <text x="153" y="214" fill="#1a1f6c">x₂</text>
+                <text x="238" y="214" fill="#1a1f6c">x₃</text>
+                <text x="323" y="214" fill="#1a1f6c">x₄</text>
+                <text x="68" y="54" fill="#ff5700">y₁</text>
+                <text x="153" y="54" fill="#ff5700">y₂</text>
+                <text x="238" y="54" fill="#ff5700">y₃</text>
+                <text x="323" y="54" fill="#ff5700">y₄</text>
+              </g>
+              <text x="195" y="242" text-anchor="middle" font-family="Inter Tight" font-style="italic" font-size="11" fill="#7c80a6">
+                la misma celda, con los mismos Wₕ y Wₓ, en cada paso
+              </text>
+            </svg>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 05 — Vanishing / exploding gradient -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Vanishing gradient">
         <div class="slide-inner">
@@ -253,7 +362,47 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 04 — Dependencias a largo plazo -->
+      <!-- 06 — La cuenta del gradiente -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Con números">
+        <div class="slide-inner">
+          <span class="kicker">La cuenta que lo explica</span>
+          <h2 class="h2">Multiplicar <em>cincuenta</em> veces.</h2>
+          <p class="lead">
+            Para llegar del error en el paso 50 hasta el paso 1, el gradiente
+            atraviesa 50 celdas. En cada una se multiplica por un factor
+            <code>∂hₜ/∂hₜ₋₁ ≈ tanh′ · Wₕ</code>.
+          </p>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Factor 0,9</h4>
+              <div class="fn-formula">0,9⁵⁰ ≈ 0,005</div>
+              <p>Lo que pasó al principio apenas influye en el aprendizaje.</p>
+              <span class="fn-use">→ vanishing</span>
+            </div>
+            <div class="fn-card">
+              <h4>Factor 1,0</h4>
+              <div class="fn-formula">1,0⁵⁰ = 1</div>
+              <p>El gradiente llega intacto. Es el ideal que persigue la LSTM.</p>
+              <span class="fn-use">→ lo que queremos</span>
+            </div>
+            <div class="fn-card">
+              <h4>Factor 1,1</h4>
+              <div class="fn-formula">1,1⁵⁰ ≈ 117</div>
+              <p>Pesos que se disparan, pérdida que oscila o se va a NaN.</p>
+              <span class="fn-use">→ exploding</span>
+            </div>
+          </div>
+          <p class="note">
+            La derivada de la tanh es como mucho 1, así que el producto casi
+            nunca se queda cerca de 1. Hay parches (recortar el gradiente,
+            inicialización cuidadosa), pero ninguno arregla el
+            <em>desvanecimiento</em>: hace falta cambiar la celda.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 07 — Dependencias a largo plazo -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Dependencias largas">
         <div class="slide-inner">
@@ -297,7 +446,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 05 — DIVISOR 2 -->
+      <!-- 08 — DIVISOR 2 -->
       <!-- ============================================================ -->
       <section class="slide slide-divider" data-title="La celda LSTM">
         <div class="divider-inner">
@@ -312,7 +461,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 06 — Tres puertas por celda (diagrama) -->
+      <!-- 09 — Tres puertas por celda (diagrama) -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Tres puertas">
         <div class="slide-inner">
@@ -378,7 +527,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 07 — Cell state -->
+      <!-- 10 — Cell state -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Cell state">
         <div class="slide-inner">
@@ -426,7 +575,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 08 — Puertas en detalle -->
+      <!-- 11 — Puertas en detalle -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Puertas en detalle">
         <div class="slide-inner">
@@ -472,7 +621,179 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 09 — DIVISOR 3 -->
+      <!-- 12 — Un paso con números -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Un paso con números">
+        <div class="slide-inner">
+          <span class="kicker">Con una sola componente</span>
+          <h2 class="h2">Un paso, con <em>números</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Cₜ₋₁ = 2 · las puertas ya han decidido</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">forget fₜ = 0,75 · input iₜ = 0,5</span>
+                <span class="pt-c">candidato C̃ₜ = 1 · output oₜ = 0,5</span>
+                <span class="pt-t">Cₜ = 0,75 · 2 + 0,5 · 1 = 1,5 + 0,5 = 2</span>
+                <span class="pt-t">hₜ = 0,5 · tanh(2) = 0,5 · 0,96 = 0,48</span>
+                <span class="pt-f">la memoria apenas cambia; se expone la mitad</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li><strong>f = 1, i = 0</strong> · <code>Cₜ = Cₜ₋₁</code>: recordar tal cual, indefinidamente.</li>
+                <li><strong>f = 0, i = 1</strong> · <code>Cₜ = C̃ₜ</code>: sobrescribir la memoria con lo nuevo.</li>
+                <li><strong>o = 0</strong> · <code>hₜ = 0</code>: guardar sin decir nada todavía.</li>
+                <li>Con 64 unidades, esto ocurre en <em>64 componentes</em> a la vez, cada una con sus propias puertas.</li>
+              </ul>
+              <p class="note">
+                Las puertas no son fijas: salen de <code>σ(W·[hₜ₋₁, xₜ] + b)</code>,
+                así que dependen de lo que la red ve en cada paso.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 13 — Por qué sobrevive el gradiente -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="La autopista">
+        <div class="slide-inner">
+          <span class="kicker">Por qué funciona</span>
+          <h2 class="h2">La <em>autopista</em> del gradiente.</h2>
+          <p class="lead">
+            Derivemos la actualización <code>Cₜ = fₜ · Cₜ₋₁ + iₜ · C̃ₜ</code>
+            respecto al estado anterior:
+          </p>
+          <div class="fn-formula" style="margin: 0 0 16px">∂Cₜ / ∂Cₜ₋₁ = fₜ &nbsp;(+ términos pequeños)</div>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>RNN simple</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">factor por paso ≈ tanh′ · Wₕ</span>
+                <span class="pt-c">fijado por los pesos, casi siempre &lt; 1</span>
+                <span class="pt-f">el producto cae a 0</span>
+              </div></div>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>LSTM</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">factor por paso = fₜ</span>
+                <span class="pt-c">lo decide la red en cada paso, puede ser ≈ 1</span>
+                <span class="pt-f">el gradiente cruza 50 pasos casi intacto</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Es la misma idea que las conexiones residuales de ResNet: un camino
+            casi lineal por el que la señal pasa sin transformarse. Keras
+            inicializa el sesgo del forget gate a 1
+            (<code>unit_forget_bias</code>): la celda <em>empieza
+            recordando</em> y aprende a olvidar.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 14 — Contar parámetros -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Contar parámetros">
+        <div class="slide-inner">
+          <span class="kicker">La cuenta que pregunta todo el mundo</span>
+          <h2 class="h2">¿Cuántos <em>parámetros</em> tiene una LSTM?</h2>
+          <div class="fn-formula" style="margin: 0 0 16px">4 × [ nₕ × (nₕ + nₓ) + nₕ ]</div>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Por qué 4</h4>
+              <div class="fn-formula">f · i · C̃ · o</div>
+              <p>Tres puertas y el candidato: cada uno con pesos sobre <code>hₜ₋₁</code>, sobre <code>xₜ</code> y su sesgo.</p>
+              <span class="fn-use">→ cuatro bloques iguales</span>
+            </div>
+            <div class="fn-card">
+              <h4>Ejemplo</h4>
+              <div class="fn-formula">4 × (32 × 42 + 32) = 5.504</div>
+              <p>Entrada de 10 valores, 32 unidades: <code>nₕ + nₓ</code> = 42.</p>
+              <span class="fn-use">→ lo confirma model.summary()</span>
+            </div>
+            <div class="fn-card">
+              <h4>Comparado</h4>
+              <div class="fn-formula">RNN 1.376 · GRU ≈ 4.100</div>
+              <p>La RNN simple tiene un solo bloque; la GRU, tres.</p>
+              <span class="fn-use">→ la LSTM cuesta ×4</span>
+            </div>
+          </div>
+          <p class="note">
+            Fíjate en lo que <strong>no</strong> aparece: la longitud de la
+            secuencia. Como los filtros de una CNN, los mismos pesos sirven para
+            10 pasos o para 1.000.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 15 — Ejercicio: un paso de la celda -->
+      <!-- ============================================================ -->
+      <section class="slide slide-exercise" data-title="Calcula">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · a mano</span>
+          <h2 class="h2 h2-ex">Un paso de la <em>celda</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># celda de 2 componentes, en el paso t</span><br />
+              C_prev = [ <span class="c-kw">2.0</span>, <span class="c-kw">-1.0</span> ]<br />
+              f &nbsp;&nbsp;&nbsp;&nbsp;= [ <span class="c-kw">0.9</span>, &nbsp;<span class="c-kw">0.1</span> ] &nbsp;<span class="c-com"># forget</span><br />
+              i &nbsp;&nbsp;&nbsp;&nbsp;= [ <span class="c-kw">0.5</span>, &nbsp;<span class="c-kw">1.0</span> ] &nbsp;<span class="c-com"># input</span><br />
+              C_cand = [ <span class="c-kw">-1.0</span>, <span class="c-kw">1.0</span> ] &nbsp;<span class="c-com"># candidato</span><br />
+              o &nbsp;&nbsp;&nbsp;&nbsp;= [ <span class="c-kw">1.0</span>, &nbsp;<span class="c-kw">0.5</span> ] &nbsp;<span class="c-com"># output</span><br />
+              <br />
+              <span class="c-com"># tanh(0.9) = 0.72 · tanh(1.3) = 0.86</span>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>a) Calcula el nuevo estado <strong>Cₜ</strong>.</li>
+                <li>b) Calcula la salida <strong>hₜ</strong>.</li>
+                <li>c) ¿Qué componente <em>recuerda</em> y cuál <em>sobrescribe</em>? Justifícalo con las puertas.</li>
+                <li>d) Si la celda tuviera 64 unidades y la entrada 32 valores, ¿cuántos <strong>parámetros</strong> tendría la capa?</li>
+              </ul>
+              <p class="note">
+                Herramientas: <code>Cₜ = fₜ · Cₜ₋₁ + iₜ · C̃ₜ</code> y
+                <code>hₜ = oₜ · tanh(Cₜ)</code>, componente a componente.
+                Decide antes de pasar de diapositiva.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 16 — Ejercicio: soluciones (celda) -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Solución · celda">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Las <em>cuentas</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Componente a componente</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">Cₜ[1] = 0,9 · 2,0 + 0,5 · (−1,0) = 1,8 − 0,5 = 1,3</span>
+                <span class="pt-c">Cₜ[2] = 0,1 · (−1,0) + 1,0 · 1,0 = −0,1 + 1,0 = 0,9</span>
+                <span class="pt-t">a) Cₜ = [1,3 · 0,9]</span>
+                <span class="pt-c">hₜ[1] = 1,0 · tanh(1,3) = 0,86</span>
+                <span class="pt-c">hₜ[2] = 0,5 · tanh(0,9) = 0,36</span>
+                <span class="pt-t">b) hₜ = [0,86 · 0,36]</span>
+                <span class="pt-f">d) 4 × (64 × 96 + 64) = 24.832</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>c) La <strong>1.ª componente</strong> recuerda: forget abierto (0,9) conserva el 2,0 y el input solo le resta un poco.</li>
+                <li>La <strong>2.ª</strong> sobrescribe: forget casi cerrado (0,1) tira el −1,0 e input abierto (1,0) escribe el candidato.</li>
+                <li>El output expone toda la 1.ª y la mitad de la 2.ª: lo que <em>se guarda</em> y lo que <em>se dice</em> son cosas distintas.</li>
+                <li>d) Es el mismo cálculo que en la diapositiva anterior: nada depende de la longitud de la secuencia.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 17 — DIVISOR 3 -->
       <!-- ============================================================ -->
       <section class="slide slide-divider" data-title="Entrenamiento">
         <div class="divider-inner">
@@ -486,7 +807,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 10 — Entrenamiento -->
+      <!-- 18 — Entrenamiento -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Cómo se entrena">
         <div class="slide-inner">
@@ -535,7 +856,114 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 11 — Aplicaciones y arquitecturas -->
+      <!-- 19 — Trucos de entrenamiento -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Trucos">
+        <div class="slide-inner">
+          <span class="kicker">Lo que hace falta en la práctica</span>
+          <h2 class="h2">Cuatro <em>trucos</em> de entrenamiento.</h2>
+          <div class="fn-grid">
+            <div class="fn-card">
+              <h4>Recortar el gradiente</h4>
+              <div class="fn-formula">clipnorm = 1.0</div>
+              <p>Si la norma del gradiente supera un umbral, se reescala. Barato y casi obligatorio.</p>
+              <span class="fn-use">→ contra la explosión</span>
+            </div>
+            <div class="fn-card">
+              <h4>BPTT truncado</h4>
+              <div class="fn-formula">ventanas de ~100 pasos</div>
+              <p>No se retropropaga por toda la secuencia, solo por un tramo.</p>
+              <span class="fn-use">→ memoria y tiempo acotados</span>
+            </div>
+            <div class="fn-card">
+              <h4>Dropout recurrente</h4>
+              <div class="fn-formula">recurrent_dropout</div>
+              <p>La misma máscara en todos los pasos (Gal &amp; Ghahramani, 2016).</p>
+              <span class="fn-use">→ regularizar sin romper la memoria</span>
+            </div>
+            <div class="fn-card">
+              <h4>Padding y masking</h4>
+              <div class="fn-formula">mask_zero = True</div>
+              <p>Las secuencias cortas se rellenan con 0 y la red aprende a ignorarlos.</p>
+              <span class="fn-use">→ lotes de longitud variable</span>
+            </div>
+          </div>
+          <p class="note">
+            En Keras: <code>Adam(clipnorm=1.0)</code> y
+            <code>Embedding(..., mask_zero=True)</code>, que propaga la máscara
+            a la LSTM sin que tengas que hacer nada más.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 20 — LSTM en Keras -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="LSTM en Keras">
+        <div class="slide-inner">
+          <span class="kicker">Tres líneas</span>
+          <h2 class="h2">Una LSTM en <em>Keras</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># reseñas de 200 tokens → una etiqueta</span><br />
+              model = keras.Sequential([<br />
+              &nbsp;&nbsp;layers.Embedding(<span class="c-kw">10_000</span>, <span class="c-kw">32</span>, mask_zero=<span class="c-kw">True</span>),<br />
+              &nbsp;&nbsp;layers.LSTM(<span class="c-kw">64</span>), &nbsp;<span class="c-com"># seq → 1</span><br />
+              &nbsp;&nbsp;layers.Dense(<span class="c-kw">1</span>, activation=<span class="c-str">"sigmoid"</span>),<br />
+              ])<br />
+              <br />
+              <span class="c-com"># una salida por paso (etiquetado)</span><br />
+              layers.LSTM(<span class="c-kw">64</span>, return_sequences=<span class="c-kw">True</span>)<br />
+              <br />
+              <span class="c-com"># apilar dos capas</span><br />
+              layers.LSTM(<span class="c-kw">64</span>, return_sequences=<span class="c-kw">True</span>),<br />
+              layers.LSTM(<span class="c-kw">32</span>),
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>La entrada es un tensor 3-D: <strong>(lote, pasos, características)</strong>. <code>Embedding</code> convierte cada índice en un vector de 32.</li>
+                <li><code>return_sequences=False</code> (por defecto) devuelve solo el último <code>hₜ</code>: lo que necesita un clasificador.</li>
+                <li><code>return_sequences=True</code> devuelve todos los <code>hₜ</code>: para etiquetar o para apilar otra LSTM encima.</li>
+                <li><code>layers.Bidirectional(<wbr />layers.LSTM(64))</code> envuelve cualquiera y dobla la salida a 128.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 21 — Series temporales: ventanas -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Ventanas">
+        <div class="slide-inner">
+          <span class="kicker">Lo que harás en el laboratorio</span>
+          <h2 class="h2">De una serie a <em>ventanas</em>.</h2>
+          <p class="lead">
+            Una serie con un valor por día no es un tensor 3-D. Se corta en
+            ventanas: los últimos <code>k</code> valores predicen el siguiente.
+          </p>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>serie: 12, 15, 14, 18, 21, 19, 23 … · k = 3</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">[12, 15, 14] → 18</span>
+                <span class="pt-c">[15, 14, 18] → 21</span>
+                <span class="pt-c">[14, 18, 21] → 19</span>
+                <span class="pt-c">[18, 21, 19] → 23</span>
+                <span class="pt-f">X.shape = (nº ventanas, 3, 1)</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li><strong>Normaliza</strong> antes y des-normaliza después: tanh y σ viven en [−1, 1].</li>
+                <li>Divide <strong>por tiempo</strong>, no al azar: entrena con el pasado, valida con el futuro. Mezclar filtra el futuro al entrenamiento.</li>
+                <li>Compara siempre con un <em>baseline</em> tonto («mañana = hoy»). Una LSTM que no lo bate no sirve.</li>
+                <li>Un MLP sobre la misma ventana compite bien; la LSTM gana con ventanas largas y dependencias lejanas.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 22 — Aplicaciones y arquitecturas -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Arquitecturas">
         <div class="slide-inner">
@@ -571,7 +999,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 12 — Aplicaciones reales -->
+      <!-- 23 — Aplicaciones reales -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Aplicaciones reales">
         <div class="slide-inner">
@@ -616,7 +1044,66 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 13 — DIVISOR 4 -->
+      <!-- 24 — Ejercicio: elige la arquitectura -->
+      <!-- ============================================================ -->
+      <section class="slide slide-exercise" data-title="Elige">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · en grupos, 5 minutos</span>
+          <h2 class="h2 h2-ex">Elige la <em>arquitectura</em>.</h2>
+          <p class="lead">
+            Para cada tarea decide: ¿<strong>seq → 1</strong>,
+            <strong>seq → seq</strong> o <strong>seq2seq</strong>?
+            ¿Bidireccional, sí o no? ¿Qué devuelve la última LSTM
+            (<code>return_sequences</code>)?
+          </p>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>1.</strong> Detectar si un correo es spam.</li>
+              <li><strong>2.</strong> Marcar nombres de personas y empresas en un contrato ya redactado.</li>
+              <li><strong>3.</strong> Predecir la demanda eléctrica de la próxima hora con las últimas 48 horas.</li>
+            </ul>
+            <ul class="neuron-notes">
+              <li><strong>4.</strong> Transcribir voz a texto en directo, mientras la persona habla.</li>
+              <li><strong>5.</strong> Resumir un artículo de prensa en tres frases.</li>
+            </ul>
+          </div>
+          <p class="note">
+            Pista: una red bidireccional necesita ver la secuencia
+            <em>completa</em> antes de responder. Pregúntate si eso es posible
+            en cada caso.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 25 — Ejercicio: soluciones (arquitectura) -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="Solución · arquitectura">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Una respuesta <em>razonable</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>tarea · forma · bidireccional · return_sequences</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">1 spam · seq → 1 · sí · False</span>
+                <span class="pt-c">2 entidades · seq → seq · sí · True</span>
+                <span class="pt-c">3 demanda · seq → 1 · no · False</span>
+                <span class="pt-c">4 voz en directo · seq → seq · no · True</span>
+                <span class="pt-f">5 resumen · seq2seq · encoder sí, decoder no</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>La pregunta clave es si la secuencia entera está disponible antes de responder. En <strong>directo</strong> o <strong>prediciendo el futuro</strong>, no hay bidireccional posible.</li>
+                <li>«Una salida por secuencia» o «una por paso» decide <code>return_sequences</code>.</li>
+                <li>Cuando entrada y salida tienen longitudes distintas y no alineadas (traducir, resumir), hace falta <strong>encoder-decoder</strong>. Hoy, casi siempre con atención.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 26 — DIVISOR 4 -->
       <!-- ============================================================ -->
       <section class="slide slide-divider" data-title="Variantes">
         <div class="divider-inner">
@@ -630,7 +1117,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 14 — Bi-LSTM -->
+      <!-- 27 — Bi-LSTM -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Bi-LSTM">
         <div class="slide-inner">
@@ -655,7 +1142,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 15 — GRU -->
+      <!-- 28 — GRU -->
       <!-- ============================================================ -->
       <section class="slide" data-title="GRU">
         <div class="slide-inner">
@@ -699,7 +1186,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 16 — Atención -->
+      <!-- 29 — Atención -->
       <!-- ============================================================ -->
       <section class="slide slide-exercise" data-title="Atención">
         <div class="slide-inner">
@@ -743,7 +1230,39 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- 17 — Ideas para llevarte -->
+      <!-- 30 — ¿LSTM hoy? -->
+      <!-- ============================================================ -->
+      <section class="slide" data-title="¿LSTM hoy?">
+        <div class="slide-inner">
+          <span class="kicker">Después de 2017</span>
+          <h2 class="h2">¿Sigue teniendo sentido una <em>LSTM</em>?</h2>
+          <div class="two-col">
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">Cuando sí</h3>
+              <ul class="neuron-notes">
+                <li><strong>Series temporales y sensores</strong> · pocos datos, pocas variables, secuencias largas.</li>
+                <li><strong>Streaming</strong> · procesa el paso <code>t</code> con coste constante; el Transformer vuelve a mirar toda la secuencia.</li>
+                <li><strong>Dispositivos pequeños</strong> · memoria lineal en la longitud, frente a la cuadrática de la atención.</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="font-family: var(--serif); font-weight: 500; margin-bottom: 10px">Cuando no</h3>
+              <ul class="neuron-notes">
+                <li><strong>Texto a gran escala</strong> · el Transformer entrena en paralelo; la LSTM va paso a paso.</li>
+                <li><strong>Dependencias muy largas</strong> · la atención une dos posiciones en un salto; la LSTM, en <code>n</code>.</li>
+                <li><strong>Modelos preentrenados</strong> · casi todos son Transformers; aprovecharlos es transfer learning gratis.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="note">
+            Y el círculo se cierra: en 2023–24 aparecen Mamba y xLSTM, redes
+            recurrentes modernas que vuelven a competir con la atención en
+            secuencias muy largas.
+          </p>
+        </div>
+      </section>
+      <!-- ============================================================ -->
+      <!-- 31 — Ideas para llevarte -->
       <!-- ============================================================ -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
@@ -776,17 +1295,17 @@
             </div>
           </div>
           <div class="close-next">
-            <span>Siguiente · Tema 4</span>
+            <span>Siguiente · Tema 4.3</span>
             <span
-              >Redes convolucionales — cómo las redes aprenden a mirar
-              imágenes.</span
+              >Atención y Transformers — la arquitectura que domina la IA de
+              hoy.</span
             >
           </div>
         </div>
       </section>
 
       <!-- ============================================================ -->
-      <!-- 18 — Cierre -->
+      <!-- 32 — Cierre -->
       <!-- ============================================================ -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
@@ -821,7 +1340,7 @@
                 >Repaso del Tema 4
                 <span class="close-cta-arrow">→</span></span
               >
-              <span class="close-cta-note">10 retos autocorregibles.</span>
+              <span class="close-cta-note">15 retos autocorregibles.</span>
             </a>
             <a class="close-cta" href="./sesion-t6.html">
               <span class="close-cta-eyebrow">Seguir el curso</span>

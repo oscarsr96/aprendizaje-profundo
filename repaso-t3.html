@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Repaso Tema 4</title>
     <meta
       name="description"
-      content="Cuestionario autocorregible del Tema 3 de Aprendizaje Profundo. 10 retos sobre las redes LSTM para comprobar lo aprendido. CUNEF Universidad."
+      content="Cuestionario autocorregible del Tema 3 de Aprendizaje Profundo. 15 retos sobre las redes LSTM para comprobar lo aprendido. CUNEF Universidad."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -619,7 +619,7 @@
         <span class="bar-sub">· Aprendizaje Profundo · Repaso · Tema 4 · Modelos dinámicos</span>
       </span>
       <div class="bar-progress"><div class="bar-fill" id="barFill"></div></div>
-      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/10</span>
+      <span class="bar-score">Aciertos <b id="scoreNum">0</b>/15</span>
     </header>
 
     <main>
@@ -629,13 +629,13 @@
           <span class="hero-kicker">Tema 4 · Modelos dinámicos · Repaso</span>
           <h1>¿Dominas las<br /><em>redes LSTM</em>?</h1>
           <p>
-            Diez retos para comprobar lo que te llevas del Tema 4: el gradiente
+            Quince retos para comprobar lo que te llevas del Tema 4: el gradiente
             que se desvanece, la celda LSTM y sus tres puertas, el estado de
             memoria, el entrenamiento y las variantes (GRU, Bi-LSTM, atención).
             Con explicación en cada respuesta.
           </p>
           <div class="hero-meta">
-            <div><span class="n">10</span><span class="l">Retos</span></div>
+            <div><span class="n">15</span><span class="l">Retos</span></div>
             <div><span class="n">~5′</span><span class="l">Minutos</span></div>
             <div><span class="n">0</span><span class="l">Riesgo</span></div>
           </div>
@@ -649,7 +649,7 @@
       <section class="screen" id="quizScreen" hidden>
         <div class="card">
           <div class="qmeta">
-            <span id="qCounter">Reto 1 / 10</span>
+            <span id="qCounter">Reto 1 / 15</span>
             <span class="tag" id="qType">Opción única</span>
           </div>
           <h2 class="qtext" id="qText"></h2>
@@ -674,7 +674,7 @@
           <div class="ring" id="ring">
             <div class="ring-inner">
               <div class="ring-pct" id="ringPct">0%</div>
-              <div class="ring-sub" id="ringSub">0 / 10</div>
+              <div class="ring-sub" id="ringSub">0 / 15</div>
             </div>
           </div>
           <h2 id="resTitle"></h2>
@@ -728,6 +728,19 @@
             "La RNN simple pierde la información lejana (por el vanishing gradient), así que no puede, por ejemplo, recordar el sujeto para concordar con un verbo muchas palabras después.",
         },
         {
+          type: "choice",
+          q: "En una RNN simple, ¿qué pesos se usan en el paso 1 y en el paso 100 de la secuencia?",
+          options: [
+            "Los mismos: la celda se reutiliza en cada paso de tiempo",
+            "Distintos: cada paso de tiempo tiene su propia matriz",
+            "Los del paso 1 se congelan y solo se ajustan los demás",
+            "Depende de la longitud de la secuencia que se procese",
+          ],
+          correct: 0,
+          explain:
+            "La misma celda, con los mismos Wₕ y Wₓ, se aplica en cada paso (pesos compartidos en el tiempo, como los filtros en una CNN). Por eso el número de parámetros no depende de la longitud de la secuencia.",
+        },
+        {
           type: "classify",
           q: "La celda LSTM tiene tres puertas. Empareja cada una con su función.",
           buckets: ["Forget gate", "Input gate", "Output gate"],
@@ -766,6 +779,32 @@
             "La sigmoide (0–1) regula cuánto pasa (una compuerta); la tanh (−1 a 1) produce el contenido candidato. El estado se actualiza olvidando (×) y añadiendo (+).",
         },
         {
+          type: "choice",
+          q: "¿Por qué el gradiente sobrevive muchos pasos hacia atrás en una LSTM?",
+          options: [
+            "Porque la tanh de la LSTM tiene derivada siempre igual a 1",
+            "Porque ∂Cₜ/∂Cₜ₋₁ ≈ fₜ y la red puede mantenerlo cerca de 1",
+            "Porque la LSTM no usa backpropagation a través del tiempo",
+            "Porque la celda tiene más parámetros que una RNN simple",
+          ],
+          correct: 1,
+          explain:
+            "El estado se actualiza casi linealmente: Cₜ = fₜ·Cₜ₋₁ + iₜ·C̃ₜ, así que el factor por paso es el forget gate, que la red aprende y puede dejar ≈ 1 (una «autopista», como las conexiones residuales). En la RNN simple el factor es tanh′·Wₕ, casi siempre < 1.",
+        },
+        {
+          type: "choice",
+          q: "Una capa LSTM de 32 unidades recibe vectores de 10 valores. ¿Cuántos parámetros tiene?",
+          options: [
+            "5.504 · cuatro bloques de 32 × (32 + 10) + 32",
+            "1.376 · un solo bloque de 32 × (32 + 10) + 32",
+            "1.344 · solo los pesos 32 × (32 + 10), sin sesgos",
+            "Depende de la longitud de las secuencias de entrada",
+          ],
+          correct: 0,
+          explain:
+            "Cada una de las tres puertas y el candidato tiene pesos sobre hₜ₋₁ (32×32), sobre xₜ (32×10) y su sesgo (32): 32×42 + 32 = 1.376, por cuatro = 5.504. La longitud de la secuencia no aparece: los pesos se comparten en el tiempo.",
+        },
+        {
           type: "multi",
           q: "¿Qué es cierto sobre el entrenamiento de una LSTM?",
           hint: "Marca todas las que apliquen.",
@@ -778,6 +817,19 @@
           correct: [0,  2,  3],
           explain:
             "BPTT despliega la red por la secuencia; ADAM (Kingma & Ba, 2015) es el optimizador típico; y hace falta mucho cómputo y datos. Como toda red, sí necesita una función de pérdida.",
+        },
+        {
+          type: "choice",
+          q: "Quieres apilar dos capas LSTM en Keras. ¿Qué debe cumplir la primera?",
+          options: [
+            "Tener exactamente el mismo número de unidades que la segunda",
+            "Devolver la secuencia completa con return_sequences=True",
+            "Ir envuelta obligatoriamente en una capa Bidirectional",
+            "Usar la activación sigmoide en lugar de la tanh habitual",
+          ],
+          correct: 1,
+          explain:
+            "Por defecto LSTM devuelve solo el último hₜ (un vector por secuencia). La segunda LSTM necesita un tensor (lote, pasos, características), así que la primera debe devolver todos los hₜ con return_sequences=True.",
         },
         {
           type: "classify",
@@ -829,6 +881,20 @@
           correct: 3,
           explain:
             "La atención deja a la red enfocar partes relevantes de la entrada en cada paso (regiones de una imagen, palabras de la frase origen). Es la base de los Transformers posteriores.",
+        },
+        {
+          type: "multi",
+          q: "¿En qué casos tiene sentido hoy elegir una LSTM antes que un Transformer?",
+          hint: "Marca todas las que apliquen.",
+          options: [
+            "Texto a gran escala con un modelo preentrenado disponible",
+            "Transcripción en directo, con latencia baja y coste constante",
+            "Series temporales de sensores con pocos datos y variables",
+            "Dependencias entre posiciones muy lejanas en textos largos",
+          ],
+          correct: [1, 2],
+          explain:
+            "La LSTM procesa cada paso con coste constante y memoria lineal, sin necesitar ver el futuro: ideal en streaming y en dispositivos pequeños, y competitiva con pocos datos. Con texto masivo, modelos preentrenados o dependencias muy largas, la atención gana.",
         },
       ];
 
