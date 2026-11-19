@@ -44,7 +44,7 @@
           <div class="cover-meta">
             <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
             <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">4.3 · Atención y Transformers</span></div>
-            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~75 minutos</span></div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
               <span class="meta-val">Óscar Sánchez Rueda</span>
@@ -79,17 +79,17 @@
       <!-- 01 — AGENDA -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <span class="kicker">Agenda · ~75&nbsp;min</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
-            <li><span class="agenda-num">01</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">El cuello de botella</span><span class="agenda-desc">Por qué el seq2seq con LSTM se queda corto con frases largas.</span></div></li>
-            <li><span class="agenda-num">02</span><span class="agenda-time">18&prime;</span>
-              <div><span class="agenda-title">Self-attention</span><span class="agenda-desc">Query, Key, Value; el cálculo de la atención y multi-head.</span></div></li>
-            <li><span class="agenda-num">03</span><span class="agenda-time">12&prime;</span>
-              <div><span class="agenda-title">El Transformer</span><span class="agenda-desc">La arquitectura, el paralelismo y el positional encoding.</span></div></li>
-            <li><span class="agenda-num">04</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">De BERT a los LLMs</span><span class="agenda-desc">Preentrenar + fine-tuning; los grandes modelos de lenguaje.</span></div></li>
+            <li><span class="agenda-num">01</span><span class="agenda-time">12&prime;</span>
+              <div><span class="agenda-title">El cuello de botella</span><span class="agenda-desc">Por qué el seq2seq con LSTM se queda corto y cómo la primera atención lo arregló.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">23&prime;</span>
+              <div><span class="agenda-title">Self-attention</span><span class="agenda-desc">Query, Key, Value; el cálculo con números, por qué √dₖ, multi-head y parámetros.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">20&prime;</span>
+              <div><span class="agenda-title">El Transformer</span><span class="agenda-desc">Tokens, el bloque por dentro, paralelismo, posición y máscara causal.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">20&prime;</span>
+              <div><span class="agenda-title">De BERT a los LLMs</span><span class="agenda-desc">Tres familias, fine-tuning en Keras, cómo genera un LLM y dos ejercicios.</span></div></li>
           </ol>
         </div>
       </section>
@@ -160,7 +160,67 @@
         </div>
       </section>
 
-      <!-- 05 — DIVISOR 2 -->
+      <!-- 05 — La primera atención (Bahdanau) -->
+      <section class="slide" data-title="La primera atención">
+        <div class="slide-inner">
+          <span class="kicker">Bahdanau, Cho &amp; Bengio (2015)</span>
+          <h2 class="h2">La primera <em>atención</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El decoder sigue siendo una LSTM, pero en cada paso calcula una
+                <em>puntuación</em> entre su estado y cada estado del encoder,
+                la pasa por una softmax y mezcla los estados con esos pesos.
+              </p>
+              <ul class="neuron-notes">
+                <li>El vector de contexto <strong>cambia en cada paso</strong>: ya no hay un único resumen.</li>
+                <li>Los pesos se pueden pintar: una matriz de <em>alineamiento</em> entre las dos frases.</li>
+                <li>Con frases largas, la calidad de la traducción deja de caer.</li>
+              </ul>
+            </div>
+            <svg viewBox="0 0 330 250" style="width: 100%; height: auto">
+              <g font-family="Inter Tight" font-size="12" fill="#1a1f6c">
+                <text x="95" y="38" text-anchor="middle">la</text>
+                <text x="145" y="38" text-anchor="middle">casa</text>
+                <text x="195" y="38" text-anchor="middle">es</text>
+                <text x="245" y="38" text-anchor="middle">azul</text>
+                <text x="60" y="72" text-anchor="end">the</text>
+                <text x="60" y="122" text-anchor="end">house</text>
+                <text x="60" y="172" text-anchor="end">is</text>
+                <text x="60" y="222" text-anchor="end">blue</text>
+              </g>
+              <g fill="#ff5700">
+                <rect x="72" y="50" width="46" height="46" opacity="0.85" />
+                <rect x="122" y="50" width="46" height="46" opacity="0.12" />
+                <rect x="172" y="50" width="46" height="46" opacity="0.05" />
+                <rect x="222" y="50" width="46" height="46" opacity="0.05" />
+                <rect x="72" y="100" width="46" height="46" opacity="0.1" />
+                <rect x="122" y="100" width="46" height="46" opacity="0.85" />
+                <rect x="172" y="100" width="46" height="46" opacity="0.05" />
+                <rect x="222" y="100" width="46" height="46" opacity="0.08" />
+                <rect x="72" y="150" width="46" height="46" opacity="0.05" />
+                <rect x="122" y="150" width="46" height="46" opacity="0.08" />
+                <rect x="172" y="150" width="46" height="46" opacity="0.85" />
+                <rect x="222" y="150" width="46" height="46" opacity="0.1" />
+                <rect x="72" y="200" width="46" height="46" opacity="0.05" />
+                <rect x="122" y="200" width="46" height="46" opacity="0.1" />
+                <rect x="172" y="200" width="46" height="46" opacity="0.12" />
+                <rect x="222" y="200" width="46" height="46" opacity="0.85" />
+              </g>
+              <text x="170" y="18" text-anchor="middle" font-family="Inter Tight" font-style="italic" font-size="11" fill="#7c80a6">a dónde mira el decoder al generar cada palabra</text>
+            </svg>
+          </div>
+          <p class="note">
+            Cómo leer la matriz: cada <strong>fila</strong> es una palabra que
+            el decoder está generando y suma 1; el color dice cuánto mira a cada
+            palabra de la entrada. Aquí es casi diagonal porque el orden coincide;
+            en «casa blanca» → «white house» las dos casillas se cruzarían. Nadie
+            etiqueta estos pesos: salen solos de entrenar a traducir.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — DIVISOR 2 -->
       <section class="slide slide-divider" data-title="Self-attention">
         <div class="divider-inner">
           <span class="divider-num">— 02 —</span>
@@ -172,7 +232,7 @@
         </div>
       </section>
 
-      <!-- 06 — Q, K, V -->
+      <!-- 07 — Q, K, V -->
       <section class="slide" data-title="Query, Key, Value">
         <div class="slide-inner">
           <span class="kicker">Query · Key · Value</span>
@@ -208,12 +268,12 @@
         </div>
       </section>
 
-      <!-- 07 — El cálculo (diagrama) -->
+      <!-- 08 — El cálculo (diagrama) -->
       <section class="slide" data-title="El cálculo">
         <div class="slide-inner">
           <span class="kicker">Scaled dot-product attention</span>
           <h2 class="h2">Afinidad → <em>softmax</em> → mezcla.</h2>
-          <svg viewBox="0 0 760 210" style="width:100%; height:auto; margin: 6px 0 12px">
+          <svg viewBox="0 0 760 210" style="width:100%; max-width:720px; height:auto; display:block; margin: 0 auto 10px">
             <g text-anchor="middle" font-family="Inter Tight" font-size="12" fill="#7c80a6">
               <rect x="20" y="80" width="70" height="46" rx="6" fill="#1a1f6c"/><text x="55" y="107" fill="#fff" font-family="JetBrains Mono">Q</text>
               <rect x="20" y="20" width="70" height="40" rx="6" fill="#0796a3"/><text x="55" y="45" fill="#fff" font-family="JetBrains Mono">Kᵀ</text>
@@ -233,15 +293,95 @@
             </g>
             <defs><marker id="a6" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3"/></marker></defs>
           </svg>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>Q · Kᵀ</strong> · la query de cada token contra la key de todos: una matriz <em>n × n</em> de afinidades. Fila = quién mira, columna = a quién.</li>
+              <li><strong>softmax / √dₖ</strong> · se escala y se normaliza <em>por filas</em>: cada token reparte un total de 1 entre los demás.</li>
+              <li><strong>Σ pesos · V</strong> · cada token recibe un promedio ponderado de los values. Sale un vector nuevo por token, del mismo tamaño pero <em>enriquecido</em> con lo que ha mirado.</li>
+            </ul>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Dimensiones · n tokens, dₖ = 64</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">Q, K, V &nbsp;&nbsp;&nbsp;&nbsp;n × 64 &nbsp;(X · W_Q, X · W_K, X · W_V)</span>
+                <span class="pt-c">Q · Kᵀ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n × n &nbsp;&nbsp;afinidades</span>
+                <span class="pt-c">softmax &nbsp;&nbsp;&nbsp;&nbsp;n × n &nbsp;&nbsp;cada fila suma 1</span>
+                <span class="pt-c">pesos · V &nbsp;&nbsp;n × 64 &nbsp;contexto por token</span>
+                <span class="pt-f">solo multiplicaciones de matrices: lo que una GPU hace mejor</span>
+              </div></div>
+            </div>
+          </div>
           <p class="note">
             <code>Atención(Q,K,V) = softmax(Q·Kᵀ / √dₖ) · V</code>. Los pesos
             (una distribución que suma 1) dicen cuánto se mezcla el Value de cada
-            palabra en la salida de esta.
+            palabra en la salida de esta. No hay parámetros en el cálculo: los
+            únicos que se aprenden son las tres proyecciones W_Q, W_K, W_V.
           </p>
         </div>
       </section>
 
-      <!-- 08 — Multi-head -->
+      <!-- 09 — Con números -->
+      <section class="slide" data-title="Con números">
+        <div class="slide-inner">
+          <span class="kicker">Tres tokens, dₖ = 2</span>
+          <h2 class="h2">La atención, con <em>números</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>q = [1, 0] · k₁ = [1, 0] · k₂ = [0, 1] · k₃ = [1, 1]</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">afinidades q·kᵢ = [1, 0, 1]</span>
+                <span class="pt-c">÷ √2 → [0,71 · 0 · 0,71]</span>
+                <span class="pt-c">eˣ → [2,03 · 1 · 2,03] · suma 5,06</span>
+                <span class="pt-t">pesos = [0,40 · 0,20 · 0,40]</span>
+                <span class="pt-c">v₁ = [1, 0] · v₂ = [0, 1] · v₃ = [0, 0]</span>
+                <span class="pt-f">salida = 0,4·v₁ + 0,2·v₂ + 0,4·v₃ = [0,4 · 0,2]</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>La query se parece a k₁ y a k₃ (producto escalar alto) y nada a k₂.</li>
+                <li>La softmax convierte afinidades en una <strong>distribución</strong>: suma 1, todas positivas.</li>
+                <li>La salida es un <em>promedio ponderado</em> de los Values: se parece más a lo que más se atiende.</li>
+                <li>Esto se hace para <strong>cada token</strong> a la vez: Q·Kᵀ es una matriz n × n.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 — Por qué dividir por √dk -->
+      <section class="slide" data-title="Por qué √dₖ">
+        <div class="slide-inner">
+          <span class="kicker">El detalle que estabiliza el entrenamiento</span>
+          <h2 class="h2">Por qué dividir por <em>√dₖ</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Los productos crecen</h4>
+              <div class="fn-formula">q·k ∝ √dₖ</div>
+              <p>Con vectores de 64 componentes, los productos escalares son 8 veces mayores que con 1.</p>
+              <span class="fn-use">→ afinidades enormes</span>
+            </div>
+            <div class="fn-card">
+              <h4>La softmax se satura</h4>
+              <div class="fn-formula">softmax(10, 0) = [0,99995 · 0,00005]</div>
+              <p>Casi toda la atención en un token; el gradiente de los demás es ≈ 0.</p>
+              <span class="fn-use">→ no aprende</span>
+            </div>
+            <div class="fn-card">
+              <h4>Escalar lo arregla</h4>
+              <div class="fn-formula">softmax(1, 0) = [0,73 · 0,27]</div>
+              <p>Dividir por √dₖ deja las afinidades con varianza ≈ 1, en la zona útil de la softmax.</p>
+              <span class="fn-use">→ reparto suave</span>
+            </div>
+          </div>
+          <p class="note">
+            Es el mismo problema de las sigmoides saturadas del Tema 2: una
+            activación en la zona plana no deja pasar el gradiente. Aquí la
+            escala lo evita de forma barata.
+          </p>
+        </div>
+      </section>
+
+      <!-- 11 — Multi-head -->
       <section class="slide" data-title="Multi-head">
         <div class="slide-inner">
           <span class="kicker">Varias miradas a la vez</span>
@@ -272,7 +412,41 @@
         </div>
       </section>
 
-      <!-- 09 — DIVISOR 3 -->
+      <!-- 12 — Dimensiones y parámetros -->
+      <section class="slide" data-title="Contar parámetros">
+        <div class="slide-inner">
+          <span class="kicker">El Transformer original · d = 512, 8 cabezas, dₖ = 64</span>
+          <h2 class="h2">Cuántos <em>parámetros</em> tiene un bloque.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Una cabeza</h4>
+              <div class="fn-formula">3 × 512 × 64 = 98.304</div>
+              <p>Tres proyecciones (W_Q, W_K, W_V) de 512 a 64.</p>
+              <span class="fn-use">→ cada cabeza mira en 64 dimensiones</span>
+            </div>
+            <div class="fn-card">
+              <h4>Multi-head + salida</h4>
+              <div class="fn-formula">8 × 98.304 + 512² ≈ 1,05 M</div>
+              <p>Las 8 cabezas concatenadas (512) pasan por W_O. Total: 4·d².</p>
+              <span class="fn-use">→ la atención entera</span>
+            </div>
+            <div class="fn-card">
+              <h4>Feed-forward</h4>
+              <div class="fn-formula">2 × 512 × 2048 ≈ 2,1 M</div>
+              <p>Dos capas densas, con una capa intermedia 4 veces más ancha.</p>
+              <span class="fn-use">→ dos tercios del bloque</span>
+            </div>
+          </div>
+          <p class="note">
+            Los parámetros no dependen de la longitud <code>n</code> de la
+            secuencia. El <strong>coste de cómputo</strong> sí: la matriz
+            Q·Kᵀ es n × n, así que pasar de 512 a 4.096 tokens multiplica la
+            atención por 64. De ahí la carrera por «contextos largos».
+          </p>
+        </div>
+      </section>
+
+      <!-- 13 — DIVISOR 3 -->
       <section class="slide slide-divider" data-title="El Transformer">
         <div class="divider-inner">
           <span class="divider-num">— 03 —</span>
@@ -284,12 +458,43 @@
         </div>
       </section>
 
-      <!-- 10 — La arquitectura (diagrama) -->
+      <!-- 14 — Tokens y embeddings -->
+      <section class="slide" data-title="Tokens">
+        <div class="slide-inner">
+          <span class="kicker">La entrada</span>
+          <h2 class="h2">Tokens y <em>embeddings</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                El modelo no ve letras ni palabras: ve <em>tokens</em>, trozos
+                de texto de un vocabulario fijo (30.000 a 100.000 piezas)
+                aprendido por frecuencia (<strong>BPE</strong>).
+              </p>
+              <ul class="neuron-notes">
+                <li>Palabras frecuentes son un token; raras, varios: «aprend» + «izaje».</li>
+                <li>Cada token tiene un <strong>embedding</strong> aprendido de d dimensiones (512 a 12.288).</li>
+                <li>Por eso un LLM cuenta mal las letras de una palabra: nunca las ha visto.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>«El aprendizaje profundo mola»</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">El · aprend · izaje · profundo · mola</span>
+                <span class="pt-t">ids: 1.024 · 7.731 · 22.410 · 3.388 · 15.902</span>
+                <span class="pt-c">cada id → vector de 512 números</span>
+                <span class="pt-f">matriz de entrada: 5 × 512</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 — La arquitectura (diagrama) -->
       <section class="slide" data-title="La arquitectura">
         <div class="slide-inner">
           <span class="kicker">Bloques apilados</span>
           <h2 class="h2">La <em>arquitectura</em>.</h2>
-          <svg viewBox="0 0 760 200" style="width:100%; height:auto; margin:6px 0 12px">
+          <svg viewBox="0 0 760 200" style="width:100%; max-width:720px; height:auto; display:block; margin:0 auto 10px">
             <g text-anchor="middle" font-family="Inter Tight" font-size="11" fill="#7c80a6">
               <rect x="20" y="80" width="90" height="44" rx="6" fill="#1a1f6c"/><text x="65" y="100" fill="#fff">tokens →</text><text x="65" y="116" fill="#fff" font-size="10">embeddings</text>
               <rect x="130" y="80" width="70" height="44" rx="6" fill="#0796a3"/><text x="165" y="100" fill="#fff" font-size="10">+ posición</text><text x="165" y="115" fill="#fff" font-size="9">(orden)</text>
@@ -308,15 +513,68 @@
             </g>
             <defs><marker id="b6" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 Z" fill="#c9c3b3"/></marker></defs>
           </svg>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>tokens → embeddings</strong> · una tabla de vocabulario: cada id se cambia por su vector de d números.</li>
+              <li><strong>+ posición</strong> · se suma un vector que depende del lugar; sin él la atención no sabría el orden.</li>
+              <li><strong>bloque × N</strong> · atención (los tokens se leen entre sí) y feed-forward (cada token se procesa solo). N = 6 en 2017; 96 en GPT-3. La forma <em>n × d</em> no cambia de un bloque al siguiente, por eso se pueden apilar.</li>
+              <li><strong>salida</strong> · una capa densa proyecta cada vector al vocabulario y una softmax da la probabilidad del token siguiente.</li>
+            </ul>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Siguiendo las dimensiones · 5 tokens, d = 512</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">ids &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5</span>
+                <span class="pt-c">embeddings &nbsp;&nbsp;5 × 512</span>
+                <span class="pt-c">+ posición &nbsp;&nbsp;5 × 512</span>
+                <span class="pt-c">bloque × N &nbsp;&nbsp;5 × 512 &nbsp;(siempre)</span>
+                <span class="pt-c">densa &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5 × 50.000</span>
+                <span class="pt-f">softmax → P(token siguiente) para cada posición</span>
+              </div></div>
+            </div>
+          </div>
           <p class="note">
             Tokens → <em>embeddings</em> + codificación de posición → una pila de
             <strong>bloques</strong> (multi-head attention + red feed-forward,
-            con conexiones residuales y normalización) → salida.
+            con conexiones residuales y normalización) → salida. Es el mismo
+            esquema para BERT, GPT y Claude; cambian N, d y la máscara.
           </p>
         </div>
       </section>
 
-      <!-- 11 — Sin recurrencia -->
+      <!-- 16 — Dentro del bloque -->
+      <section class="slide" data-title="Dentro del bloque">
+        <div class="slide-inner">
+          <span class="kicker">Residual, normalización y feed-forward</span>
+          <h2 class="h2">Dentro del <em>bloque</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Conexión residual</h4>
+              <div class="fn-formula">x + Atención(x)</div>
+              <p>La salida se <em>suma</em> a la entrada. La misma autopista que en ResNet y en la cinta de la LSTM.</p>
+              <span class="fn-use">→ apilar 96 bloques sin que muera el gradiente</span>
+            </div>
+            <div class="fn-card">
+              <h4>LayerNorm</h4>
+              <div class="fn-formula">(x − μ) / σ · γ + β</div>
+              <p>Normaliza cada vector de token por separado. Mantiene las escalas estables bloque tras bloque.</p>
+              <span class="fn-use">→ entrenamiento estable</span>
+            </div>
+            <div class="fn-card">
+              <h4>Feed-forward</h4>
+              <div class="fn-formula">W₂ · GELU(W₁ · x)</div>
+              <p>Un MLP de dos capas aplicado a <em>cada token por separado</em>. La atención mezcla; el FFN procesa.</p>
+              <span class="fn-use">→ donde vive el «conocimiento»</span>
+            </div>
+          </div>
+          <p class="note">
+            Reparto de papeles: la <strong>atención</strong> mueve información
+            entre posiciones; el <strong>feed-forward</strong> transforma cada
+            posición. Un bloque = una ronda de «leer a los demás y pensar».
+          </p>
+        </div>
+      </section>
+
+      <!-- 17 — Sin recurrencia -->
       <section class="slide" data-title="Sin recurrencia">
         <div class="slide-inner">
           <span class="kicker">Por qué escala</span>
@@ -333,11 +591,31 @@
               <ul class="neuron-notes"><li>Aprovecha las GPUs al máximo.</li><li>Acceso directo a cualquier posición.</li></ul>
             </div>
           </div>
-          <p class="note">Quitar la recurrencia es lo que permitió entrenar modelos <strong>enormes</strong> con muchísimos datos.</p>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Pasos secuenciales</h4>
+              <div class="fn-formula">LSTM n · Transformer 1</div>
+              <p>La LSTM necesita el paso t−1 para calcular el t. La atención calcula todas las posiciones en una sola multiplicación.</p>
+              <span class="fn-use">→ la GPU trabaja de verdad</span>
+            </div>
+            <div class="fn-card">
+              <h4>Distancia entre dos tokens</h4>
+              <div class="fn-formula">LSTM n · Transformer 1</div>
+              <p>Para que el token 1 influya en el 500, la LSTM arrastra la señal 499 pasos; la atención los une en un salto.</p>
+              <span class="fn-use">→ sin olvido</span>
+            </div>
+            <div class="fn-card">
+              <h4>Coste por capa</h4>
+              <div class="fn-formula">LSTM n·d² · Transformer n²·d</div>
+              <p>La atención paga la longitud al cuadrado. Es su factura: con contextos largos, es lo que más cuesta.</p>
+              <span class="fn-use">→ el precio del paralelismo</span>
+            </div>
+          </div>
+          <p class="note">Quitar la recurrencia es lo que permitió entrenar modelos <strong>enormes</strong> con muchísimos datos: el tiempo de entrenamiento deja de crecer con la longitud de cada frase.</p>
         </div>
       </section>
 
-      <!-- 12 — Positional encoding -->
+      <!-- 18 — Positional encoding -->
       <section class="slide" data-title="Positional encoding">
         <div class="slide-inner">
           <span class="kicker">¿Y el orden?</span>
@@ -367,7 +645,71 @@
         </div>
       </section>
 
-      <!-- 13 — DIVISOR 4 -->
+      <!-- 19 — Senos, cosenos y RoPE -->
+      <section class="slide" data-title="Cómo se codifica">
+        <div class="slide-inner">
+          <span class="kicker">Tres formas de decir «estás en la posición 7»</span>
+          <h2 class="h2">Senos, cosenos y <em>RoPE</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Sinusoidal (2017)</h4>
+              <div class="fn-formula">sin(pos / 10000^(2i/d))</div>
+              <p>Cada dimensión oscila a una frecuencia distinta: la posición queda escrita como un «reloj» de muchas agujas.</p>
+              <span class="fn-use">→ sin parámetros, extrapola</span>
+            </div>
+            <div class="fn-card">
+              <h4>Aprendido (BERT, GPT-2)</h4>
+              <div class="fn-formula">tabla de 512 × d</div>
+              <p>Un embedding por posición, entrenado como los de los tokens.</p>
+              <span class="fn-use">→ simple, longitud máxima fija</span>
+            </div>
+            <div class="fn-card">
+              <h4>RoPE (Llama, Claude…)</h4>
+              <div class="fn-formula">rotar q y k según pos</div>
+              <p>En vez de sumar, se rotan Q y K; la afinidad depende de la <em>distancia</em> entre tokens.</p>
+              <span class="fn-use">→ posición relativa, contextos largos</span>
+            </div>
+          </div>
+          <p class="note">
+            Lo importante no es la fórmula: es que, sin algo así, «perro muerde
+            hombre» y «hombre muerde perro» serían la misma entrada.
+          </p>
+        </div>
+      </section>
+
+      <!-- 20 — La máscara causal -->
+      <section class="slide" data-title="Máscara causal">
+        <div class="slide-inner">
+          <span class="kicker">Para generar, no se puede mirar al futuro</span>
+          <h2 class="h2">La máscara <em>causal</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Si el modelo aprende a predecir el token siguiente, en
+                entrenamiento <em>ya lo tiene delante</em>. Hay que impedir
+                que cada posición atienda a las que vienen después.
+              </p>
+              <ul class="neuron-notes">
+                <li>Antes de la softmax se pone <strong>−∞</strong> en las afinidades «hacia el futuro»: su peso queda en 0.</li>
+                <li>Así una sola pasada entrena <em>todas las posiciones</em> a la vez, en paralelo.</li>
+                <li>Un encoder (BERT) no la usa: ve la frase entera. Un decoder (GPT) siempre.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>pesos de atención · filas = quién mira</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">El &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ 1,00 &nbsp;&nbsp;— &nbsp;&nbsp;&nbsp;— &nbsp;&nbsp;&nbsp;— &nbsp;]</span>
+                <span class="pt-c">cielo &nbsp;&nbsp;&nbsp;[ 0,30 &nbsp;0,70 &nbsp;— &nbsp;&nbsp;&nbsp;— &nbsp;]</span>
+                <span class="pt-c">es &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ 0,10 &nbsp;0,60 &nbsp;0,30 &nbsp;— &nbsp;]</span>
+                <span class="pt-c">azul &nbsp;&nbsp;&nbsp;&nbsp;[ 0,05 &nbsp;0,55 &nbsp;0,10 &nbsp;0,30 ]</span>
+                <span class="pt-f">triángulo inferior: solo pasado y presente</span>
+              </div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21 — DIVISOR 4 -->
       <section class="slide slide-divider" data-title="De BERT a los LLMs">
         <div class="divider-inner">
           <span class="divider-num">— 04 —</span>
@@ -379,7 +721,40 @@
         </div>
       </section>
 
-      <!-- 14 — Preentrenar + fine-tuning -->
+      <!-- 22 — Encoder, decoder o ambos -->
+      <section class="slide" data-title="Tres familias">
+        <div class="slide-inner">
+          <span class="kicker">Mismo bloque, tres formas de usarlo</span>
+          <h2 class="h2">Encoder, decoder o <em>ambos</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Solo encoder</h4>
+              <div class="fn-formula">BERT · RoBERTa · DistilBERT</div>
+              <p>Ve la frase entera, sin máscara. Produce un vector por token para clasificar o etiquetar.</p>
+              <span class="fn-use">→ entender: sentimiento, NER, búsqueda</span>
+            </div>
+            <div class="fn-card">
+              <h4>Solo decoder</h4>
+              <div class="fn-formula">GPT · Llama · Claude</div>
+              <p>Máscara causal; predice el siguiente token. Es la familia de los LLMs.</p>
+              <span class="fn-use">→ generar: chat, código, resumen</span>
+            </div>
+            <div class="fn-card">
+              <h4>Encoder–decoder</h4>
+              <div class="fn-formula">T5 · BART · Whisper</div>
+              <p>El decoder atiende a su propio pasado <em>y</em> a la salida del encoder (cross-attention).</p>
+              <span class="fn-use">→ transformar: traducir, transcribir</span>
+            </div>
+          </div>
+          <p class="note">
+            Pregunta práctica: ¿tu tarea es <em>entender</em> un texto que ya
+            tienes, <em>generar</em> uno nuevo o <em>convertir</em> uno en
+            otro? Eso elige la familia.
+          </p>
+        </div>
+      </section>
+
+      <!-- 23 — Preentrenar + fine-tuning -->
       <section class="slide" data-title="Preentrenar y ajustar">
         <div class="slide-inner">
           <span class="kicker">Transfer learning en NLP</span>
@@ -400,7 +775,35 @@
         </div>
       </section>
 
-      <!-- 15 — LLMs -->
+      <!-- 24 — Fine-tuning en Keras -->
+      <section class="slide" data-title="Fine-tuning en Keras">
+        <div class="slide-inner">
+          <span class="kicker">Lo que harás en el laboratorio</span>
+          <h2 class="h2">Fine-tuning en <em>Keras</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># DistilBERT + cabeza de clasificación (2 clases)</span><br />
+              tok = AutoTokenizer.from_pretrained(<span class="c-str">"distilbert-base-uncased"</span>)<br />
+              model = TFAutoModelForSequenceClassification<br />
+              &nbsp;&nbsp;.from_pretrained(<span class="c-str">"distilbert-base-uncased"</span>, num_labels=<span class="c-kw">2</span>)<br />
+              <br />
+              enc = tok(textos, padding=<span class="c-kw">True</span>, truncation=<span class="c-kw">True</span>, max_length=<span class="c-kw">256</span>)<br />
+              model.compile(optimizer=Adam(<span class="c-kw">2e-5</span>))<br />
+              model.fit(dict(enc), y, epochs=<span class="c-kw">1</span>, batch_size=<span class="c-kw">16</span>)
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>El <strong>tokenizer</strong> va con el modelo: mismo vocabulario que en el preentrenamiento.</li>
+                <li>La cabeza nueva es una capa densa sobre el token <code>[CLS]</code>; el resto ya sabe inglés.</li>
+                <li><strong>Learning rate pequeño</strong> (2e-5) y una o dos épocas: si no, se destroza lo aprendido.</li>
+                <li>Con 2.000 ejemplos se supera lo que una LSTM desde cero logra con 25.000.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 25 — LLMs -->
       <section class="slide slide-exercise" data-title="LLMs">
         <div class="slide-inner">
           <span class="kicker kicker-ex">Los grandes modelos de lenguaje</span>
@@ -429,7 +832,195 @@
         </div>
       </section>
 
-      <!-- 16 — Ideas -->
+      <!-- 26 — Generar texto: decodificación -->
+      <section class="slide" data-title="Decodificar">
+        <div class="slide-inner">
+          <span class="kicker">De probabilidades a palabras</span>
+          <h2 class="h2">Cómo <em>genera</em> un LLM.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                En cada paso el modelo da una distribución sobre los 100.000
+                tokens del vocabulario. Hay que <em>elegir uno</em>, añadirlo
+                al texto y repetir.
+              </p>
+              <ul class="neuron-notes">
+                <li><strong>Greedy</strong> · siempre el más probable. Repetitivo y plano.</li>
+                <li><strong>Temperatura</strong> · softmax(z / T). T &lt; 1 concentra; T &gt; 1 aplana.</li>
+                <li><strong>Top-k / top-p</strong> · muestrear solo entre los k mejores, o entre los que suman p = 0,9.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>«El cielo es de color ___» · logits [azul 4 · gris 2 · verde 0]</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">T = 1 &nbsp;&nbsp;→ [0,87 · 0,12 · 0,02]</span>
+                <span class="pt-c">T = 0,5 → [0,98 · 0,02 · 0,00]</span>
+                <span class="pt-c">T = 2 &nbsp;&nbsp;→ [0,67 · 0,24 · 0,09]</span>
+                <span class="pt-f">misma red, distinta «creatividad»</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Cada token generado vuelve a entrar como contexto: el coste crece
+            con la longitud, y un error temprano se arrastra. Por eso los LLMs
+            «se inventan» cosas con tanta seguridad.
+          </p>
+        </div>
+      </section>
+
+      <!-- 27 — Del LLM al asistente -->
+      <section class="slide" data-title="Del LLM al asistente">
+        <div class="slide-inner">
+          <span class="kicker">Predecir tokens no es conversar</span>
+          <h2 class="h2">Del LLM al <em>asistente</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>1 · Preentrenar</h4>
+              <div class="fn-formula">billones de tokens</div>
+              <p>Predecir el siguiente token en casi todo el texto disponible. Sale un modelo que <em>completa</em>, no que responde.</p>
+              <span class="fn-use">→ el conocimiento</span>
+            </div>
+            <div class="fn-card">
+              <h4>2 · Ajuste supervisado</h4>
+              <div class="fn-formula">miles de diálogos</div>
+              <p>Fine-tuning con ejemplos de pregunta → respuesta escritos por personas.</p>
+              <span class="fn-use">→ el formato</span>
+            </div>
+            <div class="fn-card">
+              <h4>3 · Preferencias (RLHF)</h4>
+              <div class="fn-formula">A es mejor que B</div>
+              <p>Personas comparan respuestas; un modelo de recompensa aprende sus preferencias y guía al LLM.</p>
+              <span class="fn-use">→ útil, seguro, honesto</span>
+            </div>
+          </div>
+          <p class="note">
+            Y después, <strong>prompting</strong>: el modelo no cambia, cambia
+            el contexto. Instrucciones, ejemplos en el propio prompt
+            (<em>few-shot</em>) o documentos recuperados (<em>RAG</em>) bastan
+            para muchas tareas sin reentrenar nada.
+          </p>
+        </div>
+      </section>
+
+      <!-- 28 — Ejercicio: calcula la atención -->
+      <section class="slide slide-exercise" data-title="Calcula">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · a mano</span>
+          <h2 class="h2 h2-ex">Calcula la <em>atención</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># un token mira a tres, d_k = 4</span><br />
+              q &nbsp;= [ <span class="c-kw">2</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span> ]<br />
+              k1 = [ <span class="c-kw">2</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span> ] &nbsp;v1 = [ <span class="c-kw">1</span>, <span class="c-kw">0</span> ]<br />
+              k2 = [ <span class="c-kw">0</span>, <span class="c-kw">2</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span> ] &nbsp;v2 = [ <span class="c-kw">0</span>, <span class="c-kw">1</span> ]<br />
+              k3 = [ <span class="c-kw">1</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span>, <span class="c-kw">0</span> ] &nbsp;v3 = [ <span class="c-kw">1</span>, <span class="c-kw">1</span> ]<br />
+              <br />
+              <span class="c-com"># e^0 = 1 · e^1 = 2,72 · e^2 = 7,39 · e^4 = 54,6</span>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>a) Calcula las <strong>afinidades</strong> q·kᵢ y escálalas por √dₖ.</li>
+                <li>b) Aplica la <strong>softmax</strong>: ¿cuánto pesa cada token?</li>
+                <li>c) Calcula la <strong>salida</strong> Σ pesoᵢ · vᵢ.</li>
+                <li>d) Repite b) <em>sin</em> escalar. ¿Qué cambia?</li>
+                <li>e) Si esto fuera un decoder y el token que mira es el 2.º de la frase, ¿qué pesos quedan?</li>
+              </ul>
+              <p class="note">
+                Herramientas: <code>softmax(sᵢ) = eˢⁱ / Σ eˢʲ</code>. Decide
+                antes de pasar de diapositiva.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 29 — Ejercicio: soluciones (atención) -->
+      <section class="slide" data-title="Solución · atención">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Las <em>cuentas</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Paso a paso</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">a) q·k = [4 · 0 · 2] &nbsp;→ ÷ √4 = [2 · 0 · 1]</span>
+                <span class="pt-c">b) eˢ = [7,39 · 1 · 2,72] · suma 11,11</span>
+                <span class="pt-t">pesos = [0,67 · 0,09 · 0,24]</span>
+                <span class="pt-c">c) 0,67·[1,0] + 0,09·[0,1] + 0,24·[1,1]</span>
+                <span class="pt-t">salida = [0,91 · 0,33]</span>
+                <span class="pt-c">d) sin escalar: eˢ = [54,6 · 1 · 7,39]</span>
+                <span class="pt-t">pesos = [0,87 · 0,02 · 0,12] → más picudo</span>
+                <span class="pt-f">e) solo k₁, k₂: [7,39 · 1] → [0,88 · 0,12]</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>El token «se parece» a k₁ (misma dirección) y algo a k₃; a k₂, nada: su peso es casi 0 pero <em>no exactamente</em> 0.</li>
+                <li>d) Sin √dₖ la atención se concentra y el gradiente de los tokens ignorados desaparece. Con dₖ = 64 el efecto es mucho peor.</li>
+                <li>e) La máscara pone −∞ en k₃ antes de la softmax: el tercero <em>todavía no existe</em> para el segundo.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 30 — Ejercicio: elige el modelo -->
+      <section class="slide slide-exercise" data-title="Elige">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio · en grupos, 5 minutos</span>
+          <h2 class="h2 h2-ex">Elige el <em>modelo</em>.</h2>
+          <p class="lead">
+            Para cada caso decide: ¿<strong>encoder</strong>,
+            <strong>decoder</strong> o <strong>encoder–decoder</strong>?
+            ¿<strong>Fine-tuning</strong> o <strong>prompting</strong>? ¿O ni
+            siquiera un Transformer?
+          </p>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>1.</strong> Clasificar tickets de soporte en 5 categorías; tenéis 3.000 tickets ya etiquetados.</li>
+              <li><strong>2.</strong> Traducir manuales técnicos del español al inglés.</li>
+              <li><strong>3.</strong> Un asistente que responde preguntas sobre la documentación interna de la empresa.</li>
+            </ul>
+            <ul class="neuron-notes">
+              <li><strong>4.</strong> Extraer fecha, proveedor e importe de facturas en PDF; solo tenéis 40 ejemplos.</li>
+              <li><strong>5.</strong> Predecir la demanda eléctrica de mañana con el histórico horario de 5 años.</li>
+            </ul>
+          </div>
+          <p class="note">
+            Pista: ¿la tarea es entender, generar o convertir? ¿Cuántos datos
+            etiquetados hay? ¿Importa que el modelo corra barato y en local?
+          </p>
+        </div>
+      </section>
+
+      <!-- 31 — Ejercicio: soluciones (modelo) -->
+      <section class="slide" data-title="Solución · modelo">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio · soluciones</span>
+          <h2 class="h2">Una respuesta <em>razonable</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>caso · familia · cómo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">1 tickets · encoder (BERT) · fine-tuning</span>
+                <span class="pt-c">2 traducir · encoder–decoder · modelo ya entrenado</span>
+                <span class="pt-c">3 asistente · decoder (LLM) · prompting + RAG</span>
+                <span class="pt-c">4 facturas · decoder (LLM) · prompting few-shot</span>
+                <span class="pt-f">5 demanda · ni Transformer: LSTM o MLP con ventanas</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>1) Con miles de ejemplos etiquetados y una tarea cerrada, un encoder pequeño ajustado es <strong>barato, rápido y local</strong>. Como en el laboratorio.</li>
+                <li>3 y 4) Sin datos o con muy pocos, el LLM con instrucciones y ejemplos en el prompt gana. Con el tiempo, si acumuláis etiquetas, el caso 4 puede pasar a un encoder con NER.</li>
+                <li>5) Una serie numérica, sin texto: lo del Tema 4.2. El tamaño no sustituye a elegir bien la herramienta.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 32 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
           <span class="kicker">Resumen del Tema 4</span>
@@ -446,7 +1037,7 @@
         </div>
       </section>
 
-      <!-- 17 — Cierre -->
+      <!-- 33 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
           <span class="kicker">Cierre del Tema 4</span>
