@@ -6,7 +6,7 @@
     <title>CUNEF · Aprendizaje Profundo · Tema 5 · Validación y métricas</title>
     <meta
       name="description"
-      content="Tema 5 de Aprendizaje Profundo en CUNEF. Datos y evaluación: preprocesado y normalización, desbalanceo, métricas (accuracy, precision, recall, F1), matriz de confusión, ROC-AUC y umbral de decisión."
+      content="Tema 5.1 de Aprendizaje Profundo en CUNEF. Validación (train/validación/test, fugas de datos, validación cruzada) y métricas: matriz de confusión, precision, recall, F1 y Fβ, especificidad, MCC, multiclase, umbral, ROC-AUC, curva precision-recall y métricas de regresión. Con cuatro ejercicios de clase."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,7 +44,7 @@
           <div class="cover-meta">
             <div class="meta-block"><span class="meta-label">Asignatura</span><span class="meta-val">Aprendizaje Profundo</span></div>
             <div class="meta-block"><span class="meta-label">Tema</span><span class="meta-val">5.1 · Validación y métricas</span></div>
-            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~50 minutos</span></div>
+            <div class="meta-block"><span class="meta-label">Duración</span><span class="meta-val">~85 minutos</span></div>
             <div class="meta-block">
               <span class="meta-label">Profesor</span>
               <span class="meta-val">Óscar Sánchez Rueda</span>
@@ -53,9 +53,9 @@
           <h1 class="cover-title">Más allá del<br /><em>accuracy</em>.</h1>
           <p class="cover-sub">
             «Mi modelo acierta el 99 %» puede ser una <em>trampa</em>. Este tema
-            va de medir de verdad: <em>matriz de confusión</em>,
-            <em>precision</em> y <em>recall</em>, <em>F1</em>, la curva
-            <em>ROC</em> y el <em>umbral de decisión</em>.
+            va de medir de verdad: <em>validar sin fugas</em>, la
+            <em>matriz de confusión</em>, <em>precision</em> y <em>recall</em>,
+            las curvas <em>ROC</em> y <em>PR</em> y el <em>umbral de decisión</em>.
           </p>
           <div class="cover-foot">
             <span>→ Usa las flechas del teclado para avanzar</span>
@@ -82,34 +82,245 @@
       <!-- 01 — AGENDA -->
       <section class="slide" data-title="Agenda">
         <div class="slide-inner">
-          <span class="kicker">Agenda · ~50&nbsp;min</span>
+          <span class="kicker">Agenda · ~85&nbsp;min · 4 ejercicios</span>
           <h2 class="h2">Lo que vamos a ver.</h2>
           <ol class="agenda">
-            <li><span class="agenda-num">01</span><span class="agenda-time">10&prime;</span>
-              <div><span class="agenda-title">La trampa del accuracy</span><span class="agenda-desc">Por qué acertar mucho no siempre significa acertar bien.</span></div></li>
-            <li><span class="agenda-num">02</span><span class="agenda-time">14&prime;</span>
-              <div><span class="agenda-title">La matriz de confusión</span><span class="agenda-desc">TP, FP, FN, TN: las cuatro casillas que lo explican todo.</span></div></li>
-            <li><span class="agenda-num">03</span><span class="agenda-time">14&prime;</span>
-              <div><span class="agenda-title">Precision, recall y F1</span><span class="agenda-desc">Las métricas que sí distinguen tipos de error.</span></div></li>
-            <li><span class="agenda-num">04</span><span class="agenda-time">12&prime;</span>
-              <div><span class="agenda-title">Umbral y curva ROC</span><span class="agenda-desc">Mover el listón; ROC-AUC y datos desbalanceados.</span></div></li>
+            <li><span class="agenda-num">01</span><span class="agenda-time">15&prime;</span>
+              <div><span class="agenda-title">Validar bien</span><span class="agenda-desc">Train, validación y test; fugas de datos; validación cruzada. Ejercicio: caza la fuga.</span></div></li>
+            <li><span class="agenda-num">02</span><span class="agenda-time">15&prime;</span>
+              <div><span class="agenda-title">Accuracy y matriz de confusión</span><span class="agenda-desc">Por qué el accuracy engaña; TP, FP, FN, TN con números reales.</span></div></li>
+            <li><span class="agenda-num">03</span><span class="agenda-time">20&prime;</span>
+              <div><span class="agenda-title">Precision, recall y compañía</span><span class="agenda-desc">F1 y Fβ, especificidad, MCC, multiclase. Ejercicio: calcula a mano.</span></div></li>
+            <li><span class="agenda-num">04</span><span class="agenda-time">18&prime;</span>
+              <div><span class="agenda-title">Umbral, ROC y PR</span><span class="agenda-desc">Mover el listón, el AUC y la curva precision-recall. Ejercicio: diez puntuaciones.</span></div></li>
+            <li><span class="agenda-num">05</span><span class="agenda-time">17&prime;</span>
+              <div><span class="agenda-title">De la métrica a la decisión</span><span class="agenda-desc">Regresión, desbalanceo, código. Ejercicio en grupos: elige la métrica.</span></div></li>
           </ol>
         </div>
       </section>
 
-      <!-- 02 — DIVISOR 1 -->
-      <section class="slide slide-divider" data-title="La trampa del accuracy">
+      <!-- ============================================================ -->
+      <!-- 02 — DIVISOR 1 · VALIDAR BIEN -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Validar bien">
         <div class="divider-inner">
           <span class="divider-num">— 01 —</span>
-          <h2 class="divider-title">La trampa<br />del <em>accuracy</em>.</h2>
+          <h2 class="divider-title">Validar<br /><em>bien</em>.</h2>
           <p class="divider-sub">
-            La métrica más intuitiva es también la que más engaña cuando las
-            clases no están equilibradas.
+            Una métrica solo vale lo que valen los datos con los que la
+            calculas. Antes de elegir <em>qué</em> medir, hay que decidir
+            <em>dónde</em>.
           </p>
         </div>
       </section>
 
-      <!-- 03 — El clasificador tramposo -->
+      <!-- 03 — Tres particiones -->
+      <section class="slide" data-title="Tres particiones">
+        <div class="slide-inner">
+          <span class="kicker">Train · validación · test</span>
+          <h2 class="h2">Tres conjuntos, tres <em>trabajos</em>.</h2>
+          <svg viewBox="0 0 760 120" style="width:100%; height:auto; margin: 4px 0 10px" role="img" aria-label="Partición 70 % entrenamiento, 15 % validación, 15 % test">
+            <g font-family="Inter Tight" font-size="14" text-anchor="middle">
+              <rect x="20" y="20" width="504" height="54" rx="6" fill="#0796a3"/>
+              <text x="272" y="52" fill="#fff" font-weight="600">Entrenamiento · 70 %</text>
+              <rect x="528" y="20" width="104" height="54" rx="6" fill="#3b4080"/>
+              <text x="580" y="52" fill="#fff" font-weight="600">Valid. · 15 %</text>
+              <rect x="636" y="20" width="104" height="54" rx="6" fill="#ff5700"/>
+              <text x="688" y="52" fill="#fff" font-weight="600">Test · 15 %</text>
+              <text x="272" y="100" fill="#7c80a6" font-family="JetBrains Mono" font-size="12">ajusta los pesos</text>
+              <text x="580" y="100" fill="#7c80a6" font-family="JetBrains Mono" font-size="12">elige y para</text>
+              <text x="688" y="100" fill="#7c80a6" font-family="JetBrains Mono" font-size="12">mide, una vez</text>
+            </g>
+          </svg>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Entrenamiento</h4>
+              <p>El descenso del gradiente ve estos datos y ajusta los pesos con ellos.</p>
+              <span class="fn-use">→ su error siempre es optimista</span>
+            </div>
+            <div class="fn-card">
+              <h4>Validación</h4>
+              <p>Para decidir: hiperparámetros, arquitectura, <em>early stopping</em>, el umbral.</p>
+              <span class="fn-use">→ se usa muchas veces</span>
+            </div>
+            <div class="fn-card">
+              <h4>Test</h4>
+              <p>La estimación final de cómo irá en el mundo real. Se mira <em>al final</em>.</p>
+              <span class="fn-use">→ intocable hasta el último día</span>
+            </div>
+          </div>
+          <p class="note">
+            Regla de oro: <strong>si tomas una decisión mirando el test, el test
+            deja de ser test</strong>. Su número se vuelve optimista igual que el
+            de entrenamiento.
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 — Fugas de datos -->
+      <section class="slide" data-title="Fugas de datos">
+        <div class="slide-inner">
+          <span class="kicker">Data leakage</span>
+          <h2 class="h2">Cuando el test se <em>cuela</em> en el entrenamiento.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Hay <strong>fuga</strong> cuando el modelo recibe, durante el
+                entrenamiento, información que no tendría en producción. La
+                métrica sale brillante… y el modelo falla al desplegarlo.
+              </p>
+              <ul class="neuron-notes">
+                <li><strong>Preprocesado antes del split</strong>: normalizar con la media de <em>todo</em> el dataset.</li>
+                <li><strong>Duplicados o el mismo sujeto</strong> a ambos lados (varias fotos del mismo paciente).</li>
+                <li><strong>Información del futuro</strong>: barajar una serie temporal.</li>
+                <li><strong>Variables trampa</strong>: una columna que solo existe <em>después</em> de conocer la etiqueta.</li>
+              </ul>
+            </div>
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>La señal de alarma</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">validación: 99,4 % ✓</span>
+                <span class="pt-c">producción: 71 % ✗</span>
+                <span class="pt-t">«demasiado bueno para ser verdad»</span>
+                <span class="pt-f">suele serlo: busca la fuga</span>
+              </div></div>
+            </div>
+          </div>
+          <p class="note">
+            Remedio general: <strong>separa primero</strong> y ajusta cualquier
+            transformación (escalado, imputación, re-muestreo) <em>solo</em> con
+            el entrenamiento. En scikit-learn, un <code>Pipeline</code> lo hace solo.
+          </p>
+        </div>
+      </section>
+
+      <!-- 05 — Validación cruzada -->
+      <section class="slide" data-title="Validación cruzada">
+        <div class="slide-inner">
+          <span class="kicker">k-fold</span>
+          <h2 class="h2">Validación <em>cruzada</em>.</h2>
+          <svg viewBox="0 0 760 190" style="width:100%; height:auto; margin: 0 0 8px" role="img" aria-label="Cinco folds: en cada vuelta un bloque distinto hace de validación">
+            <g font-family="JetBrains Mono" font-size="12">
+              <g fill="#7c80a6">
+                <text x="0" y="36">vuelta 1</text><text x="0" y="70">vuelta 2</text><text x="0" y="104">vuelta 3</text><text x="0" y="138">vuelta 4</text><text x="0" y="172">vuelta 5</text>
+              </g>
+              <g fill="#0796a3" opacity="0.75">
+                <rect x="186" y="18" width="96" height="26" rx="4"/><rect x="286" y="18" width="96" height="26" rx="4"/><rect x="386" y="18" width="96" height="26" rx="4"/><rect x="486" y="18" width="96" height="26" rx="4"/>
+                <rect x="86" y="52" width="96" height="26" rx="4"/><rect x="286" y="52" width="96" height="26" rx="4"/><rect x="386" y="52" width="96" height="26" rx="4"/><rect x="486" y="52" width="96" height="26" rx="4"/>
+                <rect x="86" y="86" width="96" height="26" rx="4"/><rect x="186" y="86" width="96" height="26" rx="4"/><rect x="386" y="86" width="96" height="26" rx="4"/><rect x="486" y="86" width="96" height="26" rx="4"/>
+                <rect x="86" y="120" width="96" height="26" rx="4"/><rect x="186" y="120" width="96" height="26" rx="4"/><rect x="286" y="120" width="96" height="26" rx="4"/><rect x="486" y="120" width="96" height="26" rx="4"/>
+                <rect x="86" y="154" width="96" height="26" rx="4"/><rect x="186" y="154" width="96" height="26" rx="4"/><rect x="286" y="154" width="96" height="26" rx="4"/><rect x="386" y="154" width="96" height="26" rx="4"/>
+              </g>
+              <g fill="#ff5700">
+                <rect x="86" y="18" width="96" height="26" rx="4"/>
+                <rect x="186" y="52" width="96" height="26" rx="4"/>
+                <rect x="286" y="86" width="96" height="26" rx="4"/>
+                <rect x="386" y="120" width="96" height="26" rx="4"/>
+                <rect x="486" y="154" width="96" height="26" rx="4"/>
+              </g>
+              <g fill="#3b4080">
+                <text x="604" y="36">F1 = 0,83</text><text x="604" y="70">F1 = 0,86</text><text x="604" y="104">F1 = 0,82</text><text x="604" y="138">F1 = 0,85</text><text x="604" y="172">F1 = 0,84</text>
+              </g>
+            </g>
+          </svg>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Estratificada</h4>
+              <p>Cada fold conserva la proporción de clases. Imprescindible con desbalanceo.</p>
+              <span class="fn-use">→ StratifiedKFold</span>
+            </div>
+            <div class="fn-card">
+              <h4>Por grupos</h4>
+              <p>Todas las muestras de un paciente, cliente o planta, en el mismo fold.</p>
+              <span class="fn-use">→ GroupKFold</span>
+            </div>
+            <div class="fn-card">
+              <h4>Temporal</h4>
+              <p>Entrena con el pasado, valida con lo que viene después. Nunca al revés.</p>
+              <span class="fn-use">→ TimeSeriesSplit</span>
+            </div>
+          </div>
+          <p class="note">
+            Resultado: <strong>0,84 ± 0,01</strong> (media ± desviación). La
+            dispersión dice cuánto fiarte. En deep learning, entrenar k veces es
+            caro: se usa sobre todo con <em>pocos datos</em>; con muchos, basta un
+            buen hold-out.
+          </p>
+        </div>
+      </section>
+
+      <!-- 06 — Ejercicio A: caza la fuga -->
+      <section class="slide slide-exercise" data-title="Caza la fuga">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio A · por parejas, 5 minutos</span>
+          <h2 class="h2 h2-ex">¿Dónde está la <em>fuga</em>?</h2>
+          <p class="lead">
+            Cada equipo presume de una métrica excelente. Para cada caso: ¿hay
+            fuga? ¿Cuál? ¿Cómo lo arreglarías?
+          </p>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>1.</strong> Aplican <code>StandardScaler</code> a todo el dataset y después separan train y test.</li>
+              <li><strong>2.</strong> 3.000 radiografías de 500 pacientes (varias por paciente). Split aleatorio por imagen.</li>
+              <li><strong>3.</strong> Predicción de ventas diarias: k-fold <em>barajado</em> sobre tres años de histórico.</li>
+            </ul>
+            <ul class="neuron-notes">
+              <li><strong>4.</strong> Prueban 20 arquitecturas, se quedan con la de mejor accuracy <em>en test</em> y publican ese número.</li>
+              <li><strong>5.</strong> Modelo de abandono de clientes con la variable «llamadas al departamento de bajas».</li>
+              <li><strong>6.</strong> Duplican los ejemplos de la clase rara (oversampling) y <em>luego</em> hacen el split.</li>
+            </ul>
+          </div>
+          <p class="note">
+            Pista: pregúntate en cada caso qué sabría el modelo <em>el día que
+            se despliegue</em>, y si algo del test ha influido en el entrenamiento.
+          </p>
+        </div>
+      </section>
+
+      <!-- 07 — Solución A -->
+      <section class="slide" data-title="Solución · fugas">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio A · soluciones</span>
+          <h2 class="h2">Las seis <em>tienen</em> fuga.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>fuga → arreglo</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">1 media y desviación del test → ajusta el scaler solo en train (Pipeline)</span>
+                <span class="pt-c">2 mismo paciente en ambos lados → split por paciente (GroupKFold)</span>
+                <span class="pt-c">3 entrena con el futuro → TimeSeriesSplit, validar siempre «hacia delante»</span>
+                <span class="pt-c">4 el test eligió el modelo → elegir con validación; test una sola vez</span>
+                <span class="pt-c">5 variable posterior a la etiqueta → quitarla (target leakage)</span>
+                <span class="pt-f">6 copias en train y test → re-muestrear solo dentro del train</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>Las <strong>1</strong> y <strong>6</strong> son la misma lección: cualquier paso que «aprende» de los datos va <em>después</em> del split.</li>
+                <li>En la <strong>2</strong>, el modelo puede aprender a reconocer al <em>paciente</em> (la máquina de rayos, una prótesis) en vez de la enfermedad.</li>
+                <li>La <strong>4</strong> es la más sutil: no hay trampa en el código, pero 20 intentos sobre el test lo convierten en validación. El número publicado es optimista.</li>
+                <li>La <strong>5</strong>: quien llama a bajas ya ha decidido irse. El modelo no predice nada, solo lee la respuesta.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 08 — DIVISOR 2 · ACCURACY Y MATRIZ -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="Accuracy y matriz">
+        <div class="divider-inner">
+          <span class="divider-num">— 02 —</span>
+          <h2 class="divider-title">El accuracy y la<br />matriz de <em>confusión</em>.</h2>
+          <p class="divider-sub">
+            La métrica más intuitiva es también la que más engaña cuando las
+            clases no están equilibradas. Cuatro casillas lo explican.
+          </p>
+        </div>
+      </section>
+
+      <!-- 09 — El clasificador tramposo -->
       <section class="slide" data-title="El 99 % que engaña">
         <div class="slide-inner">
           <span class="kicker">Un ejemplo incómodo</span>
@@ -139,7 +350,7 @@
         </div>
       </section>
 
-      <!-- 04 — Accuracy definición -->
+      <!-- 10 — Accuracy definición -->
       <section class="slide" data-title="Qué es el accuracy">
         <div class="slide-inner">
           <span class="kicker">La métrica de partida</span>
@@ -156,26 +367,15 @@
               métricas que <em>distingan tipos de error</em>.
             </p>
             <p class="note">
-              Para eso, primero hay que abrir la caja: la <strong>matriz de
-              confusión</strong>.
+              Compara siempre con la <strong>línea base</strong>: el accuracy de
+              predecir siempre la clase mayoritaria. Si no la superas con
+              holgura, tu modelo no ha aprendido nada útil.
             </p>
           </div>
         </div>
       </section>
 
-      <!-- 05 — DIVISOR 2 -->
-      <section class="slide slide-divider" data-title="La matriz de confusión">
-        <div class="divider-inner">
-          <span class="divider-num">— 02 —</span>
-          <h2 class="divider-title">La matriz de<br /><em>confusión</em>.</h2>
-          <p class="divider-sub">
-            Cuatro casillas que separan los aciertos y los errores por tipo. De
-            aquí sale <em>todo</em> lo demás.
-          </p>
-        </div>
-      </section>
-
-      <!-- 06 — Las cuatro casillas -->
+      <!-- 11 — Las cuatro casillas -->
       <section class="slide" data-title="Las cuatro casillas">
         <div class="slide-inner">
           <span class="kicker">TP · FP · FN · TN</span>
@@ -196,11 +396,13 @@
             La diagonal (<strong>TP</strong> y <strong>TN</strong>) son aciertos.
             Fuera de ella, los dos <em>tipos</em> de error: <strong>FP</strong>
             (falsa alarma) y <strong>FN</strong> (algo real que se escapa).
+            Ojo: scikit-learn pone las <em>filas</em> como clase real y la
+            clase negativa (0) primero.
           </p>
         </div>
       </section>
 
-      <!-- 07 — Los dos errores cuestan distinto -->
+      <!-- 12 — Los dos errores cuestan distinto -->
       <section class="slide" data-title="No todos los errores">
         <div class="slide-inner">
           <span class="kicker">FP vs FN</span>
@@ -221,24 +423,69 @@
         </div>
       </section>
 
-      <!-- 08 — DIVISOR 3 -->
+      <!-- 13 — Una matriz con números -->
+      <section class="slide" data-title="Matriz con números">
+        <div class="slide-inner">
+          <span class="kicker">1.000 transacciones, 50 fraudes</span>
+          <h2 class="h2">Una matriz con <em>números</em>.</h2>
+          <div class="two-col">
+            <svg viewBox="0 0 360 250" style="width:100%; height:auto" role="img" aria-label="Matriz de confusión: TP 40, FP 60, FN 10, TN 890">
+              <g font-family="Inter Tight" text-anchor="middle">
+                <text x="140" y="20" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">real: fraude</text>
+                <text x="280" y="20" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">real: legítima</text>
+                <text x="26" y="90" font-family="JetBrains Mono" font-size="11" fill="#7c80a6" transform="rotate(-90 26 90)">pred: fraude</text>
+                <text x="26" y="196" font-family="JetBrains Mono" font-size="11" fill="#7c80a6" transform="rotate(-90 26 196)">pred: legítima</text>
+                <rect x="70" y="34" width="136" height="100" rx="8" fill="#0796a3"/>
+                <text x="138" y="84" fill="#fff" font-size="30" font-weight="600">40</text><text x="138" y="110" fill="#fff" font-family="JetBrains Mono" font-size="12">TP</text>
+                <rect x="212" y="34" width="136" height="100" rx="8" fill="#f4d9cf"/>
+                <text x="280" y="84" fill="#c8410f" font-size="30" font-weight="600">60</text><text x="280" y="110" fill="#c8410f" font-family="JetBrains Mono" font-size="12">FP</text>
+                <rect x="70" y="140" width="136" height="100" rx="8" fill="#f4d9cf"/>
+                <text x="138" y="190" fill="#c8410f" font-size="30" font-weight="600">10</text><text x="138" y="216" fill="#c8410f" font-family="JetBrains Mono" font-size="12">FN</text>
+                <rect x="212" y="140" width="136" height="100" rx="8" fill="#0796a3"/>
+                <text x="280" y="190" fill="#fff" font-size="30" font-weight="600">890</text><text x="280" y="216" fill="#fff" font-family="JetBrains Mono" font-size="12">TN</text>
+              </g>
+            </svg>
+            <div>
+              <div class="prompt-box">
+                <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Las cuentas</div>
+                <div class="prompt-good"><div class="prompt-text">
+                  <span class="pt-c">accuracy = (40 + 890) / 1.000 = 0,93</span>
+                  <span class="pt-c">precision = 40 / (40 + 60) = 0,40</span>
+                  <span class="pt-c">recall = 40 / (40 + 10) = 0,80</span>
+                  <span class="pt-t">«siempre legítima» → accuracy 0,95</span>
+                  <span class="pt-f">la línea base gana en accuracy</span>
+                </div></div>
+              </div>
+              <p class="note">
+                Nuestro modelo caza 4 de cada 5 fraudes, pero 6 de cada 10
+                alarmas son falsas. Y el modelo inútil le gana en accuracy.
+                Cada número cuenta una parte de la historia.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 14 — DIVISOR 3 · PRECISION, RECALL Y COMPAÑÍA -->
+      <!-- ============================================================ -->
       <section class="slide slide-divider" data-title="Precision, recall, F1">
         <div class="divider-inner">
           <span class="divider-num">— 03 —</span>
-          <h2 class="divider-title">Precision,<br />recall y <em>F1</em>.</h2>
+          <h2 class="divider-title">Precision, recall<br />y <em>compañía</em>.</h2>
           <p class="divider-sub">
-            Dos preguntas distintas sobre la clase positiva, y una forma de
-            combinarlas en un solo número.
+            Dos preguntas distintas sobre la clase positiva, formas de
+            combinarlas en un solo número, y qué hacer con más de dos clases.
           </p>
         </div>
       </section>
 
-      <!-- 09 — Precision y recall -->
+      <!-- 15 — Precision y recall -->
       <section class="slide" data-title="Precision y recall">
         <div class="slide-inner">
           <span class="kicker">Dos preguntas distintas</span>
           <h2 class="h2"><em>Precision</em> vs. <em>recall</em>.</h2>
-          <div class="fn-grid">
+          <div class="fn-grid fn-grid-3">
             <div class="fn-card">
               <h4>Precision</h4>
               <div class="fn-formula">TP / (TP + FP)</div>
@@ -253,20 +500,21 @@
             </div>
             <div class="fn-card">
               <h4>F1</h4>
-              <div class="fn-formula">media armónica</div>
-              <p>Combina precision y recall en un número; castiga que una sea baja.</p>
+              <div class="fn-formula">2·P·R / (P + R)</div>
+              <p>Media armónica de las dos; castiga que una sea baja.</p>
               <span class="fn-use">→ un solo resumen</span>
             </div>
           </div>
           <p class="note">
             <strong>Recall</strong> importa cuando un FN es grave (medicina,
             fraude). <strong>Precision</strong> importa cuando molesta la falsa
-            alarma (spam, recomendaciones).
+            alarma (spam, recomendaciones). Fíjate: <em>ninguna de las dos usa
+            TN</em>, por eso no se dejan engañar por la clase mayoritaria.
           </p>
         </div>
       </section>
 
-      <!-- 10 — El tira y afloja -->
+      <!-- 16 — El tira y afloja -->
       <section class="slide" data-title="El tira y afloja">
         <div class="slide-inner">
           <span class="kicker">No puedes maximizar las dos</span>
@@ -279,9 +527,9 @@
                 máximo.
               </p>
               <p class="note">
-                Por eso existe <strong>F1</strong> (su media armónica): un único
-                número que solo es alto si <em>las dos</em> lo son. Útil para
-                comparar modelos de un vistazo.
+                Los dos extremos son triviales: marcar <em>todo</em> como positivo
+                da recall 1; marcar solo el caso más seguro suele dar precision 1.
+                Ninguno sirve. Lo interesante está en medio.
               </p>
             </div>
             <div class="prompt-box">
@@ -296,11 +544,179 @@
         </div>
       </section>
 
-      <!-- 11 — DIVISOR 4 -->
+      <!-- 17 — Media armónica y Fβ -->
+      <section class="slide" data-title="F1 y Fβ">
+        <div class="slide-inner">
+          <span class="kicker">Por qué armónica, y cómo inclinarla</span>
+          <h2 class="h2">F1 y su familia, <em>Fβ</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                Un modelo marca un único caso, y acierta: precision 1,0, pero
+                solo pilla 1 de 50 positivos (recall 0,02).
+              </p>
+              <div class="prompt-box">
+                <div class="prompt-head"><span class="prompt-dot"></span>Dos medias, dos veredictos</div>
+                <div class="prompt-good"><div class="prompt-text">
+                  <span class="pt-t">aritmética: (1,0 + 0,02) / 2 = 0,51</span>
+                  <span class="pt-c">armónica: 2·1,0·0,02 / 1,02 = 0,04</span>
+                  <span class="pt-f">F1 no se deja comprar con una sola métrica</span>
+                </div></div>
+              </div>
+            </div>
+            <div>
+              <div class="fn-formula" style="margin: 0 0 12px">Fβ = (1 + β²)·P·R / (β²·P + R)</div>
+              <ul class="neuron-notes">
+                <li><strong>β = 1</strong> → F1: precision y recall pesan igual.</li>
+                <li><strong>β = 2</strong> → F2: el recall pesa más. Cribados, fraude.</li>
+                <li><strong>β = 0,5</strong> → F0,5: la precision pesa más. Spam, alertas que revisa una persona.</li>
+                <li>Con el modelo de fraude (P = 0,40, R = 0,80): <strong>F2 = 0,67</strong>, F1 = 0,53, F0,5 = 0,44.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18 — Especificidad y compañía -->
+      <section class="slide" data-title="Especificidad y MCC">
+        <div class="slide-inner">
+          <span class="kicker">Mirando también a los negativos</span>
+          <h2 class="h2">Especificidad, balanced accuracy y <em>MCC</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>Especificidad</h4>
+              <div class="fn-formula">TN / (TN + FP)</div>
+              <p>El «recall» de los negativos: de los sanos, ¿a cuántos dejé tranquilos? Su complemento es el <strong>FPR</strong>.</p>
+              <span class="fn-use">→ fraude: 890 / 950 = 0,94</span>
+            </div>
+            <div class="fn-card">
+              <h4>Balanced accuracy</h4>
+              <div class="fn-formula">(recall + especif.) / 2</div>
+              <p>El accuracy promediado por clase. El modelo «siempre legítima» se queda en 0,5.</p>
+              <span class="fn-use">→ fraude: (0,80 + 0,94) / 2 = 0,87</span>
+            </div>
+            <div class="fn-card">
+              <h4>MCC</h4>
+              <div class="fn-formula">de −1 a +1</div>
+              <p>Correlación entre lo real y lo predicho. Usa las cuatro casillas y solo es alto si aciertas en ambas clases.</p>
+              <span class="fn-use">→ fraude: 0,54 · azar: 0</span>
+            </div>
+          </div>
+          <p class="note">
+            En medicina se habla de <strong>sensibilidad</strong> (= recall) y
+            <strong>especificidad</strong>. Si un artículo te da solo una de las
+            dos, sospecha: con la otra muy baja, cualquiera es fácil de subir.
+          </p>
+        </div>
+      </section>
+
+      <!-- 19 — Multiclase -->
+      <section class="slide" data-title="Más de dos clases">
+        <div class="slide-inner">
+          <span class="kicker">Multiclase</span>
+          <h2 class="h2">Más de dos clases: <em>macro</em> y <em>micro</em>.</h2>
+          <div class="two-col">
+            <svg viewBox="0 0 360 250" style="width:100%; height:auto" role="img" aria-label="Matriz de confusión 3x3: gato, perro, pájaro">
+              <g font-family="Inter Tight" text-anchor="middle">
+                <text x="225" y="16" font-family="JetBrains Mono" font-size="11" fill="#7c80a6">predicho →</text>
+                <g font-family="JetBrains Mono" font-size="11" fill="#7c80a6">
+                  <text x="135" y="38">gato</text><text x="225" y="38">perro</text><text x="315" y="38">pájaro</text>
+                  <text x="46" y="84" text-anchor="end">gato</text><text x="46" y="154" text-anchor="end">perro</text><text x="46" y="224" text-anchor="end">pájaro</text>
+                </g>
+                <g font-size="22" font-weight="600">
+                  <rect x="92" y="46" width="86" height="64" rx="6" fill="#0796a3"/><text x="135" y="86" fill="#fff">40</text>
+                  <rect x="182" y="46" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="225" y="86" fill="#c8410f">8</text>
+                  <rect x="272" y="46" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="315" y="86" fill="#c8410f">2</text>
+                  <rect x="92" y="116" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="135" y="156" fill="#c8410f">5</text>
+                  <rect x="182" y="116" width="86" height="64" rx="6" fill="#0796a3"/><text x="225" y="156" fill="#fff">30</text>
+                  <rect x="272" y="116" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="315" y="156" fill="#c8410f">5</text>
+                  <rect x="92" y="186" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="135" y="226" fill="#c8410f">0</text>
+                  <rect x="182" y="186" width="86" height="64" rx="6" fill="#f4d9cf"/><text x="225" y="226" fill="#c8410f">2</text>
+                  <rect x="272" y="186" width="86" height="64" rx="6" fill="#0796a3"/><text x="315" y="226" fill="#fff">8</text>
+                </g>
+              </g>
+            </svg>
+            <div>
+              <ul class="neuron-notes">
+                <li>Cada clase tiene su precision (columna) y su recall (fila). Pájaro: precision <strong>8/15 = 0,53</strong>, recall 8/10 = 0,80.</li>
+                <li><strong>Macro</strong>: media simple de las clases. Precision macro = (0,89 + 0,75 + 0,53) / 3 = <strong>0,72</strong>. Todas las clases cuentan igual.</li>
+                <li><strong>Micro</strong>: suma todas las casillas primero. En clasificación de una etiqueta, coincide con el accuracy: <strong>0,78</strong>.</li>
+                <li><strong>Weighted</strong>: media ponderada por nº de ejemplos. Se parece a micro.</li>
+              </ul>
+              <p class="note">
+                Si te importan las clases <em>raras</em>, mira la macro: es la que
+                delata que «pájaro» va mal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 20 — Ejercicio B: calcula a mano -->
+      <section class="slide slide-exercise" data-title="Calcula">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio B · individual, 6 minutos</span>
+          <h2 class="h2 h2-ex">Un filtro de spam, <em>a mano</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># 200 correos · positivo = spam</span><br />
+              <br />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;real:spam &nbsp;real:legít<br />
+              pred:spam &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">45</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">15</span><br />
+              pred:legít &nbsp;&nbsp;&nbsp;<span class="c-kw">5</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-kw">135</span><br />
+              <br />
+              <span class="c-com"># hay 50 spam y 150 legítimos</span>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>a) Calcula <strong>accuracy</strong>, <strong>precision</strong> y <strong>recall</strong>.</li>
+                <li>b) Calcula el <strong>F1</strong>.</li>
+                <li>c) Calcula la <strong>especificidad</strong>. ¿Qué porcentaje de correos legítimos acaba en la carpeta de spam?</li>
+                <li>d) ¿Qué accuracy tendría un filtro que <em>nunca</em> marca spam? ¿Y qué recall?</li>
+                <li>e) Para un correo de trabajo, ¿qué error es más caro? ¿Subirías o bajarías el umbral?</li>
+              </ul>
+              <p class="note">Con papel y calculadora. Primero identifica TP, FP, FN y TN.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21 — Solución B -->
+      <section class="slide" data-title="Solución · spam">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio B · soluciones</span>
+          <h2 class="h2">Las <em>cuentas</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>TP 45 · FP 15 · FN 5 · TN 135</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">a) accuracy = 180 / 200 = 0,90</span>
+                <span class="pt-c">&nbsp;&nbsp;&nbsp;precision = 45 / 60 = 0,75</span>
+                <span class="pt-c">&nbsp;&nbsp;&nbsp;recall = 45 / 50 = 0,90</span>
+                <span class="pt-c">b) F1 = 2·0,75·0,90 / 1,65 = 0,82</span>
+                <span class="pt-c">c) especificidad = 135 / 150 = 0,90 → 10 % de legítimos a spam</span>
+                <span class="pt-t">d) «nunca spam»: accuracy 0,75 · recall 0</span>
+                <span class="pt-f">e) FP más caro → subir el umbral</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>El 0,90 de accuracy suena bien, pero la línea base ya da 0,75: el modelo aporta 15 puntos, no 90.</li>
+                <li>Un 10 % de correos legítimos perdidos es inaceptable en una empresa: 1 de cada 10 facturas, ofertas o avisos.</li>
+                <li>e) Aquí el error caro es el <strong>FP</strong>. Subir el umbral sube la precision a costa de dejar pasar algo más de spam (que solo molesta). Métrica natural: <strong>F0,5</strong> o precision con un recall mínimo.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 22 — DIVISOR 4 · UMBRAL, ROC Y PR -->
+      <!-- ============================================================ -->
       <section class="slide slide-divider" data-title="Umbral y ROC">
         <div class="divider-inner">
           <span class="divider-num">— 04 —</span>
-          <h2 class="divider-title">El umbral<br />y la <em>ROC</em>.</h2>
+          <h2 class="divider-title">El umbral,<br />la ROC y la <em>PR</em>.</h2>
           <p class="divider-sub">
             El modelo da una <em>probabilidad</em>. Dónde pones el listón cambia
             todas las métricas a la vez.
@@ -308,7 +724,7 @@
         </div>
       </section>
 
-      <!-- 12 — El umbral de decisión -->
+      <!-- 23 — El umbral de decisión -->
       <section class="slide" data-title="El umbral de decisión">
         <div class="slide-inner">
           <span class="kicker">De probabilidad a decisión</span>
@@ -316,13 +732,14 @@
           <div class="two-col">
             <div>
               <p class="lead">
-                Un clasificador no dice «sí» o «no»: dice <em>«0.73 de
+                Un clasificador no dice «sí» o «no»: dice <em>«0,73 de
                 probabilidad»</em>. Tú eliges el <strong>umbral</strong> a partir
-                del cual llamas positivo (por defecto, 0.5).
+                del cual llamas positivo (por defecto, 0,5).
               </p>
               <ul class="neuron-notes">
                 <li>Umbral <em>bajo</em> → más positivos → más recall, menos precision.</li>
                 <li>Umbral <em>alto</em> → solo los muy seguros → más precision, menos recall.</li>
+                <li>El umbral se elige con <strong>validación</strong>, nunca con el test.</li>
               </ul>
             </div>
             <div class="prompt-box">
@@ -330,6 +747,7 @@
               <div class="prompt-good"><div class="prompt-text">
                 <span class="pt-c">cribado médico → umbral bajo (no perder enfermos)</span>
                 <span class="pt-c">bloquear cuentas → umbral alto (no molestar inocentes)</span>
+                <span class="pt-t">con costes: minimiza FN·coste_FN + FP·coste_FP</span>
                 <span class="pt-f">lo verás en la práctica</span>
               </div></div>
             </div>
@@ -337,7 +755,7 @@
         </div>
       </section>
 
-      <!-- 13 — La curva ROC -->
+      <!-- 24 — La curva ROC -->
       <section class="slide" data-title="La curva ROC">
         <div class="slide-inner">
           <span class="kicker">Todos los umbrales a la vez</span>
@@ -351,46 +769,263 @@
               <text x="-12" y="90" font-family="Inter Tight" font-size="11" fill="#7c80a6" text-anchor="middle" transform="rotate(-90 -12 90)">TPR (recall)</text>
             </g>
             <g font-family="Inter Tight" font-size="14" fill="#3b4080">
-              <text x="280" y="50">· Cada punto de la curva es un <tspan font-style="italic">umbral</tspan> distinto.</text>
-              <text x="280" y="82">· La diagonal es el azar (AUC = 0.5).</text>
-              <text x="280" y="114">· Cuanto más pegada a la esquina superior izquierda, mejor.</text>
-              <text x="280" y="146" fill="#c8410f" font-weight="600">· AUC = área bajo la curva (1.0 = perfecto).</text>
+              <text x="280" y="40">· Cada punto de la curva es un <tspan font-style="italic">umbral</tspan> distinto.</text>
+              <text x="280" y="70">· La diagonal es el azar (AUC = 0,5).</text>
+              <text x="280" y="100">· Cuanto más pegada a la esquina superior izquierda, mejor.</text>
+              <text x="280" y="130" fill="#c8410f" font-weight="600">· AUC = área bajo la curva (1,0 = perfecto).</text>
+              <text x="280" y="160">· AUC = probabilidad de que un positivo al azar</text>
+              <text x="292" y="180">puntúe más alto que un negativo al azar.</text>
             </g>
           </svg>
           <p class="note">
             El <strong>ROC-AUC</strong> resume la calidad del modelo a través de
-            <em>todos</em> los umbrales, en un solo número entre 0.5 (azar) y 1
-            (perfecto). No depende del umbral que acabes eligiendo.
+            <em>todos</em> los umbrales: mide si <em>ordena</em> bien los casos,
+            no si sus probabilidades son exactas. No depende del umbral que
+            acabes eligiendo.
           </p>
         </div>
       </section>
 
-      <!-- 14 — Datos y preprocesado -->
-      <section class="slide" data-title="Datos y preprocesado">
+      <!-- 25 — Curva PR -->
+      <section class="slide" data-title="Curva precision-recall">
         <div class="slide-inner">
-          <span class="kicker">Antes de medir: los datos</span>
-          <h2 class="h2">Buenos datos, <em>bien</em> tratados.</h2>
-          <div class="flow">
-            <div class="flow-card">
-              <h3>Preprocesado</h3>
-              <p>Normalizar / estandarizar las variables para que estén en escalas comparables.</p>
-              <ul class="neuron-notes"><li>Ayuda al entrenamiento (Tema 2 · Entrenamiento).</li><li>Ajusta la escala solo con el <em>train</em>.</li></ul>
+          <span class="kicker">Cuando el positivo es muy raro</span>
+          <h2 class="h2">La ROC puede ser <em>optimista</em>.</h2>
+          <div class="two-col">
+            <div>
+              <p class="lead">
+                100.000 transacciones, 1 % de fraude. El modelo detecta el 90 %
+                de los fraudes con solo un 5 % de falsas alarmas. En la ROC, el
+                punto (0,05 · 0,90) luce estupendo.
+              </p>
+              <div class="prompt-box">
+                <div class="prompt-head"><span class="prompt-dot"></span>Hagamos la cuenta</div>
+                <div class="prompt-good"><div class="prompt-text">
+                  <span class="pt-c">1.000 fraudes × 0,90 = 900 TP</span>
+                  <span class="pt-c">99.000 legítimas × 0,05 = 4.950 FP</span>
+                  <span class="pt-f">precision = 900 / 5.850 = 0,15</span>
+                </div></div>
+              </div>
             </div>
-            <div class="flow-card">
-              <h3>Desbalanceo</h3>
-              <p>Cuando una clase es rara, cuida las métricas y la partición.</p>
-              <ul class="neuron-notes"><li>Usa precision/recall/F1, no solo accuracy.</li><li>Estratifica los splits y valora reponderar.</li></ul>
+            <div>
+              <ul class="neuron-notes">
+                <li>El 5 % de FPR se calcula sobre una montaña de negativos: <em>en números absolutos</em> son casi 5.000 alarmas falsas.</li>
+                <li>La <strong>curva precision-recall</strong> enfrenta precision y recall para cada umbral. Aquí sí se ve el problema.</li>
+                <li>Su línea base no es 0,5 sino la <strong>prevalencia</strong> (0,01). Su área se llama <strong>PR-AUC</strong> o <em>average precision</em>.</li>
+                <li>Regla práctica: con desbalanceo fuerte y la clase positiva como protagonista, reporta <strong>PR-AUC</strong> además de ROC-AUC.</li>
+              </ul>
             </div>
           </div>
-          <p class="note">Con <strong>validación cruzada</strong> (k-fold) obtienes una estimación más estable que con un único split.</p>
         </div>
       </section>
 
-      <!-- 15 — Cómo elegir (síntesis) -->
-      <section class="slide slide-exercise" data-title="Cómo elegir">
+      <!-- 26 — Ejercicio C: diez puntuaciones -->
+      <section class="slide slide-exercise" data-title="Mueve el umbral">
         <div class="slide-inner">
-          <span class="kicker kicker-ex">La decisión práctica</span>
-          <h2 class="h2 h2-ex">¿Qué métrica <em>miro</em>?</h2>
+          <span class="kicker kicker-ex">Ejercicio C · por parejas, 8 minutos</span>
+          <h2 class="h2 h2-ex">Diez puntuaciones, tres <em>umbrales</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># puntuación del modelo · clase real</span><br />
+              0,95 &nbsp;<span class="c-kw">fraude</span><br />
+              0,80 &nbsp;<span class="c-kw">fraude</span><br />
+              0,70 &nbsp;legítima<br />
+              0,65 &nbsp;<span class="c-kw">fraude</span><br />
+              0,45 &nbsp;legítima<br />
+              0,40 &nbsp;<span class="c-kw">fraude</span><br />
+              0,30 &nbsp;legítima<br />
+              0,20 &nbsp;legítima<br />
+              0,10 &nbsp;legítima<br />
+              0,05 &nbsp;legítima<br />
+              <span class="c-com"># positivo si puntuación ≥ umbral</span>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li>a) Con umbral <strong>0,5</strong>: TP, FP, FN, TN, precision y recall.</li>
+                <li>b) Repite con umbral <strong>0,3</strong> y con umbral <strong>0,75</strong>.</li>
+                <li>c) Sitúa los tres puntos (FPR, TPR) en una curva ROC.</li>
+                <li>d) Calcula el <strong>AUC</strong> contando parejas: de las 4 × 6 parejas (fraude, legítima), ¿en cuántas puntúa más el fraude?</li>
+                <li>e) Si un fraude no detectado cuesta <strong>100 €</strong> y una falsa alarma <strong>5 €</strong>, ¿qué umbral de los tres eliges?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 27 — Solución C -->
+      <section class="slide" data-title="Solución · umbral">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio C · soluciones</span>
+          <h2 class="h2">Tres umbrales, una <em>curva</em>.</h2>
+          <div class="two-col">
+            <div>
+              <div class="prompt-box">
+                <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>umbral · TP FP FN TN · P · R · coste</div>
+                <div class="prompt-good"><div class="prompt-text">
+                  <span class="pt-c">0,75 · 2 0 2 6 · P 1,00 · R 0,50 · 200 €</span>
+                  <span class="pt-c">0,50 · 3 1 1 5 · P 0,75 · R 0,75 · 105 €</span>
+                  <span class="pt-c">0,30 · 4 3 0 3 · P 0,57 · R 1,00 · 15 €</span>
+                  <span class="pt-t">d) AUC = (6 + 6 + 5 + 4) / 24 = 21 / 24 = 0,875</span>
+                  <span class="pt-f">e) umbral 0,3: el FN cuesta 20 veces más</span>
+                </div></div>
+              </div>
+              <p class="note">
+                d) El fraude de 0,65 pierde contra la legítima de 0,70; el de 0,40,
+                contra 0,70 y 0,45. Tres parejas mal ordenadas de 24.
+              </p>
+            </div>
+            <svg viewBox="0 0 300 250" style="width:100%; height:auto" role="img" aria-label="Curva ROC escalonada de las diez puntuaciones, AUC 0,875">
+              <g transform="translate(50,16)">
+                <rect x="0" y="0" width="200" height="200" fill="#fbfaf6" stroke="#e2ded0"/>
+                <line x1="0" y1="200" x2="200" y2="0" stroke="#c9c3b3" stroke-dasharray="4 4"/>
+                <path d="M0 200 L0 100 L33.3 100 L33.3 50 L66.7 50 L66.7 0 L200 0 L200 200 Z" fill="#ff5700" opacity="0.12"/>
+                <path d="M0 200 L0 100 L33.3 100 L33.3 50 L66.7 50 L66.7 0 L200 0" fill="none" stroke="#ff5700" stroke-width="2.5"/>
+                <g fill="#3b4080">
+                  <circle cx="0" cy="100" r="5"/><circle cx="33.3" cy="50" r="5"/><circle cx="100" cy="0" r="5"/>
+                </g>
+                <g font-family="JetBrains Mono" font-size="11" fill="#3b4080">
+                  <text x="6" y="118">0,75</text><text x="38" y="68">0,50</text><text x="104" y="16">0,30</text>
+                </g>
+                <text x="100" y="226" font-family="Inter Tight" font-size="11" fill="#7c80a6" text-anchor="middle">FPR</text>
+                <text x="-14" y="100" font-family="Inter Tight" font-size="11" fill="#7c80a6" text-anchor="middle" transform="rotate(-90 -14 100)">TPR</text>
+                <text x="140" y="150" font-family="Inter Tight" font-size="14" font-weight="600" fill="#c8410f" text-anchor="middle">AUC 0,875</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 28 — DIVISOR 5 · DE LA MÉTRICA A LA DECISIÓN -->
+      <!-- ============================================================ -->
+      <section class="slide slide-divider" data-title="De la métrica a la decisión">
+        <div class="divider-inner">
+          <span class="divider-num">— 05 —</span>
+          <h2 class="divider-title">De la métrica<br />a la <em>decisión</em>.</h2>
+          <p class="divider-sub">
+            Métricas cuando la salida es un número, qué hacer con clases
+            desbalanceadas y cómo se escribe todo esto en código.
+          </p>
+        </div>
+      </section>
+
+      <!-- 29 — Métricas de regresión -->
+      <section class="slide" data-title="Métricas de regresión">
+        <div class="slide-inner">
+          <span class="kicker">Cuando predices un número</span>
+          <h2 class="h2">MAE, RMSE y <em>R²</em>.</h2>
+          <div class="fn-grid fn-grid-3">
+            <div class="fn-card">
+              <h4>MAE</h4>
+              <div class="fn-formula">media |y − ŷ|</div>
+              <p>Error típico, en las unidades del problema (€, grados). Fácil de explicar.</p>
+              <span class="fn-use">→ robusta a valores extremos</span>
+            </div>
+            <div class="fn-card">
+              <h4>RMSE</h4>
+              <div class="fn-formula">√ media (y − ŷ)²</div>
+              <p>También en unidades, pero eleva al cuadrado: un error grande pesa mucho.</p>
+              <span class="fn-use">→ castiga los errores gordos</span>
+            </div>
+            <div class="fn-card">
+              <h4>R²</h4>
+              <div class="fn-formula">1 − SSE / SST</div>
+              <p>Qué fracción de la variabilidad explicas. 0 = predecir siempre la media; 1 = perfecto.</p>
+              <span class="fn-use">→ puede ser negativo</span>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot"></span>Dos modelos, cinco errores cada uno</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">A: [1, −1, 2, −2, 10] → MAE 3,2 · RMSE 4,7</span>
+                <span class="pt-c">B: [3, −3, 3, −3, 3] &nbsp;→ MAE 3,0 · RMSE 3,0</span>
+                <span class="pt-f">casi igual en MAE; el 10 dispara el RMSE de A</span>
+              </div></div>
+            </div>
+            <p class="note">
+              ¿Qué prefieres: un modelo que casi siempre acierta y a veces falla
+              por mucho (A), o uno que siempre falla un poco (B)? La métrica
+              debe responder a esa pregunta de negocio. El MSE es además la
+              <em>pérdida</em> habitual al entrenar.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 30 — Desbalanceo: qué hacer -->
+      <section class="slide" data-title="Desbalanceo">
+        <div class="slide-inner">
+          <span class="kicker">Cuando una clase es rara</span>
+          <h2 class="h2">Cinco palancas contra el <em>desbalanceo</em>.</h2>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>1. Mide bien.</strong> Precision, recall, F1/Fβ, PR-AUC, balanced accuracy. Nunca solo accuracy.</li>
+              <li><strong>2. Estratifica</strong> los splits y los folds para que la clase rara aparezca en todos.</li>
+              <li><strong>3. Repondera la pérdida.</strong> <code>class_weight</code>: cada error en la clase rara cuenta más al entrenar.</li>
+            </ul>
+            <ul class="neuron-notes">
+              <li><strong>4. Re-muestrea</strong> (oversampling, undersampling) <em>solo dentro del train</em>. Validación y test, siempre con la proporción real.</li>
+              <li><strong>5. Mueve el umbral.</strong> A menudo es la palanca más barata: el modelo ya ordena bien, solo hay que poner el listón en otro sitio.</li>
+            </ul>
+          </div>
+          <p class="note">
+            Un detalle: reponderar o re-muestrear cambia las <em>probabilidades</em>
+            que da el modelo (ya no son la frecuencia real). Para ordenar casos no
+            importa; si necesitas probabilidades fiables, hay que
+            <strong>recalibrar</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- 31 — En código -->
+      <section class="slide" data-title="En código">
+        <div class="slide-inner">
+          <span class="kicker">Keras y scikit-learn</span>
+          <h2 class="h2">Todo esto, en <em>código</em>.</h2>
+          <div class="two-col">
+            <div class="code-block">
+              <span class="c-com"># Keras: métricas durante el entrenamiento</span><br />
+              model.compile(<br />
+              &nbsp;&nbsp;optimizer=<span class="c-str">"adam"</span>,<br />
+              &nbsp;&nbsp;loss=<span class="c-str">"binary_crossentropy"</span>,<br />
+              &nbsp;&nbsp;metrics=[<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;keras.metrics.Precision(),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;keras.metrics.Recall(),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;keras.metrics.AUC(),<br />
+              &nbsp;&nbsp;&nbsp;&nbsp;keras.metrics.AUC(curve=<span class="c-str">"PR"</span>)])<br />
+              model.fit(X_tr, y_tr,<br />
+              &nbsp;&nbsp;validation_data=(X_val, y_val),<br />
+              &nbsp;&nbsp;class_weight={<span class="c-kw">0</span>: <span class="c-kw">1</span>, <span class="c-kw">1</span>: <span class="c-kw">20</span>})
+            </div>
+            <div class="code-block">
+              <span class="c-com"># scikit-learn: CV sin fugas</span><br />
+              pipe = make_pipeline(<br />
+              &nbsp;&nbsp;StandardScaler(), LogisticRegression())<br />
+              cv = StratifiedKFold(<span class="c-kw">5</span>, shuffle=<span class="c-kw">True</span>)<br />
+              cross_val_score(pipe, X, y, cv=cv,<br />
+              &nbsp;&nbsp;scoring=<span class="c-str">"average_precision"</span>)<br />
+              <br />
+              <span class="c-com"># informe final, una vez, en test</span><br />
+              p = model.predict(X_te).ravel()<br />
+              print(classification_report(<br />
+              &nbsp;&nbsp;y_te, p &gt;= <span class="c-kw">0.3</span>))<br />
+              roc_auc_score(y_te, p)
+            </div>
+          </div>
+          <p class="note">
+            El <code>Pipeline</code> vuelve a ajustar el escalado dentro de cada
+            fold: imposible filtrar el test. Y el umbral (0.3) viene de
+            validación, no de mirar el test.
+          </p>
+        </div>
+      </section>
+
+      <!-- 32 — Cómo elegir (síntesis) -->
+      <section class="slide" data-title="Cómo elegir">
+        <div class="slide-inner">
+          <span class="kicker">La decisión práctica</span>
+          <h2 class="h2">¿Qué métrica <em>miro</em>?</h2>
           <div class="two-col">
             <div>
               <p class="lead">
@@ -399,32 +1034,91 @@
               </p>
               <ul class="neuron-notes">
                 <li>¿Clases equilibradas y errores simétricos? → accuracy vale.</li>
-                <li>¿FN grave (medicina, fraude)? → mira el <strong>recall</strong>.</li>
-                <li>¿FP molesto (spam)? → mira la <strong>precision</strong>.</li>
-                <li>¿Comparar modelos sin fijar umbral? → <strong>ROC-AUC</strong>.</li>
+                <li>¿FN grave (medicina, fraude)? → <strong>recall</strong>, F2.</li>
+                <li>¿FP molesto (spam)? → <strong>precision</strong>, F0,5.</li>
+                <li>¿Comparar modelos sin fijar umbral? → <strong>ROC-AUC</strong>; con positivo muy raro, <strong>PR-AUC</strong>.</li>
+                <li>¿Salida numérica? → <strong>MAE</strong> o <strong>RMSE</strong>, según cuánto duelan los errores grandes.</li>
               </ul>
             </div>
             <div class="prompt-box">
-              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>En scikit-learn</div>
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>Y antes de todo</div>
               <div class="prompt-good"><div class="prompt-text">
-                <span class="pt-c">from sklearn.metrics import \</span>
-                <span class="pt-c">&nbsp;&nbsp;classification_report, roc_auc_score</span>
-                <span class="pt-f">te da precision, recall y F1 de golpe</span>
+                <span class="pt-c">1. split sin fugas (grupos, tiempo)</span>
+                <span class="pt-c">2. una línea base con la que comparar</span>
+                <span class="pt-c">3. métrica elegida antes de entrenar</span>
+                <span class="pt-f">4. test: una vez, al final</span>
               </div></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- 16 — Ideas -->
+      <!-- 33 — Ejercicio D: elige la métrica -->
+      <section class="slide slide-exercise" data-title="Elige la métrica">
+        <div class="slide-inner">
+          <span class="kicker kicker-ex">Ejercicio D · en grupos, 8 minutos</span>
+          <h2 class="h2 h2-ex">Elige la métrica y la <em>validación</em>.</h2>
+          <p class="lead">
+            Para cada proyecto decide: ¿qué <strong>métrica</strong> principal?
+            ¿Cómo <strong>partirías</strong> los datos? ¿Umbral alto o bajo?
+          </p>
+          <div class="two-col">
+            <ul class="neuron-notes">
+              <li><strong>1.</strong> Fraude con tarjeta: 0,2 % de fraudes; un analista revisa cada alerta. Dos años de histórico.</li>
+              <li><strong>2.</strong> Filtro de spam para el correo de un bufete de abogados.</li>
+              <li><strong>3.</strong> Precio de pisos en Madrid; unos pocos áticos de lujo cuestan diez veces la media.</li>
+            </ul>
+            <ul class="neuron-notes">
+              <li><strong>4.</strong> Tres enfermedades de una hoja, clases equilibradas: 600 fotos de 60 plantas.</li>
+              <li><strong>5.</strong> Primera fase de un cribado de cáncer; los positivos pasan a una prueba confirmatoria.</li>
+              <li><strong>6.</strong> Dos equipos presentan sus modelos y aún no se sabe qué umbral usará el cliente.</li>
+            </ul>
+          </div>
+          <p class="note">
+            No hay una única respuesta correcta: se valora la <em>justificación</em>.
+            Cada grupo defiende un caso en voz alta.
+          </p>
+        </div>
+      </section>
+
+      <!-- 34 — Solución D -->
+      <section class="slide" data-title="Solución · elige">
+        <div class="slide-inner">
+          <span class="kicker">Ejercicio D · una propuesta</span>
+          <h2 class="h2">Una respuesta <em>razonable</em>.</h2>
+          <div class="two-col">
+            <div class="prompt-box">
+              <div class="prompt-head"><span class="prompt-dot prompt-dot-good"></span>caso · métrica · validación · umbral</div>
+              <div class="prompt-good"><div class="prompt-text">
+                <span class="pt-c">1 fraude · PR-AUC; recall con precision mínima · temporal · bajo</span>
+                <span class="pt-c">2 spam · precision, F0,5 · estratificada · alto</span>
+                <span class="pt-c">3 pisos · MAE (o RMSE si el lujo importa) · k-fold · —</span>
+                <span class="pt-c">4 hojas · accuracy / F1 macro · por planta (GroupKFold) · —</span>
+                <span class="pt-c">5 cribado · recall, F2 · estratificada (por paciente) · bajo</span>
+                <span class="pt-f">6 comparar · ROC-AUC (PR-AUC si es raro) · mismo test · ninguno</span>
+              </div></div>
+            </div>
+            <div>
+              <ul class="neuron-notes">
+                <li><strong>1</strong>: los fraudes cambian con el tiempo, así que se valida con los meses más recientes. La capacidad del analista fija cuántas alertas caben: eso decide la precision mínima.</li>
+                <li><strong>3</strong>: si un error de 300.000 € en un ático es grave para el negocio, RMSE; si no, MAE o incluso error relativo.</li>
+                <li><strong>4</strong>: con 10 fotos por planta, un split por imagen mediría si el modelo reconoce <em>la planta</em>, no la enfermedad.</li>
+                <li><strong>5</strong>: un FP solo cuesta una prueba más; un FN, un cáncer sin tratar.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 35 — Ideas -->
       <section class="slide" data-title="Ideas">
         <div class="slide-inner">
-          <span class="kicker">Resumen del Tema 5 · Validación y métricas</span>
+          <span class="kicker">Resumen del Tema 5.1 · Validación y métricas</span>
           <h2 class="h2">Ideas para <em>llevarte</em>.</h2>
           <div class="close-grid">
-            <div class="close-item"><span class="close-num">01 · CUIDADO</span><h3>El accuracy engaña</h3><p>Con clases desbalanceadas, un accuracy alto puede esconder un modelo inútil. Mira más allá.</p></div>
-            <div class="close-item"><span class="close-num">02 · LA BASE</span><h3>Matriz de confusión</h3><p>TP, FP, FN, TN. De ahí salen precision (¿me fío?) y recall (¿se me escapa?), y su equilibrio F1.</p></div>
-            <div class="close-item"><span class="close-num">03 · LA PALANCA</span><h3>Umbral y ROC-AUC</h3><p>El umbral reparte precision y recall; la ROC-AUC resume la calidad a través de todos los umbrales.</p></div>
+            <div class="close-item"><span class="close-num">01 · DÓNDE</span><h3>Valida sin fugas</h3><p>Train para ajustar, validación para decidir, test una vez. Separa antes de preprocesar; respeta grupos y tiempo.</p></div>
+            <div class="close-item"><span class="close-num">02 · QUÉ</span><h3>Más allá del accuracy</h3><p>La matriz de confusión da precision (¿me fío?) y recall (¿se me escapa?). F1, Fβ y macro según qué error duela más.</p></div>
+            <div class="close-item"><span class="close-num">03 · CÓMO DECIDIR</span><h3>Umbral, ROC y PR</h3><p>El umbral reparte precision y recall; ROC-AUC y PR-AUC resumen todos los umbrales. Con positivos raros, mira la PR.</p></div>
           </div>
           <div class="close-next">
             <span>Práctica y laboratorio</span>
@@ -433,15 +1127,16 @@
         </div>
       </section>
 
-      <!-- 17 — Cierre -->
+      <!-- 36 — Cierre -->
       <section class="slide slide-close" data-title="Cierre">
         <div class="slide-inner">
-          <span class="kicker">Cierre del Tema 5 · Validación y métricas</span>
+          <span class="kicker">Cierre del Tema 5.1 · Validación y métricas</span>
           <h2 class="h2-close">Gracias.<br />¿<em>Preguntas</em>?</h2>
-          <p class="lead">Dos referencias para profundizar:</p>
+          <p class="lead">Tres referencias para profundizar:</p>
           <ul class="proj-list">
-            <li><strong>scikit-learn</strong> — <em>guía de "Model evaluation"</em> (métricas y validación cruzada).</li>
+            <li><strong>scikit-learn</strong> — <em>guía de "Model evaluation"</em> y <em>"Cross-validation"</em> (métricas y validación cruzada).</li>
             <li><strong>Fawcett, T.</strong> — <em>"An introduction to ROC analysis"</em> (2006).</li>
+            <li><strong>Saito, T. y Rehmsmeier, M.</strong> — <em>"The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets"</em> (2015).</li>
           </ul>
           <div class="close-cta-grid">
             <a class="close-cta" href="./practica-t9.html">
@@ -454,10 +1149,10 @@
               <span class="close-cta-title">Laboratorio · evaluar de verdad <span class="close-cta-arrow">→</span></span>
               <span class="close-cta-note">Métricas, matriz y ROC de un clasificador en Python.</span>
             </a>
-            <a class="close-cta" href="./index.html">
-              <span class="close-cta-eyebrow">Fin del curso</span>
-              <span class="close-cta-title">Ver todos los temas <span class="close-cta-arrow">→</span></span>
-              <span class="close-cta-note">Has recorrido los cinco temas. ¡Enhorabuena!</span>
+            <a class="close-cta" href="./index.html#tema-5">
+              <span class="close-cta-eyebrow">Siguiente · Tema 5.2</span>
+              <span class="close-cta-title">Librerías y casos aplicados <span class="close-cta-arrow">→</span></span>
+              <span class="close-cta-note">Los laboratorios de cada tema, de punta a punta.</span>
             </a>
           </div>
         </div>
