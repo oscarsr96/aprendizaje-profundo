@@ -21,7 +21,9 @@
   .meta { display: flex; gap: 8mm; font-size: 9pt; color: var(--mute); margin-top: 3mm; }
   .meta b { color: var(--ink); font-weight: 600; }
   .ex { break-inside: avoid; margin: 0 0 5mm; padding: 3.5mm 4.5mm; border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--paper); }
-  .sol { border-left-color: var(--teal); }
+  .sol { border-left-color: var(--teal); break-inside: auto; }
+  .sol .calc, .sol table, .sol .row, .sol p { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
   .ex p { margin: 1mm 0; }
   ol.q { margin: 1.5mm 0 0; padding-left: 6mm; }
   ol.q li { margin: .8mm 0; }
@@ -278,20 +280,39 @@
 <div class="page-break cover">
   <span class="kicker">Tema 4 · Ejercicios a mano</span>
   <h1><em>Soluciones</em>.</h1>
-  <p>Resueltas paso a paso. Los decimales están redondeados a dos o tres cifras; pequeñas diferencias en la última cifra son normales.</p>
+  <p>
+    Resueltas paso a paso, con el razonamiento de cada cuenta. Cada ejercicio
+    termina con la <b>idea clave</b> que conviene llevarse. Los decimales están
+    redondeados a dos o tres cifras; pequeñas diferencias en la última cifra
+    son normales.
+  </p>
 </div>
 
 <h2>4.1 · Redes <em>convolucionales</em></h2>
 
 <div class="ex sol">
   <h3><span class="n">E1</span>Convolución, ReLU y pooling</h3>
-  <p>a) Salida <span class="ans">(6 − 3)/1 + 1 = 4 → 4×4</span>. Cada casilla es la suma de la columna derecha de la ventana menos la columna izquierda. Por ejemplo, arriba a la izquierda: <span class="mono">(0+0+0) − (0+0+0) = 0</span>; la siguiente: <span class="mono">(5+5+5) − (0+0+0) = 15</span>.</p>
+  <p><b>a) Tamaño.</b> Con W = 6, K = 3, P = 0 y S = 1: <span class="mono">(6 − 3 + 0)/1 + 1 =</span> <span class="ans">4 → salida 4×4</span>. El filtro solo cabe en 4 posiciones por fila y 4 por columna.</p>
+  <p><b>Cómo calcular cada casilla.</b> Se coloca el filtro sobre una ventana 3×3, se multiplica elemento a elemento y se suma todo. Como el filtro tiene −1 en la columna izquierda, 0 en la central y +1 en la derecha, cada casilla es <em>(suma de la columna derecha de la ventana) − (suma de la columna izquierda)</em>. Un atajo: para cada banda de 3 filas, suma cada columna de la imagen una sola vez.</p>
+  <table class="t">
+    <tr><th>Filas de la ventana</th><th>Suma de cada columna (col 1 … col 6)</th><th>Fila de salida = col(j+2) − col(j)</th></tr>
+    <tr><td>1–3</td><td class="mono">0, 0, 0, 15, 15, 15</td><td class="mono">0−0, 15−0, 15−0, 15−15 → 0, 15, 15, 0</td></tr>
+    <tr><td>2–4</td><td class="mono">0, 0, 5, 15, 15, 15</td><td class="mono">5−0, 15−0, 15−5, 15−15 → 5, 15, 10, 0</td></tr>
+    <tr><td>3–5</td><td class="mono">0, 0, 10, 15, 15, 15</td><td class="mono">10−0, 15−0, 15−10, 15−15 → 10, 15, 5, 0</td></tr>
+    <tr><td>4–6</td><td class="mono">0, 0, 15, 15, 15, 15</td><td class="mono">15−0, 15−0, 15−15, 15−15 → 15, 15, 0, 0</td></tr>
+  </table>
+  <p>Ejemplo completo de la casilla (1, 2), ventana de las filas 1–3 y columnas 2–4: <span class="mono">(−1)·(0+0+0) + 0·(0+0+0) + 1·(5+5+5) = 15</span>.</p>
   <div class="row">
     <div><div class="lbl">a) X ∗ K</div><table class="m">
       <tr><td>0</td><td>15</td><td>15</td><td>0</td></tr>
       <tr><td>5</td><td>15</td><td>10</td><td>0</td></tr>
       <tr><td>10</td><td>15</td><td>5</td><td>0</td></tr>
       <tr><td>15</td><td>15</td><td>0</td><td>0</td></tr></table></div>
+    <div><div class="lbl">X ∗ K − 10</div><table class="m">
+      <tr><td>−10</td><td>5</td><td>5</td><td>−10</td></tr>
+      <tr><td>−5</td><td>5</td><td>0</td><td>−10</td></tr>
+      <tr><td>0</td><td>5</td><td>−5</td><td>−10</td></tr>
+      <tr><td>5</td><td>5</td><td>−10</td><td>−10</td></tr></table></div>
     <div><div class="lbl">b) ReLU(X ∗ K − 10)</div><table class="m">
       <tr><td>0</td><td class="hl">5</td><td class="hl">5</td><td>0</td></tr>
       <tr><td>0</td><td class="hl">5</td><td>0</td><td>0</td></tr>
@@ -301,21 +322,44 @@
       <tr><td class="hl">5</td><td class="hl">5</td></tr>
       <tr><td class="hl">5</td><td>0</td></tr></table></div>
   </div>
-  <p>c) Queda <span class="ans">2×2</span>: cada bloque 2×2 se resume en su máximo.</p>
-  <p>d) Es un detector de <span class="ans">bordes verticales de oscuro a claro</span> (izquierda negativa, derecha positiva). Se activa donde la imagen pasa de 0 a 5 al ir hacia la derecha: la frontera escalonada entre las columnas 2–3 (abajo) y 3–4 (arriba). El sesgo −10 y la ReLU eliminan las respuestas débiles (los 5 y los 10 parciales).</p>
+  <p><b>b) Sesgo y ReLU.</b> Se resta 10 a cada casilla y la ReLU, <span class="mono">max(0, z)</span>, convierte en 0 todo lo negativo. Solo sobreviven las respuestas que superaban 10.</p>
+  <p><b>c) Pooling.</b> La salida 4×4 se divide en cuatro bloques 2×2 que no se solapan (stride 2), y de cada uno se queda el máximo: arriba-izquierda <span class="mono">max(0, 5, 0, 5) = 5</span>; arriba-derecha <span class="mono">max(5, 0, 0, 0) = 5</span>; abajo-izquierda <span class="mono">max(0, 5, 5, 5) = 5</span>; abajo-derecha <span class="mono">max(0, 0, 0, 0) = 0</span>. Queda <span class="ans">2×2</span>; con <span class="mono">(4 − 2)/2 + 1 = 2</span> sale lo mismo.</p>
+  <p><b>d) Qué detecta.</b> Un <span class="ans">borde vertical de oscuro a claro</span>: la respuesta es grande cuando a la derecha hay más intensidad que a la izquierda. El máximo (15) aparece donde la ventana tiene oscuro a un lado y claro al otro: en la frontera entre las columnas 3–4 de la imagen (arriba) y 2–3 (abajo), que forma un escalón. En las zonas uniformes (todo 0 o todo 5) la respuesta es 0.</p>
+  <p class="note">Idea clave: una convolución es un «detector de patrones» que se desliza por la imagen. El sesgo fija el umbral a partir del cual la neurona se activa, y el pooling conserva «aquí hubo un borde» perdiendo la posición exacta.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E2</span>Tamaños de salida</h3>
-  <div class="calc">a) (28 − 5 + 0)/1 + 1 = <span class="ans">24</span>
-b) (28 − 3 + 2)/1 + 1 = <span class="ans">28</span>  → padding="same": conserva el tamaño
-c) ⌊(224 − 7 + 6)/2⌋ + 1 = ⌊111,5⌋ + 1 = <span class="ans">112</span>
-d) ⌊(13 − 3 + 0)/2⌋ + 1 = 5 + 1 = <span class="ans">6</span>
-e) ⌊(15 − 2)/2⌋ + 1 = 6 + 1 = <span class="ans">7</span>  → la última fila/columna impar se descarta</div>
+  <p>La fórmula cuenta cuántas veces cabe el filtro: al ancho W se le suman los 2P píxeles de padding, se resta el ancho del filtro K (la primera posición), se divide por el salto S y se suma 1 por la posición inicial. Si la división no es exacta, se redondea hacia abajo: las posiciones que no caben enteras se descartan.</p>
+  <div class="calc">a) (28 − 5 + 0)/1 + 1 = 23 + 1 = <span class="ans">24</span>
+   → sin padding, cada convolución K×K come K − 1 = 4 píxeles por dimensión.
+
+b) (28 − 3 + 2)/1 + 1 = 27 + 1 = <span class="ans">28</span>
+   → con P = (K − 1)/2 = 1 el tamaño se conserva: es padding=<span class="ans">"same"</span>.
+     Sin padding es padding="valid".
+
+c) ⌊(224 − 7 + 6)/2⌋ + 1 = ⌊223/2⌋ + 1 = ⌊111,5⌋ + 1 = 111 + 1 = <span class="ans">112</span>
+   → stride 2 reduce el tamaño a la mitad: 224 → 112.
+
+d) ⌊(13 − 3 + 0)/2⌋ + 1 = ⌊10/2⌋ + 1 = 5 + 1 = <span class="ans">6</span>
+   → posiciones de inicio: columnas 1, 3, 5, 7, 9, 11 (la 11 cubre 11–13).
+
+e) ⌊(15 − 2 + 0)/2⌋ + 1 = ⌊6,5⌋ + 1 = 6 + 1 = <span class="ans">7</span>
+   → los bloques cubren 1–2, 3–4, …, 13–14; la fila y columna 15 se pierden.</div>
+  <p class="note">Idea clave: «same» conserva el tamaño, «valid» lo reduce en K − 1, y stride 2 o pooling 2×2 lo dividen por 2. Con eso se sigue cualquier CNN de memoria.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E3</span>Siguiendo las dimensiones de una CNN</h3>
+  <p><b>Capa a capa.</b></p>
+  <ol class="q">
+    <li><b>Conv2D(16, 3×3, same)</b>: «same» conserva 32×32 y hay un mapa por filtro, así que la salida es 32×32×16. Cada filtro mira 3×3 píxeles en los 3 canales: 3·3·3 = 27 pesos + 1 sesgo = 28. Con 16 filtros: 28·16 = <b>448</b>.</li>
+    <li><b>MaxPooling2D(2×2)</b>: divide alto y ancho por 2 y deja los canales igual: 16×16×16. No tiene pesos: <b>0</b> parámetros.</li>
+    <li><b>Conv2D(32, 3×3, valid)</b>: «valid» resta 2: 16 − 3 + 1 = 14, salida 14×14×32. Ahora la entrada tiene 16 canales, así que cada filtro tiene 3·3·16 = 144 pesos + 1 = 145. Con 32 filtros: 145·32 = <b>4.640</b>.</li>
+    <li><b>MaxPooling2D(2×2)</b>: 14/2 = 7, salida 7×7×32, <b>0</b> parámetros.</li>
+    <li><b>Flatten</b>: pone todo en fila: 7·7·32 = 1.568 valores, <b>0</b> parámetros.</li>
+    <li><b>Dense(10)</b>: cada una de las 10 neuronas tiene un peso por entrada y un sesgo: (1.568 + 1)·10 = <b>15.690</b>.</li>
+  </ol>
   <table class="t">
     <tr><th>Capa</th><th>Salida</th><th>Parámetros</th><th>Cuenta</th></tr>
     <tr><td>Conv2D 16, same</td><td class="num">32×32×16</td><td class="num">448</td><td class="mono">(3·3·3 + 1)·16</td></tr>
@@ -325,128 +369,206 @@ e) ⌊(15 − 2)/2⌋ + 1 = 6 + 1 = <span class="ans">7</span>  → la última f
     <tr><td>Flatten</td><td class="num">1.568</td><td class="num">0</td><td class="mono">7·7·32</td></tr>
     <tr><td>Dense 10</td><td class="num">10</td><td class="num">15.690</td><td class="mono">(1.568 + 1)·10</td></tr>
   </table>
-  <p>a) Total <span class="ans">20.778</span> parámetros. La capa <span class="ans">Dense final</span> concentra el 75 %: las convoluciones son baratas porque comparten pesos; lo caro es conectar todo con todo.</p>
-  <p>b) <span class="mono">Dense(16)</span> sobre 32·32·3 = 3.072 entradas: <span class="mono">(3.072 + 1)·16</span> = <span class="ans">49.168</span> parámetros, más del doble que toda la CNN, y sin aprovechar que los píxeles cercanos están relacionados.</p>
+  <p><b>a)</b> Total <span class="mono">448 + 4.640 + 15.690 =</span> <span class="ans">20.778</span>. La <span class="ans">Dense final</span> se lleva el <span class="mono">15.690 / 20.778 ≈</span> 75 %. Las convoluciones son baratas porque un filtro 3×3 se reutiliza en todas las posiciones de la imagen (pesos compartidos); la capa densa, en cambio, conecta cada uno de los 1.568 valores con cada neurona.</p>
+  <p><b>b)</b> Aplanada, la imagen tiene 32·32·3 = 3.072 valores. <span class="mono">Dense(16)</span>: <span class="mono">(3.072 + 1)·16 =</span> <span class="ans">49.168</span>, más del doble que toda la CNN, con solo 16 neuronas y sin saber que los píxeles vecinos están relacionados.</p>
+  <p class="note">Idea clave: el número de parámetros de una convolución no depende del tamaño de la imagen, solo de K, de los canales de entrada y del número de filtros. Por eso las CNN escalan a imágenes grandes y las redes densas no.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E4</span>Campo receptivo y filtros pequeños</h3>
-  <p>a) Cada capa 3×3 con stride 1 añade 2 píxeles: <span class="mono">3 → 5 → 7</span>. Campo receptivo <span class="ans">7×7</span>.</p>
-  <p>b) Tres capas 3×3: <span class="mono">3 · (3·3·64·64) = 3 · 36.864 =</span> <span class="ans">110.592</span>. Una capa 7×7: <span class="mono">7·7·64·64 =</span> <span class="ans">200.704</span>. La pila usa un 45 % menos de pesos para el mismo campo receptivo.</p>
-  <p>c) Tiene <span class="ans">tres no linealidades</span> (tres ReLU) en lugar de una: puede representar funciones más complejas. Es la idea de VGG.</p>
-  <p>d) <span class="ans">Crece</span>. Tras el pooling, cada píxel del mapa resume una zona 2×2 del anterior, así que un filtro 3×3 posterior abarca el doble de entrada original. Por eso las CNN alternan convolución y pooling: ven zonas cada vez más grandes con pocos parámetros.</p>
+  <p><b>a)</b> Una neurona de la capa 1 ve 3×3 píxeles. Una de la capa 2 ve 3×3 neuronas de la capa 1, que juntas cubren 3 + 2 = 5 píxeles por lado (cada paso a la derecha añade una columna nueva). La capa 3 añade otros 2: <span class="mono">3 → 5 → 7</span>, campo receptivo <span class="ans">7×7</span>. En general, con stride 1, cada capa K×K suma K − 1.</p>
+  <div class="calc">b) Pesos de una capa K×K con 64 canales de entrada y 64 de salida: K·K·64·64
+   Tres capas 3×3: 3 · (3·3·64·64) = 3 · 36.864 = <span class="ans">110.592</span>
+   Una capa 7×7:   7·7·64·64 = 49 · 4.096      = <span class="ans">200.704</span>
+   Ahorro: 1 − 110.592 / 200.704 ≈ 0,45 → <span class="ans">un 45 % menos</span> (27·C² frente a 49·C²)</div>
+  <p><b>c)</b> Entre las tres capas hay <span class="ans">tres ReLU</span> en lugar de una. Cada no linealidad permite combinar los patrones de la capa anterior de forma más rica (bordes → esquinas → formas), así que la pila es más expresiva además de más barata. Es la idea de diseño de VGG.</p>
+  <p><b>d)</b> <span class="ans">Crece</span>. Tras el pooling, cada valor resume una zona 2×2 de la capa anterior, así que cada paso de un filtro posterior equivale a saltar 2 píxeles de la entrada original, no 1. Si se calcula: tras la conv 1, 3; tras el pooling, 3 + 1 = 4 (con salto acumulado 2); tras la conv 2, 4 + 2·2 = 8; tras la conv 3, 8 + 2·2 = <b>12×12</b>, frente a 7×7 sin pooling.</p>
+  <p class="note">Idea clave: apilar filtros pequeños da el mismo campo de visión que un filtro grande con menos pesos y más no linealidades; el pooling (o el stride) hace que ese campo crezca deprisa.</p>
 </div>
 
 <h2>4.2 · Modelos <em>recurrentes</em> y LSTM</h2>
 
 <div class="ex sol">
   <h3><span class="n">E5</span>Una RNN simple, paso a paso</h3>
-  <div class="calc">h₁ = tanh(0,5·0 + 1)       = tanh(1)       = <span class="ans">0,762</span>
-h₂ = tanh(0,5·0,762 + 0)   = tanh(0,381)   = <span class="ans">0,363</span>
-h₃ = tanh(0,5·0,363 − 1)   = tanh(−0,818)  = <span class="ans">−0,674</span></div>
-  <p>b) Solo <span class="ans">2</span> (w y u). Los mismos pesos se reutilizan en cada paso, así que con 1.000 pasos siguen siendo 2: el número de parámetros no depende de la longitud.</p>
-  <p>c) Porque h₂ depende también de h₁: el estado oculto es la <em>memoria</em> de la red. La información de x₁ sigue presente, atenuada por w = 0,5.</p>
+  <p>En cada paso se calcula primero el argumento de la tanh (memoria anterior × 0,5 + entrada actual × 1) y después se aplica la tanh, que lo deja entre −1 y 1.</p>
+  <div class="calc">Paso 1: argumento = 0,5·h₀ + 1·x₁ = 0,5·0 + 1·1          = 1
+        h₁ = tanh(1)                                    = <span class="ans">0,762</span>
+Paso 2: argumento = 0,5·h₁ + 1·x₂ = 0,5·0,762 + 1·0     = 0,381
+        h₂ = tanh(0,381)                                = <span class="ans">0,363</span>
+Paso 3: argumento = 0,5·h₂ + 1·x₃ = 0,5·0,363 + 1·(−1)  = 0,182 − 1 = −0,818
+        h₃ = tanh(−0,818)                               = <span class="ans">−0,674</span></div>
+  <p>Los valores de la tabla de apoyo tanh(0,363), tanh(0,762) y tanh(−0,5) no hacen falta: son distractores para que no se pueda adivinar el camino.</p>
+  <p><b>b)</b> Solo <span class="ans">2 parámetros</span>: w = 0,5 y u = 1. Los tres pasos usan los <em>mismos</em> pesos (la red se «desenrolla» en el tiempo, pero es una sola celda). Con 1.000 pasos siguen siendo 2: el número de parámetros no depende de la longitud de la secuencia.</p>
+  <p><b>c)</b> Porque h₂ no depende solo de x₂: también de h₁, que lleva la información de x₁. El estado oculto es la <em>memoria</em> de la red. Como w = 0,5, esa memoria se atenúa a la mitad en cada paso (antes de la tanh): por eso h₂ es más pequeño que h₁.</p>
+  <p class="note">Idea clave: una RNN es la misma función aplicada una y otra vez, que recibe su propia salida anterior. Pesos compartidos en el tiempo, igual que una CNN los comparte en el espacio.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E6</span>El gradiente que se desvanece</h3>
-  <div class="calc">a) 0,5²⁰ = (0,5¹⁰)² ≈ 0,000977² ≈ <span class="ans">9,5 · 10⁻⁷</span>  → se desvanece
-b) 1,5²⁰ = (1,5¹⁰)² ≈ 57,7²     ≈ <span class="ans">3.325</span>         → explota
-c) 0,9²⁰  = 0,349²  ≈ <span class="ans">0,12</span>
-   0,99²⁰ = 0,904²  ≈ <span class="ans">0,82</span></div>
-  <p>b) Es el <span class="ans">gradiente explosivo</span>; se contiene con <em>gradient clipping</em> (recortar la norma del gradiente).</p>
-  <p>c) En la LSTM el factor no está atado a tanh′ ≤ 1 ni a un peso fijo: lo decide la puerta de olvido, que la red <em>aprende</em> a mantener cerca de 1 cuando necesita recordar. Con f = 0,99 sobrevive el 82 % de la señal tras 20 pasos, frente a la millonésima de la RNN simple. Es la «autopista del gradiente».</p>
+  <p>Por la regla de la cadena, <span class="mono">∂h₂₀/∂h₀ = (∂h₂₀/∂h₁₉)·(∂h₁₉/∂h₁₈)·…·(∂h₁/∂h₀)</span>: veinte factores multiplicados. Si todos valen lo mismo, el resultado es ese valor elevado a 20. Las potencias de 10 de la tabla permiten hacerlo sin calculadora científica, porque <span class="mono">a²⁰ = (a¹⁰)²</span>.</p>
+  <div class="calc">a) 0,5²⁰ = (0,5¹⁰)² ≈ 0,000977² ≈ <span class="ans">0,00000095</span>  (menos de una millonésima)
+b) 1,5²⁰ = (1,5¹⁰)² ≈ 57,7²     ≈ <span class="ans">3.325</span>        (más de tres mil veces)
+c) f = 0,9:   0,9²⁰  = (0,9¹⁰)²  ≈ 0,349²  ≈ <span class="ans">0,12</span>
+   f = 0,99:  0,99²⁰ = (0,99¹⁰)² ≈ 0,904²  ≈ <span class="ans">0,82</span></div>
+  <p><b>a)</b> Con factores menores que 1 el gradiente <span class="ans">se desvanece</span>: lo que pasó 20 pasos atrás apenas modifica los pesos, y la red no aprende dependencias largas. Como tanh′ ≤ 1 (y suele ser bastante menor), es lo que ocurre casi siempre en una RNN simple.</p>
+  <p><b>b)</b> Con factores mayores que 1 el gradiente <span class="ans">explota</span>: las actualizaciones son enormes, la pérdida salta o da NaN. Se contiene con <span class="ans">gradient clipping</span>: si la norma del gradiente supera un umbral, se reescala hasta ese umbral (en Keras, <span class="mono">clipnorm=1.0</span> en el optimizador).</p>
+  <p><b>c)</b> En la LSTM, por el camino del estado de memoria (<span class="mono">Cₜ = f·Cₜ₋₁ + …</span>) el factor es la puerta de olvido f, que no está limitada por tanh′ ni fijada por un peso: la red la <em>aprende</em> y puede dejarla cerca de 1 cuando necesita recordar. Con f = 0,99 sobrevive el 82 % de la señal tras 20 pasos; con 0,9, el 12 %; en la RNN simple de a), una millonésima.</p>
+  <p class="note">Idea clave: multiplicar muchos números menores que 1 lleva a cero, y mayores que 1, a infinito. La LSTM crea una «autopista» por donde el factor está controlado y puede valer casi 1.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E7</span>Un paso de una celda LSTM</h3>
-  <div class="calc">a) f = σ(2) = <span class="ans">0,881</span>   i = σ(0) = <span class="ans">0,5</span>   o = σ(−1) = <span class="ans">0,269</span>   C̃ = tanh(1) = <span class="ans">0,762</span>
-b) Cₜ = 0,881 · 1,5 + 0,5 · 0,762 = 1,321 + 0,381 = <span class="ans">1,70</span>
-   hₜ = 0,269 · tanh(1,70) = 0,269 · 0,935 = <span class="ans">0,25</span></div>
-  <p>c) La <span class="ans">puerta de olvido</span>: haría falta un z_f muy negativo (por ejemplo z_f = −4 → f ≈ 0,02), de modo que f·Cₜ₋₁ ≈ 0. Fíjate también en que la celda guarda mucho (Cₜ = 1,70) pero dice poco (hₜ = 0,25), porque la puerta de salida está medio cerrada.</p>
+  <p><b>a) Puertas.</b> Las tres puertas usan la sigmoide <span class="mono">σ(z) = 1 / (1 + e<sup>−z</sup>)</span>, que da un valor entre 0 (cerrada) y 1 (abierta). El candidato usa tanh, entre −1 y 1, porque es un contenido que puede sumar o restar.</p>
+  <div class="calc">f  = σ(2)  = 1 / (1 + e⁻²) = 1 / 1,135 = <span class="ans">0,881</span>  → conserva el 88 % de la memoria
+i  = σ(0)  = 1 / (1 + 1)                = <span class="ans">0,5</span>    → deja entrar la mitad del candidato
+o  = σ(−1) = 1 / (1 + e¹)  = 1 / 3,718  = <span class="ans">0,269</span>  → muestra solo el 27 % del estado
+C̃  = tanh(1)                           = <span class="ans">0,762</span>  → lo nuevo que se propone escribir</div>
+  <p><b>b) Estado y salida.</b> El nuevo estado es «lo que conservo de antes + lo que escribo de nuevo»; la salida es el estado pasado por tanh y filtrado por la puerta de salida.</p>
+  <div class="calc">Cₜ = f·Cₜ₋₁ + i·C̃ = 0,881·1,5 + 0,5·0,762 = 1,321 + 0,381 = <span class="ans">1,70</span>
+hₜ = o·tanh(Cₜ)    = 0,269·tanh(1,70)    = 0,269·0,935      = <span class="ans">0,25</span></div>
+  <p>La celda <em>guarda</em> mucho (Cₜ = 1,70, más que antes) pero <em>dice</em> poco (hₜ = 0,25), porque la puerta de salida está casi cerrada: la memoria interna y lo que se comunica a la siguiente capa son cosas distintas.</p>
+  <p><b>c)</b> Hay que cerrar la <span class="ans">puerta de olvido</span>: llevar z_f a un valor <span class="ans">muy negativo</span>. Por ejemplo, con z_f = −4, f = σ(−4) ≈ 0,018, y entonces <span class="mono">Cₜ = 0,018·1,5 + 0,381 ≈ 0,41</span>: del 1,5 anterior apenas queda nada y el estado lo domina el candidato nuevo.</p>
+  <p class="note">Idea clave: las puertas son interruptores graduales (de 0 a 1) que la red aprende. f decide qué se borra, i qué se escribe y o qué se muestra.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E8</span>Formas y parámetros de una red recurrente en Keras</h3>
-  <table class="t">
-    <tr><th>Capa</th><th>Salida</th><th>Parámetros</th><th>Cuenta</th></tr>
-    <tr><td class="mono">LSTM(64, return_sequences=True)</td><td class="num">(lote, 50, 64)</td><td class="num">21.760</td><td class="mono">4·[64·(64+20) + 64]</td></tr>
-    <tr><td class="mono">LSTM(32)</td><td class="num">(lote, 32)</td><td class="num">12.416</td><td class="mono">4·[32·(32+64) + 32]</td></tr>
-    <tr><td class="mono">Dense(1)</td><td class="num">(lote, 1)</td><td class="num">33</td><td class="mono">32 + 1</td></tr>
-  </table>
-  <p>a) Total <span class="ans">34.209</span> parámetros.</p>
-  <p>b) Devolvería solo el último estado, de forma (lote, 64), y la segunda LSTM daría error: necesita una <em>secuencia</em> 3-D como entrada.</p>
-  <p>c) <span class="mono">64·(64 + 20) + 64 =</span> <span class="ans">5.440</span>. La LSTM tiene cuatro bloques así (puertas f, i, o y el candidato), de ahí el ×4.</p>
-  <p>d) Salida <span class="ans">(lote, 50, 128)</span>: concatena las dos direcciones. Parámetros <span class="mono">2 · 21.760 =</span> <span class="ans">43.520</span> (dos LSTM independientes).</p>
+  <p><b>Por qué la fórmula.</b> Cada uno de los 4 bloques de la LSTM (f, i, o y el candidato) es como una capa densa que recibe la entrada actual xₜ (nₓ valores) y el estado anterior hₜ₋₁ (nₕ valores): tiene nₕ·nₓ pesos sobre la entrada, nₕ·nₕ pesos recurrentes y nₕ sesgos.</p>
+  <div class="calc">LSTM(64), entrada de 20 características:
+  pesos sobre xₜ: 64·20 = 1.280 · recurrentes: 64·64 = 4.096 · sesgos: 64
+  un bloque = 1.280 + 4.096 + 64 = 5.440   → × 4 bloques = <span class="ans">21.760</span>
+  salida (return_sequences=True): un h por paso → <span class="ans">(lote, 50, 64)</span>
+
+LSTM(32), su entrada es la salida anterior: 64 características
+  pesos sobre xₜ: 32·64 = 2.048 · recurrentes: 32·32 = 1.024 · sesgos: 32
+  un bloque = 3.104                        → × 4 bloques = <span class="ans">12.416</span>
+  salida (return_sequences=False): solo el último h → <span class="ans">(lote, 32)</span>
+
+Dense(1): 32 pesos + 1 sesgo = <span class="ans">33</span>, salida <span class="ans">(lote, 1)</span>
+
+a) Total: 21.760 + 12.416 + 33 = <span class="ans">34.209</span></div>
+  <p>Fíjate en que la longitud de la secuencia (50) no aparece en ninguna cuenta: los mismos pesos se aplican en los 50 pasos.</p>
+  <p><b>b)</b> La primera LSTM devolvería solo su último estado, con forma (lote, 64): un vector por secuencia, no una secuencia. La segunda LSTM daría un <span class="ans">error de forma</span>, porque espera una entrada 3-D (lote, pasos, características). Para apilar LSTM, todas menos la última necesitan <span class="mono">return_sequences=True</span>.</p>
+  <p><b>c)</b> La RNN simple tiene un único bloque: <span class="mono">64·20 + 64·64 + 64 =</span> <span class="ans">5.440</span>. La LSTM tiene exactamente <span class="ans">4 veces más</span> porque repite ese mismo bloque para cada puerta y para el candidato.</p>
+  <p><b>d)</b> <span class="mono">Bidirectional</span> crea dos LSTM independientes, una que lee la secuencia hacia delante y otra hacia atrás, y concatena sus salidas: 64 + 64 = 128 → <span class="ans">(lote, 50, 128)</span>. Parámetros: <span class="mono">2 · 21.760 =</span> <span class="ans">43.520</span>. (Ojo: la segunda LSTM recibiría entonces 128 características y su cuenta cambiaría.)</p>
+  <p class="note">Idea clave: 4 · [nₕ·(nₕ + nₓ) + nₕ], donde nₓ es el tamaño de lo que entra en <em>esa</em> capa. return_sequences decide si sale una secuencia o un solo vector.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E9</span>Ventanas para series temporales</h3>
-  <div class="calc">a) [12, 14, 13] → 15
-   [14, 13, 15] → 18
-   …
-   [19, 21, 20] → 22
-b) 10 − 3 = <span class="ans">7 ejemplos</span>   X: <span class="ans">(7, 3, 1)</span>  (ejemplos, pasos, características)   y: <span class="ans">(7,)</span>
-c) 10 − 3 − 2 + 1 = <span class="ans">6 ejemplos</span>  (el primero: [12, 14, 13] → 18)</div>
-  <p>d) Las ventanas consecutivas se solapan y el futuro depende del pasado. Si barajas, ventanas casi idénticas acaban en entrenamiento y validación, y el modelo se evalúa sobre el <em>futuro</em> habiendo visto lo que viene después: es una fuga de datos. Hay que separar <span class="ans">por tiempo</span> (las últimas ventanas, a validación).</p>
+  <p><b>a)</b> Se desliza una ventana de 3 valores de uno en uno; el objetivo es el valor inmediatamente siguiente a la ventana. Todos los pares:</p>
+  <div class="calc">1: [12, 14, 13] → 15        5: [18, 17, 19] → 21
+2: [14, 13, 15] → 18        6: [17, 19, 21] → 20
+3: [13, 15, 18] → 17        7: [19, 21, 20] → 22
+4: [15, 18, 17] → 19</div>
+  <p><b>b)</b> La última ventana tiene que dejar sitio a su objetivo, así que puede empezar como mucho en la posición 7. Con N datos, ventana w y horizonte h, salen <span class="mono">N − w − h + 1</span> ejemplos: <span class="mono">10 − 3 − 1 + 1 =</span> <span class="ans">7</span>. La LSTM espera (ejemplos, pasos, características): X = <span class="ans">(7, 3, 1)</span>, porque cada paso tiene una sola característica (el valor de la serie). El objetivo es un número por ejemplo: y = <span class="ans">(7,)</span>.</p>
+  <p><b>c)</b> Con horizonte 2 el objetivo está dos posiciones después del final de la ventana: <span class="mono">10 − 3 − 2 + 1 =</span> <span class="ans">6 ejemplos</span>. El primero es <span class="mono">[12, 14, 13] → 18</span> (se salta el 15) y el último, <span class="mono">[17, 19, 21] → 22</span>.</p>
+  <p><b>d)</b> Las ventanas consecutivas comparten 2 de sus 3 valores, y el objetivo de una es parte de la entrada de las siguientes. Si se barajan antes de separar, ventanas casi idénticas acaban a ambos lados, y el modelo se valida con datos de fechas <em>anteriores</em> a otras que ya vio al entrenar: está mirando el futuro. Es una <span class="ans">fuga de datos</span> y la métrica sale optimista. Hay que separar <span class="ans">por tiempo</span>: entrenar con el principio de la serie y validar con el final (por ejemplo, ventanas 1–5 para entrenar y 6–7 para validar).</p>
+  <p class="note">Idea clave: una serie se convierte en un problema supervisado con ventanas deslizantes, y en series temporales la validación siempre va «hacia delante».</p>
 </div>
 
 <h2>4.3 · Atención y <em>Transformers</em></h2>
 
 <div class="ex sol">
   <h3><span class="n">E10</span>Self-attention a mano</h3>
+  <p><b>a) Puntuaciones.</b> La casilla (i, j) es el producto escalar de la query del token i con la key del token j: cuánto «encaja» lo que busca i con lo que ofrece j.</p>
+  <div class="calc">fila 1, q₁ = [1, 0]: q₁·k₁ = 1·1+0·0 = 1 · q₁·k₂ = 1·0+0·1 = 0 · q₁·k₃ = 1·1+0·1 = 1
+fila 2, q₂ = [0, 1]: q₂·k₁ = 0 · q₂·k₂ = 1 · q₂·k₃ = 0·1+1·1 = 1
+fila 3, q₃ = [1, 1]: q₃·k₁ = 1 · q₃·k₂ = 1 · q₃·k₃ = 1·1+1·1 = 2
+Escalado: se divide todo por √dₖ = √2 ≈ 1,414 → 1 pasa a 0,707 y 2 pasa a 1,414</div>
   <div class="row">
-    <div><div class="lbl">a) Q·Kᵀ</div><table class="m">
+    <div><div class="lbl">Q·Kᵀ</div><table class="m">
       <tr><td>1</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>1</td><td>2</td></tr></table></div>
-    <div><div class="lbl">a) Q·Kᵀ / √2</div><table class="m" style="--w:12mm">
+    <div><div class="lbl">Q·Kᵀ / √2</div><table class="m">
       <tr><td style="width:12mm">0,707</td><td style="width:12mm">0</td><td style="width:12mm">0,707</td></tr><tr><td>0</td><td>0,707</td><td>0,707</td></tr><tr><td>0,707</td><td>0,707</td><td>1,414</td></tr></table></div>
-    <div><div class="lbl">b) pesos (softmax por filas)</div><table class="m">
+    <div><div class="lbl">pesos (softmax por filas)</div><table class="m">
       <tr><td style="width:12mm">0,40</td><td style="width:12mm">0,20</td><td style="width:12mm">0,40</td></tr><tr><td>0,20</td><td>0,40</td><td>0,40</td></tr><tr><td>0,25</td><td>0,25</td><td class="hl">0,50</td></tr></table></div>
   </div>
-  <div class="calc">b) fila 1: [2,028, 1, 2,028] / 5,056     = [0,40, 0,20, 0,40]
-   fila 3: [2,028, 2,028, 4,113] / 8,169 = [0,25, 0,25, 0,50]
-c) token 1: 0,40·[1,0] + 0,20·[0,2] + 0,40·[1,1] = <span class="ans">[0,80, 0,80]</span>
-   token 3: 0,25·[1,0] + 0,25·[0,2] + 0,50·[1,1] = <span class="ans">[0,75, 1,00]</span></div>
-  <p>d) A <span class="ans">sí mismo</span> (peso 0,50): su query [1, 1] es la más parecida a su propia key [1, 1] (producto 2, frente a 1 con las otras). Cada fila de pesos suma 1: la salida es una media ponderada de los valores.</p>
+  <p><b>b) Softmax por filas.</b> En cada fila: se toma la exponencial de cada puntuación, se suman, y se divide cada exponencial por la suma. Así cada fila queda en positivo y suma 1.</p>
+  <div class="calc">fila 1: [e<sup>0,707</sup>, e⁰, e<sup>0,707</sup>] = [2,028, 1, 2,028]     suma 5,056 → [<span class="ans">0,40, 0,20, 0,40</span>]
+fila 2: [e⁰, e<sup>0,707</sup>, e<sup>0,707</sup>] = [1, 2,028, 2,028]     suma 5,056 → [<span class="ans">0,20, 0,40, 0,40</span>]
+fila 3: [e<sup>0,707</sup>, e<sup>0,707</sup>, e<sup>1,414</sup>] = [2,028, 2,028, 4,113] suma 8,169 → [<span class="ans">0,25, 0,25, 0,50</span>]
+        (2,028 / 8,169 = 0,248 · 4,113 / 8,169 = 0,503)</div>
+  <p><b>c) Salidas.</b> Cada salida es la media de las filas de V ponderada por los pesos de su fila (componente a componente):</p>
+  <div class="calc">token 1: 0,40·[1, 0] + 0,20·[0, 2] + 0,40·[1, 1]
+       = [0,40 + 0 + 0,40,  0 + 0,40 + 0,40]  = <span class="ans">[0,80, 0,80]</span>
+token 3: 0,25·[1, 0] + 0,25·[0, 2] + 0,50·[1, 1]
+       = [0,25 + 0 + 0,50,  0 + 0,50 + 0,50]  = <span class="ans">[0,75, 1,00]</span>
+(token 2, por completar: 0,20·[1,0] + 0,40·[0,2] + 0,40·[1,1] = [0,60, 1,20])</div>
+  <p><b>d)</b> El token 3 presta más atención a <span class="ans">sí mismo</span> (0,50). Su query [1, 1] tiene producto 2 con su propia key [1, 1] y solo 1 con las otras dos, porque «busca» en las dos direcciones y k₃ es la única que tiene las dos. Los tokens 1 y 2 reparten su atención entre sí mismos y el token 3, que comparte una dirección con cada uno.</p>
+  <p class="note">Idea clave: Q·Kᵀ mide afinidades, la softmax las convierte en un reparto que suma 1, y la salida es una mezcla de los valores V según ese reparto. Cada token sale «enriquecido» con información de los tokens a los que atiende.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E11</span>La máscara causal</h3>
-  <p>a) Las casillas <span class="ans">por encima de la diagonal</span> (token 1 → 2 y 3; token 2 → 3) se ponen a <span class="ans">−∞</span> antes de la softmax, para que su peso sea e<sup>−∞</sup> = 0.</p>
-  <div class="calc">b) fila 1: [1, 0, 0]
-   fila 2: [1, 2,028, 0] / 3,028 = <span class="ans">[0,33, 0,67, 0]</span>
-   fila 3: sin cambios          = [0,25, 0,25, 0,50]
-c) token 2: 0,33·[1,0] + 0,67·[0,2] = <span class="ans">[0,33, 1,34]</span></div>
-  <p>c) La del token 3 <span class="ans">no cambia</span>: es el último, así que ya podía ver todos los anteriores. La salida del token 1 pasa a ser exactamente su valor V₁ = [1, 0], porque solo puede mirarse a sí mismo.</p>
+  <p><b>a)</b> Un token no puede ver el futuro, así que se tapan las casillas <span class="ans">por encima de la diagonal</span>: (1→2), (1→3) y (2→3). Se les suma <span class="ans">−∞</span> (en la práctica, un número muy negativo) <em>antes</em> de la softmax: como e<sup>−∞</sup> = 0, su peso queda exactamente en 0 y el resto de la fila se renormaliza solo. Poner un 0 en la puntuación no serviría, porque e⁰ = 1.</p>
+  <div class="calc">Puntuaciones con máscara:   [0,707   −∞     −∞   ]
+                            [0       0,707  −∞   ]
+                            [0,707   0,707  1,414]
+
+b) fila 1: [e<sup>0,707</sup>, 0, 0] = [2,028, 0, 0]       suma 2,028 → <span class="ans">[1, 0, 0]</span>
+   fila 2: [e⁰, e<sup>0,707</sup>, 0] = [1, 2,028, 0]        suma 3,028 → <span class="ans">[0,33, 0,67, 0]</span>
+   fila 3: sin casillas tapadas                         → <span class="ans">[0,25, 0,25, 0,50]</span>
+
+c) token 2: 0,33·[1, 0] + 0,67·[0, 2] = [0,33, 1,34]  → <span class="ans">[0,33, 1,34]</span>
+   token 1: 1·[1, 0] = [1, 0]   (antes [0,80, 0,80])</div>
+  <p><b>c)</b> La salida del token 3 <span class="ans">no cambia</span>: es el último de la secuencia, así que todos los demás son «pasado» para él y la máscara no le tapa nada. En cambio, el token 1 solo puede mirarse a sí mismo y su salida es su propio valor V₁.</p>
+  <p class="note">Idea clave: la máscara causal es lo que permite entrenar un modelo generativo (GPT) en paralelo con todas las posiciones a la vez sin que ninguna «haga trampa» viendo la palabra que tiene que predecir.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E12</span>Parámetros de un bloque Transformer</h3>
-  <div class="calc">a) dₖ = 512 / 8 = <span class="ans">64</span>
-b) 4 matrices · (512·512 + 512) = 4 · 262.656            = <span class="ans">1.050.624</span>
-c) (512·2.048 + 2.048) + (2.048·512 + 512) = 1.050.624 + 1.049.088 = <span class="ans">2.099.712</span>
-d) LayerNorm: 2 · (512 + 512)                            =     2.048
-   Total del bloque                                       = <span class="ans">3.152.384</span></div>
-  <p>Las cabezas no añaden parámetros: las 8 cabezas de 64 se reparten las mismas matrices 512×512. La <span class="ans">feed-forward pesa el doble</span> que la atención (≈ 2/3 del bloque). Con 6 bloques en el codificador ya son ~19 millones.</p>
+  <p><b>a)</b> Las 8 cabezas se reparten la dimensión del modelo: <span class="mono">dₖ = 512 / 8 =</span> <span class="ans">64</span>. Cada cabeza trabaja con vectores de 64 y al final se concatenan: 8·64 = 512.</p>
+  <div class="calc">b) Atención multi-cabeza: cuatro proyecciones de 512 a 512, cada una con sesgo
+   W_Q: 512·512 + 512 = 262.144 + 512 = 262.656
+   W_K, W_V y W_O: igual, 262.656 cada una
+   4 · 262.656                              = <span class="ans">1.050.624</span>
+
+c) Feed-forward: dos capas densas, 512 → 2.048 → 512
+   1.ª capa: 512·2.048 + 2.048 = 1.048.576 + 2.048 = 1.050.624
+   2.ª capa: 2.048·512 + 512   = 1.048.576 + 512   = 1.049.088
+   Total                                    = <span class="ans">2.099.712</span>
+
+d) LayerNorm: dos capas, cada una con γ (512) y β (512) = 2 · 1.024 = 2.048
+   Bloque: 1.050.624 + 2.099.712 + 2.048    = <span class="ans">3.152.384</span>
+   Reparto: atención 33 % · feed-forward <span class="ans">67 %</span> · LayerNorm 0,06 %</div>
+  <p>Las cabezas <em>no</em> añaden parámetros: tener 8 cabezas de 64 o 1 cabeza de 512 cuesta lo mismo, porque la proyección de 512 a 512 se parte en 8 trozos. La que más pesa es la <span class="ans">feed-forward</span>, el doble que la atención. Con 6 bloques en el codificador ya son unos 19 millones de parámetros, sin contar los embeddings.</p>
+  <p class="note">Idea clave: en un Transformer la atención decide <em>qué información se mezcla</em>, pero la mayoría de los parámetros (y del «conocimiento» memorizado) está en las capas feed-forward.</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E13</span>Por qué √dₖ, y el coste cuadrático</h3>
-  <p>a) Sin escalar: desviación <span class="mono">√64 =</span> <span class="ans">8</span>. Tras dividir por √64 = 8: desviación <span class="ans">1</span>.</p>
-  <p>b) Con entradas grandes, la softmax <span class="ans">se satura</span>: casi todo el peso va a una posición (≈ one-hot) y sus gradientes se vuelven casi cero, así que la red aprende muy despacio.</p>
-  <div class="calc">c) 8 · 512²   = 8 · 262.144   = <span class="ans">2.097.152</span>
-   8 · 1.024² = 8 · 1.048.576 = <span class="ans">8.388.608</span>   → doble de tokens, ×4 de cálculo</div>
-  <p>d) <span class="ans">Un solo paso</span>: todas las posiciones se calculan a la vez con productos de matrices, en paralelo en la GPU. Se gana paralelismo y caminos de longitud 1 entre tokens lejanos; se paga un coste de memoria y cálculo cuadrático en la longitud.</p>
+  <p><b>a)</b> <span class="mono">q·k = q₁k₁ + q₂k₂ + … + q₆₄k₆₄</span>. Cada producto qᵢkᵢ tiene varianza 1 y, al ser independientes, las varianzas se suman: varianza 64. La desviación típica es <span class="mono">√64 =</span> <span class="ans">8</span>. Dividir por √dₖ = 8 divide la desviación por 8: queda <span class="ans">1</span>, sea cual sea dₖ.</p>
+  <p><b>b)</b> La softmax se <span class="ans">satura</span>: con entradas grandes, la mayor se lleva casi todo el peso. Por ejemplo:</p>
+  <div class="calc">softmax([1, 0, −1]) = [0,67, 0,24, 0,09]        → reparto suave
+softmax([8, 0, −8]) = [0,9997, 0,0003, 0,0000]  → casi one-hot</div>
+  <p>En la zona saturada la derivada de la softmax es casi cero (del orden de <span class="mono">p·(1 − p) ≈ 0,0003</span>), así que los gradientes que llegan a Q y K son minúsculos y la red <span class="ans">aprende muy despacio</span> o se queda atascada.</p>
+  <div class="calc">c) Una cabeza compara cada token con todos: n · n puntuaciones
+   512 tokens:   8 · 512²   = 8 · 262.144   = <span class="ans">2.097.152</span>
+   1.024 tokens: 8 · 1.024² = 8 · 1.048.576 = <span class="ans">8.388.608</span>
+   → duplicar la longitud multiplica el cálculo y la memoria por <span class="ans">4</span></div>
+  <p><b>d)</b> <span class="ans">Un solo paso</span>: la matriz Q·Kᵀ se calcula de golpe con un producto de matrices, en paralelo en la GPU; no hay que esperar al token anterior como en la LSTM. Se gana: paralelismo (entrenamiento mucho más rápido) y que cualquier par de tokens está conectado directamente, a distancia 1, sin que la información se diluya por el camino. Se paga: un coste de cálculo y memoria que crece con el <span class="ans">cuadrado</span> de la longitud, frente al crecimiento lineal de la LSTM. Por eso los contextos muy largos son caros.</p>
+  <p class="note">Idea clave: √dₖ mantiene las puntuaciones en una escala donde la softmax aprende bien, y la atención cambia pasos secuenciales por un coste n².</p>
 </div>
 
 <div class="ex sol">
   <h3><span class="n">E14</span>Decodificar: voraz, temperatura y top-k</h3>
-  <div class="calc">a) T = 1:   [e², e¹, e⁰] = [7,389, 2,718, 1] / 11,107 = <span class="ans">[0,67, 0,24, 0,09]</span> → voraz elige <span class="ans">gato</span>
-b) T = 0,5: logits [4, 2, 0] → [54,60, 7,389, 1] / 62,99 = <span class="ans">[0,87, 0,12, 0,02]</span>
-   T = 2:   logits [1, 0,5, 0] → [2,718, 1,649, 1] / 5,367 = <span class="ans">[0,51, 0,31, 0,19]</span>
-c) top-2:   [0,665, 0,245] / 0,910 = <span class="ans">[0,73, 0,27, 0]</span></div>
-  <p>b) Una <span class="ans">T baja afila</span> la distribución (más determinista, tiende a voraz); una <span class="ans">T alta la aplana</span> (más variedad y más riesgo de incoherencias). El orden de las palabras nunca cambia.</p>
-  <p>d) Preguntas factuales: <span class="ans">T baja</span> (0–0,3), se quiere la respuesta más probable. Ideas de nombres: <span class="ans">T alta</span> (0,8–1,2), se busca variedad.</p>
+  <p><b>a)</b> Softmax de los logits [2, 1, 0]: exponencial de cada uno, suma y división.</p>
+  <div class="calc">T = 1: [e², e¹, e⁰] = [7,389, 2,718, 1]   suma 11,107
+       gato 7,389/11,107 = <span class="ans">0,67</span> · perro 2,718/11,107 = <span class="ans">0,24</span> · coche 1/11,107 = <span class="ans">0,09</span></div>
+  <p>La decodificación voraz elige siempre la más probable: <span class="ans">gato</span>, con cualquier temperatura (la temperatura no cambia cuál es el máximo).</p>
+  <div class="calc">b) Con temperatura se divide cada logit por T antes de la softmax:
+   T = 0,5: logits / 0,5 = [4, 2, 0] → [54,60, 7,389, 1]    suma 62,99
+            → <span class="ans">[0,87, 0,12, 0,02]</span>
+   T = 2:   logits / 2   = [1, 0,5, 0] → [2,718, 1,649, 1]  suma 5,367
+            → <span class="ans">[0,51, 0,31, 0,19]</span></div>
+  <p>Una <span class="ans">T baja</span> agranda las diferencias entre logits y <span class="ans">afila</span> la distribución: gato pasa del 67 % al 87 % y el muestreo se parece cada vez más al voraz. Una <span class="ans">T alta</span> las encoge y la <span class="ans">aplana</span>: coche pasa del 9 % al 19 %, más variedad y también más riesgo de elegir algo incoherente. El orden de las palabras nunca cambia.</p>
+  <div class="calc">c) top-k = 2: se quedan las 2 más probables y se descarta el resto
+   gato 0,665 y perro 0,245 → suma 0,910
+   gato 0,665/0,910 = <span class="ans">0,73</span> · perro 0,245/0,910 = <span class="ans">0,27</span> · coche <span class="ans">0</span></div>
+  <p>Top-k corta la «cola» de palabras improbables, que en un vocabulario real de decenas de miles de tokens suman mucha probabilidad y son la fuente de muchas incoherencias.</p>
+  <p><b>d)</b> Para preguntas factuales interesa la respuesta más probable y repetible: <span class="ans">T baja</span> (0–0,3). Para generar ideas de nombres interesa la variedad: <span class="ans">T alta</span> (0,8–1,2), a menudo combinada con top-k o top-p para no salirse del todo de lo razonable.</p>
+  <p class="note">Idea clave: el modelo solo da una distribución de probabilidad; cómo se elige la siguiente palabra (voraz, temperatura, top-k) es una decisión aparte que cambia mucho el estilo del texto.</p>
 </div>
 
 </body>
