@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Tema 3 · Ejercicios a mano</title>
+<link href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,600;1,400;1,600&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  @page { size: A4; margin: 18mm 17mm 18mm 17mm; }
+  :root { --ink:#1a1f6c; --mute:#6b6f99; --accent:#ff5700; --accent-d:#c8410f; --teal:#0796a3; --line:#e2ded0; --paper:#fbfaf6; }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter Tight", sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  h1, h2, h3 { font-family: "Taviraj", serif; font-weight: 600; margin: 0; }
+  h1 { font-size: 30pt; line-height: 1.05; }
+  h1 em, h2 em { color: var(--accent); font-style: italic; }
+  h2 { font-size: 19pt; margin: 0 0 4mm; padding-top: 2mm; border-top: 2px solid var(--ink); }
+  h3 { font-size: 12.5pt; margin: 0 0 1.5mm; }
+  h3 .n { color: var(--accent); font-family: "JetBrains Mono", monospace; font-size: 10pt; margin-right: 2mm; }
+  .kicker { font-family: "JetBrains Mono", monospace; font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-d); }
+  .cover { border-bottom: 1px solid var(--line); padding-bottom: 6mm; margin-bottom: 6mm; }
+  .cover p { color: var(--mute); max-width: 150mm; }
+  .meta { display: flex; gap: 8mm; font-size: 9pt; color: var(--mute); margin-top: 3mm; }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .ex { break-inside: avoid; margin: 0 0 5mm; padding: 3.5mm 4.5mm; border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--paper); }
+  .sol { border-left-color: var(--teal); break-inside: auto; }
+  .sol .calc, .sol table, .sol .row, .sol p { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  .ex p { margin: 1mm 0; }
+  ol.q { margin: 1.5mm 0 0; padding-left: 6mm; }
+  ol.q li { margin: .8mm 0; }
+  ol.q[type="a"] { list-style-type: lower-alpha; }
+  code, .mono { font-family: "JetBrains Mono", monospace; font-size: 9pt; }
+  .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 7.5pt; color: var(--mute); border: 1px solid var(--line); padding: 0 1.5mm; margin-left: 2mm; vertical-align: middle; }
+  table.m { border-collapse: collapse; font-family: "JetBrains Mono", monospace; font-size: 9pt; margin: 1.5mm 0; }
+  table.m td { border: 1px solid #cfcab9; width: 8mm; height: 6mm; text-align: center; background: #fff; }
+  table.m td.hl { background: #f4d9cf; color: var(--accent-d); font-weight: 600; }
+  .row { display: flex; gap: 6mm; align-items: flex-start; flex-wrap: wrap; }
+  .lbl { font-size: 8.5pt; color: var(--mute); margin-bottom: .5mm; }
+  table.t { border-collapse: collapse; font-size: 9.2pt; margin: 1.5mm 0; }
+  table.t th, table.t td { border-bottom: 1px solid var(--line); padding: 1mm 2.5mm; text-align: left; }
+  table.t th { font-weight: 600; color: var(--mute); font-size: 8.5pt; }
+  table.t td.num { font-family: "JetBrains Mono", monospace; font-size: 8.8pt; text-align: right; }
+  .help { font-size: 9pt; color: var(--mute); }
+  .help .mono { color: var(--ink); }
+  .calc { font-family: "JetBrains Mono", monospace; font-size: 8.8pt; white-space: pre-wrap; margin: 1mm 0; line-height: 1.55; }
+  .ans { font-weight: 600; color: var(--teal); }
+  .note { font-style: italic; color: var(--mute); font-size: 9.3pt; }
+  .page-break { break-before: page; }
+  .formulas { columns: 2; column-gap: 8mm; font-size: 9.2pt; margin: 0 0 5mm; padding: 3mm 4.5mm; border: 1px dashed #cfcab9; }
+  .formulas div { break-inside: avoid; margin: .6mm 0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <span class="kicker">CUNEF Universidad · Aprendizaje Profundo</span>
+  <h1>Tema 3 · Ejercicios <em>a mano</em>.</h1>
+  <p>
+    Trece ejercicios con papel y calculadora sobre aprendizaje no supervisado
+    y autoencoders (3.1), modelos generativos adversarios (3.2) y redes de base
+    radial (3.3). Primero vienen todos los enunciados; las soluciones, paso a
+    paso, están al final. Intenta resolver cada ejercicio antes de mirarlas.
+  </p>
+  <div class="meta"><span><b>Temas</b> 3.1 · 3.2 · 3.3</span><span><b>Ejercicios</b> 13</span><span><b>Tiempo orientativo</b> 2–3 horas</span></div>
+</div>
+
+<div class="formulas">
+  <div><b>k-means</b>: asigna cada punto al centro más cercano; cada centro pasa a ser la media de sus puntos.</div>
+  <div><b>Parámetros Dense</b>: <span class="mono">(n<sub>in</sub> + 1) · n<sub>out</sub></span></div>
+  <div><b>MSE</b>: <span class="mono">media (x − x̂)²</span></div>
+  <div><b>Entropía cruzada binaria</b>: <span class="mono">−media [x·ln x̂ + (1 − x)·ln(1 − x̂)]</span></div>
+  <div><b>Pérdida del discriminador</b>: <span class="mono">−media [ln D(x)] − media [ln(1 − D(G(z)))]</span> (reales y falsos)</div>
+  <div><b>Pérdida del generador</b>: <span class="mono">−media ln D(G(z))</span></div>
+  <div><b>Gaussiana</b>: <span class="mono">φ(x) = exp(−‖x − c‖² / 2σ²)</span></div>
+  <div><b>Red RBF</b>: <span class="mono">y(x) = w₁·φ₁(x) + … + w<sub>K</sub>·φ<sub>K</sub>(x) + b</span></div>
+</div>
+
+<!-- ===================================================== -->
+<h2>3.1 · No supervisado y <em>autoencoders</em></h2>
+
+<div class="ex">
+  <h3><span class="n">E1</span>k-means a mano<span class="tag">~15 min</span></h3>
+  <p>Seis puntos en una dimensión: <span class="mono">x = [1, 2, 4, 7, 8, 10]</span>. Agrúpalos en K = 2 grupos con k-means, empezando con los centros <span class="mono">c₁ = 1</span> y <span class="mono">c₂ = 2</span> (una mala inicialización a propósito).</p>
+  <ol class="q" type="a">
+    <li>Haz la primera iteración: asigna cada punto a su centro más cercano y recalcula los centros.</li>
+    <li>Repite hasta que las asignaciones no cambien. ¿Cuántas iteraciones hacen falta? ¿Dónde acaban los centros?</li>
+    <li>Calcula la inercia final (suma de distancias al cuadrado de cada punto a su centro).</li>
+    <li>¿Qué habría pasado empezando con <span class="mono">c₁ = 1</span> y <span class="mono">c₂ = 10</span>? ¿Por qué se suele ejecutar k-means varias veces?</li>
+  </ol>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E2</span>Parámetros y compresión de un autoencoder<span class="tag">~10 min</span></h3>
+  <p>Un autoencoder denso para imágenes MNIST (28×28 = 784 píxeles):</p>
+  <p class="mono">784 → Dense(128) → Dense(32) → Dense(128) → Dense(784)</p>
+  <ol class="q" type="a">
+    <li>¿Qué capas forman el codificador, cuál es el código (cuello de botella) y cuáles el decodificador?</li>
+    <li>Calcula los parámetros de cada capa y el total.</li>
+    <li>¿Cuál es el factor de compresión? Si guardas el código de 60.000 imágenes en lugar de las imágenes, ¿cuántos números te ahorras?</li>
+    <li>¿Qué ocurriría si el código tuviera 1.000 neuronas y no se añadiera ninguna regularización?</li>
+  </ol>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E3</span>La pérdida de reconstrucción<span class="tag">~10 min</span></h3>
+  <p>Una imagen diminuta de 4 píxeles binarios <span class="mono">x = [1, 0, 1, 0]</span> y la reconstrucción del autoencoder <span class="mono">x̂ = [0,9, 0,2, 0,6, 0,1]</span>.</p>
+  <ol class="q" type="a">
+    <li>Calcula el error cuadrático medio (MSE).</li>
+    <li>Calcula la entropía cruzada binaria (BCE).</li>
+    <li>¿Qué píxel contribuye más a cada pérdida? ¿Por qué la BCE lo castiga más que el MSE?</li>
+    <li>¿Qué activación pondrías en la última capa para que x̂ esté entre 0 y 1?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">ln 0,9 ≈ −0,105 · ln 0,8 ≈ −0,223 · ln 0,6 ≈ −0,511 · ln 0,4 ≈ −0,916 · ln 0,2 ≈ −1,609</span></p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E4</span>Detección de anomalías por error de reconstrucción<span class="tag">~12 min</span></h3>
+  <p>Entrenas un autoencoder solo con transacciones <em>normales</em>. Sobre un conjunto de validación (también normal), el error de reconstrucción tiene media <span class="mono">0,020</span> y desviación típica <span class="mono">0,005</span>.</p>
+  <ol class="q" type="a">
+    <li>Fija el umbral como media + 3 desviaciones. ¿Cuánto vale?</li>
+    <li>Llegan tres transacciones con errores <span class="mono">0,028</span>, <span class="mono">0,041</span> y <span class="mono">0,190</span>. ¿Cuáles marcas como anómalas?</li>
+    <li>¿Por qué una transacción fraudulenta suele tener un error de reconstrucción alto?</li>
+    <li>En un test con 1.000 normales y 10 fraudes, el sistema marca 23 transacciones, de las que 8 son fraude. Calcula precision y recall. ¿Qué harías para subir el recall?</li>
+  </ol>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E5</span>¿Cuántas dimensiones latentes? PCA frente a autoencoder<span class="tag">~10 min</span></h3>
+  <ol class="q" type="a">
+    <li>Los datos son los puntos <span class="mono">(1, 2), (2, 4), (3, 6), (4, 8)</span>. ¿Cuántas dimensiones latentes bastan para reconstruirlos sin error? Propón un codificador y un decodificador lineales.</li>
+    <li>Ahora los datos están sobre una circunferencia de radio 1: <span class="mono">(1, 0), (0, 1), (−1, 0), (0, −1)</span>. Con PCA de 1 componente (por ejemplo, proyectando sobre el eje horizontal), ¿qué códigos reciben los puntos (0, 1) y (0, −1)? ¿Se pueden reconstruir?</li>
+    <li>¿Qué único número describiría cada punto de la circunferencia? ¿Por qué un autoencoder <em>no lineal</em> podría aprenderlo y PCA no?</li>
+    <li>Si un autoencoder solo tiene activaciones lineales y pérdida MSE, ¿qué aprende?</li>
+  </ol>
+</div>
+
+<!-- ===================================================== -->
+<h2 class="page-break">3.2 · Modelos <em>generativos</em> (GAN)</h2>
+
+<div class="ex">
+  <h3><span class="n">E6</span>Las pérdidas de una GAN con números<span class="tag">~15 min</span></h3>
+  <p>En un paso de entrenamiento, el discriminador D da estas probabilidades de «real»:</p>
+  <ul class="q" style="list-style:none;padding-left:2mm">
+    <li>2 imágenes reales: <span class="mono">D(x₁) = 0,9 · D(x₂) = 0,6</span></li>
+    <li>2 imágenes falsas del generador: <span class="mono">D(G(z₁)) = 0,3 · D(G(z₂)) = 0,8</span></li>
+  </ul>
+  <ol class="q" type="a">
+    <li>Calcula la pérdida del discriminador como la media de la entropía cruzada sobre las 4 imágenes (etiqueta 1 para las reales, 0 para las falsas).</li>
+    <li>Calcula la pérdida del generador <span class="mono">L_G = −media ln D(G(z))</span>.</li>
+    <li>¿Qué imagen falsa «engaña» mejor al discriminador? ¿Cuál de las cuatro aporta más pérdida a D?</li>
+    <li>En el equilibrio ideal, D da 0,5 a todo. ¿Cuánto valen entonces L_D y L_G?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">ln 0,9 ≈ −0,105 · ln 0,8 ≈ −0,223 · ln 0,7 ≈ −0,357 · ln 0,6 ≈ −0,511 · ln 0,5 ≈ −0,693 · ln 0,3 ≈ −1,204 · ln 0,2 ≈ −1,609</span></p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E7</span>Por qué el generador minimiza −ln D(G(z))<span class="tag">~10 min</span></h3>
+  <p>Al principio del entrenamiento el generador es malo y el discriminador lo detecta fácilmente: <span class="mono">D(G(z)) = 0,01</span>. Hay dos formas de escribir el objetivo del generador:</p>
+  <ul class="q" style="list-style:none;padding-left:2mm">
+    <li><b>Original («saturante»)</b>: minimizar <span class="mono">ln(1 − D(G(z)))</span></li>
+    <li><b>No saturante</b>: minimizar <span class="mono">−ln D(G(z))</span></li>
+  </ul>
+  <ol class="q" type="a">
+    <li>Calcula el valor de cada pérdida cuando D(G(z)) = 0,01.</li>
+    <li>Calcula la derivada de cada pérdida respecto a D (recuerda: la derivada de ln u es 1/u).</li>
+    <li>¿Cuál de las dos da una señal de aprendizaje más fuerte al principio? ¿Por cuánto?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">ln 0,99 ≈ −0,010 · ln 0,01 ≈ −4,605</span></p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E8</span>Dimensiones de un generador convolucional<span class="tag">~12 min</span></h3>
+  <p>Un generador tipo DCGAN para dígitos de 28×28:</p>
+  <table class="t">
+    <tr><th>Capa</th><th>Configuración</th><th>Salida</th><th>Parámetros</th></tr>
+    <tr><td>Input</td><td>vector de ruido z</td><td class="num">100</td><td class="num">0</td></tr>
+    <tr><td>Dense</td><td>7·7·128 neuronas</td><td></td><td></td></tr>
+    <tr><td>Reshape</td><td>a (7, 7, 128)</td><td></td><td></td></tr>
+    <tr><td>Conv2DTranspose</td><td>64 filtros 4×4, stride 2, same</td><td></td><td></td></tr>
+    <tr><td>Conv2DTranspose</td><td>1 filtro 4×4, stride 2, same, tanh</td><td></td><td></td></tr>
+  </table>
+  <ol class="q" type="a">
+    <li>Completa la tabla. (Una Conv2DTranspose con stride 2 y padding="same" <em>duplica</em> alto y ancho; sus parámetros se cuentan igual que en una Conv2D.)</li>
+    <li>¿Qué capa concentra más parámetros?</li>
+    <li>La salida usa tanh. ¿A qué rango hay que llevar los píxeles reales (0–255) antes de entrenar? ¿Qué valor recibe un píxel de 51?</li>
+  </ol>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E9</span>Diagnostica el entrenamiento<span class="tag">~8 min</span></h3>
+  <p>Para cada síntoma, di qué está pasando y propón un remedio:</p>
+  <ol class="q">
+    <li>La pérdida del discriminador cae casi a 0 en pocas épocas y la del generador no para de subir.</li>
+    <li>El generador produce imágenes nítidas, pero casi siempre el mismo dígito (un 1), sea cual sea z.</li>
+    <li>Las dos pérdidas oscilan alrededor de 0,69 y D da valores cercanos a 0,5.</li>
+    <li>Las pérdidas oscilan con picos enormes y, de repente, las imágenes se vuelven ruido.</li>
+  </ol>
+</div>
+
+<!-- ===================================================== -->
+<h2 class="page-break">3.3 · Redes de base <em>radial</em> (RBF)</h2>
+
+<div class="ex">
+  <h3><span class="n">E10</span>Activaciones gaussianas<span class="tag">~10 min</span></h3>
+  <p>Una neurona RBF con centro <span class="mono">c = (1, 2)</span>.</p>
+  <ol class="q" type="a">
+    <li>Con σ = 1, calcula φ para los puntos <span class="mono">A = (1, 2)</span>, <span class="mono">B = (2, 2)</span> y <span class="mono">C = (3, 4)</span>.</li>
+    <li>Repite con σ = 2.</li>
+    <li>¿Qué efecto tiene σ? ¿Qué pasa en los extremos (σ muy pequeño, σ muy grande)?</li>
+    <li>Compara con una neurona de perceptrón: ¿qué forma tiene la región donde se activa cada una?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">e<sup>−0,125</sup> ≈ 0,882 · e<sup>−0,5</sup> ≈ 0,607 · e⁻¹ ≈ 0,368 · e⁻² ≈ 0,135 · e⁻⁴ ≈ 0,018</span></p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E11</span>El XOR con dos campanas<span class="tag">~15 min</span></h3>
+  <p>El XOR vale 1 en (0, 1) y (1, 0), y 0 en (0, 0) y (1, 1). Usa dos neuronas RBF con centros <span class="mono">c₁ = (0, 0)</span> y <span class="mono">c₂ = (1, 1)</span> y <span class="mono">φ = exp(−‖x − c‖²)</span>.</p>
+  <ol class="q" type="a">
+    <li>Calcula (φ₁, φ₂) para los cuatro puntos.</li>
+    <li>Dibuja los cuatro puntos en el plano (φ₁, φ₂). ¿Son ahora separables por una recta?</li>
+    <li>Busca una salida lineal <span class="mono">y = w·(φ₁ + φ₂) + b</span> que dé exactamente 1 para las entradas con XOR = 1 y 0 para las de XOR = 0.</li>
+    <li>¿Por qué un perceptrón simple no puede resolver el XOR y esta red sí?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">e⁻¹ ≈ 0,368 · e⁻² ≈ 0,135</span></p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E12</span>Pesos de salida por mínimos cuadrados<span class="tag">~15 min</span></h3>
+  <p>Dos ejemplos de entrenamiento en una dimensión: <span class="mono">x = 0 → y = 1</span> y <span class="mono">x = 1 → y = 2</span>. Pones un centro en cada ejemplo (c₁ = 0, c₂ = 1), con <span class="mono">φ(x) = exp(−(x − c)²)</span> y sin sesgo: <span class="mono">y(x) = w₁·φ₁(x) + w₂·φ₂(x)</span>.</p>
+  <ol class="q" type="a">
+    <li>Escribe la matriz Φ (una fila por ejemplo, una columna por centro).</li>
+    <li>Resuelve el sistema <span class="mono">Φ·w = y</span> para obtener w₁ y w₂.</li>
+    <li>Predice la salida en x = 0,5 y en x = 5. ¿Qué observas lejos de los datos?</li>
+    <li>¿Por qué este paso se resuelve sin descenso del gradiente?</li>
+  </ol>
+  <p class="help">Apoyo: <span class="mono">e<sup>−0,25</sup> ≈ 0,779 · e⁻¹ ≈ 0,368 · e<sup>−16</sup> ≈ 0,0000001 · e<sup>−25</sup> ≈ 0</span>. Para un sistema 2×2 <span class="mono">[a b; b a]</span>: el determinante es a² − b².</p>
+</div>
+
+<div class="ex">
+  <h3><span class="n">E13</span>Diseñar una red RBF<span class="tag">~10 min</span></h3>
+  <ol class="q" type="a">
+    <li>k-means sobre tus datos da K = 4 centros, y la mayor distancia entre dos de ellos es 6. Con la regla habitual <span class="mono">σ = d<sub>max</sub> / √(2K)</span>, ¿cuánto vale σ?</li>
+    <li>Una red RBF con entrada de 10 variables, 50 centros y 1 salida. Cuenta lo que hay que fijar o aprender: coordenadas de los centros, anchuras (una por centro) y pesos de salida con sesgo. Compáralo con un MLP 10 → 50 → 1.</li>
+    <li>Si quieres cubrir el espacio de entrada con una rejilla de 10 centros por dimensión, ¿cuántos centros necesitas con 2 variables? ¿Y con 10? ¿Y con una imagen de 28×28?</li>
+    <li>Con lo anterior, ¿para qué tipo de problemas recomendarías una RBF y para cuáles no?</li>
+  </ol>
+</div>
+
+<!-- ===================================================== -->
+<!-- SOLUCIONES -->
+<!-- ===================================================== -->
+<div class="page-break cover">
+  <span class="kicker">Tema 3 · Ejercicios a mano</span>
+  <h1><em>Soluciones</em>.</h1>
+  <p>
+    Resueltas paso a paso, con el razonamiento de cada cuenta. Cada ejercicio
+    termina con la <b>idea clave</b> que conviene llevarse. Los decimales están
+    redondeados a dos o tres cifras; pequeñas diferencias en la última cifra
+    son normales.
+  </p>
+</div>
+
+<h2>3.1 · No supervisado y <em>autoencoders</em></h2>
+
+<div class="ex sol">
+  <h3><span class="n">E1</span>k-means a mano</h3>
+  <p>Cada iteración tiene dos pasos: <b>asignar</b> (cada punto va al centro más cercano) y <b>actualizar</b> (cada centro pasa a la media de sus puntos).</p>
+  <div class="calc">Iteración 1 · centros c₁ = 1, c₂ = 2
+  1 → c₁ (distancia 0)     2 → c₂ (0)       4 → c₂ (3 frente a 2)
+  7, 8, 10 → c₂ (más cerca de 2 que de 1)
+  grupos: {1} y {2, 4, 7, 8, 10}
+  nuevos centros: c₁ = 1   c₂ = (2+4+7+8+10)/5 = 31/5 = <span class="ans">6,2</span>
+
+Iteración 2 · c₁ = 1, c₂ = 6,2
+  2 → c₁ (1 frente a 4,2)   4 → c₂ (3 frente a 2,2)
+  grupos: {1, 2} y {4, 7, 8, 10}
+  nuevos centros: c₁ = 1,5   c₂ = 29/4 = <span class="ans">7,25</span>
+
+Iteración 3 · c₁ = 1,5, c₂ = 7,25
+  4 → c₁ (2,5 frente a 3,25)
+  grupos: {1, 2, 4} y {7, 8, 10}
+  nuevos centros: c₁ = 7/3 = <span class="ans">2,33</span>   c₂ = 25/3 = <span class="ans">8,33</span>
+
+Iteración 4 · c₁ = 2,33, c₂ = 8,33
+  4 → c₁ (1,67 frente a 4,33): nada cambia → <span class="ans">convergencia</span></div>
+  <p><b>b)</b> Las asignaciones dejan de cambiar en la <span class="ans">4.ª iteración</span> (3 iteraciones con cambios y una de comprobación). Centros finales <span class="ans">2,33 y 8,33</span>: los dos grupos naturales {1, 2, 4} y {7, 8, 10}.</p>
+  <div class="calc">c) grupo 1: (1 − 2,33)² + (2 − 2,33)² + (4 − 2,33)² = 1,78 + 0,11 + 2,78 = 4,67
+   grupo 2: (7 − 8,33)² + (8 − 8,33)² + (10 − 8,33)² = 1,78 + 0,11 + 2,78 = 4,67
+   inercia = <span class="ans">9,33</span></div>
+  <p><b>d)</b> Con c₁ = 1 y c₂ = 10, la primera asignación ya da {1, 2, 4} y {7, 8, 10}: converge en <span class="ans">una sola iteración</span> al mismo resultado. Aquí la mala inicialización solo cuesta iteraciones, pero en general k-means puede quedarse en un <span class="ans">mínimo local</span> peor (por ejemplo, dos centros en el mismo grupo). Por eso se ejecuta varias veces con inicios distintos y se queda la solución de menor inercia (en scikit-learn, <span class="mono">n_init</span>; y k-means++ elige inicios separados entre sí).</p>
+  <p class="note">Idea clave: k-means alterna asignar y promediar, la inercia nunca sube, y el resultado depende del punto de partida. Es el mismo k-means que coloca los centros de una red RBF.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E2</span>Parámetros y compresión de un autoencoder</h3>
+  <p><b>a)</b> Codificador: <span class="mono">784 → 128 → 32</span>. Código: la capa de <span class="ans">32 neuronas</span>, el cuello de botella. Decodificador: <span class="mono">32 → 128 → 784</span>, la imagen especular del codificador. Se entrena para que la salida sea igual a la entrada.</p>
+  <div class="calc">b) Dense(128): (784 + 1)·128 = 100.480
+   Dense(32):  (128 + 1)·32  =   4.128
+   Dense(128): (32 + 1)·128  =   4.224
+   Dense(784): (128 + 1)·784 = 101.136
+   Total                     = <span class="ans">209.968</span>
+
+c) Compresión: 784 / 32 = <span class="ans">24,5 veces</span>
+   60.000 imágenes: 60.000·784 = 47.040.000 números
+   60.000 códigos:  60.000·32  =  1.920.000 números
+   Ahorro: <span class="ans">45.120.000</span> números (el 96 %), a cambio de guardar también el decodificador</div>
+  <p>Casi todos los parámetros están en la primera y la última capa, las que tocan los 784 píxeles.</p>
+  <p><b>d)</b> Con un código de 1.000 neuronas (más que la entrada) y sin regularización, la red puede aprender a <span class="ans">copiar la entrada</span> (algo parecido a la identidad): error casi cero, pero el código no ha aprendido ninguna estructura útil. Un autoencoder «overcomplete» necesita una restricción extra para servir: dispersión (sparse), ruido en la entrada (denoising) u otra regularización.</p>
+  <p class="note">Idea clave: el cuello de botella obliga a la red a quedarse con lo esencial. Sin él (o sin otra restricción), reconstruir bien no demuestra nada.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E3</span>La pérdida de reconstrucción</h3>
+  <div class="calc">a) MSE: errores x − x̂ = [0,1, −0,2, 0,4, −0,1]
+   cuadrados = [0,01, 0,04, 0,16, 0,01]   suma 0,22
+   MSE = 0,22 / 4 = <span class="ans">0,055</span>
+
+b) BCE píxel a píxel (solo sobrevive un término, según x sea 1 o 0):
+   píxel 1 (x=1): −ln 0,9       = 0,105
+   píxel 2 (x=0): −ln(1 − 0,2)  = −ln 0,8 = 0,223
+   píxel 3 (x=1): −ln 0,6       = 0,511
+   píxel 4 (x=0): −ln(1 − 0,1)  = −ln 0,9 = 0,105
+   BCE = (0,105 + 0,223 + 0,511 + 0,105) / 4 = 0,944 / 4 = <span class="ans">0,236</span></div>
+  <p><b>c)</b> En las dos pérdidas el que más aporta es el <span class="ans">píxel 3</span> (vale 1 y se reconstruye como 0,6). En MSE pesa 0,16 frente a 0,01–0,04 de los demás. La BCE usa el logaritmo: cuando la predicción se acerca al valor equivocado, −ln x̂ crece sin límite (con x̂ = 0,01 sería 4,6), mientras que el error cuadrático nunca pasa de 1. Por eso la BCE castiga con más fuerza los errores «seguros y equivocados» y da gradientes más fuertes.</p>
+  <p><b>d)</b> Una <span class="ans">sigmoide</span>, que lleva cualquier valor a (0, 1). Es la combinación habitual con imágenes normalizadas a [0, 1] y pérdida BCE.</p>
+  <p class="note">Idea clave: un autoencoder se entrena con una pérdida que compara la entrada con su reconstrucción: MSE para valores continuos, BCE para píxeles en [0, 1].</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E4</span>Detección de anomalías por error de reconstrucción</h3>
+  <div class="calc">a) umbral = 0,020 + 3·0,005 = 0,020 + 0,015 = <span class="ans">0,035</span>
+b) 0,028 &lt; 0,035 → normal
+   0,041 &gt; 0,035 → <span class="ans">anómala</span>
+   0,190 &gt; 0,035 → <span class="ans">anómala</span> (casi 10 veces el error típico)</div>
+  <p><b>c)</b> El autoencoder solo ha visto transacciones normales, así que ha aprendido a comprimir y reconstruir <em>ese</em> tipo de patrón. Una transacción rara no encaja en lo que el código sabe representar y se reconstruye mal: el error alto es la señal de «esto no se parece a nada de lo que conozco». No hacen falta ejemplos de fraude para entrenar.</p>
+  <div class="calc">d) TP = 8 (fraudes marcados)   FP = 23 − 8 = 15 (normales marcadas)   FN = 10 − 8 = 2
+   precision = 8 / 23 = <span class="ans">0,35</span>    recall = 8 / 10 = <span class="ans">0,80</span></div>
+  <p>Para subir el recall hay que <span class="ans">bajar el umbral</span> (por ejemplo, media + 2σ = 0,030): se cazan más fraudes a cambio de más falsas alarmas. El umbral se elige con un conjunto de validación que contenga algunos fraudes, igual que en el Tema 5.1.</p>
+  <p class="note">Idea clave: entrenado solo con lo normal, el error de reconstrucción funciona como una «puntuación de rareza». El umbral reparte precision y recall como en cualquier clasificador.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E5</span>¿Cuántas dimensiones latentes? PCA frente a autoencoder</h3>
+  <p><b>a)</b> Todos los puntos cumplen y = 2x: están sobre una recta, así que <span class="ans">1 dimensión</span> basta. Codificador: <span class="mono">z = x₁</span> (o cualquier múltiplo). Decodificador: <span class="mono">(x̂₁, x̂₂) = (z, 2z)</span>. Comprobación con (3, 6): z = 3 → (3, 6). Error cero. Es lo que haría PCA con 1 componente (la dirección de la recta).</p>
+  <p><b>b)</b> Proyectando sobre el eje horizontal, el código es la coordenada x: <span class="mono">(0, 1) → 0</span> y <span class="mono">(0, −1) → 0</span>. Dos puntos distintos reciben el <span class="ans">mismo código</span>, así que es imposible reconstruirlos los dos: el decodificador devolverá lo mismo para ambos. Cualquier otra dirección de proyección tiene el mismo problema con otra pareja de puntos.</p>
+  <p><b>c)</b> El <span class="ans">ángulo</span> θ: cada punto es <span class="mono">(cos θ, sin θ)</span>, con 0°, 90°, 180° y 270°. Los datos tienen un solo grado de libertad, pero la relación entre θ y las coordenadas es <em>curva</em>. PCA solo puede proyectar sobre rectas (es lineal); un autoencoder con activaciones no lineales puede aprender una función curva como z = θ y reconstruir (cos z, sin z).</p>
+  <p><b>d)</b> Con activaciones lineales y MSE, el autoencoder aprende el <span class="ans">mismo subespacio que PCA</span>: lo mejor que puede hacer una transformación lineal. La ventaja del autoencoder aparece al añadir no linealidades y capas.</p>
+  <p class="note">Idea clave: la dimensión latente necesaria es la de la «forma» de los datos, no la del espacio donde viven. PCA encuentra formas planas; un autoencoder profundo, también curvas.</p>
+</div>
+
+<h2>3.2 · Modelos <em>generativos</em> (GAN)</h2>
+
+<div class="ex sol">
+  <h3><span class="n">E6</span>Las pérdidas de una GAN con números</h3>
+  <p><b>a)</b> Para las reales (etiqueta 1) la entropía cruzada es −ln D(x); para las falsas (etiqueta 0), −ln(1 − D(G(z))).</p>
+  <div class="calc">real 1:  −ln 0,9        = 0,105
+real 2:  −ln 0,6        = 0,511
+falsa 1: −ln(1 − 0,3) = −ln 0,7 = 0,357
+falsa 2: −ln(1 − 0,8) = −ln 0,2 = 1,609
+L_D = (0,105 + 0,511 + 0,357 + 1,609) / 4 = 2,582 / 4 = <span class="ans">0,646</span>
+
+b) L_G = −(ln 0,3 + ln 0,8) / 2 = (1,204 + 0,223) / 2 = 1,427 / 2 = <span class="ans">0,714</span></div>
+  <p><b>c)</b> La <span class="ans">falsa 2</span> engaña mejor: D le da 0,8 de probabilidad de ser real. Por eso también es la que más pérdida aporta a D (1,609): el discriminador se equivocó «con seguridad». En el siguiente paso, D aprenderá sobre todo de esa imagen, y G aprenderá sobre todo de la falsa 1, que es la que peor le salió (−ln 0,3 = 1,204).</p>
+  <div class="calc">d) D = 0,5 para todo:
+   L_D = −[ln 0,5 + ln(1 − 0,5)] / 2 = −ln 0,5 = <span class="ans">0,693</span>  (= ln 2)
+   L_G = −ln 0,5                             = <span class="ans">0,693</span></div>
+  <p>Ninguna de las dos pérdidas llega a cero: en el equilibrio, D no distingue y adivina a cara o cruz. Por eso, en una GAN, que la pérdida no baje <em>no</em> significa que no aprenda; hay que mirar las imágenes.</p>
+  <p class="note">Idea clave: D y G se entrenan con pérdidas opuestas sobre las mismas imágenes. Lo que una red gana, la otra lo pierde, y el punto de equilibrio es D = 0,5, con pérdidas ≈ 0,69.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E7</span>Por qué el generador minimiza −ln D(G(z))</h3>
+  <div class="calc">a) saturante:     ln(1 − 0,01) = ln 0,99 ≈ <span class="ans">−0,010</span>
+   no saturante:  −ln 0,01            ≈ <span class="ans">4,605</span>
+
+b) Llamando D = D(G(z)):
+   saturante:     d/dD [ln(1 − D)] = −1 / (1 − D) = −1 / 0,99 ≈ <span class="ans">−1,01</span>
+   no saturante:  d/dD [−ln D]     = −1 / D       = −1 / 0,01 = <span class="ans">−100</span>
+
+c) 100 / 1,01 ≈ <span class="ans">99 veces</span> más fuerte la no saturante</div>
+  <p>El signo negativo dice lo mismo en las dos: subir D(G(z)) reduce la pérdida. La diferencia está en el tamaño. Con la forma original, cuando D rechaza con claridad las falsas (D ≈ 0), la pérdida está en una zona casi plana: el generador recibe un gradiente pequeño justo cuando más necesita aprender. Con −ln D(G(z)), el gradiente es grande precisamente cuando el generador es malo. Las dos formas tienen el mismo objetivo (que D se equivoque), pero solo una aprende bien al principio.</p>
+  <p class="note">Idea clave: no basta con que la pérdida apunte en la dirección correcta; tiene que dar gradientes útiles donde empieza el entrenamiento. Por eso en la práctica casi todas las GAN usan la versión no saturante.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E8</span>Dimensiones de un generador convolucional</h3>
+  <table class="t">
+    <tr><th>Capa</th><th>Salida</th><th>Parámetros</th><th>Cuenta</th></tr>
+    <tr><td>Dense 6.272</td><td class="num">6.272</td><td class="num">633.472</td><td class="mono">(100 + 1)·6.272</td></tr>
+    <tr><td>Reshape</td><td class="num">7×7×128</td><td class="num">0</td><td>solo reordena: 7·7·128 = 6.272</td></tr>
+    <tr><td>Conv2DTranspose 64</td><td class="num">14×14×64</td><td class="num">131.136</td><td class="mono">(4·4·128 + 1)·64</td></tr>
+    <tr><td>Conv2DTranspose 1</td><td class="num">28×28×1</td><td class="num">1.025</td><td class="mono">(4·4·64 + 1)·1</td></tr>
+  </table>
+  <p><b>a)</b> El camino es el inverso al de una CNN clasificadora: se parte de un vector pequeño, se le da forma de «imagen» 7×7 con 128 canales, y cada Conv2DTranspose con stride 2 duplica el tamaño (7 → 14 → 28) mientras reduce los canales (128 → 64 → 1). Total: <span class="mono">633.472 + 131.136 + 1.025 =</span> <span class="ans">765.633</span> parámetros.</p>
+  <p><b>b)</b> La capa <span class="ans">Dense</span> inicial, con el 83 % de los parámetros: conecta cada una de las 100 componentes del ruido con cada uno de los 6.272 valores.</p>
+  <div class="calc">c) tanh da valores en [−1, 1] → los reales deben estar en <span class="ans">[−1, 1]</span>
+   transformación: p' = p / 127,5 − 1     (0 → −1 · 127,5 → 0 · 255 → 1)
+   píxel 51: 51 / 127,5 − 1 = 0,4 − 1 = <span class="ans">−0,6</span></div>
+  <p>Si las imágenes reales estuvieran en [0, 255] y las falsas en [−1, 1], el discriminador las distinguiría solo por la escala, sin mirar el contenido.</p>
+  <p class="note">Idea clave: el generador es una CNN «al revés»: de un vector de ruido a una imagen, aumentando el tamaño y bajando los canales. Las imágenes reales tienen que vivir en el mismo rango que su activación final.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E9</span>Diagnostica el entrenamiento</h3>
+  <ol class="q">
+    <li><b>El discriminador es demasiado fuerte.</b> Distingue todo sin esfuerzo, D(G(z)) ≈ 0 y el generador apenas recibe gradiente (es justo el caso de E7). Remedios: pérdida no saturante, reducir la capacidad o el learning rate de D, entrenarlo menos pasos que G, añadir ruido o <em>label smoothing</em> (etiquetas reales a 0,9 en lugar de 1).</li>
+    <li><b>Colapso de modos (mode collapse).</b> G ha encontrado una salida que engaña a D y la repite para cualquier z: buena calidad, cero variedad. Remedios: variantes como WGAN, minibatch discrimination, o arquitecturas más estables; vigilar la diversidad de las muestras, no solo la pérdida.</li>
+    <li><b>Probablemente va bien.</b> Pérdidas en torno a ln 2 ≈ 0,69 y D ≈ 0,5 es lo esperable cerca del equilibrio (E6 d). Hay que comprobarlo mirando muestras generadas, porque la pérdida sola no mide la calidad.</li>
+    <li><b>Entrenamiento inestable / divergencia.</b> El juego entre las dos redes se ha desequilibrado. Remedios: bajar el learning rate (y usar Adam con β₁ = 0,5, lo habitual en GAN), normalización por lotes o espectral, guardar checkpoints para volver al último estado bueno.</li>
+  </ol>
+  <p class="note">Idea clave: en una GAN la pérdida no baja hasta cero, así que se diagnostica por el equilibrio entre D y G y, sobre todo, mirando las imágenes generadas.</p>
+</div>
+
+<h2>3.3 · Redes de base <em>radial</em> (RBF)</h2>
+
+<div class="ex sol">
+  <h3><span class="n">E10</span>Activaciones gaussianas</h3>
+  <p>Primero la distancia al cuadrado al centro, que no depende de σ; después la gaussiana.</p>
+  <div class="calc">‖A − c‖² = (1−1)² + (2−2)² = 0
+‖B − c‖² = (2−1)² + (2−2)² = 1
+‖C − c‖² = (3−1)² + (4−2)² = 4 + 4 = 8
+
+a) σ = 1, exponente −r²/2:   A: e⁰ = <span class="ans">1</span>   B: e<sup>−0,5</sup> = <span class="ans">0,607</span>   C: e⁻⁴ = <span class="ans">0,018</span>
+b) σ = 2, exponente −r²/8:   A: e⁰ = <span class="ans">1</span>   B: e<sup>−0,125</sup> = <span class="ans">0,882</span>   C: e⁻¹ = <span class="ans">0,368</span></div>
+  <p><b>c)</b> σ es la <span class="ans">anchura de la campana</span>. Con σ = 1, C está prácticamente fuera (0,018); con σ = 2 aún responde 0,368. En el centro siempre vale 1. Con σ muy pequeño, cada neurona solo responde a puntos casi idénticos a su centro (picos aislados, la red memoriza y generaliza mal); con σ muy grande, todas responden casi igual a todo (la salida se aplana y la red no distingue nada).</p>
+  <p><b>d)</b> El perceptrón calcula w·x + b: su región de activación es un <span class="ans">semiplano</span> (todo lo que queda a un lado de una recta, hasta el infinito). La RBF depende de la distancia a un punto: su región es una <span class="ans">bola</span> alrededor del centro, y lejos de él la respuesta cae a 0. Global frente a local.</p>
+  <p class="note">Idea clave: una neurona RBF mide parecido a un prototipo. σ decide hasta dónde llega ese parecido.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E11</span>El XOR con dos campanas</h3>
+  <div class="calc">a) punto    ‖x−c₁‖²  ‖x−c₂‖²   φ₁               φ₂               XOR
+   (0, 0)     0        2        e⁰ = 1           e⁻² = 0,135       0
+   (0, 1)     1        1        e⁻¹ = 0,368       e⁻¹ = 0,368       1
+   (1, 0)     1        1        e⁻¹ = 0,368       e⁻¹ = 0,368       1
+   (1, 1)     2        0        e⁻² = 0,135       e⁰ = 1           0</div>
+  <p><b>b)</b> En el plano (φ₁, φ₂), los dos puntos con XOR = 1 caen en el <span class="ans">mismo sitio</span>, (0,368, 0,368), cerca del origen. Los dos con XOR = 0 están en (1, 0,135) y (0,135, 1), lejos del origen. Una recta como <span class="mono">φ₁ + φ₂ = 0,9</span> los separa: <span class="ans">ahora sí son separables</span>.</p>
+  <div class="calc">c) φ₁ + φ₂ vale 0,736 si XOR = 1 y 1,135 si XOR = 0. Se pide:
+   w·0,736 + b = 1
+   w·1,135 + b = 0
+   restando: w·(0,736 − 1,135) = 1  →  w = 1 / (−0,399) = <span class="ans">−2,50</span>
+   b = −w·1,135 = 2,50·1,135 = <span class="ans">2,84</span>
+   comprobación: −2,50·0,736 + 2,84 = 1,00 ✓   −2,50·1,135 + 2,84 = 0,00 ✓</div>
+  <p>El peso es negativo porque «estar cerca de algún centro» (suma grande) significa XOR = 0.</p>
+  <p><b>d)</b> El perceptrón traza una sola recta en el plano original, y no hay ninguna que deje (0, 1) y (1, 0) a un lado y (0, 0) y (1, 1) al otro. La capa RBF <span class="ans">transforma el espacio</span> de forma no lineal: mide distancias a dos prototipos, y en esas nuevas coordenadas el problema se vuelve lineal. La capa de salida, que es lineal, ya puede resolverlo.</p>
+  <p class="note">Idea clave: la capa oculta de una RBF lleva los datos a un espacio donde una recta basta. Es la misma idea que el truco del núcleo de las SVM.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E12</span>Pesos de salida por mínimos cuadrados</h3>
+  <div class="calc">a) fila x = 0:  φ₁(0) = e⁰ = 1           φ₂(0) = e⁻¹ = 0,368
+   fila x = 1:  φ₁(1) = e⁻¹ = 0,368       φ₂(1) = e⁰ = 1
+
+   Φ = [ 1      0,368 ]      y = [ 1 ]
+       [ 0,368  1     ]          [ 2 ]
+
+b) Sistema:  w₁ + 0,368·w₂ = 1
+             0,368·w₁ + w₂ = 2
+   determinante = 1² − 0,368² = 1 − 0,135 = 0,865
+   w₁ = (1·1 − 0,368·2) / 0,865 = (1 − 0,736) / 0,865 = 0,264 / 0,865 = <span class="ans">0,31</span>
+   w₂ = (1·2 − 0,368·1) / 0,865 = (2 − 0,368) / 0,865 = 1,632 / 0,865 = <span class="ans">1,89</span>
+   comprobación x = 0: 0,31 + 0,368·1,89 = 0,31 + 0,69 = 1,00 ✓</div>
+  <p>(Regla de Cramer: se sustituye la columna de cada incógnita por y y se divide entre el determinante. También vale despejar w₁ de la primera ecuación y sustituir en la segunda.)</p>
+  <div class="calc">c) x = 0,5: φ₁ = φ₂ = e<sup>−0,25</sup> = 0,779
+           y = 0,779·(0,31 + 1,89) = 0,779·2,20 = <span class="ans">1,71</span>
+   x = 5:   φ₁ = e<sup>−25</sup> ≈ 0,  φ₂ = e<sup>−16</sup> ≈ 0,0000001
+           y ≈ <span class="ans">0</span></div>
+  <p>Entre los datos, la red <span class="ans">interpola</span> con suavidad (1,71, entre 1 y 2). Lejos de ellos, todas las campanas se apagan y la salida cae a 0 (o al sesgo, si lo hubiera): una RBF <span class="ans">no extrapola</span>. No sabe nada de donde no ha visto datos.</p>
+  <p><b>d)</b> Con los centros y σ ya fijados, la salida es <span class="ans">lineal en los pesos</span> w. Ajustarlos es un problema de mínimos cuadrados con solución cerrada (resolver un sistema, o usar la pseudoinversa si hay más ejemplos que centros), sin iterar ni elegir learning rate. Esa es la ventaja del entrenamiento en dos pasos.</p>
+  <p class="note">Idea clave: paso 1, colocar los centros (k-means); paso 2, resolver los pesos de salida con un sistema lineal. Rápido y exacto, pero la red solo sabe responder cerca de sus centros.</p>
+</div>
+
+<div class="ex sol">
+  <h3><span class="n">E13</span>Diseñar una red RBF</h3>
+  <div class="calc">a) σ = d_max / √(2K) = 6 / √8 = 6 / 2,83 = <span class="ans">2,12</span>
+
+b) Red RBF 10 → 50 centros → 1:
+   coordenadas de los centros: 50·10 = 500   (k-means, paso 1)
+   anchuras:                   50            (una por centro; o 1 compartida)
+   pesos de salida + sesgo:    50 + 1 = 51   (mínimos cuadrados, paso 2)
+   total = <span class="ans">601</span>
+   MLP 10 → 50 → 1: (10 + 1)·50 + (50 + 1)·1 = 550 + 51 = <span class="ans">601</span></div>
+  <p>El tamaño es el mismo, pero se aprenden de forma distinta: en la RBF, solo 51 números salen del ajuste supervisado (y de forma exacta); los centros se colocan sin mirar las etiquetas. En el MLP, los 601 se aprenden juntos con backprop.</p>
+  <div class="calc">c) rejilla de 10 centros por dimensión:
+   2 variables:          10² = <span class="ans">100</span> centros
+   10 variables:         10¹⁰ = <span class="ans">10.000 millones</span>
+   imagen 28×28 (784):   10⁷⁸⁴ (más que átomos en el universo, ~10⁸⁰)</div>
+  <p><b>d)</b> Recomendable con <span class="ans">pocas variables</span> (hasta unas decenas), relaciones suaves y necesidad de entrenar rápido o interpolar con precisión: aproximar funciones, control, series cortas, modelos sustitutos de simulaciones. No recomendable con <span class="ans">entradas de alta dimensión</span> como imágenes, audio o texto (la maldición de la dimensionalidad de c), ni cuando hay que extrapolar. Ahí ganan las redes profundas, que aprenden sus propias características.</p>
+  <p class="note">Idea clave: las RBF son locales, rápidas de entrenar y buenas interpolando en pocas dimensiones; ese mismo carácter local es su límite cuando la dimensión crece.</p>
+</div>
+
+</body>
+</html>
