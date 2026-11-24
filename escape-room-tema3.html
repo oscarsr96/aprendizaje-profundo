@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Protocolo SIMULACRO · Escape Room Tema 3</title>
+<meta name="description" content="Escape room del Tema 3 de Aprendizaje Profundo (CUNEF): aprendizaje no supervisado y autoencoders, GAN y redes RBF.">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<style>
+:root{--bg:#0a0f0a;--panel:rgba(13,26,13,.92);--text:#80d4a0;--accent:#00ff41;--success:#4ade80;--error:#ef4444;--border:#1f5f2f;--code-bg:rgba(5,12,5,.92);--code-text:#00ff41};--panel:{PANEL};--text:{TEXT};--accent:{ACCENT};--success:#4ade80;--error:#ef4444;--border:{BORDER};--code-bg:rgba(13,13,13,.9);--code-text:#00ff41}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Press Start 2P',monospace;min-height:100vh;display:flex;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));line-height:1.8}
+#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#wrapper{display:flex;gap:20px;width:100%;max-width:1400px;align-items:flex-start;perspective:1200px}
+#app{flex:1;min-width:0;max-width:960px;transform-style:preserve-3d;border-radius:8px;transition:box-shadow .8s ease}
+#schemaPanel{width:420px;flex-shrink:0;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);backdrop-filter:blur(8px);border:4px solid var(--border);padding:20px;display:none;animation:fadeIn .3s}
+#schemaPanel.visible{display:block}
+#schemaPanel h2{font-size:.9em;color:var(--accent);margin-bottom:12px;text-align:center}
+#schemaPanel pre{font-family:'Courier New',monospace;font-size:12px;color:var(--code-text);background:var(--code-bg);padding:12px;white-space:pre-wrap;line-height:1.8;border:2px solid var(--border)}
+#schemaPanel .close-btn{margin-top:12px;display:block;width:100%;font-size:.65em}
+.screen{animation:screenEnter .6s ease-out}
+@keyframes screenEnter{0%{opacity:0;transform:rotateY(-8deg) translateZ(-40px) scale(.97)}100%{opacity:1;transform:rotateY(0) translateZ(0) scale(1)}}
+.screen-exit{animation:screenExit .3s ease-in forwards}
+@keyframes screenExit{0%{opacity:1;transform:rotateY(0) translateZ(0) scale(1)}100%{opacity:0;transform:rotateY(8deg) translateZ(-40px) scale(.97)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:.7}}
+.title-screen{text-align:center;padding-top:12vh}
+.title-screen h1{font-size:2.2em;color:var(--accent);text-shadow:0 0 20px rgba(0,255,65,.5),0 0 60px rgba(0,255,65,.2);margin-bottom:10px;line-height:1.4}
+.title-screen .subtitle{font-size:.9em;margin-bottom:40px;opacity:.8}
+.title-screen .swords{font-size:3em;margin-bottom:20px;animation:flicker 3s infinite}
+input[type="text"]{font-family:'Press Start 2P',monospace;background:var(--code-bg);color:var(--code-text);border:3px solid var(--border);padding:12px;font-size:.85em;width:100%;max-width:420px;outline:none;display:block;margin:0 auto 15px;-webkit-appearance:none;appearance:none}
+input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(0,255,65,.3)}
+button{font-family:'Press Start 2P',monospace;background:var(--accent);color:#031a08;border:none;padding:12px 24px;font-size:.8em;cursor:pointer;margin-top:10px;transition:all .2s;touch-action:manipulation;min-height:44px}
+button:hover{background:#5cff85;transform:scale(1.05)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:3px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.hearts{font-size:1.5em;letter-spacing:5px}
+.heart{color:var(--error);transition:all .3s}
+.heart.dead{color:#3a2020;filter:grayscale(1)}
+.progress{font-size:.75em;opacity:.8}
+.schema-btn{font-size:.7em;padding:10px 18px;background:var(--accent);border:3px solid #5cff85;color:#031a08;letter-spacing:1px;box-shadow:0 0 12px rgba(0,255,65,.3)}
+.schema-btn:hover{background:#5cff85;box-shadow:0 0 20px rgba(0,255,65,.5)}
+.schema-btn.active{background:var(--success);border-color:#86efac;color:#000;box-shadow:0 0 12px rgba(74,222,128,.3)}
+.room-name{text-align:center;font-size:1.1em;color:var(--accent);margin-bottom:20px;padding:10px;border:2px solid var(--accent);background:rgba(0,255,65,.08);letter-spacing:2px}
+.narrative{font-size:.7em;font-style:italic;margin-bottom:20px;opacity:.85;line-height:2.2;padding:0 10px}
+.task-box{background:var(--panel);backdrop-filter:blur(6px);border:3px solid var(--border);padding:15px;margin-bottom:15px}
+.task-box h3{font-size:.8em;color:var(--accent);margin-bottom:10px}
+.task-box p{font-size:.7em;line-height:2.2}
+.question-text{font-size:.75em;line-height:2.2;margin-top:10px;padding:10px;background:rgba(0,0,0,.2);border-left:3px solid var(--accent)}
+code{background:rgba(0,0,0,.4);padding:2px 6px;color:var(--code-text);font-family:'Courier New',monospace;font-size:1.1em}
+.hint{font-size:.6em;opacity:.5;margin-bottom:15px;padding:5px 10px;border-left:3px solid var(--border)}
+.feedback{font-size:.7em;margin:15px 0;padding:12px 15px;line-height:2}
+.feedback.ok{color:var(--success);border-left:4px solid var(--success);background:rgba(74,222,128,.05)}
+.feedback.fail{color:var(--error);border-left:4px solid var(--error);background:rgba(239,68,68,.05)}
+.feedback.warn{color:#fbbf24;border-left:4px solid #fbbf24;background:rgba(251,191,36,.05)}
+.nav-row{display:flex;gap:10px;margin-top:15px}
+.nav-row button{flex:1}
+.prev-btn{background:var(--panel);border:2px solid var(--border);color:var(--text);font-size:.7em}
+.prev-btn:hover{border-color:var(--accent);background:var(--border)}
+.next-btn{font-size:.75em;padding:15px;background:var(--success);color:#000;letter-spacing:1px}
+.next-btn:hover{background:#86efac}
+.solved-badge{display:inline-block;background:var(--success);color:#000;font-size:.55em;padding:4px 10px;margin-left:10px;vertical-align:middle}
+.branch-screen{text-align:center;padding-top:5vh}
+.branch-screen h2{font-size:1.1em;color:var(--accent);margin-bottom:15px}
+.branch-options{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.branch-card{background:var(--panel);backdrop-filter:blur(6px);border:3px solid var(--border);padding:25px 20px;width:400px;cursor:pointer;transition:all .4s ease-out;text-align:center;transform-style:preserve-3d}
+.branch-card:hover{border-color:var(--accent);transform:perspective(800px) rotateY(-5deg) rotateX(3deg) translateY(-8px) scale(1.03);box-shadow:0 15px 40px rgba(0,255,65,.3),0 0 15px rgba(0,255,65,.15)}
+.branch-card:active{transform:perspective(800px) rotateY(0) rotateX(0) scale(.98);transition:all .1s}
+.branch-card h3{font-size:.85em;color:var(--accent);margin-bottom:12px}
+.branch-card p{font-size:.65em;line-height:2.2;opacity:.8}
+.branch-card .icon{font-size:2.5em;margin-bottom:10px}
+.victory-screen{text-align:center;padding-top:5vh}
+.victory-screen h1{color:#ffd700;font-size:1.7em;margin-bottom:5px;text-shadow:0 0 20px rgba(255,215,0,.5)}
+.victory-screen .trophy{font-size:3.5em;margin-bottom:10px;animation:pulse 2s infinite}
+.phrase-box{background:linear-gradient(135deg,rgba(10,40,18,.9),rgba(6,24,10,.9));backdrop-filter:blur(8px);border:4px solid #d4a76a;padding:30px;margin:25px auto;max-width:700px;box-shadow:0 0 40px rgba(212,167,106,.25),inset 0 0 30px rgba(0,0,0,.3)}
+.phrase-text{font-size:.75em;line-height:2.5;color:#ffd700}
+.completion-info{margin-top:25px;font-size:.65em;line-height:2.2;opacity:.8}
+.code-box{background:var(--code-bg);border:2px solid var(--border);padding:15px;margin:15px auto;max-width:400px;font-family:'Courier New',monospace;color:var(--code-text);font-size:16px;letter-spacing:3px}
+.instructions{font-size:.55em;margin-top:20px;opacity:.6;line-height:2.2}
+.gameover-screen{text-align:center;padding-top:12vh}
+.gameover-screen h1{color:var(--error);font-size:1.7em;margin-bottom:15px}
+.gameover-screen .skull{font-size:3.5em;margin-bottom:15px}
+.gameover-screen p{font-size:.75em;margin-bottom:25px;line-height:2}
+.intro-screen{text-align:center;padding-top:8vh;max-width:720px;margin:0 auto}
+.intro-screen h2{font-size:1.1em;color:var(--accent);margin-bottom:25px}
+.intro-screen p{font-size:.7em;line-height:2.4;margin-bottom:15px;text-align:left}
+.intro-screen .warning{color:var(--error)}
+.intro-screen .note{opacity:.6;font-size:.6em;margin-top:10px;text-align:left;line-height:2.2}
+.name-display{color:var(--accent);font-style:normal}
+#toggle3d{position:fixed;top:10px;right:10px;z-index:100;font-family:'Press Start 2P',monospace;font-size:.5em;padding:6px 10px;background:rgba(6,24,10,.7);backdrop-filter:blur(4px);color:var(--text);border:2px solid var(--border);cursor:pointer;opacity:.6;transition:all .3s}
+#toggle3d:hover{opacity:1;border-color:var(--accent)}
+#toggle3d.off{opacity:.4}
+
+/* === QUIZ STYLES === */
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.option-card{background:var(--panel);border:3px solid var(--border);padding:15px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:12px;touch-action:manipulation;min-height:44px}
+.option-card:hover{border-color:var(--accent);transform:translateX(5px);background:rgba(0,255,65,.05)}
+.option-card.selected{border-color:var(--accent);background:rgba(0,255,65,.12);box-shadow:0 0 15px rgba(0,255,65,.2)}
+.option-card.correct{border-color:var(--success);background:rgba(74,222,128,.1);box-shadow:0 0 10px rgba(74,222,128,.2)}
+.option-card.incorrect{border-color:var(--error);background:rgba(239,68,68,.1);box-shadow:0 0 10px rgba(239,68,68,.2)}
+.option-label{font-size:.8em;color:var(--accent);font-weight:bold;min-width:28px}
+.option-text{font-size:.7em;line-height:2.2}
+.tf-options{display:flex;gap:20px;justify-content:center;margin-bottom:10px}
+.tf-card{flex:1;max-width:250px;text-align:center;padding:25px;cursor:pointer;background:var(--panel);border:3px solid var(--border);transition:all .3s;touch-action:manipulation;min-height:44px}
+.tf-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.tf-card.selected{border-color:var(--accent);background:rgba(0,255,65,.12);box-shadow:0 0 15px rgba(0,255,65,.2)}
+.tf-card.correct{border-color:var(--success);background:rgba(74,222,128,.1)}
+.tf-card.incorrect{border-color:var(--error);background:rgba(239,68,68,.1)}
+.tf-icon{font-size:2em;margin-bottom:8px}
+.tf-label{font-size:.7em;letter-spacing:2px}
+.answer-area{margin-bottom:10px}
+.answer-input{width:100%;font-family:'Press Start 2P',monospace;background:var(--code-bg);color:var(--code-text);border:3px solid var(--border);padding:12px;font-size:16px;outline:none;-webkit-appearance:none;appearance:none}
+.answer-input:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(0,255,65,.3)}
+.answer-input:read-only{opacity:.7;cursor:default}
+.fill-question{font-size:.75em;line-height:2.4;margin-bottom:15px;padding:10px;background:rgba(0,0,0,.2);border-left:3px solid var(--accent)}
+.confirm-btn{background:var(--accent);width:100%;margin-top:10px;margin-bottom:5px;font-size:.8em;padding:15px;letter-spacing:1px}
+.confirm-btn:hover{background:#5cff85}
+.confirm-btn:disabled{opacity:.4;cursor:not-allowed}
+
+#profPanel{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(8,4,18,.97);backdrop-filter:blur(8px);border-top:3px solid #7c3aed;padding:8px 12px;display:none;flex-wrap:wrap;gap:5px;align-items:center}
+#profPanel.visible{display:flex}
+#profPanel .prof-label{font-family:'Press Start 2P',monospace;font-size:.5em;color:#a78bfa;white-space:nowrap;margin-right:4px}
+#profPanel .prof-q-btn{font-family:'Press Start 2P',monospace;font-size:.48em;padding:5px 8px;min-width:32px;background:rgba(31,20,45,.8);border:2px solid #4a3560;color:var(--text);cursor:pointer;touch-action:manipulation}
+#profPanel .prof-q-btn.active{background:#7c3aed;border-color:#a78bfa;color:#fff}
+#profPanel .prof-q-btn:hover{border-color:#a78bfa;background:rgba(124,58,237,.3)}
+#profPanel .prof-sep{width:2px;height:22px;background:#4a3560;margin:0 4px;flex-shrink:0}
+#profPanel .prof-q-btn.prof-br-a{border-color:#2563eb}
+#profPanel .prof-q-btn.prof-br-b{border-color:#0891b2}
+#profPanel .prof-q-btn.prof-br-c{border-color:#d97706}
+#profPanel .prof-q-btn.prof-br-d{border-color:#dc2626}
+#profPanel .prof-q-btn.prof-br-a.active{background:#1d4ed8;border-color:#60a5fa}
+#profPanel .prof-q-btn.prof-br-b.active{background:#0e7490;border-color:#22d3ee}
+#profPanel .prof-q-btn.prof-br-c.active{background:#b45309;border-color:#fbbf24}
+#profPanel .prof-q-btn.prof-br-d.active{background:#b91c1c;border-color:#f87171}
+#profPanel .prof-exit-btn{font-family:'Press Start 2P',monospace;font-size:.45em;padding:5px 12px;background:#7f1d1d;color:#fca5a5;border:2px solid #991b1b;cursor:pointer;margin-left:auto;touch-action:manipulation}
+#profPanel .prof-exit-btn:hover{background:#991b1b}
+
+/* === RESPONSIVE + SAFARI === */
+button{-webkit-tap-highlight-color:transparent}
+#schemaPanel{-webkit-overflow-scrolling:touch}
+#toggle3d{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));touch-action:manipulation;min-height:44px}
+#app .screen:not(.title-screen){background:rgba(4,10,5,.88);border:2px solid var(--border);border-radius:8px;padding:20px 24px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.title-screen{background:radial-gradient(ellipse at center,rgba(4,10,5,.75) 0%,rgba(4,10,5,.35) 60%,transparent 80%);padding-bottom:30px}
+#profPanel .prof-q-btn{color:var(--text)}
+.title-screen h1{text-shadow:0 0 20px rgba(0,255,65,.6),0 0 60px rgba(0,255,65,.25)}
+@media (max-width:900px){
+  #wrapper{flex-direction:column}
+  #schemaPanel{position:static;width:100%;max-height:50vh}
+  .title-screen h1{font-size:1.7em}
+  .room-name{font-size:.9em}
+  .narrative,.task-box p{font-size:.65em}
+  .branch-card{width:calc(50% - 10px)}
+  .top-bar{flex-wrap:wrap;gap:8px}
+}
+@media (max-width:600px){
+  body{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+  input[type="text"],textarea,.answer-input{font-size:16px}
+  .nav-row{flex-direction:column}
+  .branch-card{width:100%}
+  #three-canvas{touch-action:none}
+  .title-screen h1{font-size:1.1em}
+  .title-screen .subtitle{font-size:.65em}
+  .title-screen .swords{font-size:2em}
+  .room-name{font-size:.75em}
+  .victory-screen h1,.gameover-screen h1{font-size:1.1em}
+  .hearts{font-size:1.1em}
+  .progress,.schema-btn{font-size:.55em}
+  .tf-options{gap:10px}
+  .tf-card{padding:15px}
+  .code-box{font-size:12px;letter-spacing:1px;word-break:break-all}
+  #toggle3d{font-size:.42em;top:auto;bottom:max(10px,env(safe-area-inset-bottom))}
+  #app .screen:not(.title-screen){padding:14px 12px}
+}
+
+</style>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<button id="toggle3d" onclick="toggle3D()">3D: ON</button>
+<div id="wrapper">
+  <div id="app">Cargando...</div>
+  <div id="schemaPanel">
+    <h2>&#128190; ARCHIVO DE REFERENCIA</h2>
+    <pre id="schemaContent"></pre>
+    <button class="close-btn" onclick="toggleReference()">CERRAR REFERENCIA</button>
+  </div>
+</div>
+<div id="profPanel"></div>
+<script>
+// ============================================================
+// CODIGO FIJO - Quiz Escape Room
+// Copiar tal cual en cada escape room quiz generado
+// Solo cambiar lo marcado con {ADAPTAR}
+// ============================================================
+
+// === STATE ===
+var state = {
+  screen: 'title', name: '', hash: 0, lives: 3, step: 0, maxStep: 0,
+  branch1: null, branch2: null, solved: false, schemaOpen: false,
+  solvedQueries: {}, proof: [], startTime: 0, profMode: false,
+  selectedAnswer: null, seed: 0, bankMode: false
+};
+
+// === QUESTION BANK SYSTEM ===
+// El banco se declara en la seccion ADAPTAR como: var QUESTION_BANK = [...]
+// Cada pregunta tiene: { topic: 'nombre_tema', tier: 1|2|3, ... }
+// topic: nombre del tema (ej: 'Epidemiologia basica', 'Pruebas diagnosticas')
+// tier: 1 (facil), 2 (medio), 3 (dificil)
+// selectQuestions() selecciona 19 preguntas por dificultad progresiva, mezclando temas
+
+var shared1 = [], shared2 = [], branch1A = [], branch1B = [];
+var shared3 = [], branch2C = [], branch2D = [], shared4 = [];
+
+function _seedRandom(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function _makeSeed(name) {
+  var d = new Date();
+  var dateStr = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  var str = name.trim().toLowerCase() + '|' + dateStr;
+  var h = 0;
+  for (var i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function _shuffleWithSeed(arr, rng) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(rng() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function _pickByTier(bank, tier, n, rng) {
+  // Selecciona n preguntas del tier indicado, barajadas, mezclando temas
+  var pool = _shuffleWithSeed(bank.filter(function(q) { return q.tier === tier; }), rng);
+  return pool.slice(0, n);
+}
+
+function _removeUsed(bank, used) {
+  return bank.filter(function(q) {
+    return used.indexOf(q) === -1;
+  });
+}
+
+function selectQuestions(name) {
+  var seed = _makeSeed(name);
+  state.seed = seed;
+  var rng = _seedRandom(seed);
+
+  // Copia del banco para ir eliminando las ya usadas
+  var available = QUESTION_BANK.slice();
+
+  // Steps 0-2: 3 preguntas faciles (tier 1)
+  shared1 = _pickByTier(available, 1, 3, rng);
+  available = _removeUsed(available, shared1);
+
+  // Steps 3-5: 3 preguntas medias (tier 2)
+  shared2 = _pickByTier(available, 2, 3, rng);
+  available = _removeUsed(available, shared2);
+
+  // Steps 7-8 rama A: 2 preguntas medias (tier 2)
+  branch1A = _pickByTier(available, 2, 2, rng);
+  available = _removeUsed(available, branch1A);
+
+  // Steps 7-8 rama B: 2 preguntas medias (tier 2)
+  branch1B = _pickByTier(available, 2, 2, rng);
+  available = _removeUsed(available, branch1B);
+
+  // Steps 9-10: 2 preguntas dificiles (tier 3)
+  shared3 = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, shared3);
+
+  // Steps 12-13 rama C: 2 preguntas dificiles (tier 3)
+  branch2C = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, branch2C);
+
+  // Steps 12-13 rama D: 2 preguntas dificiles (tier 3)
+  branch2D = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, branch2D);
+
+  // Steps 14-16: 3 preguntas dificiles (tier 3)
+  shared4 = _pickByTier(available, 3, 3, rng);
+  _assignRooms();
+}
+
+// === ANTI-CHEAT ===
+// {ADAPTAR: cambiar los char codes del SALT para cada tema}
+const _SALT = [83,73,77,85,76,65,67,82,79,95,84,51,95,65,80,50,54].map(c=>String.fromCharCode(c)).join('');
+const _REQUIRED_PROOFS = 15;
+
+function _fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0);
+}
+function _proofHash(answer, step, prevHash) {
+  var input = _SALT + '|' + step + '|' + answer.trim().toLowerCase() + '|' + prevHash;
+  return _fnv1a(input).toString(36);
+}
+function _chainHash(proofArr) {
+  return _fnv1a(proofArr.join('+')+_SALT).toString(36);
+}
+function addProof(answer, step) {
+  var prev = state.proof.length > 0 ? state.proof[state.proof.length - 1] : '0';
+  var p = _proofHash(answer, step, prev);
+  if (!state.proof.some(function(x) { return x.startsWith(step + ':'); })) {
+    state.proof.push(step + ':' + p);
+  }
+}
+function validateProofChain() {
+  if (state.proof.length < _REQUIRED_PROOFS) return false;
+  var provenSteps = {};
+  state.proof.forEach(function(p) { provenSteps[parseInt(p.split(':')[0])] = true; });
+  var requiredSteps = [0,1,2,3,4,5,7,8,9,10,12,13,14,15,16];
+  return requiredSteps.every(function(s) { return provenSteps[s]; });
+}
+function getProofSignature() {
+  var chain = _chainHash(state.proof);
+  var nameH = _fnv1a(state.name + _SALT).toString(36);
+  var timeMin = Math.floor((Date.now() - state.startTime) / 60000);
+  return { chain: chain, nameH: nameH, timeMin: timeMin };
+}
+
+// === HELPERS ===
+function hashName(name) {
+  var h = 0;
+  var n = name.trim().toLowerCase();
+  for (var i = 0; i < n.length; i++) {
+    h = ((h << 5) - h + n.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h) % 4;
+}
+function livesHTML() {
+  var h = '';
+  for (var i = 0; i < 3; i++) {
+    h += '<span class="heart' + (i >= state.lives ? ' dead' : '') + '">&#9829;</span> ';
+  }
+  return h;
+}
+
+// === ANSWER VALIDATION ===
+function validateAnswer(ch, answer) {
+  if (ch.type === 'mc') return answer === ch.correctAnswer;
+  if (ch.type === 'tf') return answer === ch.correctAnswer;
+  // short y fill: normalizacion + comparacion case-insensitive + sin acentos
+  var norm = answer.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return ch.acceptedAnswers.some(function(a) {
+    var na = a.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return norm === na;
+  });
+}
+
+// === GAME FLOW ===
+function getCurrentStep() {
+  var s = state.step;
+  if (s <= 2) return { type:'challenge', data: shared1[s] };
+  if (s <= 5) return { type:'challenge', data: shared2[s - 3] };
+  if (s === 6) return { type:'branch', id: 1 };
+  if (s <= 8) return { type:'challenge', data: (state.branch1 === 'A' ? branch1A : branch1B)[s - 7] };
+  if (s <= 10) return { type:'challenge', data: shared3[s - 9] };
+  if (s === 11) return { type:'branch', id: 2 };
+  if (s <= 13) return { type:'challenge', data: (state.branch2 === 'C' ? branch2C : branch2D)[s - 12] };
+  if (s <= 16) return { type:'challenge', data: shared4[s - 14] };
+  return { type:'victory' };
+}
+function getChallengeNumber() {
+  var s = state.step;
+  if (s <= 5) return s + 1;
+  if (s <= 8) return s;
+  if (s <= 10) return s;
+  return s - 1;
+}
+function getFinalPhraseIndex() {
+  var branchCombo = (state.branch1 === 'A' ? 0 : 1) * 2 + (state.branch2 === 'C' ? 0 : 1);
+  return state.hash * 4 + branchCombo;
+}
+function getCompletionCode() {
+  // {ADAPTAR: cambiar 'QER' por el prefijo del tema}
+  if (!validateProofChain()) return 'INVALID-PROOF';
+  var sig = getProofSignature();
+  var prefix = state.name.replace(/\s+/g, '').substring(0, 3).toUpperCase();
+  var branches = state.branch1 + state.branch2;
+  var sigHash = _fnv1a(state.name + sig.chain + branches + _SALT + sig.timeMin);
+  var sigCode = (sigHash >>> 0).toString(36).toUpperCase().padStart(7, '0');
+  return 'MTX-' + prefix + '-' + branches + '-' + sig.chain.toUpperCase() + '-' + sigCode + '-' + sig.timeMin + 'm';
+}
+function isStepSolved(s) { return state.solvedQueries[s] !== undefined; }
+function canGoBack() {
+  if (state.step <= 0) return false;
+  var prev = state.step - 1;
+  while (prev >= 0) {
+    var s = getStepType(prev);
+    if (s === 'challenge') return true;
+    prev--;
+  }
+  return false;
+}
+function getStepType(s) {
+  if (s === 6 || s === 11) return 'branch';
+  if (s >= 17) return 'victory';
+  return 'challenge';
+}
+function findPrevChallenge() {
+  var s = state.step - 1;
+  while (s >= 0) {
+    if (getStepType(s) === 'challenge') return s;
+    s--;
+  }
+  return -1;
+}
+function findNextChallenge() {
+  var s = state.step + 1;
+  while (s <= 17) {
+    if (getStepType(s) !== 'branch') return s;
+    s++;
+  }
+  return state.step + 1;
+}
+
+// === RENDER ===
+function render() {
+  updateThreeScene();
+  var app = document.getElementById('app');
+  if (state.screen === 'title') { renderTitle(app); renderProfPanel(); return; }
+  if (state.screen === 'intro') { renderIntro(app); renderProfPanel(); return; }
+  if (state.screen === 'gameover') { renderGameOver(app); renderProfPanel(); return; }
+  var step = getCurrentStep();
+  if (step.type === 'challenge') renderChallenge(app, step.data);
+  else if (step.type === 'branch') renderBranch(app, step.id);
+  else if (step.type === 'victory') renderVictory(app);
+  renderProfPanel();
+}
+
+// renderChallenge - QUIZ VERSION (FIJO, no adaptar)
+function renderChallenge(app, ch) {
+  var num = getChallengeNumber();
+  var viewing = !state.profMode && state.step < state.maxStep && isStepSolved(state.step);
+  var previousAnswer = state.solvedQueries[state.step] || '';
+  var prevStep = findPrevChallenge();
+  var canBack = prevStep >= 0;
+  var canForward = state.step < state.maxStep;
+
+  var answerHTML = '';
+  if (ch.type === 'mc') {
+    answerHTML = '<div class="quiz-options" id="quizOptions">';
+    var letters = ['A','B','C','D'];
+    for (var i = 0; i < ch.options.length; i++) {
+      var letter = letters[i];
+      var selectedCls = '';
+      if (viewing && previousAnswer === letter) selectedCls = ' selected correct';
+      else if (state.profMode) {
+        if (letter === ch.correctAnswer) selectedCls = ' selected correct';
+      }
+      answerHTML += '<div class="option-card' + selectedCls + '" data-letter="' + letter + '"' +
+        (viewing ? '' : ' onclick="selectOption(\'' + letter + '\')"') + '>' +
+        '<span class="option-label">' + letter + ')</span>' +
+        '<span class="option-text">' + ch.options[i].replace(/^[A-D]\)\s*/, '') + '</span></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'tf') {
+    answerHTML = '<div class="tf-options" id="quizOptions">';
+    var tfOpts = [{letter:'V', label:'VERDADERO', icon:'&#10003;'}, {letter:'F', label:'FALSO', icon:'&#10007;'}];
+    for (var t = 0; t < tfOpts.length; t++) {
+      var opt = tfOpts[t];
+      var selCls = '';
+      if (viewing && previousAnswer === opt.letter) selCls = ' selected correct';
+      else if (state.profMode && opt.letter === ch.correctAnswer) selCls = ' selected correct';
+      answerHTML += '<div class="tf-card' + selCls + '" data-letter="' + opt.letter + '"' +
+        (viewing ? '' : ' onclick="selectOption(\'' + opt.letter + '\')"') + '>' +
+        '<div class="tf-icon">' + opt.icon + '</div>' +
+        '<div class="tf-label">' + opt.label + '</div></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'short') {
+    var prefill = viewing ? previousAnswer : (state.profMode ? ch.correctAnswer : '');
+    answerHTML = '<div class="answer-area">' +
+      '<input type="text" class="answer-input" id="answerInput" placeholder="Escribe tu respuesta..." ' +
+      'value="' + prefill.replace(/"/g, '&quot;') + '" ' +
+      'autocomplete="off" spellcheck="false" ' +
+      (viewing ? 'readonly' : '') + '></div>';
+  } else if (ch.type === 'fill') {
+    var prefillF = viewing ? previousAnswer : (state.profMode ? ch.correctAnswer : '');
+    answerHTML = '<div class="answer-area">' +
+      '<p class="fill-question">' + ch.question + '</p>' +
+      '<input type="text" class="answer-input" id="answerInput" placeholder="Completa el hueco..." ' +
+      'value="' + prefillF.replace(/"/g, '&quot;') + '" ' +
+      'autocomplete="off" spellcheck="false" ' +
+      (viewing ? 'readonly' : '') + '></div>';
+  }
+
+  var questionText = ch.type === 'fill' ? '' : '<p class="question-text">' + ch.question + '</p>';
+
+  app.innerHTML =
+    '<div class="screen">' +
+      '<div class="top-bar">' +
+        '<div class="hearts" id="livesDisplay">' + livesHTML() + '</div>' +
+        '<div class="progress">PRUEBA ' + num + ' / 15</div>' +
+        '<button class="schema-btn' + (state.schemaOpen ? ' active' : '') + '" onclick="toggleReference()">&#128218; REFERENCIA</button>' +
+      '</div>' +
+      '<div class="room-name">' + ch.room + (viewing ? '<span class="solved-badge">&#10004; RESUELTA</span>' : '') + '</div>' +
+      '<p class="narrative">' + ch.narrative + '</p>' +
+      '<div class="task-box">' +
+        '<h3>&#128203; ' + ch.title + '</h3>' +
+        questionText +
+      '</div>' +
+      '<p class="hint">&#128161; ' + ch.hint + '</p>' +
+      answerHTML +
+      ((!viewing && !state.solved) ?
+        '<button class="confirm-btn" id="confirmBtn" onclick="submitAnswer()">&#9876; CONFIRMAR RESPUESTA</button>' : '') +
+      '<div id="feedback">' + (viewing ? '<div class="feedback ok">&#10004; Ya resolviste esta prueba.</div>' : '') + '</div>' +
+      '<div class="nav-row">' +
+        (canBack ? '<button class="prev-btn" onclick="goToStep(' + prevStep + ')">&#8592; ANTERIOR</button>' : '') +
+        ((state.solved || viewing) && canForward ? '<button class="next-btn" onclick="goForward()">SIGUIENTE &#8594;</button>' : '') +
+        (state.solved && !canForward ? '<button class="next-btn" id="nextBtn" onclick="nextStep()">AVANZAR &#8594;</button>' : '') +
+      '</div>' +
+    '</div>';
+
+  state.selectedAnswer = null;
+
+  // Keyboard handler para inputs
+  if (!viewing && !state.solved) {
+    var input = document.getElementById('answerInput');
+    if (input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); submitAnswer(); }
+      });
+      if (!state.profMode) input.focus();
+    }
+  }
+}
+
+// === SELECT OPTION (mc/tf) ===
+function selectOption(letter) {
+  if (state.solved) return;
+  state.selectedAnswer = letter;
+  var cards = document.querySelectorAll('.option-card, .tf-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].classList.remove('selected');
+    if (cards[i].getAttribute('data-letter') === letter) {
+      cards[i].classList.add('selected');
+    }
+  }
+}
+
+// === SUBMIT ANSWER ===
+function submitAnswer() {
+  if (state.solved) return;
+  var step = getCurrentStep();
+  var ch = step.data;
+  var answer;
+
+  if (ch.type === 'mc' || ch.type === 'tf') {
+    answer = state.selectedAnswer;
+    if (!answer) return; // nada seleccionado
+  } else {
+    var input = document.getElementById('answerInput');
+    answer = input ? input.value.trim() : '';
+    if (!answer) return;
+  }
+
+  var feedback = document.getElementById('feedback');
+  var correct = validateAnswer(ch, answer);
+
+  if (correct) {
+    state.solved = true;
+    var answerStr = (ch.type === 'mc' || ch.type === 'tf') ? answer : answer;
+    state.solvedQueries[state.step] = answerStr;
+    addProof(answerStr, state.step);
+    if (state.step >= state.maxStep) state.maxStep = state.step + 1;
+
+    // Mostrar feedback correcto
+    var fbText = ch.feedback && ch.feedback.correct ? ch.feedback.correct : '';
+    feedback.innerHTML = '<div class="feedback ok">&#10004; &#161;Correcto! ' + fbText + '</div>';
+
+    // Deshabilitar boton confirmar
+    var btn = document.getElementById('confirmBtn');
+    if (btn) btn.disabled = true;
+
+    // Marcar opcion correcta visualmente
+    if (ch.type === 'mc' || ch.type === 'tf') {
+      var cards = document.querySelectorAll('.option-card, .tf-card');
+      for (var i = 0; i < cards.length; i++) {
+        var l = cards[i].getAttribute('data-letter');
+        if (l === ch.correctAnswer) cards[i].classList.add('correct');
+        else if (l === answer && l !== ch.correctAnswer) cards[i].classList.add('incorrect');
+        // Deshabilitar clicks
+        cards[i].onclick = null;
+        cards[i].style.cursor = 'default';
+      }
+    } else {
+      var inp = document.getElementById('answerInput');
+      if (inp) inp.readOnly = true;
+    }
+
+    // Mostrar boton avanzar
+    var navRow = document.querySelector('.nav-row');
+    if (navRow) {
+      var prevStep = findPrevChallenge();
+      navRow.innerHTML =
+        (prevStep >= 0 ? '<button class="prev-btn" onclick="goToStep(' + prevStep + ')">&#8592; ANTERIOR</button>' : '') +
+        '<button class="next-btn" onclick="nextStep()">AVANZAR &#8594;</button>';
+    }
+  } else {
+    // Respuesta incorrecta
+    var fbWrong = ch.feedback && ch.feedback.incorrect ? ch.feedback.incorrect : '';
+    if (state.profMode) {
+      feedback.innerHTML = '<div class="feedback fail">&#10006; Incorrecto. ' + fbWrong +
+        ' <span style="opacity:.6;font-size:.9em">(modo profesor: sin penalizaci\u00f3n)</span></div>';
+    } else {
+      state.lives--;
+      feedback.innerHTML = '<div class="feedback fail">&#10006; Incorrecto. ' + fbWrong +
+        ' (Vidas restantes: ' + state.lives + ')</div>';
+      updateLivesDisplay();
+      if (state.lives <= 0) {
+        var btn2 = document.getElementById('confirmBtn');
+        if (btn2) btn2.disabled = true;
+        setTimeout(function() { state.screen = 'gameover'; render(); }, 2000);
+      }
+    }
+
+    // Para mc/tf: marcar la incorrecta en rojo (pero no revelar la correcta)
+    if (ch.type === 'mc' || ch.type === 'tf') {
+      var cards2 = document.querySelectorAll('.option-card, .tf-card');
+      for (var j = 0; j < cards2.length; j++) {
+        if (cards2[j].getAttribute('data-letter') === answer) {
+          cards2[j].classList.add('incorrect');
+        }
+        cards2[j].classList.remove('selected');
+      }
+      state.selectedAnswer = null;
+    }
+  }
+}
+
+function updateLivesDisplay() {
+  var el = document.getElementById('livesDisplay');
+  if (el) el.innerHTML = livesHTML();
+}
+
+// === TOGGLE REFERENCE ===
+function toggleReference() {
+  state.schemaOpen = !state.schemaOpen;
+  var panel = document.getElementById('schemaPanel');
+  var content = document.getElementById('schemaContent');
+  if (state.schemaOpen) {
+    content.textContent = REFERENCE_TEXT;
+    panel.classList.add('visible');
+  } else {
+    panel.classList.remove('visible');
+  }
+  var btns = document.querySelectorAll('.schema-btn');
+  for (var i = 0; i < btns.length; i++) {
+    if (state.schemaOpen) btns[i].classList.add('active');
+    else btns[i].classList.remove('active');
+  }
+}
+
+// === GAME ACTIONS ===
+function transitionTo(fn) {
+  var app = document.getElementById('app');
+  var screen = app.querySelector('.screen');
+  if (screen) {
+    screen.classList.add('screen-exit');
+    setTimeout(function() { fn(); window.scrollTo(0, 0); }, 280);
+  } else { fn(); window.scrollTo(0, 0); }
+}
+function startGame() {
+  var input = document.getElementById('nameInput');
+  var name = input ? input.value.trim() : '';
+  if (name.length < 2) {
+    input.style.borderColor = 'var(--error)';
+    input.placeholder = 'Escribe al menos 2 caracteres...';
+    return;
+  }
+  state.name = name;
+  state.hash = hashName(name);
+  transitionTo(function() { state.screen = 'intro'; render(); });
+}
+function startAdventure() {
+  transitionTo(function() {
+    state.screen = 'game'; state.step = 0; state.maxStep = 0;
+    state.lives = 3; state.branch1 = null; state.branch2 = null;
+    state.solved = false; state.solvedQueries = {}; state.proof = [];
+    state.startTime = Date.now(); state.selectedAnswer = null;
+    selectQuestions(state.name);
+    render();
+  });
+}
+function chooseBranch(branchId, choice) {
+  transitionTo(function() {
+    if (branchId === 1) state.branch1 = choice;
+    else state.branch2 = choice;
+    state.step++;
+    if (state.step > state.maxStep) state.maxStep = state.step;
+    render();
+  });
+}
+function nextStep() {
+  transitionTo(function() {
+    state.step++;
+    if (state.step > state.maxStep) state.maxStep = state.step;
+    state.solved = false;
+    state.selectedAnswer = null;
+    render();
+  });
+}
+function goToStep(s) {
+  transitionTo(function() {
+    state.step = s;
+    state.solved = isStepSolved(s);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+function goForward() {
+  var next = state.step + 1;
+  while (next <= state.maxStep && getStepType(next) === 'branch') next++;
+  if (next <= state.maxStep) goToStep(next);
+}
+function restartGame() {
+  state = {
+    screen: 'title', name: '', hash: 0, lives: 3, step: 0, maxStep: 0,
+    branch1: null, branch2: null, solved: false, schemaOpen: false,
+    solvedQueries: {}, proof: [], startTime: 0, profMode: false,
+    selectedAnswer: null, seed: 0, bankMode: false
+  };
+  document.getElementById('schemaPanel').classList.remove('visible');
+  document.body.style.paddingBottom = '';
+  render();
+}
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', function() {
+  try { initThreeJS(); } catch(e) { console.warn('Three.js init failed:', e); }
+  render();
+});
+
+// === THREE.JS ENGINE ===
+var tjs = null;
+function initThreeJS() {
+  if (typeof THREE === 'undefined') return;
+  var canvas = document.getElementById('three-canvas');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  var scene = new THREE.Scene();
+  // {ADAPTAR: cambiar color fog al --bg del tema}
+  scene.fog = new THREE.FogExp2(0x0a0f0a, 0.035);
+  var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 2, 8); camera.lookAt(0, 1, 0);
+  tjs = { renderer: renderer, scene: scene, camera: camera, canvas: canvas, clock: new THREE.Clock(), currentScene: null, sceneObjects: [], particles: null, animCallbacks: [], frameCount: 0 };
+  window.addEventListener('resize', function() {
+    if (!tjs) return;
+    tjs.camera.aspect = window.innerWidth / window.innerHeight;
+    tjs.camera.updateProjectionMatrix();
+    tjs.renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  buildTitleScene();
+  animateThreeJS();
+}
+function clearScene() {
+  if (!tjs) return;
+  tjs.sceneObjects.forEach(function(obj) {
+    tjs.scene.remove(obj);
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(function(m) { m.dispose(); });
+      else obj.material.dispose();
+    }
+    if (obj.children) obj.children.forEach(function(child) { if (child.geometry) child.geometry.dispose(); if (child.material) child.material.dispose(); });
+  });
+  tjs.sceneObjects = []; tjs.animCallbacks = [];
+}
+
+// === THREE.JS HELPERS ===
+function addDust(count, color, spread, height, opacity) {
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(count * 3);
+  for (var i = 0; i < count; i++) { pos[i*3]=(Math.random()-0.5)*spread; pos[i*3+1]=Math.random()*height; pos[i*3+2]=(Math.random()-0.5)*spread; }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var mat = new THREE.PointsMaterial({ color: color, size: 0.04, transparent: true, opacity: opacity||0.4, sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  var pts = new THREE.Points(geo, mat);
+  tjs.scene.add(pts); tjs.sceneObjects.push(pts); return pts;
+}
+function addGround(color) {
+  var g = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, metalness: 0.05 }));
+  g.rotation.x = -Math.PI / 2; g.receiveShadow = true;
+  tjs.scene.add(g); tjs.sceneObjects.push(g); return g;
+}
+function addObj(geo, mat, pos, rot) {
+  var m = new THREE.Mesh(geo, mat);
+  if (pos) m.position.set(pos[0], pos[1], pos[2]);
+  if (rot) { m.rotation.x = rot[0]||0; m.rotation.y = rot[1]||0; m.rotation.z = rot[2]||0; }
+  m.castShadow = true; m.receiveShadow = true;
+  tjs.scene.add(m); tjs.sceneObjects.push(m); return m;
+}
+function addLight(type, color, intensity, pos, dist) {
+  var l;
+  if (type === 'point') l = new THREE.PointLight(color, intensity, dist||10);
+  else if (type === 'ambient') l = new THREE.AmbientLight(color, intensity);
+  else if (type === 'spot') { l = new THREE.SpotLight(color, intensity); l.angle = 0.6; l.penumbra = 0.5; }
+  if (pos) l.position.set(pos[0], pos[1], pos[2]);
+  tjs.scene.add(l); tjs.sceneObjects.push(l); return l;
+}
+function animDust(pts, count, elapsed, speed) {
+  var p = pts.geometry.attributes.position.array;
+  for (var i = 0; i < count; i++) {
+    p[i*3+1] += Math.sin(elapsed + i) * (speed||0.001);
+    p[i*3] += Math.cos(elapsed*0.5 + i*0.1) * ((speed*0.5)||0.0005);
+    if (p[i*3+1] > 6) p[i*3+1] = 0; if (p[i*3+1] < 0) p[i*3+1] = 6;
+  }
+  pts.geometry.attributes.position.needsUpdate = true;
+}
+
+// === ANIMATE + TOGGLE ===
+var threeEnabled = true, fpsHistory = [], lastFpsTime = 0;
+function animateThreeJS() {
+  if (!tjs) return;
+  requestAnimationFrame(animateThreeJS);
+  if (!threeEnabled) return;
+  var now = performance.now();
+  var elapsed = tjs.clock.getElapsedTime();
+  tjs.frameCount++;
+  if (tjs.frameCount % 60 === 0) {
+    var fps = 1000 / ((now - lastFpsTime) / 60);
+    fpsHistory.push(fps); if (fpsHistory.length > 5) fpsHistory.shift();
+    var avgFps = fpsHistory.reduce(function(a,b) { return a+b; }, 0) / fpsHistory.length;
+    if (avgFps < 25 && tjs.renderer.getPixelRatio() > 1) tjs.renderer.setPixelRatio(1);
+    lastFpsTime = now;
+  }
+  if (lastFpsTime === 0) lastFpsTime = now;
+  tjs.animCallbacks.forEach(function(cb) { cb(elapsed); });
+  tjs.renderer.render(tjs.scene, tjs.camera);
+}
+function toggle3D() {
+  threeEnabled = !threeEnabled;
+  var btn = document.getElementById('toggle3d');
+  var canvas = document.getElementById('three-canvas');
+  if (threeEnabled) {
+    btn.textContent = '3D: ON'; btn.classList.remove('off'); canvas.style.display = 'block';
+    if (tjs) { tjs.clock = new THREE.Clock(); tjs.currentScene = null; updateThreeScene(); }
+  } else {
+    btn.textContent = '3D: OFF'; btn.classList.add('off'); canvas.style.display = 'none';
+  }
+}
+
+// === MODO BANCO (profesor: ver todas las preguntas del banco) ===
+var _bankAll = [];
+var _bankIdx = 0;
+var _bankTopics = [];      // nombres de temas unicos, ordenados
+var _bankByTopic = {};     // { topic: [questions...] }
+
+function _buildBankIndex() {
+  // Extrae temas unicos del QUESTION_BANK y agrupa preguntas
+  _bankTopics = [];
+  _bankByTopic = {};
+  _bankAll = QUESTION_BANK.slice();
+  for (var i = 0; i < _bankAll.length; i++) {
+    var t = _bankAll[i].topic || 'Sin tema';
+    if (!_bankByTopic[t]) {
+      _bankByTopic[t] = [];
+      _bankTopics.push(t);
+    }
+    _bankByTopic[t].push(i); // indice en _bankAll
+  }
+}
+
+function toggleBankMode() {
+  state.bankMode = !state.bankMode;
+  if (state.bankMode) {
+    _buildBankIndex();
+    _bankIdx = 0;
+    renderBankView();
+  } else {
+    render();
+  }
+  renderProfPanel();
+}
+
+function profBankJump(idx) {
+  _bankIdx = idx;
+  renderBankView();
+  renderProfPanel();
+}
+
+function _bankQuestionInfo(idx) {
+  var ch = _bankAll[idx];
+  var topic = ch ? (ch.topic || 'Sin tema') : '';
+  var indices = _bankByTopic[topic] || [];
+  var numInTopic = indices.indexOf(idx) + 1;
+  return { topic: topic, numInTopic: numInTopic, totalInTopic: indices.length };
+}
+
+function renderBankView() {
+  var app = document.getElementById('app');
+  if (!_bankAll.length) return;
+  var ch = _bankAll[_bankIdx];
+  var info = _bankQuestionInfo(_bankIdx);
+  var tierLabels = {1: 'FACIL', 2: 'MEDIO', 3: 'DIFICIL'};
+
+  var answerHTML = '';
+  if (ch.type === 'mc') {
+    answerHTML = '<div class="quiz-options">';
+    var letters = ['A','B','C','D'];
+    for (var i = 0; i < ch.options.length; i++) {
+      var letter = letters[i];
+      var cls = letter === ch.correctAnswer ? ' correct' : '';
+      answerHTML += '<div class="option-card' + cls + '" style="cursor:default">' +
+        '<span class="option-label">' + letter + ')</span>' +
+        '<span class="option-text">' + ch.options[i].replace(/^[A-D]\)\s*/, '') + '</span></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'tf') {
+    answerHTML = '<div class="tf-options">';
+    var tfPairs = [['V','VERDADERO'],['F','FALSO']];
+    for (var t = 0; t < 2; t++) {
+      var cls2 = tfPairs[t][0] === ch.correctAnswer ? ' correct' : '';
+      answerHTML += '<div class="tf-card' + cls2 + '" style="cursor:default"><div class="tf-label">' + tfPairs[t][1] + '</div></div>';
+    }
+    answerHTML += '</div>';
+  } else {
+    answerHTML = '<div class="feedback ok" style="margin-top:10px">Respuesta: <strong>' + ch.correctAnswer + '</strong></div>';
+    if (ch.acceptedAnswers) {
+      answerHTML += '<div style="font-size:.55em;opacity:.5;margin-top:5px">Acepta: ' + ch.acceptedAnswers.join(', ') + '</div>';
+    }
+  }
+
+  var questionText = ch.type === 'fill'
+    ? '<p class="fill-question">' + ch.question + '</p>'
+    : '<p class="question-text">' + ch.question + '</p>';
+
+  app.innerHTML = '<div class="screen">' +
+    '<div class="top-bar">' +
+      '<div style="font-size:.6em;color:var(--accent);letter-spacing:1px">' + info.topic + ' [' + (tierLabels[ch.tier] || 'T'+ch.tier) + '] #' + info.numInTopic + '/' + info.totalInTopic + '</div>' +
+      '<div class="progress">PREGUNTA ' + (_bankIdx + 1) + ' / ' + _bankAll.length + '</div>' +
+    '</div>' +
+    '<div class="room-name">' + ch.room + '</div>' +
+    '<p class="narrative">' + ch.narrative + '</p>' +
+    '<div class="task-box">' +
+      '<h3>&#128203; ' + ch.title + '</h3>' +
+      questionText +
+    '</div>' +
+    '<p class="hint">&#128161; ' + ch.hint + '</p>' +
+    answerHTML +
+    '<div class="feedback ok" style="margin-top:10px">' + (ch.feedback && ch.feedback.correct ? ch.feedback.correct : '') + '</div>' +
+    '<div class="nav-row">' +
+      (_bankIdx > 0 ? '<button class="prev-btn" onclick="profBankJump(' + (_bankIdx - 1) + ')">&#8592; ANTERIOR</button>' : '') +
+      (_bankIdx < _bankAll.length - 1 ? '<button class="next-btn" onclick="profBankJump(' + (_bankIdx + 1) + ')">SIGUIENTE &#8594;</button>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+// === MODO PROFESOR (oculto) ===
+// PROF_ANSWERS es ahora DINAMICO: se lee del challenge activo
+// Ya no se necesita un objeto estatico con 19 entries
+function _profGetAnswer(step) {
+  // Obtener la respuesta correcta del challenge en el step dado
+  var s = step;
+  var ch;
+  if (s <= 2) ch = shared1[s];
+  else if (s <= 5) ch = shared2[s - 3];
+  else if (s <= 8) ch = (state.branch1 === 'A' ? branch1A : branch1B)[s - 7];
+  else if (s <= 10) ch = shared3[s - 9];
+  else if (s <= 13) ch = (state.branch2 === 'C' ? branch2C : branch2D)[s - 12];
+  else if (s <= 16) ch = shared4[s - 14];
+  return ch ? ch.correctAnswer : '';
+}
+
+function toggleProfMode() {
+  state.profMode = !state.profMode;
+  if (state.profMode) {
+    state.maxStep = 17;
+    state.lives = 99;
+    if (!state.branch1) state.branch1 = 'A';
+    if (!state.branch2) state.branch2 = 'C';
+    if (state.screen !== 'game') {
+      state.screen = 'game';
+      state.step = 0;
+      state.solved = false;
+      state.solvedQueries = {};
+      state.proof = [];
+      state.startTime = Date.now();
+      if (!state.name) state.name = 'Profesor';
+      selectQuestions(state.name);
+    }
+  }
+  render();
+}
+
+function profJumpToStep(step) {
+  if (step >= 7 && !state.branch1) state.branch1 = 'A';
+  if (step >= 12 && !state.branch2) state.branch2 = 'C';
+  state.maxStep = Math.max(state.maxStep, step + 1);
+  transitionTo(function() {
+    state.step = step;
+    state.solved = isStepSolved(step);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+
+function profJumpBranch(branchId, choice, step) {
+  if (branchId === 1) state.branch1 = choice;
+  else state.branch2 = choice;
+  if (step >= 12 && !state.branch2) state.branch2 = 'C';
+  state.maxStep = Math.max(state.maxStep, step + 1);
+  transitionTo(function() {
+    state.step = step;
+    state.solved = isStepSolved(step);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+
+// Panel profesor con ramas inline + modo banco
+function renderProfPanel() {
+  var panel = document.getElementById('profPanel');
+  if (!panel) return;
+  if (!state.profMode) { panel.classList.remove('visible'); document.body.style.paddingBottom = ''; return; }
+  panel.classList.add('visible');
+  document.body.style.paddingBottom = '68px';
+
+  // MODO BANCO: panel con pestanas dinamicas por tema
+  if (state.bankMode) {
+    var bbtns = '';
+    var curTopic = _bankAll[_bankIdx] ? (_bankAll[_bankIdx].topic || '') : '';
+    // Pestanas de tema
+    for (var p = 0; p < _bankTopics.length; p++) {
+      var tName = _bankTopics[p];
+      var firstIdx = _bankByTopic[tName][0];
+      var isActive = (curTopic === tName);
+      var acls = isActive ? ' active' : '';
+      bbtns += '<button class="prof-q-btn' + acls + '" onclick="profBankJump(' + firstIdx + ')" style="font-size:.38em;padding:3px 5px">' + tName.substring(0, 12) + '</button>';
+    }
+    // Botones numerados dentro del tema activo
+    var topicIndices = _bankByTopic[curTopic] || [];
+    if (topicIndices.length > 0) {
+      bbtns += '<div class="prof-sep"></div>';
+      for (var qi = 0; qi < topicIndices.length; qi++) {
+        var qIdx = topicIndices[qi];
+        var qAct = (_bankIdx === qIdx) ? ' active' : '';
+        bbtns += '<button class="prof-q-btn' + qAct + '" onclick="profBankJump(' + qIdx + ')">' + (qi + 1) + '</button>';
+      }
+    }
+    panel.innerHTML = '<span class="prof-label">&#128218; BANCO (' + _bankAll.length + ')</span>' + bbtns +
+      '<button class="prof-exit-btn" onclick="toggleBankMode()">&#10005; CERRAR BANCO</button>';
+    return;
+  }
+
+  // MODO NORMAL: panel P1-P15 con ramas
+  var s = state.step;
+  var btns = '';
+  for (var i = 0; i <= 5; i++) {
+    var active = s === i ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active + '" onclick="profJumpToStep(' + i + ')">P' + (i+1) + '</button>';
+  }
+  btns += '<div class="prof-sep"></div>';
+  [7, 8].forEach(function(step) {
+    var q2 = step;
+    ['A','B'].forEach(function(br) {
+      var active2 = (s === step && state.branch1 === br) ? ' active' : '';
+      var cls = br === 'A' ? ' prof-br-a' : ' prof-br-b';
+      btns += '<button class="prof-q-btn' + cls + active2 + '" onclick="profJumpBranch(1,\'' + br + '\',' + step + ')">P' + q2 + br + '</button>';
+    });
+  });
+  btns += '<div class="prof-sep"></div>';
+  for (var i2 = 9; i2 <= 10; i2++) {
+    var active3 = s === i2 ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active3 + '" onclick="profJumpToStep(' + i2 + ')">P' + i2 + '</button>';
+  }
+  btns += '<div class="prof-sep"></div>';
+  [12, 13].forEach(function(step) {
+    var q3 = step - 1;
+    ['C','D'].forEach(function(br) {
+      var active4 = (s === step && state.branch2 === br) ? ' active' : '';
+      var cls2 = br === 'C' ? ' prof-br-c' : ' prof-br-d';
+      btns += '<button class="prof-q-btn' + cls2 + active4 + '" onclick="profJumpBranch(2,\'' + br + '\',' + step + ')">P' + q3 + br + '</button>';
+    });
+  });
+  btns += '<div class="prof-sep"></div>';
+  for (var step3 = 14; step3 <= 16; step3++) {
+    var q4 = step3 - 1;
+    var active5 = s === step3 ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active5 + '" onclick="profJumpToStep(' + step3 + ')">P' + q4 + '</button>';
+  }
+  var seedInfo = state.seed ? ' <span style="font-size:.4em;opacity:.5;margin-left:8px">SEED:' + state.seed + '</span>' : '';
+  panel.innerHTML = '<span class="prof-label">&#128218; PROF' + seedInfo + '</span>' + btns +
+    '<button class="prof-q-btn" onclick="toggleBankMode()" style="margin-left:8px;background:#7c3aed;border-color:#a78bfa;color:#fff;font-size:.4em">BANCO</button>' +
+    '<button class="prof-exit-btn" onclick="toggleProfMode()">&#10005; SALIR</button>';
+}
+
+// Activacion oculta: escribir "PROFE" en pantalla de titulo
+var _pb = '';
+document.addEventListener('keydown', function(e) {
+  if (state.screen !== 'title') { _pb = ''; return; }
+  _pb += e.key.toUpperCase();
+  if (_pb.length > 5) _pb = _pb.slice(-5);
+  if (_pb === 'PROFE') { _pb = ''; toggleProfMode(); }
+});
+
+
+// === REFERENCE_TEXT (orientación, sin respuestas directas) ===
+var REFERENCE_TEXT = [
+  "===================================",
+  "  ARCHIVO DE REFERENCIA · TEMA 3",
+  "===================================",
+  "",
+  "3.1 NO SUPERVISADO Y AUTOENCODERS",
+  "  - Sin etiquetas: el modelo busca estructura.",
+  "  - Tres familias: reunir lo parecido, resumir muchas",
+  "    variables en pocas y crear ejemplos nuevos.",
+  "  - Agrupar: se alterna asignar puntos a centros y",
+  "    mover los centros; el resultado depende del inicio.",
+  "  - Proyecciones lineales: buscan los ejes donde más",
+  "    varían los datos.",
+  "  - Autoencoder: comprime la entrada en un código pequeño",
+  "    y la reconstruye. Se entrena comparando la salida",
+  "    con la propia entrada.",
+  "  - Variantes: con ruido en la entrada, con código grande",
+  "    pero regularizado, probabilística.",
+  "  - Usos: comprimir, limpiar, detectar lo raro (lo que",
+  "    se reconstruye mal), aprender representaciones.",
+  "",
+  "3.2 MODELOS GENERATIVOS (GAN)",
+  "  - Discriminar: aprender una frontera entre clases.",
+  "    Generar: aprender cómo se distribuyen los datos.",
+  "  - Dos redes en duelo: una crea a partir de ruido y la",
+  "    otra intenta distinguir lo real de lo creado.",
+  "  - Se entrenan por turnos con objetivos opuestos.",
+  "  - Retos: inestabilidad, falta de variedad, evaluación.",
+  "  - Otras familias generativas: VAE y modelos que",
+  "    eliminan ruido poco a poco.",
+  "",
+  "3.3 REDES DE BASE RADIAL (RBF)",
+  "  - Cada neurona oculta mide el parecido de la entrada",
+  "    con un prototipo (su centro): respuesta local.",
+  "  - La anchura de la campana decide hasta dónde llega.",
+  "  - Salida: combinación lineal de las campanas.",
+  "  - Entrenamiento en dos pasos: colocar los centros sin",
+  "    mirar etiquetas y ajustar los pesos de salida.",
+  "  - Buenas interpolando en pocas dimensiones; sufren",
+  "    cuando la dimensión crece.",
+  "",
+].join("\n");
+
+// === QUESTION BANK: 4 temas x 12 (4 fácil + 4 medio + 4 difícil) ===
+var QUESTION_BANK = [
+  // ---------------- No supervisado ----------------
+  {
+    topic: "No supervisado",
+    tier: 1,
+    title: "Datos sin etiqueta",
+    type: "mc",
+    question: "¿Qué caracteriza al aprendizaje no supervisado?",
+    options: [
+      "A) Cada ejemplo lleva su etiqueta correcta",
+      "B) Un agente aprende de recompensas y castigos",
+      "C) Solo funciona con imágenes y con texto",
+      "D) Busca estructura en datos sin etiquetas",
+    ],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "Piensa en qué falta en los datos con respecto a la clasificación supervisada.",
+    feedback: {
+      correct:
+        "Sin etiquetas: el modelo busca grupos, ejes de variación o la forma de los datos.",
+      incorrect:
+        "No supervisado = solo X, sin y. El modelo busca estructura por sí mismo.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 1,
+    title: "El precio del dato",
+    type: "tf",
+    question:
+      "En general, los datos sin etiquetar son mucho más baratos de conseguir que los etiquetados.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Etiquetar exige tiempo de personas, a menudo expertas.",
+    feedback: {
+      correct: "Fotos, registros o textos sobran; etiquetarlos es lo caro.",
+      incorrect:
+        "Es verdadero: etiquetar requiere trabajo humano, y por eso el no supervisado es tan útil.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 1,
+    title: "Agrupar",
+    type: "fill",
+    question:
+      "El algoritmo ___ agrupa los datos en K grupos alternando dos pasos: asignar cada punto a su centro más cercano y recalcular los centros.",
+    options: null,
+    correctAnswer: "k-means",
+    acceptedAnswers: [
+      "k-means",
+      "kmeans",
+      "k means",
+      "k-medias",
+      "k medias",
+      "kmedias",
+    ],
+    hint: "Su nombre lleva la K de los grupos y la palabra «media».",
+    feedback: {
+      correct:
+        "k-means: asignar al centro más cercano y mover cada centro a la media de su grupo.",
+      incorrect: "Es k-means (k-medias).",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 1,
+    title: "Ejes principales",
+    type: "short",
+    question:
+      "¿Qué técnica lineal clásica proyecta los datos en las direcciones de máxima varianza para reducir dimensiones? (siglas)",
+    options: null,
+    correctAnswer: "PCA",
+    acceptedAnswers: [
+      "pca",
+      "acp",
+      "analisis de componentes principales",
+      "componentes principales",
+      "análisis de componentes principales",
+    ],
+    hint: "En castellano se llama «análisis de componentes principales».",
+    feedback: {
+      correct: "PCA (análisis de componentes principales).",
+      incorrect: "Es PCA (ACP en castellano).",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 2,
+    title: "Un paso de k-means",
+    type: "mc",
+    question:
+      "k-means en 1-D con centros c₁ = 2 y c₂ = 8. ¿A qué centro va el punto x = 6 y cuál será el nuevo c₂ si su grupo queda {6, 8, 10}?",
+    options: [
+      "A) A c₂; el nuevo c₂ vale 8",
+      "B) A c₁; el nuevo c₂ vale 9",
+      "C) A c₂; el nuevo c₂ vale 6",
+      "D) A c₁; el nuevo c₂ vale 8",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "Compara las dos distancias; después, el centro pasa a la media de su grupo.",
+    feedback: {
+      correct: "|6 − 8| = 2 < |6 − 2| = 4 → c₂. Media de {6, 8, 10} = 8.",
+      incorrect:
+        "x = 6 está a 2 de c₂ y a 4 de c₁, así que va con c₂; la media de {6, 8, 10} es 8.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 2,
+    title: "Siempre a mejor",
+    type: "tf",
+    question:
+      "La inercia de k-means (suma de distancias al cuadrado a los centros) nunca aumenta de una iteración a la siguiente.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Analiza por separado los dos pasos: reasignar puntos y mover centros. ¿Alguno puede empeorar la suma?",
+    feedback: {
+      correct:
+        "Asignar al centro más cercano y mover al promedio solo pueden bajar (o mantener) la inercia.",
+      incorrect:
+        "Es verdadero: por eso k-means siempre converge, aunque sea a un mínimo local.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 2,
+    title: "Varios intentos",
+    type: "fill",
+    question:
+      "Para que una mala inicialización no arruine k-means, se ejecuta varias veces con inicios distintos y se elige la solución de menor ___.",
+    options: null,
+    correctAnswer: "inercia",
+    acceptedAnswers: [
+      "inercia",
+      "inertia",
+      "sse",
+      "suma de distancias al cuadrado",
+    ],
+    hint: "Es la medida que k-means intenta minimizar.",
+    feedback: {
+      correct: "La de menor inercia (en scikit-learn, n_init).",
+      incorrect: "Se elige la de menor inercia.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 2,
+    title: "La tercera familia",
+    type: "short",
+    question:
+      "Además de agrupar y reducir dimensión, ¿cuál es la tercera gran familia del aprendizaje no supervisado vista en el tema? (un verbo)",
+    options: null,
+    correctAnswer: "generar",
+    acceptedAnswers: [
+      "generar",
+      "generacion",
+      "generación",
+      "generativos",
+      "modelos generativos",
+      "generativa",
+    ],
+    hint: "Es la familia a la que pertenecen los modelos del subtema 3.2.",
+    feedback: {
+      correct:
+        "Generar: aprender cómo son los datos para crear ejemplos nuevos.",
+      incorrect: "Es generar (VAE, GAN, difusión…).",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 3,
+    title: "Mala salida",
+    type: "mc",
+    question:
+      "Puntos 1-D [1, 2, 4, 7, 8, 10] y centros iniciales 1 y 2. Tras la PRIMERA iteración de k-means, ¿dónde quedan los centros?",
+    options: [
+      "A) En 1,5 y 7,25",
+      "B) En 2,33 y 8,33",
+      "C) En 1 y 6,2",
+      "D) En 2 y 6,2",
+    ],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Asigna los seis puntos con los centros de partida y calcula solo una media por grupo.",
+    feedback: {
+      correct: "Grupos {1} y {2, 4, 7, 8, 10}: centros 1 y 31/5 = 6,2.",
+      incorrect:
+        "En la primera iteración solo el 1 va con c₁; el resto va con c₂, cuya media es 6,2.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 3,
+    title: "Código repetido",
+    type: "fill",
+    question:
+      "Con PCA de 1 componente sobre los puntos (0, 1) y (0, −1), proyectando sobre el eje horizontal, ambos reciben el código ___.",
+    options: null,
+    correctAnswer: "0",
+    acceptedAnswers: ["0", "cero", "0.0", "0,0"],
+    hint: "Proyectar sobre el eje horizontal es quedarse con la coordenada x.",
+    feedback: {
+      correct:
+        "Los dos reciben 0: dos puntos distintos, mismo código. Imposible reconstruirlos.",
+      incorrect: "Ambos tienen x = 0, así que los dos reciben el código 0.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 3,
+    title: "La circunferencia",
+    type: "mc",
+    question:
+      "Los datos están sobre una circunferencia. ¿Por qué PCA de 1 componente no basta y un autoencoder no lineal sí podría?",
+    options: [
+      "A) Porque PCA no admite valores negativos",
+      "B) Porque la forma es curva y PCA solo proyecta en rectas",
+      "C) Porque el autoencoder siempre usa más datos",
+      "D) Porque PCA necesita etiquetas para funcionar",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "Hay un único número que describe cada punto, pero su relación con (x, y) no es lineal.",
+    feedback: {
+      correct:
+        "Un grado de libertad (el ángulo), pero curvo: PCA es lineal y el autoencoder no lineal puede aprenderlo.",
+      incorrect:
+        "PCA solo proyecta sobre rectas; la circunferencia necesita una función curva como el ángulo.",
+    },
+  },
+  {
+    topic: "No supervisado",
+    tier: 3,
+    title: "Autoencoder lineal",
+    type: "tf",
+    question:
+      "Un autoencoder con activaciones lineales y pérdida MSE aprende el mismo subespacio que PCA.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "¿Qué es lo mejor que puede hacer una transformación lineal para comprimir con error cuadrático mínimo?",
+    feedback: {
+      correct: "Sin no linealidades, lo óptimo es el subespacio de PCA.",
+      incorrect:
+        "Es verdadero: la ventaja del autoencoder aparece al añadir activaciones no lineales.",
+    },
+  },
+
+  // ---------------- Autoencoders ----------------
+  {
+    topic: "Autoencoders",
+    tier: 1,
+    title: "El espejo",
+    type: "mc",
+    question: "¿Qué intenta producir un autoencoder a su salida?",
+    options: [
+      "A) La etiqueta de clase de la entrada",
+      "B) Una imagen nueva elegida al azar",
+      "C) Una reconstrucción de su propia entrada",
+      "D) La probabilidad de que la entrada sea real",
+    ],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Piensa en con qué se compara la salida al calcular la pérdida.",
+    feedback: {
+      correct: "Salida ≈ entrada: se entrena para reconstruir, sin etiquetas.",
+      incorrect:
+        "El objetivo del autoencoder es reconstruir su propia entrada.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 1,
+    title: "El embudo",
+    type: "tf",
+    question:
+      "El cuello de botella (código) de un autoencoder suele tener menos neuronas que la entrada.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Recuerda la forma de embudo del dibujo del tema.",
+    feedback: {
+      correct:
+        "Al obligar a comprimir, la red tiene que quedarse con lo esencial.",
+      incorrect:
+        "Es verdadero: es el autoencoder «undercomplete», el más habitual.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 1,
+    title: "Las dos mitades",
+    type: "fill",
+    question:
+      "Un autoencoder tiene dos partes: el codificador, que comprime, y el ___, que reconstruye.",
+    options: null,
+    correctAnswer: "decodificador",
+    acceptedAnswers: [
+      "decodificador",
+      "decoder",
+      "descodificador",
+      "el decodificador",
+    ],
+    hint: "Es la mitad simétrica del codificador.",
+    feedback: {
+      correct: "Codificador → código → decodificador.",
+      incorrect: "Es el decodificador (decoder).",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 1,
+    title: "Donde viven los códigos",
+    type: "short",
+    question:
+      "¿Cómo se llama el espacio de representaciones comprimidas donde viven los códigos de un autoencoder?",
+    options: null,
+    correctAnswer: "espacio latente",
+    acceptedAnswers: [
+      "espacio latente",
+      "latente",
+      "latent space",
+      "el espacio latente",
+    ],
+    hint: "La palabra significa «oculto» y también se usa para el vector z de una GAN.",
+    feedback: {
+      correct:
+        "El espacio latente: puntos cercanos ahí suelen ser datos parecidos.",
+      incorrect: "Es el espacio latente.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 2,
+    title: "Cuánto comprime",
+    type: "mc",
+    question:
+      "Un autoencoder MNIST tiene la arquitectura 784 → 128 → 32 → 128 → 784. ¿Cuál es su factor de compresión?",
+    options: ["A) 6,1 veces", "B) 4 veces", "C) 128 veces", "D) 24,5 veces"],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "Compara el tamaño de la entrada con el del cuello de botella, no con el de la capa intermedia.",
+    feedback: {
+      correct: "784 / 32 = 24,5.",
+      incorrect: "Entrada / código = 784 / 32 = 24,5.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 2,
+    title: "Limpiar el ruido",
+    type: "fill",
+    question:
+      "Un autoencoder ___ recibe la entrada con ruido añadido y aprende a devolverla limpia.",
+    options: null,
+    correctAnswer: "denoising",
+    acceptedAnswers: [
+      "denoising",
+      "de eliminacion de ruido",
+      "de eliminación de ruido",
+      "eliminador de ruido",
+      "denoiser",
+    ],
+    hint: "Es la variante del laboratorio de MNIST; su nombre en inglés significa «quitar ruido».",
+    feedback: {
+      correct: "Denoising: entrada ruidosa, objetivo limpio.",
+      incorrect: "Es el autoencoder denoising (de eliminación de ruido).",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 2,
+    title: "Copiar no vale",
+    type: "tf",
+    question:
+      "Si el código tiene más neuronas que la entrada y no hay ninguna regularización, el autoencoder puede limitarse a copiar la entrada.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "¿Qué le impediría aprender algo parecido a la identidad?",
+    feedback: {
+      correct:
+        "Error casi cero, pero sin aprender estructura. Hace falta un cuello de botella o regularización.",
+      incorrect:
+        "Es verdadero: sin restricción, copiar es la solución más fácil.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 2,
+    title: "Píxeles entre 0 y 1",
+    type: "short",
+    question:
+      "¿Qué función de activación pondrías en la última capa para que los píxeles reconstruidos queden entre 0 y 1?",
+    options: null,
+    correctAnswer: "sigmoide",
+    acceptedAnswers: [
+      "sigmoide",
+      "sigmoid",
+      "sigmoidea",
+      "la sigmoide",
+      "logistica",
+      "logística",
+    ],
+    hint: "Es la misma que se usa en la salida de un clasificador binario.",
+    feedback: {
+      correct:
+        "La sigmoide, normalmente con pérdida de entropía cruzada binaria.",
+      incorrect: "Es la sigmoide.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 3,
+    title: "Medir la reconstrucción",
+    type: "mc",
+    question:
+      "x = [1, 0, 1, 0] y la reconstrucción x̂ = [0,9, 0,2, 0,6, 0,1]. ¿Cuánto vale el error cuadrático medio (MSE)?",
+    options: ["A) 0,055", "B) 0,22", "C) 0,236", "D) 0,10"],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "Resta, eleva al cuadrado, suma y divide entre el número de píxeles.",
+    feedback: {
+      correct: "(0,01 + 0,04 + 0,16 + 0,01) / 4 = 0,22 / 4 = 0,055.",
+      incorrect:
+        "Cuadrados: 0,01, 0,04, 0,16, 0,01; suma 0,22; entre 4, 0,055. (0,236 sería la BCE.)",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 3,
+    title: "Cazar anomalías",
+    type: "mc",
+    question:
+      "Autoencoder entrenado con transacciones normales: error medio 0,020 y desviación 0,005. Con umbral media + 3σ, ¿qué errores se marcan como anómalos entre 0,028, 0,041 y 0,190?",
+    options: [
+      "A) Solo el 0,190",
+      "B) El 0,041 y el 0,190",
+      "C) Los tres",
+      "D) Ninguno de ellos",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "Calcula primero el umbral y compara cada error con él.",
+    feedback: {
+      correct: "Umbral = 0,020 + 0,015 = 0,035: superan 0,041 y 0,190.",
+      incorrect:
+        "Umbral 0,035: el 0,028 queda por debajo; 0,041 y 0,190 lo superan.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 3,
+    title: "La capa más cara",
+    type: "fill",
+    question:
+      "En el autoencoder 784 → 128 → 32 → 128 → 784, la primera capa Dense(128) tiene ___ parámetros.",
+    options: null,
+    correctAnswer: "100480",
+    acceptedAnswers: ["100480", "100.480", "100 480", "100,480"],
+    hint: "Cada neurona tiene un peso por píxel de entrada y un sesgo.",
+    feedback: {
+      correct: "(784 + 1)·128 = 100.480.",
+      incorrect: "(784 + 1)·128 = 100.480.",
+    },
+  },
+  {
+    topic: "Autoencoders",
+    tier: 3,
+    title: "Sin ejemplos de fraude",
+    type: "tf",
+    question:
+      "Para detectar fraude con un autoencoder hace falta entrenarlo con muchos ejemplos de fraude etiquetados.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "¿Qué datos ve el autoencoder durante el entrenamiento en la detección de anomalías?",
+    feedback: {
+      correct:
+        "Falso: se entrena solo con lo normal; lo raro se reconstruye mal y destaca.",
+      incorrect:
+        "Es falso: basta con datos normales. Los fraudes solo hacen falta para elegir el umbral.",
+    },
+  },
+
+  // ---------------- GAN ----------------
+  {
+    topic: "GAN",
+    tier: 1,
+    title: "El detective",
+    type: "mc",
+    question: "¿Qué papel tiene el discriminador en una GAN?",
+    options: [
+      "A) Decidir si una muestra es real o generada",
+      "B) Generar imágenes a partir de un ruido",
+      "C) Comprimir la imagen en un código pequeño",
+      "D) Etiquetar las clases del conjunto de datos",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "En la metáfora del tema, una red es el falsificador y la otra…",
+    feedback: {
+      correct: "El detective: da la probabilidad de que la muestra sea real.",
+      incorrect:
+        "El discriminador clasifica real frente a generado; el que genera es el generador.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 1,
+    title: "Materia prima",
+    type: "tf",
+    question:
+      "El generador de una GAN recibe como entrada un vector de ruido aleatorio z.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "¿De dónde sale la variedad entre una muestra generada y la siguiente?",
+    feedback: {
+      correct: "Cada z distinto produce una muestra distinta.",
+      incorrect: "Es verdadero: de ruido a imagen.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 1,
+    title: "Cara o cruz",
+    type: "fill",
+    question:
+      "En el equilibrio ideal de una GAN, el discriminador da una probabilidad de ___ a cualquier muestra.",
+    options: null,
+    correctAnswer: "0,5",
+    acceptedAnswers: ["0,5", "0.5", "50%", "50 %", "1/2", "0.50", "0,50"],
+    hint: "Si ya no distingue lo real de lo falso, ¿qué le queda?",
+    feedback: {
+      correct: "0,5: ya no puede distinguir y adivina al azar.",
+      incorrect: "Es 0,5 (50 %).",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 1,
+    title: "Siempre lo mismo",
+    type: "short",
+    question:
+      "¿Cómo se llama el fallo en que el generador produce casi siempre la misma salida, sea cual sea z? (en inglés o en castellano)",
+    options: null,
+    correctAnswer: "mode collapse",
+    acceptedAnswers: [
+      "mode collapse",
+      "colapso de modos",
+      "colapso de modo",
+      "colapso modal",
+    ],
+    hint: "El generador se queda con un solo «modo» de la distribución.",
+    feedback: {
+      correct: "Mode collapse (colapso de modos): calidad sin variedad.",
+      incorrect: "Es el mode collapse (colapso de modos).",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 2,
+    title: "Dos formas de aprender",
+    type: "mc",
+    question: "¿Qué diferencia a un modelo generativo de uno discriminativo?",
+    options: [
+      "A) El discriminativo crea muestras nuevas de cada clase",
+      "B) El generativo modela la distribución y puede crear muestras",
+      "C) El generativo solo funciona con datos etiquetados",
+      "D) Los dos aprenden exactamente la misma función",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "«¿Es un 7?» frente a «dibuja un 7».",
+    feedback: {
+      correct: "Discriminar = frontera; generar = cómo son los datos.",
+      incorrect:
+        "El generativo aprende la distribución de los datos y puede muestrear de ella.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 2,
+    title: "Juego de suma cero",
+    type: "tf",
+    question:
+      "En una GAN, el discriminador y el generador se entrenan con objetivos opuestos.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Uno quiere acertar; el otro quiere que se equivoque.",
+    feedback: {
+      correct: "Es un juego minimax: lo que gana uno lo pierde el otro.",
+      incorrect: "Es verdadero: es un juego adversario.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 2,
+    title: "Mismo rango",
+    type: "fill",
+    question:
+      "Si la salida del generador usa tanh, los píxeles reales (0–255) deben escalarse al rango [−1, ___].",
+    options: null,
+    correctAnswer: "1",
+    acceptedAnswers: ["1", "uno", "+1", "1.0", "1,0"],
+    hint: "Revisa entre qué valores se mueve la tangente hiperbólica.",
+    feedback: {
+      correct: "tanh ∈ [−1, 1]: los reales también, con p/127,5 − 1.",
+      incorrect: "tanh da valores en [−1, 1].",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 2,
+    title: "La otra familia",
+    type: "short",
+    question:
+      "¿Qué familia de modelos generativos, hoy muy usada en imagen, genera quitando ruido poco a poco?",
+    options: null,
+    correctAnswer: "difusión",
+    acceptedAnswers: [
+      "difusion",
+      "difusión",
+      "modelos de difusion",
+      "modelos de difusión",
+      "diffusion",
+      "diffusion models",
+    ],
+    hint: "Su nombre viene de un proceso físico en el que algo se dispersa gradualmente.",
+    feedback: {
+      correct: "Los modelos de difusión: denoising iterativo.",
+      incorrect: "Son los modelos de difusión.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 3,
+    title: "El error más caro",
+    type: "mc",
+    question:
+      "D(x) = 0,9 y 0,6 para dos imágenes reales; D(G(z)) = 0,3 y 0,8 para dos falsas. ¿Cuál de las cuatro aporta más pérdida al discriminador?",
+    options: [
+      "A) La real con 0,9",
+      "B) La real con 0,6",
+      "C) La falsa con 0,3",
+      "D) La falsa con 0,8",
+    ],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "Busca el caso en que D se equivoca con más seguridad.",
+    feedback: {
+      correct: "−ln(1 − 0,8) = −ln 0,2 ≈ 1,61: la mayor de las cuatro.",
+      incorrect:
+        "La falsa con 0,8: D la cree real con mucha seguridad; −ln 0,2 ≈ 1,61.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 3,
+    title: "Pérdida en equilibrio",
+    type: "fill",
+    question:
+      "En el equilibrio (D = 0,5 para todo), la pérdida del discriminador vale ln 2 ≈ ___ (con tres decimales).",
+    options: null,
+    correctAnswer: "0,693",
+    acceptedAnswers: ["0,693", "0.693", "0,6931", "0.6931"],
+    hint: "Es el logaritmo natural de 2.",
+    feedback: {
+      correct: "ln 2 ≈ 0,693: la pérdida de una GAN no baja hasta cero.",
+      incorrect: "ln 2 ≈ 0,693.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 3,
+    title: "Gradiente útil",
+    type: "mc",
+    question:
+      "Con D(G(z)) = 0,01, ¿cuántas veces más fuerte es el gradiente de −ln D(G(z)) que el de ln(1 − D(G(z)))?",
+    options: [
+      "A) Igual de fuerte",
+      "B) Unas 2 veces",
+      "C) Unas 100 veces",
+      "D) Unas 10 veces",
+    ],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "La derivada de ln u es 1/u. Compara 1/0,01 con 1/0,99.",
+    feedback: {
+      correct: "1/0,01 = 100 frente a 1/0,99 ≈ 1,01: unas 100 veces.",
+      incorrect:
+        "|−1/D| = 100 y |−1/(1 − D)| ≈ 1,01: unas 100 veces. Por eso se usa la versión no saturante.",
+    },
+  },
+  {
+    topic: "GAN",
+    tier: 3,
+    title: "Leer las pérdidas",
+    type: "tf",
+    question:
+      "Que la pérdida del generador no baje hasta cero significa que la GAN no está aprendiendo.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "Recuerda cuánto valen las pérdidas en el equilibrio ideal.",
+    feedback: {
+      correct:
+        "Falso: en el equilibrio rondan 0,69. Hay que mirar las muestras generadas.",
+      incorrect:
+        "Es falso: la pérdida de una GAN oscila; la calidad se juzga viendo las imágenes.",
+    },
+  },
+
+  // ---------------- RBF ----------------
+  {
+    topic: "RBF",
+    tier: 1,
+    title: "Parecido a un prototipo",
+    type: "mc",
+    question: "¿De qué depende la activación de una neurona oculta RBF?",
+    options: [
+      "A) Del producto escalar entre pesos y entrada",
+      "B) De la distancia entre la entrada y un centro",
+      "C) Del número de capas que tenga la red",
+      "D) De la etiqueta del ejemplo de entrada",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "«Radial» se refiere a algo que solo depende del radio.",
+    feedback: {
+      correct:
+        "φ depende de ‖x − c‖: cuanto más cerca del centro, mayor respuesta.",
+      incorrect:
+        "Depende de la distancia al centro; el producto escalar es el del perceptrón.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 1,
+    title: "En el centro",
+    type: "tf",
+    question:
+      "La activación gaussiana de una neurona RBF vale 1 justo en su centro.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "¿Cuánto vale la exponencial de 0?",
+    feedback: {
+      correct: "Distancia 0 → exp(0) = 1, el máximo.",
+      incorrect: "Es verdadero: exp(0) = 1.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 1,
+    title: "La anchura",
+    type: "fill",
+    question:
+      "En la gaussiana de una neurona RBF, la anchura de la campana la controla el parámetro ___ (una letra griega).",
+    options: null,
+    correctAnswer: "sigma",
+    acceptedAnswers: ["sigma", "σ", "la sigma"],
+    hint: "Es la misma letra que se usa para la desviación típica.",
+    feedback: {
+      correct:
+        "σ (sigma): pequeña → picos estrechos; grande → campanas anchas.",
+      incorrect: "Es σ (sigma).",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 1,
+    title: "El problema imposible",
+    type: "short",
+    question:
+      "¿Qué función lógica clásica, no separable por una recta, resuelve una red RBF con solo dos centros? (siglas)",
+    options: null,
+    correctAnswer: "XOR",
+    acceptedAnswers: ["xor", "o exclusivo", "or exclusivo", "el xor"],
+    hint: "Es la misma que no podía resolver el perceptrón simple en el Tema 2.",
+    feedback: { correct: "El XOR.", incorrect: "Es el XOR (o exclusivo)." },
+  },
+  {
+    topic: "RBF",
+    tier: 2,
+    title: "Calcular una campana",
+    type: "mc",
+    question:
+      "Centro c = (1, 2) y σ = 1. ¿Cuánto vale φ en B = (2, 2)? (dato: e^−0,5 ≈ 0,607)",
+    options: ["A) 1", "B) 0,368", "C) 0,607", "D) 0,018"],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Primero la distancia al cuadrado; después divide entre 2σ².",
+    feedback: {
+      correct: "‖B − c‖² = 1 → exp(−1/2) ≈ 0,607.",
+      incorrect: "Distancia² = 1; exp(−1/2) ≈ 0,607.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 2,
+    title: "Lejos de casa",
+    type: "tf",
+    question: "Una red RBF extrapola bien lejos de los datos de entrenamiento.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "¿Qué les pasa a todas las campanas cuando te alejas de sus centros?",
+    feedback: {
+      correct:
+        "Falso: lejos de los centros todas las φ ≈ 0 y la salida cae al sesgo.",
+      incorrect: "Es falso: una RBF interpola, pero no extrapola.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 2,
+    title: "Colocar los centros",
+    type: "fill",
+    question:
+      "El entrenamiento clásico de una RBF tiene dos pasos: colocar los centros con ___ y resolver los pesos de salida por mínimos cuadrados.",
+    options: null,
+    correctAnswer: "k-means",
+    acceptedAnswers: [
+      "k-means",
+      "kmeans",
+      "k means",
+      "k-medias",
+      "k medias",
+      "clustering",
+    ],
+    hint: "Es un algoritmo de agrupamiento del subtema 3.1.",
+    feedback: {
+      correct:
+        "k-means: los centros de los grupos son los centros de las campanas.",
+      incorrect: "Es k-means.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 2,
+    title: "Sin gradiente",
+    type: "short",
+    question:
+      "Con los centros ya fijados, ¿con qué método se obtienen los pesos de salida sin usar descenso del gradiente? (dos palabras)",
+    options: null,
+    correctAnswer: "mínimos cuadrados",
+    acceptedAnswers: [
+      "minimos cuadrados",
+      "mínimos cuadrados",
+      "least squares",
+      "por minimos cuadrados",
+      "pseudoinversa",
+    ],
+    hint: "La salida es lineal en los pesos: es una regresión lineal.",
+    feedback: {
+      correct: "Mínimos cuadrados: resolver Φ·w ≈ y de golpe.",
+      incorrect: "Es por mínimos cuadrados (solución cerrada).",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 3,
+    title: "El XOR transformado",
+    type: "mc",
+    question:
+      "XOR con centros (0, 0) y (1, 1) y φ = exp(−‖x − c‖²). ¿Qué par (φ₁, φ₂) corresponde al punto (0, 1)?",
+    options: [
+      "A) (0,368, 0,368)",
+      "B) (1, 0,135)",
+      "C) (0,135, 1)",
+      "D) (0,607, 0,607)",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "El punto está a la misma distancia de los dos centros. ¿Cuál es esa distancia al cuadrado?",
+    feedback: {
+      correct: "Distancia² = 1 a ambos centros → (e⁻¹, e⁻¹) ≈ (0,368, 0,368).",
+      incorrect:
+        "‖(0,1) − (0,0)‖² = 1 y ‖(0,1) − (1,1)‖² = 1, así que φ₁ = φ₂ = e⁻¹ ≈ 0,368.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 3,
+    title: "La maldición",
+    type: "fill",
+    question:
+      "Con una rejilla de 10 centros por dimensión, una entrada de 10 variables necesita 10^___ centros.",
+    options: null,
+    correctAnswer: "10",
+    acceptedAnswers: ["10", "diez", "10^10"],
+    hint: "Una rejilla multiplica los centros de cada dimensión.",
+    feedback: {
+      correct: "10¹⁰ = diez mil millones de centros.",
+      incorrect: "10 por dimensión y 10 dimensiones: 10¹⁰.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 3,
+    title: "Elegir la anchura",
+    type: "mc",
+    question:
+      "k-means da K = 4 centros y la mayor distancia entre dos de ellos es 6. Con la regla σ = d_max / √(2K), ¿cuánto vale σ?",
+    options: ["A) 0,75", "B) 1,5", "C) 3", "D) ≈ 2,12"],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "√8 está entre 2 y 3.",
+    feedback: {
+      correct: "6 / √8 ≈ 6 / 2,83 ≈ 2,12.",
+      incorrect: "σ = 6 / √(2·4) = 6 / √8 ≈ 2,12.",
+    },
+  },
+  {
+    topic: "RBF",
+    tier: 3,
+    title: "Mismo tamaño, otro aprendizaje",
+    type: "tf",
+    question:
+      "Una RBF con 10 entradas, 50 centros y 1 salida tiene tantos valores como un MLP 10 → 50 → 1 (601), pero solo 51 se ajustan de forma supervisada.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Cuenta coordenadas de los centros, anchuras y pesos de salida con sesgo.",
+    feedback: {
+      correct:
+        "500 + 50 + 51 = 601; los centros salen de k-means y solo los 51 pesos de salida usan las etiquetas.",
+      incorrect:
+        "Es verdadero: 500 coordenadas + 50 anchuras + 51 pesos = 601, y solo los 51 últimos son supervisados.",
+    },
+  },
+];
+
+// === SALAS: se asignan por posición en la partida ===
+var ROOMS = {
+  s1: {
+    room: "&#127760; ZONA DE CARGA",
+    narrative:
+      "Despiertas en un mundo que parece real… pero los píxeles tiemblan en los bordes. SIMULACRO, una red generativa, ha construido todo lo que ves.",
+  },
+  s2: {
+    room: "&#129694; SALA DE LOS ESPEJOS",
+    narrative:
+      "Cada espejo devuelve una copia casi perfecta de ti, reconstruida desde un código diminuto. Algunas copias fallan.",
+  },
+  A: {
+    room: "&#128230; COMPRESOR LATENTE",
+    narrative:
+      "Entras en el embudo del autoencoder: todo se estrecha hasta caber en unos pocos números.",
+  },
+  B: {
+    room: "&#127917; FORJA DE FALSIFICACIONES",
+    narrative:
+      "El generador fabrica caras, paisajes y objetos a partir de ruido. El discriminador los vigila sin descanso.",
+  },
+  s3: {
+    room: "&#127756; NÚCLEO DE AGRUPACIÓN",
+    narrative:
+      "Millones de puntos flotan y se agrupan alrededor de centros que se desplazan sin parar.",
+  },
+  C: {
+    room: "&#128276; CAMPO DE CAMPANAS",
+    narrative:
+      "El suelo se curva en campanas gaussianas. Solo responden cuando pisas cerca de su centro.",
+  },
+  D: {
+    room: "&#9878; TRIBUNAL DEL DISCRIMINADOR",
+    narrative:
+      "Un juez sin rostro decide qué es real y qué es falso. Esta vez, el juicio es sobre ti.",
+  },
+  s4: {
+    room: "&#128682; SALIDA DE LA SIMULACIÓN",
+    narrative:
+      "La puerta al mundo real está delante. Tres pruebas más y SIMULACRO dejará de generar tu realidad.",
+  },
+};
+function _withRoom(arr, key) {
+  return arr.map(function (q) {
+    var c = {};
+    for (var k in q) c[k] = q[k];
+    c.room = ROOMS[key].room;
+    c.narrative = ROOMS[key].narrative;
+    return c;
+  });
+}
+function _assignRooms() {
+  shared1 = _withRoom(shared1, "s1");
+  shared2 = _withRoom(shared2, "s2");
+  branch1A = _withRoom(branch1A, "A");
+  branch1B = _withRoom(branch1B, "B");
+  shared3 = _withRoom(shared3, "s3");
+  branch2C = _withRoom(branch2C, "C");
+  branch2D = _withRoom(branch2D, "D");
+  shared4 = _withRoom(shared4, "s4");
+}
+QUESTION_BANK.forEach(function (q) {
+  q.room = "&#128190; " + q.topic.toUpperCase();
+  q.narrative = "Banco de preguntas · " + q.topic + " · nivel " + q.tier;
+});
+
+// === PHRASES (16 finales) ===
+// índice = hash(nombre)*4 + ruta: 0 = Compresor+Campanas, 1 = Compresor+Tribunal, 2 = Forja+Campanas, 3 = Forja+Tribunal
+var PHRASES = [
+  "Comprimiste la simulación hasta su esencia y la reconstruiste sin errores. La puerta se abre.",
+  "Del espacio latente al juicio final: viste lo que SIMULACRO escondía en su código.",
+  "Ninguna falsificación te engañó y ninguna campana te atrapó. Eres más real que la simulación.",
+  "Engañaste al discriminador mejor que el propio generador. SIMULACRO se rinde.",
+  "Encontraste el cuello de botella y escapaste por él. Lo esencial siempre cabe en pocos números.",
+  "Tu reconstrucción fue tan buena que el juez la declaró real. Bienvenido/a al mundo exterior.",
+  "Ruido a la entrada, realidad a la salida: has aprendido a generar tu propio camino.",
+  "Generador y discriminador llegaron al equilibrio… y tú saliste por el hueco entre los dos.",
+  "Agrupaste lo parecido, comprimiste lo esencial y mediste cada distancia. Simulación superada.",
+  "Del k-means al autoencoder: has encontrado la estructura que nadie te etiquetó.",
+  "Ni el mode collapse ni la maldición de la dimensionalidad pudieron detenerte.",
+  "D(tú) = 0,5: ni el discriminador sabe ya si eres real. Y eso significa que has ganado.",
+  "Cada campana respondió a tu paso: estabas siempre cerca del centro correcto.",
+  "Tu espacio latente es más ordenado que el de SIMULACRO. Despiertas en el mundo real.",
+  "Interpolaste entre la ilusión y la realidad, y elegiste la realidad.",
+  "Sin etiquetas, sin mapas y sin ayuda: has escapado de la simulación con todo el Tema 3 en la cabeza.",
+];
+
+
+// === RENDER: pantallas temáticas ===
+function renderTitle(app) {
+  app.innerHTML =
+    '<div class="screen title-screen">' +
+    '<div class="swords">&#127760; &#129694; &#128682;</div>' +
+    "<h1>PROTOCOLO<br>SIMULACRO</h1>" +
+    '<p class="subtitle">— Escape Room · Tema 3 · No supervisado y redes alternativas —</p>' +
+    '<input type="text" id="nameInput" placeholder="Tu nombre y apellido" maxlength="40" autocomplete="off">' +
+    '<button onclick="startGame()">&#9654; DESPERTAR</button>' +
+    '<p class="instructions">Autoencoders · GAN · Redes RBF<br>Aprendizaje Profundo · CUNEF</p>' +
+    "</div>";
+  var inp = document.getElementById("nameInput");
+  if (inp) {
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        startGame();
+      }
+    });
+  }
+}
+
+function renderIntro(app) {
+  app.innerHTML =
+    '<div class="screen intro-screen">' +
+    "<h2>&#9888; ESTO NO ES REAL</h2>" +
+    '<p>Operador/a <span class="name-display">' +
+    state.name +
+    "</span>: el mundo que te rodea lo está generando SIMULACRO, una red generativa entrenada sin una sola etiqueta. Para salir tienes que demostrar que entiendes cómo aprende a imitar la realidad.</p>" +
+    "<p>Para recuperar el control tendrás que atravesar <strong>15 pruebas</strong> sobre sus tres mecanismos: la <em>compresión</em> (aprendizaje no supervisado y autoencoders), la <em>generación</em> (GAN) y las <em>campanas</em> de base radial (RBF). Dos veces tendrás que elegir camino.</p>" +
+    '<p class="warning">&#9829;&#9829;&#9829; Tienes 3 vidas. Cada respuesta incorrecta resta una. Si las pierdes todas, la simulación te reinicia.</p>' +
+    "<p>Selecciona una opción o escribe tu respuesta y pulsa <strong>CONFIRMAR</strong> (o Enter). El botón <strong>REFERENCIA</strong> abre un resumen del tema: te orienta, pero no te da las respuestas.</p>" +
+    '<p class="note">Las preguntas dependen de tu nombre y de la fecha: cada persona tiene su propia partida. Al terminar obtendrás un código de verificación para el profesor.</p>' +
+    '<button onclick="startAdventure()">&#127760; ENTRAR EN LA SIMULACIÓN</button>' +
+    "</div>";
+}
+
+function renderBranch(app, id) {
+  var html = '<div class="screen branch-screen">';
+  if (id === 1) {
+    html +=
+      "<h2>&#9888; LA SIMULACIÓN SE DIVIDE</h2>" +
+      '<p class="narrative">Los espejos se rompen y aparecen dos pasillos. Ambos llevan al núcleo de agrupación. Elige uno.</p>' +
+      '<div class="branch-options">' +
+      '<div class="branch-card" onclick="chooseBranch(1,\'A\')"><div class="icon">&#128230;</div><h3>COMPRESOR LATENTE</h3><p>Atraviesa el embudo del autoencoder.</p></div>' +
+      '<div class="branch-card" onclick="chooseBranch(1,\'B\')"><div class="icon">&#127917;</div><h3>FORJA DE FALSIFICACIONES</h3><p>Cuélate donde el generador fabrica la realidad.</p></div>' +
+      "</div>";
+  } else {
+    html +=
+      "<h2>&#9888; ÚLTIMA DIVISIÓN</h2>" +
+      '<p class="narrative">Los puntos se han agrupado. Antes de la salida hay dos caminos, igual de engañosos.</p>' +
+      '<div class="branch-options">' +
+      '<div class="branch-card" onclick="chooseBranch(2,\'C\')"><div class="icon">&#128276;</div><h3>CAMPO DE CAMPANAS</h3><p>Cruza el terreno de las funciones de base radial.</p></div>' +
+      '<div class="branch-card" onclick="chooseBranch(2,\'D\')"><div class="icon">&#9878;</div><h3>TRIBUNAL DEL DISCRIMINADOR</h3><p>Convence al juez de que eres real.</p></div>' +
+      "</div>";
+  }
+  html += "</div>";
+  app.innerHTML = html;
+}
+
+function renderGameOver(app) {
+  app.innerHTML =
+    '<div class="screen gameover-screen">' +
+    '<div class="skull">&#128128;</div>' +
+    "<h1>SIMULACIÓN REINICIADA</h1>" +
+    "<p>SIMULACRO ha detectado demasiados errores y ha borrado tu partida.<br>Repasa el Tema 3 y vuelve a intentarlo.</p>" +
+    '<button onclick="restartGame()">&#8635; REINTENTAR</button>' +
+    "</div>";
+}
+
+function renderVictory(app) {
+  var code = getCompletionCode();
+  var phrase = PHRASES[getFinalPhraseIndex()] || PHRASES[0];
+  var routes = { A: "Compresor", B: "Forja", C: "Campanas", D: "Tribunal" };
+  app.innerHTML =
+    '<div class="screen victory-screen">' +
+    '<div class="trophy">&#127942;</div>' +
+    "<h1>HAS DESPERTADO</h1>" +
+    '<p class="subtitle" style="font-size:.7em;margin-top:10px">Has salido de la simulación: esto sí es real.</p>' +
+    '<div class="phrase-box"><p class="phrase-text">&laquo; ' +
+    phrase +
+    " &raquo;</p></div>" +
+    '<div class="completion-info">' +
+    '<p>Operador/a: <span class="name-display">' +
+    state.name +
+    "</span></p>" +
+    "<p>Ruta: " +
+    (routes[state.branch1] || "?") +
+    " → " +
+    (routes[state.branch2] || "?") +
+    " · Vidas: " +
+    Math.min(state.lives, 3) +
+    "/3</p>" +
+    '<p style="margin-top:15px">CÓDIGO DE VERIFICACIÓN:</p>' +
+    '<div class="code-box">' +
+    code +
+    "</div>" +
+    '<p class="instructions">Copia este código y la frase final y entrégaselos al profesor.</p>' +
+    "</div>" +
+    '<button onclick="restartGame()">&#8635; NUEVA PARTIDA</button>' +
+    "</div>";
+}
+
+// === ESCENAS 3D (estética terminal / IA) ===
+var GREEN = 0x00ff41,
+  DGREEN = 0x0d3d1a,
+  CYAN = 0x22d3ee;
+function _baseScene(name, fogDensity) {
+  clearScene();
+  tjs.currentScene = name;
+  tjs.scene.fog = new THREE.FogExp2(0x0a0f0a, fogDensity || 0.05);
+  addLight("ambient", 0x335533, 0.5);
+}
+function _rain(count, color) {
+  // «Lluvia de código»: puntos que caen
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(count * 3);
+  for (var i = 0; i < count; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 20;
+    pos[i * 3 + 1] = Math.random() * 10;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 14 - 2;
+  }
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  var mat = new THREE.PointsMaterial({
+    color: color || GREEN,
+    size: 0.07,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  var pts = new THREE.Points(geo, mat);
+  tjs.scene.add(pts);
+  tjs.sceneObjects.push(pts);
+  tjs.animCallbacks.push(function () {
+    var p = pts.geometry.attributes.position.array;
+    for (var j = 0; j < count; j++) {
+      p[j * 3 + 1] -= 0.04 + (j % 5) * 0.01;
+      if (p[j * 3 + 1] < 0) p[j * 3 + 1] = 10;
+    }
+    pts.geometry.attributes.position.needsUpdate = true;
+  });
+  return pts;
+}
+function _glowMat(color, intensity) {
+  return new THREE.MeshStandardMaterial({
+    color: color,
+    emissive: color,
+    emissiveIntensity: intensity || 0.6,
+    roughness: 0.4,
+    metalness: 0.3,
+  });
+}
+function _wireMat(color, opacity) {
+  return new THREE.MeshBasicMaterial({
+    color: color,
+    wireframe: true,
+    transparent: true,
+    opacity: opacity || 0.5,
+  });
+}
+function _racks(n, z0) {
+  var rackMat = new THREE.MeshStandardMaterial({
+    color: 0x101a12,
+    roughness: 0.7,
+    metalness: 0.5,
+  });
+  var ledMat = _glowMat(GREEN, 1.2);
+  for (var i = 0; i < n; i++) {
+    var side = (i % 2) * 2 - 1,
+      z = z0 - Math.floor(i / 2) * 2.6;
+    addObj(new THREE.BoxGeometry(1.2, 3.2, 1.6), rackMat, [side * 3.2, 1.6, z]);
+    for (var k = 0; k < 6; k++)
+      addObj(new THREE.BoxGeometry(0.05, 0.05, 1.2), ledMat, [
+        side * 2.58,
+        0.5 + k * 0.45,
+        z,
+      ]);
+  }
+}
+function _cam(x, y, z, lx, ly, lz) {
+  tjs.camera.position.set(x, y, z);
+  tjs.camera.lookAt(lx, ly, lz);
+}
+
+function buildTitleScene() {
+  if (!tjs) return;
+  _baseScene("title", 0.04);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _wireMat(GREEN, 0.5),
+    [0, 2.2, -3],
+  );
+  var inner = addObj(
+    new THREE.SphereGeometry(0.45, 24, 24), _glowMat(GREEN, 0.5), [0, 2.2, -3],
+  );
+  addLight("point", GREEN, 3, [0, 2.2, 0], 9);
+  _rain(500);
+  _cam(0, 2.4, 8, 0, 2, 0);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.4;
+    core.rotation.x = t * 0.2;
+    inner.scale.setScalar(1 + Math.sin(t * 2) * 0.08);
+    tjs.camera.position.x = Math.sin(t * 0.15) * 2;
+    tjs.camera.lookAt(0, 2, 0);
+  });
+}
+function buildEntradaScene() {
+  if (!tjs) return;
+  _baseScene("entrada", 0.06);
+  addGround(0x050805);
+  _racks(10, 2);
+  var term = addObj(
+    new THREE.BoxGeometry(2.2, 1.3, 0.1),
+    _glowMat(GREEN, 0.5),
+    [0, 1.8, -8],
+  );
+  addLight("point", GREEN, 2, [0, 2.5, -6], 8);
+  _rain(250);
+  _cam(0, 2, 7, 0, 1.6, -6);
+  tjs.animCallbacks.push(function (t) {
+    tjs.camera.position.z = 7 + Math.sin(t * 0.3) * 0.6;
+    term.material.emissiveIntensity = 0.4 + Math.abs(Math.sin(t * 3)) * 0.4;
+  });
+}
+function buildArtefactosScene() {
+  // Firewall: muro de bloques
+  if (!tjs) return;
+  _baseScene("firewall", 0.05);
+  addGround(0x050805);
+  var blocks = [];
+  for (var x = -4; x <= 4; x++)
+    for (var y = 0; y < 5; y++) {
+      var b = addObj(
+        new THREE.BoxGeometry(0.9, 0.9, 0.3),
+        _glowMat(y % 2 ? 0x06361a : 0x084a22, 0.3),
+        [x, 0.5 + y, -3],
+      );
+      blocks.push(b);
+    }
+  addLight("point", 0xff3b3b, 1.5, [0, 3, 0], 8);
+  _rain(200);
+  _cam(0, 2.5, 6, 0, 2.3, -3);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < blocks.length; i++)
+      blocks[i].material.emissiveIntensity =
+        0.15 + 0.3 * Math.abs(Math.sin(t * 2 + i * 0.37));
+  });
+}
+function buildCriptaScene() {
+  // Rama A · visión: rejilla de píxeles y un filtro que se desliza
+  if (!tjs) return;
+  _baseScene("vision", 0.05);
+  var px = [];
+  for (var i = 0; i < 8; i++)
+    for (var j = 0; j < 8; j++) {
+      var v = Math.random();
+      px.push(
+        addObj(
+          new THREE.BoxGeometry(0.45, 0.45, 0.1),
+          _glowMat(new THREE.Color(0, 0.25 + v * 0.75, 0.2), 0.4),
+          [-1.75 + i * 0.5, 0.6 + j * 0.5, -2],
+        ),
+      );
+    }
+  var filt = addObj(
+    new THREE.BoxGeometry(1.5, 1.5, 0.12),
+    _wireMat(CYAN, 0.9),
+    [-1.25, 1.1, -1.8],
+  );
+  var eye = addObj(
+    new THREE.SphereGeometry(0.5, 24, 24),
+    _glowMat(CYAN, 1.2),
+    [0, 5.2, -2],
+  );
+  addLight("point", CYAN, 2, [0, 3, 1], 8);
+  _cam(0, 2.4, 5.5, 0, 2.3, -2);
+  tjs.animCallbacks.push(function (t) {
+    var k = Math.floor(t * 1.5) % 36,
+      cx = k % 6,
+      cy = Math.floor(k / 6);
+    filt.position.x = -1.25 + cx * 0.5;
+    filt.position.y = 1.1 + cy * 0.5;
+    eye.scale.setScalar(1 + Math.sin(t * 3) * 0.1);
+  });
+}
+function buildBibliotecaScene() {
+  // Rama B · memoria: celdas LSTM en fila con puertas
+  if (!tjs) return;
+  _baseScene("memoria", 0.05);
+  addGround(0x050805);
+  var cells = [];
+  for (var i = 0; i < 6; i++) {
+    var c = addObj(new THREE.BoxGeometry(1, 1, 1), _glowMat(0x0d7a30, 0.5), [
+      -5 + i * 2,
+      1.5,
+      -2,
+    ]);
+    cells.push(c);
+    if (i < 5)
+      addObj(
+        new THREE.CylinderGeometry(0.06, 0.06, 1, 8),
+        _glowMat(GREEN, 1),
+        [-4 + i * 2, 1.5, -2],
+        [0, 0, Math.PI / 2],
+      );
+  }
+  var belt = addObj(
+    new THREE.CylinderGeometry(0.05, 0.05, 12, 8),
+    _glowMat(CYAN, 1.2),
+    [0, 2.4, -2],
+    [0, 0, Math.PI / 2],
+  );
+  addLight("point", GREEN, 2, [0, 3, 1], 9);
+  _rain(150);
+  _cam(0, 2.6, 6, 0, 1.8, -2);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < cells.length; i++) {
+      var s = 0.5 + 0.5 * Math.sin(t * 2 - i * 0.8);
+      cells[i].material.emissiveIntensity = 0.2 + s * 0.8;
+      cells[i].rotation.y = t * 0.3 + i;
+    }
+    belt.material.emissiveIntensity = 0.8 + Math.sin(t * 4) * 0.3;
+  });
+}
+function buildPasajeScene() {
+  // Base de datos central: cilindros apilados
+  if (!tjs) return;
+  _baseScene("db", 0.05);
+  addGround(0x050805);
+  var disks = [];
+  for (var k = 0; k < 5; k++)
+    disks.push(
+      addObj(
+        new THREE.CylinderGeometry(1.4, 1.4, 0.45, 32),
+        _glowMat(0x0a5c25, 0.5),
+        [0, 0.4 + k * 0.6, -2],
+      ),
+    );
+  var ring = addObj(
+    new THREE.TorusGeometry(2.4, 0.04, 8, 64),
+    _glowMat(GREEN, 1.2),
+    [0, 1.6, -2],
+    [Math.PI / 2, 0, 0],
+  );
+  addLight("point", GREEN, 2.5, [0, 4, 0], 9);
+  _rain(300);
+  _cam(0, 3, 6.5, 0, 1.6, -2);
+  tjs.animCallbacks.push(function (t) {
+    ring.position.y = 0.4 + (Math.sin(t) + 1) * 1.3;
+    for (var i = 0; i < disks.length; i++)
+      disks[i].material.emissiveIntensity =
+        0.3 + 0.5 * Math.abs(Math.sin(t * 2 + i));
+  });
+}
+function buildFuegoScene() {
+  // Rama C · nodo encriptado: candado / espiral de tokens
+  if (!tjs) return;
+  _baseScene("cifrado", 0.05);
+  var knot = addObj(
+    new THREE.TorusKnotGeometry(1, 0.28, 120, 12),
+    _glowMat(0xd97706, 0.7),
+    [0, 2.2, -2],
+  );
+  var toks = [];
+  for (var i = 0; i < 30; i++)
+    toks.push(
+      addObj(
+        new THREE.BoxGeometry(0.18, 0.18, 0.18),
+        _glowMat(GREEN, 1),
+        [0, 0, 0],
+      ),
+    );
+  addLight("point", 0xfbbf24, 2.5, [0, 3, 1], 9);
+  _cam(0, 2.4, 6.5, 0, 2.2, -2);
+  tjs.animCallbacks.push(function (t) {
+    knot.rotation.y = t * 0.5;
+    knot.rotation.x = t * 0.25;
+    for (var i = 0; i < toks.length; i++) {
+      var a = t * 0.8 + i * 0.21;
+      toks[i].position.set(
+        Math.cos(a) * 2.6,
+        0.4 + (i / toks.length) * 3.6,
+        -2 + Math.sin(a) * 2.6,
+      );
+    }
+  });
+}
+function buildAguaScene() {
+  // Rama D · matriz de atención: nodos conectados todos con todos
+  if (!tjs) return;
+  _baseScene("atencion", 0.04);
+  var n = 8,
+    nodes = [],
+    P = [];
+  for (var i = 0; i < n; i++) {
+    var a = (i / n) * Math.PI * 2,
+      p = new THREE.Vector3(
+        Math.cos(a) * 2.5,
+        2.2 + Math.sin(a * 2) * 0.6,
+        -2 + Math.sin(a) * 2.5,
+      );
+    P.push(p);
+    nodes.push(
+      addObj(new THREE.SphereGeometry(0.18, 16, 16), _glowMat(CYAN, 1.2), [
+        p.x,
+        p.y,
+        p.z,
+      ]),
+    );
+  }
+  var lines = [];
+  for (var x = 0; x < n; x++)
+    for (var y = x + 1; y < n; y++) {
+      var g = new THREE.BufferGeometry().setFromPoints([P[x], P[y]]);
+      var l = new THREE.Line(
+        g,
+        new THREE.LineBasicMaterial({
+          color: GREEN,
+          transparent: true,
+          opacity: 0.3,
+        }),
+      );
+      tjs.scene.add(l);
+      tjs.sceneObjects.push(l);
+      lines.push(l);
+    }
+  addLight("point", CYAN, 2, [0, 3, 1], 9);
+  _rain(150, CYAN);
+  _cam(0, 3, 6.5, 0, 2.2, -2);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < lines.length; i++)
+      lines[i].material.opacity =
+        0.08 + 0.6 * Math.pow(Math.abs(Math.sin(t * 0.9 + i * 0.7)), 4);
+    tjs.camera.position.x = Math.sin(t * 0.2) * 1.5;
+    tjs.camera.lookAt(0, 2.2, -2);
+  });
+}
+function buildFinalScene() {
+  // Root access: núcleo de NEXUS
+  if (!tjs) return;
+  _baseScene("root", 0.04);
+  addGround(0x050805);
+  var core = addObj(
+    new THREE.OctahedronGeometry(1.3, 0),
+    _glowMat(0xff3b3b, 0.9),
+    [0, 2.4, -2],
+  );
+  var shell = addObj(
+    new THREE.IcosahedronGeometry(2.1, 1),
+    _wireMat(GREEN, 0.5),
+    [0, 2.4, -2],
+  );
+  addLight("point", 0xff3b3b, 3, [0, 2.4, -0.5], 8);
+  _rain(400);
+  _cam(0, 2.6, 6, 0, 2.3, -2);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t;
+    shell.rotation.y = -t * 0.3;
+    shell.rotation.x = t * 0.2;
+    core.material.emissiveIntensity = 0.6 + Math.abs(Math.sin(t * 3)) * 0.6;
+  });
+}
+function buildVictoryScene() {
+  if (!tjs) return;
+  _baseScene("victory", 0.03);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _glowMat(GREEN, 1.3),
+    [0, 2.4, -1],
+  );
+  addLight("point", GREEN, 3, [0, 3, 1], 10);
+  _rain(800, 0xffd700);
+  _cam(0, 2.6, 7, 0, 2.3, -1);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.8;
+    core.scale.setScalar(1 + Math.sin(t * 2) * 0.1);
+  });
+}
+function buildGameOverScene() {
+  if (!tjs) return;
+  _baseScene("gameover", 0.07);
+  addLight("point", 0xff2222, 2, [0, 3, 1], 8);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _wireMat(0xff2222, 0.7),
+    [0, 2.2, -1],
+  );
+  _rain(500, 0xff2222);
+  _cam(0, 2.4, 7, 0, 2, -1);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.2;
+  });
+}
+function buildBranchScene() {
+  if (!tjs) return;
+  _baseScene("branch", 0.05);
+  addGround(0x050805);
+  addObj(
+    new THREE.BoxGeometry(0.4, 0.05, 10),
+    _glowMat(GREEN, 1),
+    [-1.6, 0.03, -3],
+    [0, 0.35, 0],
+  );
+  addObj(
+    new THREE.BoxGeometry(0.4, 0.05, 10),
+    _glowMat(CYAN, 1),
+    [1.6, 0.03, -3],
+    [0, -0.35, 0],
+  );
+  var l = addObj(
+    new THREE.SphereGeometry(0.4, 16, 16),
+    _glowMat(GREEN, 1.3),
+    [-3.2, 1.5, -7],
+  );
+  var r = addObj(
+    new THREE.SphereGeometry(0.4, 16, 16),
+    _glowMat(CYAN, 1.3),
+    [3.2, 1.5, -7],
+  );
+  addLight("point", GREEN, 2, [-3, 2, -6], 8);
+  addLight("point", CYAN, 2, [3, 2, -6], 8);
+  _rain(250);
+  _cam(0, 2.2, 5, 0, 1, -5);
+  tjs.animCallbacks.push(function (t) {
+    l.position.y = 1.5 + Math.sin(t * 2) * 0.2;
+    r.position.y = 1.5 + Math.cos(t * 2) * 0.2;
+  });
+}
+
+// === UPDATE SCENE: según pantalla y paso ===
+function updateThreeScene() {
+  if (!tjs || !threeEnabled) return;
+  var target;
+  if (state.screen === "title" || state.screen === "intro") target = "title";
+  else if (state.screen === "gameover") target = "gameover";
+  else {
+    var s = state.step;
+    if (s >= 17) target = "victory";
+    else if (s === 6 || s === 11) target = "branch";
+    else if (s <= 2) target = "entrada";
+    else if (s <= 5) target = "firewall";
+    else if (s <= 8) target = state.branch1 === "B" ? "memoria" : "vision";
+    else if (s <= 10) target = "db";
+    else if (s <= 13) target = state.branch2 === "D" ? "atencion" : "cifrado";
+    else target = "root";
+  }
+  if (tjs.currentScene === target) return;
+  var map = {
+    title: buildTitleScene,
+    entrada: buildEntradaScene,
+    firewall: buildArtefactosScene,
+    vision: buildLatenteScene,
+    memoria: buildForjaScene,
+    db: buildClustersScene,
+    cifrado: buildCampanasScene,
+    atencion: buildTribunalScene,
+    root: buildFinalScene,
+    victory: buildVictoryScene,
+    gameover: buildGameOverScene,
+    branch: buildBranchScene,
+  };
+  map[target]();
+  var app = document.getElementById("app");
+  if (app) {
+    var glow = {
+      vision: "rgba(34,211,238,.25)",
+      atencion: "rgba(34,211,238,.25)",
+      cifrado: "rgba(217,119,6,.25)",
+      root: "rgba(255,59,59,.25)",
+      gameover: "rgba(255,34,34,.3)",
+      victory: "rgba(255,215,0,.25)",
+    };
+    app.style.boxShadow = "0 0 60px " + (glow[target] || "rgba(0,255,65,.18)");
+  }
+}
+
+// === ESCENAS PROPIAS DEL TEMA 3 ===
+function buildLatenteScene() { // Embudo del autoencoder: capas que se estrechan y se vuelven a abrir
+  if (!tjs) return; _baseScene('vision', 0.05);
+  var sizes = [3.2, 2.2, 1.2, 0.5, 1.2, 2.2, 3.2], planes = [];
+  for (var i = 0; i < sizes.length; i++) {
+    var col = i === 3 ? 0xffd24a : GREEN;
+    planes.push(addObj(new THREE.BoxGeometry(0.08, sizes[i], sizes[i]), _wireMat(col, i === 3 ? 0.95 : 0.55), [-4.5 + i * 1.5, 2.2, -2]));
+  }
+  var dots = [];
+  for (var k = 0; k < 40; k++) dots.push(addObj(new THREE.SphereGeometry(0.06, 8, 8), _glowMat(CYAN, 1.2), [0, 0, 0]));
+  addLight('point', GREEN, 2, [0, 3, 1], 9);
+  _cam(0, 2.6, 7, 0, 2.2, -2);
+  tjs.animCallbacks.push(function(t) {
+    for (var k = 0; k < dots.length; k++) {
+      var u = ((t * 0.25 + k / dots.length) % 1), x = -4.5 + u * 9, w = 1.6 * Math.min(1, Math.abs(x) / 4.5 + 0.12);
+      dots[k].position.set(x, 2.2 + Math.sin(k * 7.1) * w, -2 + Math.cos(k * 3.3) * w);
+    }
+    planes[3].rotation.x = t;
+  });
+}
+function buildForjaScene() { // Generador (cubo) lanza muestras hacia el discriminador (ojo)
+  if (!tjs) return; _baseScene('memoria', 0.05);
+  addGround(0x050805);
+  var gen = addObj(new THREE.BoxGeometry(1.2, 1.2, 1.2), _glowMat(0xd97706, 0.8), [-3.2, 1.4, -2]);
+  var disc = addObj(new THREE.SphereGeometry(0.8, 24, 24), _glowMat(CYAN, 0.9), [3.2, 1.6, -2]);
+  var shots = [];
+  for (var k = 0; k < 14; k++) shots.push(addObj(new THREE.TetrahedronGeometry(0.16), _glowMat(k % 2 ? GREEN : 0xffd24a, 1.2), [0, 0, 0]));
+  addLight('point', 0xfbbf24, 2, [-3, 3, 0], 7); addLight('point', CYAN, 2, [3, 3, 0], 7);
+  _rain(150);
+  _cam(0, 2.5, 6.5, 0, 1.6, -2);
+  tjs.animCallbacks.push(function(t) {
+    gen.rotation.y = t * 0.8; gen.rotation.x = t * 0.4;
+    disc.scale.setScalar(1 + Math.sin(t * 3) * 0.06);
+    for (var k = 0; k < shots.length; k++) { var u = (t * 0.35 + k / shots.length) % 1; shots[k].position.set(-3.2 + u * 6.4, 1.5 + Math.sin(u * Math.PI) * 1.4, -2 + Math.sin(k) * 0.5); shots[k].rotation.y = t * 3; }
+  });
+}
+function buildClustersScene() { // k-means: nubes de puntos que orbitan tres centros
+  if (!tjs) return; _baseScene('db', 0.05);
+  var centers = [[-2.6, 2.6, -2], [2.4, 3.0, -2.5], [0, 1.2, -1]], cols = [GREEN, CYAN, 0xffd24a], pts = [];
+  for (var c = 0; c < 3; c++) {
+    addObj(new THREE.OctahedronGeometry(0.28, 0), _glowMat(cols[c], 1.5), centers[c]);
+    for (var k = 0; k < 26; k++) pts.push({ m: addObj(new THREE.SphereGeometry(0.07, 8, 8), _glowMat(cols[c], 0.8), [0, 0, 0]), c: c, r: 0.5 + Math.random() * 0.9, a: Math.random() * 6.28, b: Math.random() * 6.28 });
+  }
+  addLight('point', GREEN, 2, [0, 4, 1], 10);
+  _rain(150);
+  _cam(0, 2.6, 7, 0, 2.2, -2);
+  tjs.animCallbacks.push(function(t) {
+    for (var i = 0; i < pts.length; i++) { var p = pts[i], C = centers[p.c], a = p.a + t * 0.6;
+      p.m.position.set(C[0] + Math.cos(a) * p.r, C[1] + Math.sin(p.b + t * 0.4) * p.r * 0.6, C[2] + Math.sin(a) * p.r); }
+  });
+}
+function buildCampanasScene() { // Campo de campanas gaussianas que suben y bajan
+  if (!tjs) return; _baseScene('cifrado', 0.045);
+  var N = 22, dots = [], bumps = [[-2, -1.5], [1.8, -2.5], [0.3, 0.8]];
+  for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) dots.push(addObj(new THREE.SphereGeometry(0.05, 6, 6), _glowMat(GREEN, 0.9), [-5 + i * 10 / (N - 1), 0, -6 + j * 7 / (N - 1)]));
+  addLight('point', 0xfbbf24, 2, [0, 4, 0], 10);
+  _cam(0, 4, 5.5, 0, 0.6, -2.5);
+  tjs.animCallbacks.push(function(t) {
+    for (var k = 0; k < dots.length; k++) { var p = dots[k].position, h = 0;
+      for (var b = 0; b < bumps.length; b++) { var dx = p.x - bumps[b][0], dz = p.z - bumps[b][1], s = 0.9 + 0.4 * Math.sin(t * 0.8 + b * 2);
+        h += (1.6 + Math.sin(t + b)) * 0.8 * Math.exp(-(dx * dx + dz * dz) / (2 * s * s)); }
+      p.y = h; dots[k].material.emissiveIntensity = 0.4 + h * 0.6; }
+  });
+}
+function buildTribunalScene() { // El discriminador como juez: un ojo sobre una columna y dos muestras
+  if (!tjs) return; _baseScene('atencion', 0.05);
+  addGround(0x050805);
+  var pillarMat = new THREE.MeshStandardMaterial({ color: 0x102016, roughness: 0.6, metalness: 0.5 });
+  addObj(new THREE.CylinderGeometry(0.5, 0.7, 3.2, 16), pillarMat, [0, 1.6, -3]);
+  var eye = addObj(new THREE.SphereGeometry(0.6, 24, 24), _glowMat(CYAN, 1.2), [0, 3.8, -3]);
+  var ring = addObj(new THREE.TorusGeometry(1, 0.04, 8, 48), _glowMat(CYAN, 1), [0, 3.8, -3]);
+  var real = addObj(new THREE.BoxGeometry(0.8, 0.8, 0.8), _glowMat(GREEN, 0.8), [-2.4, 0.6, -1.5]);
+  var fake = addObj(new THREE.BoxGeometry(0.8, 0.8, 0.8), _glowMat(0xff3b3b, 0.8), [2.4, 0.6, -1.5]);
+  addLight('point', CYAN, 2.5, [0, 4, -1], 9);
+  _rain(150, CYAN);
+  _cam(0, 2.6, 6.5, 0, 2.2, -2.5);
+  tjs.animCallbacks.push(function(t) {
+    eye.position.x = Math.sin(t * 0.9) * 0.4; ring.rotation.y = t; ring.position.x = eye.position.x;
+    real.rotation.y = t; fake.rotation.y = -t;
+    var w = 0.5 + 0.5 * Math.sin(t * 1.5); real.material.emissiveIntensity = 0.3 + w; fake.material.emissiveIntensity = 1.3 - w;
+  });
+}
+
+</script>
+</body>
+</html>
