@@ -1,0 +1,2777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Protocolo NEXUS · Escape Room Tema 4</title>
+<meta name="description" content="Escape room del Tema 4 de Aprendizaje Profundo (CUNEF): redes convolucionales, RNN/LSTM y atención y Transformers.">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<style>
+:root{--bg:#0a0f0a;--panel:rgba(13,26,13,.92);--text:#80d4a0;--accent:#00ff41;--success:#4ade80;--error:#ef4444;--border:#1f5f2f;--code-bg:rgba(5,12,5,.92);--code-text:#00ff41};--panel:{PANEL};--text:{TEXT};--accent:{ACCENT};--success:#4ade80;--error:#ef4444;--border:{BORDER};--code-bg:rgba(13,13,13,.9);--code-text:#00ff41}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Press Start 2P',monospace;min-height:100vh;display:flex;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));line-height:1.8}
+#three-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#wrapper{display:flex;gap:20px;width:100%;max-width:1400px;align-items:flex-start;perspective:1200px}
+#app{flex:1;min-width:0;max-width:960px;transform-style:preserve-3d;border-radius:8px;transition:box-shadow .8s ease}
+#schemaPanel{width:420px;flex-shrink:0;position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);backdrop-filter:blur(8px);border:4px solid var(--border);padding:20px;display:none;animation:fadeIn .3s}
+#schemaPanel.visible{display:block}
+#schemaPanel h2{font-size:.9em;color:var(--accent);margin-bottom:12px;text-align:center}
+#schemaPanel pre{font-family:'Courier New',monospace;font-size:12px;color:var(--code-text);background:var(--code-bg);padding:12px;white-space:pre-wrap;line-height:1.8;border:2px solid var(--border)}
+#schemaPanel .close-btn{margin-top:12px;display:block;width:100%;font-size:.65em}
+.screen{animation:screenEnter .6s ease-out}
+@keyframes screenEnter{0%{opacity:0;transform:rotateY(-8deg) translateZ(-40px) scale(.97)}100%{opacity:1;transform:rotateY(0) translateZ(0) scale(1)}}
+.screen-exit{animation:screenExit .3s ease-in forwards}
+@keyframes screenExit{0%{opacity:1;transform:rotateY(0) translateZ(0) scale(1)}100%{opacity:0;transform:rotateY(8deg) translateZ(-40px) scale(.97)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:.7}}
+.title-screen{text-align:center;padding-top:12vh}
+.title-screen h1{font-size:2.2em;color:var(--accent);text-shadow:0 0 20px rgba(0,255,65,.5),0 0 60px rgba(0,255,65,.2);margin-bottom:10px;line-height:1.4}
+.title-screen .subtitle{font-size:.9em;margin-bottom:40px;opacity:.8}
+.title-screen .swords{font-size:3em;margin-bottom:20px;animation:flicker 3s infinite}
+input[type="text"]{font-family:'Press Start 2P',monospace;background:var(--code-bg);color:var(--code-text);border:3px solid var(--border);padding:12px;font-size:.85em;width:100%;max-width:420px;outline:none;display:block;margin:0 auto 15px;-webkit-appearance:none;appearance:none}
+input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(0,255,65,.3)}
+button{font-family:'Press Start 2P',monospace;background:var(--accent);color:#031a08;border:none;padding:12px 24px;font-size:.8em;cursor:pointer;margin-top:10px;transition:all .2s;touch-action:manipulation;min-height:44px}
+button:hover{background:#5cff85;transform:scale(1.05)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:3px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.hearts{font-size:1.5em;letter-spacing:5px}
+.heart{color:var(--error);transition:all .3s}
+.heart.dead{color:#3a2020;filter:grayscale(1)}
+.progress{font-size:.75em;opacity:.8}
+.schema-btn{font-size:.7em;padding:10px 18px;background:var(--accent);border:3px solid #5cff85;color:#031a08;letter-spacing:1px;box-shadow:0 0 12px rgba(0,255,65,.3)}
+.schema-btn:hover{background:#5cff85;box-shadow:0 0 20px rgba(0,255,65,.5)}
+.schema-btn.active{background:var(--success);border-color:#86efac;color:#000;box-shadow:0 0 12px rgba(74,222,128,.3)}
+.room-name{text-align:center;font-size:1.1em;color:var(--accent);margin-bottom:20px;padding:10px;border:2px solid var(--accent);background:rgba(0,255,65,.08);letter-spacing:2px}
+.narrative{font-size:.7em;font-style:italic;margin-bottom:20px;opacity:.85;line-height:2.2;padding:0 10px}
+.task-box{background:var(--panel);backdrop-filter:blur(6px);border:3px solid var(--border);padding:15px;margin-bottom:15px}
+.task-box h3{font-size:.8em;color:var(--accent);margin-bottom:10px}
+.task-box p{font-size:.7em;line-height:2.2}
+.question-text{font-size:.75em;line-height:2.2;margin-top:10px;padding:10px;background:rgba(0,0,0,.2);border-left:3px solid var(--accent)}
+code{background:rgba(0,0,0,.4);padding:2px 6px;color:var(--code-text);font-family:'Courier New',monospace;font-size:1.1em}
+.hint{font-size:.6em;opacity:.5;margin-bottom:15px;padding:5px 10px;border-left:3px solid var(--border)}
+.feedback{font-size:.7em;margin:15px 0;padding:12px 15px;line-height:2}
+.feedback.ok{color:var(--success);border-left:4px solid var(--success);background:rgba(74,222,128,.05)}
+.feedback.fail{color:var(--error);border-left:4px solid var(--error);background:rgba(239,68,68,.05)}
+.feedback.warn{color:#fbbf24;border-left:4px solid #fbbf24;background:rgba(251,191,36,.05)}
+.nav-row{display:flex;gap:10px;margin-top:15px}
+.nav-row button{flex:1}
+.prev-btn{background:var(--panel);border:2px solid var(--border);color:var(--text);font-size:.7em}
+.prev-btn:hover{border-color:var(--accent);background:var(--border)}
+.next-btn{font-size:.75em;padding:15px;background:var(--success);color:#000;letter-spacing:1px}
+.next-btn:hover{background:#86efac}
+.solved-badge{display:inline-block;background:var(--success);color:#000;font-size:.55em;padding:4px 10px;margin-left:10px;vertical-align:middle}
+.branch-screen{text-align:center;padding-top:5vh}
+.branch-screen h2{font-size:1.1em;color:var(--accent);margin-bottom:15px}
+.branch-options{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.branch-card{background:var(--panel);backdrop-filter:blur(6px);border:3px solid var(--border);padding:25px 20px;width:400px;cursor:pointer;transition:all .4s ease-out;text-align:center;transform-style:preserve-3d}
+.branch-card:hover{border-color:var(--accent);transform:perspective(800px) rotateY(-5deg) rotateX(3deg) translateY(-8px) scale(1.03);box-shadow:0 15px 40px rgba(0,255,65,.3),0 0 15px rgba(0,255,65,.15)}
+.branch-card:active{transform:perspective(800px) rotateY(0) rotateX(0) scale(.98);transition:all .1s}
+.branch-card h3{font-size:.85em;color:var(--accent);margin-bottom:12px}
+.branch-card p{font-size:.65em;line-height:2.2;opacity:.8}
+.branch-card .icon{font-size:2.5em;margin-bottom:10px}
+.victory-screen{text-align:center;padding-top:5vh}
+.victory-screen h1{color:#ffd700;font-size:1.7em;margin-bottom:5px;text-shadow:0 0 20px rgba(255,215,0,.5)}
+.victory-screen .trophy{font-size:3.5em;margin-bottom:10px;animation:pulse 2s infinite}
+.phrase-box{background:linear-gradient(135deg,rgba(10,40,18,.9),rgba(6,24,10,.9));backdrop-filter:blur(8px);border:4px solid #d4a76a;padding:30px;margin:25px auto;max-width:700px;box-shadow:0 0 40px rgba(212,167,106,.25),inset 0 0 30px rgba(0,0,0,.3)}
+.phrase-text{font-size:.75em;line-height:2.5;color:#ffd700}
+.completion-info{margin-top:25px;font-size:.65em;line-height:2.2;opacity:.8}
+.code-box{background:var(--code-bg);border:2px solid var(--border);padding:15px;margin:15px auto;max-width:400px;font-family:'Courier New',monospace;color:var(--code-text);font-size:16px;letter-spacing:3px}
+.instructions{font-size:.55em;margin-top:20px;opacity:.6;line-height:2.2}
+.gameover-screen{text-align:center;padding-top:12vh}
+.gameover-screen h1{color:var(--error);font-size:1.7em;margin-bottom:15px}
+.gameover-screen .skull{font-size:3.5em;margin-bottom:15px}
+.gameover-screen p{font-size:.75em;margin-bottom:25px;line-height:2}
+.intro-screen{text-align:center;padding-top:8vh;max-width:720px;margin:0 auto}
+.intro-screen h2{font-size:1.1em;color:var(--accent);margin-bottom:25px}
+.intro-screen p{font-size:.7em;line-height:2.4;margin-bottom:15px;text-align:left}
+.intro-screen .warning{color:var(--error)}
+.intro-screen .note{opacity:.6;font-size:.6em;margin-top:10px;text-align:left;line-height:2.2}
+.name-display{color:var(--accent);font-style:normal}
+#toggle3d{position:fixed;top:10px;right:10px;z-index:100;font-family:'Press Start 2P',monospace;font-size:.5em;padding:6px 10px;background:rgba(6,24,10,.7);backdrop-filter:blur(4px);color:var(--text);border:2px solid var(--border);cursor:pointer;opacity:.6;transition:all .3s}
+#toggle3d:hover{opacity:1;border-color:var(--accent)}
+#toggle3d.off{opacity:.4}
+
+/* === QUIZ STYLES === */
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.option-card{background:var(--panel);border:3px solid var(--border);padding:15px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:12px;touch-action:manipulation;min-height:44px}
+.option-card:hover{border-color:var(--accent);transform:translateX(5px);background:rgba(0,255,65,.05)}
+.option-card.selected{border-color:var(--accent);background:rgba(0,255,65,.12);box-shadow:0 0 15px rgba(0,255,65,.2)}
+.option-card.correct{border-color:var(--success);background:rgba(74,222,128,.1);box-shadow:0 0 10px rgba(74,222,128,.2)}
+.option-card.incorrect{border-color:var(--error);background:rgba(239,68,68,.1);box-shadow:0 0 10px rgba(239,68,68,.2)}
+.option-label{font-size:.8em;color:var(--accent);font-weight:bold;min-width:28px}
+.option-text{font-size:.7em;line-height:2.2}
+.tf-options{display:flex;gap:20px;justify-content:center;margin-bottom:10px}
+.tf-card{flex:1;max-width:250px;text-align:center;padding:25px;cursor:pointer;background:var(--panel);border:3px solid var(--border);transition:all .3s;touch-action:manipulation;min-height:44px}
+.tf-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.tf-card.selected{border-color:var(--accent);background:rgba(0,255,65,.12);box-shadow:0 0 15px rgba(0,255,65,.2)}
+.tf-card.correct{border-color:var(--success);background:rgba(74,222,128,.1)}
+.tf-card.incorrect{border-color:var(--error);background:rgba(239,68,68,.1)}
+.tf-icon{font-size:2em;margin-bottom:8px}
+.tf-label{font-size:.7em;letter-spacing:2px}
+.answer-area{margin-bottom:10px}
+.answer-input{width:100%;font-family:'Press Start 2P',monospace;background:var(--code-bg);color:var(--code-text);border:3px solid var(--border);padding:12px;font-size:16px;outline:none;-webkit-appearance:none;appearance:none}
+.answer-input:focus{border-color:var(--accent);box-shadow:0 0 10px rgba(0,255,65,.3)}
+.answer-input:read-only{opacity:.7;cursor:default}
+.fill-question{font-size:.75em;line-height:2.4;margin-bottom:15px;padding:10px;background:rgba(0,0,0,.2);border-left:3px solid var(--accent)}
+.confirm-btn{background:var(--accent);width:100%;margin-top:10px;margin-bottom:5px;font-size:.8em;padding:15px;letter-spacing:1px}
+.confirm-btn:hover{background:#5cff85}
+.confirm-btn:disabled{opacity:.4;cursor:not-allowed}
+
+#profPanel{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(8,4,18,.97);backdrop-filter:blur(8px);border-top:3px solid #7c3aed;padding:8px 12px;display:none;flex-wrap:wrap;gap:5px;align-items:center}
+#profPanel.visible{display:flex}
+#profPanel .prof-label{font-family:'Press Start 2P',monospace;font-size:.5em;color:#a78bfa;white-space:nowrap;margin-right:4px}
+#profPanel .prof-q-btn{font-family:'Press Start 2P',monospace;font-size:.48em;padding:5px 8px;min-width:32px;background:rgba(31,20,45,.8);border:2px solid #4a3560;color:var(--text);cursor:pointer;touch-action:manipulation}
+#profPanel .prof-q-btn.active{background:#7c3aed;border-color:#a78bfa;color:#fff}
+#profPanel .prof-q-btn:hover{border-color:#a78bfa;background:rgba(124,58,237,.3)}
+#profPanel .prof-sep{width:2px;height:22px;background:#4a3560;margin:0 4px;flex-shrink:0}
+#profPanel .prof-q-btn.prof-br-a{border-color:#2563eb}
+#profPanel .prof-q-btn.prof-br-b{border-color:#0891b2}
+#profPanel .prof-q-btn.prof-br-c{border-color:#d97706}
+#profPanel .prof-q-btn.prof-br-d{border-color:#dc2626}
+#profPanel .prof-q-btn.prof-br-a.active{background:#1d4ed8;border-color:#60a5fa}
+#profPanel .prof-q-btn.prof-br-b.active{background:#0e7490;border-color:#22d3ee}
+#profPanel .prof-q-btn.prof-br-c.active{background:#b45309;border-color:#fbbf24}
+#profPanel .prof-q-btn.prof-br-d.active{background:#b91c1c;border-color:#f87171}
+#profPanel .prof-exit-btn{font-family:'Press Start 2P',monospace;font-size:.45em;padding:5px 12px;background:#7f1d1d;color:#fca5a5;border:2px solid #991b1b;cursor:pointer;margin-left:auto;touch-action:manipulation}
+#profPanel .prof-exit-btn:hover{background:#991b1b}
+
+/* === RESPONSIVE + SAFARI === */
+button{-webkit-tap-highlight-color:transparent}
+#schemaPanel{-webkit-overflow-scrolling:touch}
+#toggle3d{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));touch-action:manipulation;min-height:44px}
+#app .screen:not(.title-screen){background:rgba(4,10,5,.88);border:2px solid var(--border);border-radius:8px;padding:20px 24px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.title-screen{background:radial-gradient(ellipse at center,rgba(4,10,5,.75) 0%,rgba(4,10,5,.35) 60%,transparent 80%);padding-bottom:30px}
+#profPanel .prof-q-btn{color:var(--text)}
+.title-screen h1{text-shadow:0 0 20px rgba(0,255,65,.6),0 0 60px rgba(0,255,65,.25)}
+@media (max-width:900px){
+  #wrapper{flex-direction:column}
+  #schemaPanel{position:static;width:100%;max-height:50vh}
+  .title-screen h1{font-size:1.7em}
+  .room-name{font-size:.9em}
+  .narrative,.task-box p{font-size:.65em}
+  .branch-card{width:calc(50% - 10px)}
+  .top-bar{flex-wrap:wrap;gap:8px}
+}
+@media (max-width:600px){
+  body{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+  input[type="text"],textarea,.answer-input{font-size:16px}
+  .nav-row{flex-direction:column}
+  .branch-card{width:100%}
+  #three-canvas{touch-action:none}
+  .title-screen h1{font-size:1.1em}
+  .title-screen .subtitle{font-size:.65em}
+  .title-screen .swords{font-size:2em}
+  .room-name{font-size:.75em}
+  .victory-screen h1,.gameover-screen h1{font-size:1.1em}
+  .hearts{font-size:1.1em}
+  .progress,.schema-btn{font-size:.55em}
+  .tf-options{gap:10px}
+  .tf-card{padding:15px}
+  .code-box{font-size:12px;letter-spacing:1px;word-break:break-all}
+  #toggle3d{font-size:.42em;top:auto;bottom:max(10px,env(safe-area-inset-bottom))}
+  #app .screen:not(.title-screen){padding:14px 12px}
+}
+
+</style>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<button id="toggle3d" onclick="toggle3D()">3D: ON</button>
+<div id="wrapper">
+  <div id="app">Cargando...</div>
+  <div id="schemaPanel">
+    <h2>&#128190; ARCHIVO DE REFERENCIA</h2>
+    <pre id="schemaContent"></pre>
+    <button class="close-btn" onclick="toggleReference()">CERRAR REFERENCIA</button>
+  </div>
+</div>
+<div id="profPanel"></div>
+<script>
+// ============================================================
+// CODIGO FIJO - Quiz Escape Room
+// Copiar tal cual en cada escape room quiz generado
+// Solo cambiar lo marcado con {ADAPTAR}
+// ============================================================
+
+// === STATE ===
+var state = {
+  screen: 'title', name: '', hash: 0, lives: 3, step: 0, maxStep: 0,
+  branch1: null, branch2: null, solved: false, schemaOpen: false,
+  solvedQueries: {}, proof: [], startTime: 0, profMode: false,
+  selectedAnswer: null, seed: 0, bankMode: false
+};
+
+// === QUESTION BANK SYSTEM ===
+// El banco se declara en la seccion ADAPTAR como: var QUESTION_BANK = [...]
+// Cada pregunta tiene: { topic: 'nombre_tema', tier: 1|2|3, ... }
+// topic: nombre del tema (ej: 'Epidemiologia basica', 'Pruebas diagnosticas')
+// tier: 1 (facil), 2 (medio), 3 (dificil)
+// selectQuestions() selecciona 19 preguntas por dificultad progresiva, mezclando temas
+
+var shared1 = [], shared2 = [], branch1A = [], branch1B = [];
+var shared3 = [], branch2C = [], branch2D = [], shared4 = [];
+
+function _seedRandom(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function _makeSeed(name) {
+  var d = new Date();
+  var dateStr = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  var str = name.trim().toLowerCase() + '|' + dateStr;
+  var h = 0;
+  for (var i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function _shuffleWithSeed(arr, rng) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(rng() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function _pickByTier(bank, tier, n, rng) {
+  // Selecciona n preguntas del tier indicado, barajadas, mezclando temas
+  var pool = _shuffleWithSeed(bank.filter(function(q) { return q.tier === tier; }), rng);
+  return pool.slice(0, n);
+}
+
+function _removeUsed(bank, used) {
+  return bank.filter(function(q) {
+    return used.indexOf(q) === -1;
+  });
+}
+
+function selectQuestions(name) {
+  var seed = _makeSeed(name);
+  state.seed = seed;
+  var rng = _seedRandom(seed);
+
+  // Copia del banco para ir eliminando las ya usadas
+  var available = QUESTION_BANK.slice();
+
+  // Steps 0-2: 3 preguntas faciles (tier 1)
+  shared1 = _pickByTier(available, 1, 3, rng);
+  available = _removeUsed(available, shared1);
+
+  // Steps 3-5: 3 preguntas medias (tier 2)
+  shared2 = _pickByTier(available, 2, 3, rng);
+  available = _removeUsed(available, shared2);
+
+  // Steps 7-8 rama A: 2 preguntas medias (tier 2)
+  branch1A = _pickByTier(available, 2, 2, rng);
+  available = _removeUsed(available, branch1A);
+
+  // Steps 7-8 rama B: 2 preguntas medias (tier 2)
+  branch1B = _pickByTier(available, 2, 2, rng);
+  available = _removeUsed(available, branch1B);
+
+  // Steps 9-10: 2 preguntas dificiles (tier 3)
+  shared3 = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, shared3);
+
+  // Steps 12-13 rama C: 2 preguntas dificiles (tier 3)
+  branch2C = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, branch2C);
+
+  // Steps 12-13 rama D: 2 preguntas dificiles (tier 3)
+  branch2D = _pickByTier(available, 3, 2, rng);
+  available = _removeUsed(available, branch2D);
+
+  // Steps 14-16: 3 preguntas dificiles (tier 3)
+  shared4 = _pickByTier(available, 3, 3, rng);
+  _assignRooms();
+}
+
+// === ANTI-CHEAT ===
+// {ADAPTAR: cambiar los char codes del SALT para cada tema}
+const _SALT = [78,69,88,85,83,95,84,52,95,65,80,50,54].map(c=>String.fromCharCode(c)).join('');
+const _REQUIRED_PROOFS = 15;
+
+function _fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0);
+}
+function _proofHash(answer, step, prevHash) {
+  var input = _SALT + '|' + step + '|' + answer.trim().toLowerCase() + '|' + prevHash;
+  return _fnv1a(input).toString(36);
+}
+function _chainHash(proofArr) {
+  return _fnv1a(proofArr.join('+')+_SALT).toString(36);
+}
+function addProof(answer, step) {
+  var prev = state.proof.length > 0 ? state.proof[state.proof.length - 1] : '0';
+  var p = _proofHash(answer, step, prev);
+  if (!state.proof.some(function(x) { return x.startsWith(step + ':'); })) {
+    state.proof.push(step + ':' + p);
+  }
+}
+function validateProofChain() {
+  if (state.proof.length < _REQUIRED_PROOFS) return false;
+  var provenSteps = {};
+  state.proof.forEach(function(p) { provenSteps[parseInt(p.split(':')[0])] = true; });
+  var requiredSteps = [0,1,2,3,4,5,7,8,9,10,12,13,14,15,16];
+  return requiredSteps.every(function(s) { return provenSteps[s]; });
+}
+function getProofSignature() {
+  var chain = _chainHash(state.proof);
+  var nameH = _fnv1a(state.name + _SALT).toString(36);
+  var timeMin = Math.floor((Date.now() - state.startTime) / 60000);
+  return { chain: chain, nameH: nameH, timeMin: timeMin };
+}
+
+// === HELPERS ===
+function hashName(name) {
+  var h = 0;
+  var n = name.trim().toLowerCase();
+  for (var i = 0; i < n.length; i++) {
+    h = ((h << 5) - h + n.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h) % 4;
+}
+function livesHTML() {
+  var h = '';
+  for (var i = 0; i < 3; i++) {
+    h += '<span class="heart' + (i >= state.lives ? ' dead' : '') + '">&#9829;</span> ';
+  }
+  return h;
+}
+
+// === ANSWER VALIDATION ===
+function validateAnswer(ch, answer) {
+  if (ch.type === 'mc') return answer === ch.correctAnswer;
+  if (ch.type === 'tf') return answer === ch.correctAnswer;
+  // short y fill: normalizacion + comparacion case-insensitive + sin acentos
+  var norm = answer.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return ch.acceptedAnswers.some(function(a) {
+    var na = a.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return norm === na;
+  });
+}
+
+// === GAME FLOW ===
+function getCurrentStep() {
+  var s = state.step;
+  if (s <= 2) return { type:'challenge', data: shared1[s] };
+  if (s <= 5) return { type:'challenge', data: shared2[s - 3] };
+  if (s === 6) return { type:'branch', id: 1 };
+  if (s <= 8) return { type:'challenge', data: (state.branch1 === 'A' ? branch1A : branch1B)[s - 7] };
+  if (s <= 10) return { type:'challenge', data: shared3[s - 9] };
+  if (s === 11) return { type:'branch', id: 2 };
+  if (s <= 13) return { type:'challenge', data: (state.branch2 === 'C' ? branch2C : branch2D)[s - 12] };
+  if (s <= 16) return { type:'challenge', data: shared4[s - 14] };
+  return { type:'victory' };
+}
+function getChallengeNumber() {
+  var s = state.step;
+  if (s <= 5) return s + 1;
+  if (s <= 8) return s;
+  if (s <= 10) return s;
+  return s - 1;
+}
+function getFinalPhraseIndex() {
+  var branchCombo = (state.branch1 === 'A' ? 0 : 1) * 2 + (state.branch2 === 'C' ? 0 : 1);
+  return state.hash * 4 + branchCombo;
+}
+function getCompletionCode() {
+  // {ADAPTAR: cambiar 'QER' por el prefijo del tema}
+  if (!validateProofChain()) return 'INVALID-PROOF';
+  var sig = getProofSignature();
+  var prefix = state.name.replace(/\s+/g, '').substring(0, 3).toUpperCase();
+  var branches = state.branch1 + state.branch2;
+  var sigHash = _fnv1a(state.name + sig.chain + branches + _SALT + sig.timeMin);
+  var sigCode = (sigHash >>> 0).toString(36).toUpperCase().padStart(7, '0');
+  return 'AIA-' + prefix + '-' + branches + '-' + sig.chain.toUpperCase() + '-' + sigCode + '-' + sig.timeMin + 'm';
+}
+function isStepSolved(s) { return state.solvedQueries[s] !== undefined; }
+function canGoBack() {
+  if (state.step <= 0) return false;
+  var prev = state.step - 1;
+  while (prev >= 0) {
+    var s = getStepType(prev);
+    if (s === 'challenge') return true;
+    prev--;
+  }
+  return false;
+}
+function getStepType(s) {
+  if (s === 6 || s === 11) return 'branch';
+  if (s >= 17) return 'victory';
+  return 'challenge';
+}
+function findPrevChallenge() {
+  var s = state.step - 1;
+  while (s >= 0) {
+    if (getStepType(s) === 'challenge') return s;
+    s--;
+  }
+  return -1;
+}
+function findNextChallenge() {
+  var s = state.step + 1;
+  while (s <= 17) {
+    if (getStepType(s) !== 'branch') return s;
+    s++;
+  }
+  return state.step + 1;
+}
+
+// === RENDER ===
+function render() {
+  updateThreeScene();
+  var app = document.getElementById('app');
+  if (state.screen === 'title') { renderTitle(app); renderProfPanel(); return; }
+  if (state.screen === 'intro') { renderIntro(app); renderProfPanel(); return; }
+  if (state.screen === 'gameover') { renderGameOver(app); renderProfPanel(); return; }
+  var step = getCurrentStep();
+  if (step.type === 'challenge') renderChallenge(app, step.data);
+  else if (step.type === 'branch') renderBranch(app, step.id);
+  else if (step.type === 'victory') renderVictory(app);
+  renderProfPanel();
+}
+
+// renderChallenge - QUIZ VERSION (FIJO, no adaptar)
+function renderChallenge(app, ch) {
+  var num = getChallengeNumber();
+  var viewing = !state.profMode && state.step < state.maxStep && isStepSolved(state.step);
+  var previousAnswer = state.solvedQueries[state.step] || '';
+  var prevStep = findPrevChallenge();
+  var canBack = prevStep >= 0;
+  var canForward = state.step < state.maxStep;
+
+  var answerHTML = '';
+  if (ch.type === 'mc') {
+    answerHTML = '<div class="quiz-options" id="quizOptions">';
+    var letters = ['A','B','C','D'];
+    for (var i = 0; i < ch.options.length; i++) {
+      var letter = letters[i];
+      var selectedCls = '';
+      if (viewing && previousAnswer === letter) selectedCls = ' selected correct';
+      else if (state.profMode) {
+        if (letter === ch.correctAnswer) selectedCls = ' selected correct';
+      }
+      answerHTML += '<div class="option-card' + selectedCls + '" data-letter="' + letter + '"' +
+        (viewing ? '' : ' onclick="selectOption(\'' + letter + '\')"') + '>' +
+        '<span class="option-label">' + letter + ')</span>' +
+        '<span class="option-text">' + ch.options[i].replace(/^[A-D]\)\s*/, '') + '</span></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'tf') {
+    answerHTML = '<div class="tf-options" id="quizOptions">';
+    var tfOpts = [{letter:'V', label:'VERDADERO', icon:'&#10003;'}, {letter:'F', label:'FALSO', icon:'&#10007;'}];
+    for (var t = 0; t < tfOpts.length; t++) {
+      var opt = tfOpts[t];
+      var selCls = '';
+      if (viewing && previousAnswer === opt.letter) selCls = ' selected correct';
+      else if (state.profMode && opt.letter === ch.correctAnswer) selCls = ' selected correct';
+      answerHTML += '<div class="tf-card' + selCls + '" data-letter="' + opt.letter + '"' +
+        (viewing ? '' : ' onclick="selectOption(\'' + opt.letter + '\')"') + '>' +
+        '<div class="tf-icon">' + opt.icon + '</div>' +
+        '<div class="tf-label">' + opt.label + '</div></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'short') {
+    var prefill = viewing ? previousAnswer : (state.profMode ? ch.correctAnswer : '');
+    answerHTML = '<div class="answer-area">' +
+      '<input type="text" class="answer-input" id="answerInput" placeholder="Escribe tu respuesta..." ' +
+      'value="' + prefill.replace(/"/g, '&quot;') + '" ' +
+      'autocomplete="off" spellcheck="false" ' +
+      (viewing ? 'readonly' : '') + '></div>';
+  } else if (ch.type === 'fill') {
+    var prefillF = viewing ? previousAnswer : (state.profMode ? ch.correctAnswer : '');
+    answerHTML = '<div class="answer-area">' +
+      '<p class="fill-question">' + ch.question + '</p>' +
+      '<input type="text" class="answer-input" id="answerInput" placeholder="Completa el hueco..." ' +
+      'value="' + prefillF.replace(/"/g, '&quot;') + '" ' +
+      'autocomplete="off" spellcheck="false" ' +
+      (viewing ? 'readonly' : '') + '></div>';
+  }
+
+  var questionText = ch.type === 'fill' ? '' : '<p class="question-text">' + ch.question + '</p>';
+
+  app.innerHTML =
+    '<div class="screen">' +
+      '<div class="top-bar">' +
+        '<div class="hearts" id="livesDisplay">' + livesHTML() + '</div>' +
+        '<div class="progress">PRUEBA ' + num + ' / 15</div>' +
+        '<button class="schema-btn' + (state.schemaOpen ? ' active' : '') + '" onclick="toggleReference()">&#128218; REFERENCIA</button>' +
+      '</div>' +
+      '<div class="room-name">' + ch.room + (viewing ? '<span class="solved-badge">&#10004; RESUELTA</span>' : '') + '</div>' +
+      '<p class="narrative">' + ch.narrative + '</p>' +
+      '<div class="task-box">' +
+        '<h3>&#128203; ' + ch.title + '</h3>' +
+        questionText +
+      '</div>' +
+      '<p class="hint">&#128161; ' + ch.hint + '</p>' +
+      answerHTML +
+      ((!viewing && !state.solved) ?
+        '<button class="confirm-btn" id="confirmBtn" onclick="submitAnswer()">&#9876; CONFIRMAR RESPUESTA</button>' : '') +
+      '<div id="feedback">' + (viewing ? '<div class="feedback ok">&#10004; Ya resolviste esta prueba.</div>' : '') + '</div>' +
+      '<div class="nav-row">' +
+        (canBack ? '<button class="prev-btn" onclick="goToStep(' + prevStep + ')">&#8592; ANTERIOR</button>' : '') +
+        ((state.solved || viewing) && canForward ? '<button class="next-btn" onclick="goForward()">SIGUIENTE &#8594;</button>' : '') +
+        (state.solved && !canForward ? '<button class="next-btn" id="nextBtn" onclick="nextStep()">AVANZAR &#8594;</button>' : '') +
+      '</div>' +
+    '</div>';
+
+  state.selectedAnswer = null;
+
+  // Keyboard handler para inputs
+  if (!viewing && !state.solved) {
+    var input = document.getElementById('answerInput');
+    if (input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); submitAnswer(); }
+      });
+      if (!state.profMode) input.focus();
+    }
+  }
+}
+
+// === SELECT OPTION (mc/tf) ===
+function selectOption(letter) {
+  if (state.solved) return;
+  state.selectedAnswer = letter;
+  var cards = document.querySelectorAll('.option-card, .tf-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].classList.remove('selected');
+    if (cards[i].getAttribute('data-letter') === letter) {
+      cards[i].classList.add('selected');
+    }
+  }
+}
+
+// === SUBMIT ANSWER ===
+function submitAnswer() {
+  if (state.solved) return;
+  var step = getCurrentStep();
+  var ch = step.data;
+  var answer;
+
+  if (ch.type === 'mc' || ch.type === 'tf') {
+    answer = state.selectedAnswer;
+    if (!answer) return; // nada seleccionado
+  } else {
+    var input = document.getElementById('answerInput');
+    answer = input ? input.value.trim() : '';
+    if (!answer) return;
+  }
+
+  var feedback = document.getElementById('feedback');
+  var correct = validateAnswer(ch, answer);
+
+  if (correct) {
+    state.solved = true;
+    var answerStr = (ch.type === 'mc' || ch.type === 'tf') ? answer : answer;
+    state.solvedQueries[state.step] = answerStr;
+    addProof(answerStr, state.step);
+    if (state.step >= state.maxStep) state.maxStep = state.step + 1;
+
+    // Mostrar feedback correcto
+    var fbText = ch.feedback && ch.feedback.correct ? ch.feedback.correct : '';
+    feedback.innerHTML = '<div class="feedback ok">&#10004; &#161;Correcto! ' + fbText + '</div>';
+
+    // Deshabilitar boton confirmar
+    var btn = document.getElementById('confirmBtn');
+    if (btn) btn.disabled = true;
+
+    // Marcar opcion correcta visualmente
+    if (ch.type === 'mc' || ch.type === 'tf') {
+      var cards = document.querySelectorAll('.option-card, .tf-card');
+      for (var i = 0; i < cards.length; i++) {
+        var l = cards[i].getAttribute('data-letter');
+        if (l === ch.correctAnswer) cards[i].classList.add('correct');
+        else if (l === answer && l !== ch.correctAnswer) cards[i].classList.add('incorrect');
+        // Deshabilitar clicks
+        cards[i].onclick = null;
+        cards[i].style.cursor = 'default';
+      }
+    } else {
+      var inp = document.getElementById('answerInput');
+      if (inp) inp.readOnly = true;
+    }
+
+    // Mostrar boton avanzar
+    var navRow = document.querySelector('.nav-row');
+    if (navRow) {
+      var prevStep = findPrevChallenge();
+      navRow.innerHTML =
+        (prevStep >= 0 ? '<button class="prev-btn" onclick="goToStep(' + prevStep + ')">&#8592; ANTERIOR</button>' : '') +
+        '<button class="next-btn" onclick="nextStep()">AVANZAR &#8594;</button>';
+    }
+  } else {
+    // Respuesta incorrecta
+    var fbWrong = ch.feedback && ch.feedback.incorrect ? ch.feedback.incorrect : '';
+    if (state.profMode) {
+      feedback.innerHTML = '<div class="feedback fail">&#10006; Incorrecto. ' + fbWrong +
+        ' <span style="opacity:.6;font-size:.9em">(modo profesor: sin penalizaci\u00f3n)</span></div>';
+    } else {
+      state.lives--;
+      feedback.innerHTML = '<div class="feedback fail">&#10006; Incorrecto. ' + fbWrong +
+        ' (Vidas restantes: ' + state.lives + ')</div>';
+      updateLivesDisplay();
+      if (state.lives <= 0) {
+        var btn2 = document.getElementById('confirmBtn');
+        if (btn2) btn2.disabled = true;
+        setTimeout(function() { state.screen = 'gameover'; render(); }, 2000);
+      }
+    }
+
+    // Para mc/tf: marcar la incorrecta en rojo (pero no revelar la correcta)
+    if (ch.type === 'mc' || ch.type === 'tf') {
+      var cards2 = document.querySelectorAll('.option-card, .tf-card');
+      for (var j = 0; j < cards2.length; j++) {
+        if (cards2[j].getAttribute('data-letter') === answer) {
+          cards2[j].classList.add('incorrect');
+        }
+        cards2[j].classList.remove('selected');
+      }
+      state.selectedAnswer = null;
+    }
+  }
+}
+
+function updateLivesDisplay() {
+  var el = document.getElementById('livesDisplay');
+  if (el) el.innerHTML = livesHTML();
+}
+
+// === TOGGLE REFERENCE ===
+function toggleReference() {
+  state.schemaOpen = !state.schemaOpen;
+  var panel = document.getElementById('schemaPanel');
+  var content = document.getElementById('schemaContent');
+  if (state.schemaOpen) {
+    content.textContent = REFERENCE_TEXT;
+    panel.classList.add('visible');
+  } else {
+    panel.classList.remove('visible');
+  }
+  var btns = document.querySelectorAll('.schema-btn');
+  for (var i = 0; i < btns.length; i++) {
+    if (state.schemaOpen) btns[i].classList.add('active');
+    else btns[i].classList.remove('active');
+  }
+}
+
+// === GAME ACTIONS ===
+function transitionTo(fn) {
+  var app = document.getElementById('app');
+  var screen = app.querySelector('.screen');
+  if (screen) {
+    screen.classList.add('screen-exit');
+    setTimeout(function() { fn(); window.scrollTo(0, 0); }, 280);
+  } else { fn(); window.scrollTo(0, 0); }
+}
+function startGame() {
+  var input = document.getElementById('nameInput');
+  var name = input ? input.value.trim() : '';
+  if (name.length < 2) {
+    input.style.borderColor = 'var(--error)';
+    input.placeholder = 'Escribe al menos 2 caracteres...';
+    return;
+  }
+  state.name = name;
+  state.hash = hashName(name);
+  transitionTo(function() { state.screen = 'intro'; render(); });
+}
+function startAdventure() {
+  transitionTo(function() {
+    state.screen = 'game'; state.step = 0; state.maxStep = 0;
+    state.lives = 3; state.branch1 = null; state.branch2 = null;
+    state.solved = false; state.solvedQueries = {}; state.proof = [];
+    state.startTime = Date.now(); state.selectedAnswer = null;
+    selectQuestions(state.name);
+    render();
+  });
+}
+function chooseBranch(branchId, choice) {
+  transitionTo(function() {
+    if (branchId === 1) state.branch1 = choice;
+    else state.branch2 = choice;
+    state.step++;
+    if (state.step > state.maxStep) state.maxStep = state.step;
+    render();
+  });
+}
+function nextStep() {
+  transitionTo(function() {
+    state.step++;
+    if (state.step > state.maxStep) state.maxStep = state.step;
+    state.solved = false;
+    state.selectedAnswer = null;
+    render();
+  });
+}
+function goToStep(s) {
+  transitionTo(function() {
+    state.step = s;
+    state.solved = isStepSolved(s);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+function goForward() {
+  var next = state.step + 1;
+  while (next <= state.maxStep && getStepType(next) === 'branch') next++;
+  if (next <= state.maxStep) goToStep(next);
+}
+function restartGame() {
+  state = {
+    screen: 'title', name: '', hash: 0, lives: 3, step: 0, maxStep: 0,
+    branch1: null, branch2: null, solved: false, schemaOpen: false,
+    solvedQueries: {}, proof: [], startTime: 0, profMode: false,
+    selectedAnswer: null, seed: 0, bankMode: false
+  };
+  document.getElementById('schemaPanel').classList.remove('visible');
+  document.body.style.paddingBottom = '';
+  render();
+}
+
+// === INIT ===
+document.addEventListener('DOMContentLoaded', function() {
+  try { initThreeJS(); } catch(e) { console.warn('Three.js init failed:', e); }
+  render();
+});
+
+// === THREE.JS ENGINE ===
+var tjs = null;
+function initThreeJS() {
+  if (typeof THREE === 'undefined') return;
+  var canvas = document.getElementById('three-canvas');
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  var scene = new THREE.Scene();
+  // {ADAPTAR: cambiar color fog al --bg del tema}
+  scene.fog = new THREE.FogExp2(0x0a0f0a, 0.035);
+  var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 2, 8); camera.lookAt(0, 1, 0);
+  tjs = { renderer: renderer, scene: scene, camera: camera, canvas: canvas, clock: new THREE.Clock(), currentScene: null, sceneObjects: [], particles: null, animCallbacks: [], frameCount: 0 };
+  window.addEventListener('resize', function() {
+    if (!tjs) return;
+    tjs.camera.aspect = window.innerWidth / window.innerHeight;
+    tjs.camera.updateProjectionMatrix();
+    tjs.renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  buildTitleScene();
+  animateThreeJS();
+}
+function clearScene() {
+  if (!tjs) return;
+  tjs.sceneObjects.forEach(function(obj) {
+    tjs.scene.remove(obj);
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(function(m) { m.dispose(); });
+      else obj.material.dispose();
+    }
+    if (obj.children) obj.children.forEach(function(child) { if (child.geometry) child.geometry.dispose(); if (child.material) child.material.dispose(); });
+  });
+  tjs.sceneObjects = []; tjs.animCallbacks = [];
+}
+
+// === THREE.JS HELPERS ===
+function addDust(count, color, spread, height, opacity) {
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(count * 3);
+  for (var i = 0; i < count; i++) { pos[i*3]=(Math.random()-0.5)*spread; pos[i*3+1]=Math.random()*height; pos[i*3+2]=(Math.random()-0.5)*spread; }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var mat = new THREE.PointsMaterial({ color: color, size: 0.04, transparent: true, opacity: opacity||0.4, sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  var pts = new THREE.Points(geo, mat);
+  tjs.scene.add(pts); tjs.sceneObjects.push(pts); return pts;
+}
+function addGround(color) {
+  var g = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: color, roughness: 0.95, metalness: 0.05 }));
+  g.rotation.x = -Math.PI / 2; g.receiveShadow = true;
+  tjs.scene.add(g); tjs.sceneObjects.push(g); return g;
+}
+function addObj(geo, mat, pos, rot) {
+  var m = new THREE.Mesh(geo, mat);
+  if (pos) m.position.set(pos[0], pos[1], pos[2]);
+  if (rot) { m.rotation.x = rot[0]||0; m.rotation.y = rot[1]||0; m.rotation.z = rot[2]||0; }
+  m.castShadow = true; m.receiveShadow = true;
+  tjs.scene.add(m); tjs.sceneObjects.push(m); return m;
+}
+function addLight(type, color, intensity, pos, dist) {
+  var l;
+  if (type === 'point') l = new THREE.PointLight(color, intensity, dist||10);
+  else if (type === 'ambient') l = new THREE.AmbientLight(color, intensity);
+  else if (type === 'spot') { l = new THREE.SpotLight(color, intensity); l.angle = 0.6; l.penumbra = 0.5; }
+  if (pos) l.position.set(pos[0], pos[1], pos[2]);
+  tjs.scene.add(l); tjs.sceneObjects.push(l); return l;
+}
+function animDust(pts, count, elapsed, speed) {
+  var p = pts.geometry.attributes.position.array;
+  for (var i = 0; i < count; i++) {
+    p[i*3+1] += Math.sin(elapsed + i) * (speed||0.001);
+    p[i*3] += Math.cos(elapsed*0.5 + i*0.1) * ((speed*0.5)||0.0005);
+    if (p[i*3+1] > 6) p[i*3+1] = 0; if (p[i*3+1] < 0) p[i*3+1] = 6;
+  }
+  pts.geometry.attributes.position.needsUpdate = true;
+}
+
+// === ANIMATE + TOGGLE ===
+var threeEnabled = true, fpsHistory = [], lastFpsTime = 0;
+function animateThreeJS() {
+  if (!tjs) return;
+  requestAnimationFrame(animateThreeJS);
+  if (!threeEnabled) return;
+  var now = performance.now();
+  var elapsed = tjs.clock.getElapsedTime();
+  tjs.frameCount++;
+  if (tjs.frameCount % 60 === 0) {
+    var fps = 1000 / ((now - lastFpsTime) / 60);
+    fpsHistory.push(fps); if (fpsHistory.length > 5) fpsHistory.shift();
+    var avgFps = fpsHistory.reduce(function(a,b) { return a+b; }, 0) / fpsHistory.length;
+    if (avgFps < 25 && tjs.renderer.getPixelRatio() > 1) tjs.renderer.setPixelRatio(1);
+    lastFpsTime = now;
+  }
+  if (lastFpsTime === 0) lastFpsTime = now;
+  tjs.animCallbacks.forEach(function(cb) { cb(elapsed); });
+  tjs.renderer.render(tjs.scene, tjs.camera);
+}
+function toggle3D() {
+  threeEnabled = !threeEnabled;
+  var btn = document.getElementById('toggle3d');
+  var canvas = document.getElementById('three-canvas');
+  if (threeEnabled) {
+    btn.textContent = '3D: ON'; btn.classList.remove('off'); canvas.style.display = 'block';
+    if (tjs) { tjs.clock = new THREE.Clock(); tjs.currentScene = null; updateThreeScene(); }
+  } else {
+    btn.textContent = '3D: OFF'; btn.classList.add('off'); canvas.style.display = 'none';
+  }
+}
+
+// === MODO BANCO (profesor: ver todas las preguntas del banco) ===
+var _bankAll = [];
+var _bankIdx = 0;
+var _bankTopics = [];      // nombres de temas unicos, ordenados
+var _bankByTopic = {};     // { topic: [questions...] }
+
+function _buildBankIndex() {
+  // Extrae temas unicos del QUESTION_BANK y agrupa preguntas
+  _bankTopics = [];
+  _bankByTopic = {};
+  _bankAll = QUESTION_BANK.slice();
+  for (var i = 0; i < _bankAll.length; i++) {
+    var t = _bankAll[i].topic || 'Sin tema';
+    if (!_bankByTopic[t]) {
+      _bankByTopic[t] = [];
+      _bankTopics.push(t);
+    }
+    _bankByTopic[t].push(i); // indice en _bankAll
+  }
+}
+
+function toggleBankMode() {
+  state.bankMode = !state.bankMode;
+  if (state.bankMode) {
+    _buildBankIndex();
+    _bankIdx = 0;
+    renderBankView();
+  } else {
+    render();
+  }
+  renderProfPanel();
+}
+
+function profBankJump(idx) {
+  _bankIdx = idx;
+  renderBankView();
+  renderProfPanel();
+}
+
+function _bankQuestionInfo(idx) {
+  var ch = _bankAll[idx];
+  var topic = ch ? (ch.topic || 'Sin tema') : '';
+  var indices = _bankByTopic[topic] || [];
+  var numInTopic = indices.indexOf(idx) + 1;
+  return { topic: topic, numInTopic: numInTopic, totalInTopic: indices.length };
+}
+
+function renderBankView() {
+  var app = document.getElementById('app');
+  if (!_bankAll.length) return;
+  var ch = _bankAll[_bankIdx];
+  var info = _bankQuestionInfo(_bankIdx);
+  var tierLabels = {1: 'FACIL', 2: 'MEDIO', 3: 'DIFICIL'};
+
+  var answerHTML = '';
+  if (ch.type === 'mc') {
+    answerHTML = '<div class="quiz-options">';
+    var letters = ['A','B','C','D'];
+    for (var i = 0; i < ch.options.length; i++) {
+      var letter = letters[i];
+      var cls = letter === ch.correctAnswer ? ' correct' : '';
+      answerHTML += '<div class="option-card' + cls + '" style="cursor:default">' +
+        '<span class="option-label">' + letter + ')</span>' +
+        '<span class="option-text">' + ch.options[i].replace(/^[A-D]\)\s*/, '') + '</span></div>';
+    }
+    answerHTML += '</div>';
+  } else if (ch.type === 'tf') {
+    answerHTML = '<div class="tf-options">';
+    var tfPairs = [['V','VERDADERO'],['F','FALSO']];
+    for (var t = 0; t < 2; t++) {
+      var cls2 = tfPairs[t][0] === ch.correctAnswer ? ' correct' : '';
+      answerHTML += '<div class="tf-card' + cls2 + '" style="cursor:default"><div class="tf-label">' + tfPairs[t][1] + '</div></div>';
+    }
+    answerHTML += '</div>';
+  } else {
+    answerHTML = '<div class="feedback ok" style="margin-top:10px">Respuesta: <strong>' + ch.correctAnswer + '</strong></div>';
+    if (ch.acceptedAnswers) {
+      answerHTML += '<div style="font-size:.55em;opacity:.5;margin-top:5px">Acepta: ' + ch.acceptedAnswers.join(', ') + '</div>';
+    }
+  }
+
+  var questionText = ch.type === 'fill'
+    ? '<p class="fill-question">' + ch.question + '</p>'
+    : '<p class="question-text">' + ch.question + '</p>';
+
+  app.innerHTML = '<div class="screen">' +
+    '<div class="top-bar">' +
+      '<div style="font-size:.6em;color:var(--accent);letter-spacing:1px">' + info.topic + ' [' + (tierLabels[ch.tier] || 'T'+ch.tier) + '] #' + info.numInTopic + '/' + info.totalInTopic + '</div>' +
+      '<div class="progress">PREGUNTA ' + (_bankIdx + 1) + ' / ' + _bankAll.length + '</div>' +
+    '</div>' +
+    '<div class="room-name">' + ch.room + '</div>' +
+    '<p class="narrative">' + ch.narrative + '</p>' +
+    '<div class="task-box">' +
+      '<h3>&#128203; ' + ch.title + '</h3>' +
+      questionText +
+    '</div>' +
+    '<p class="hint">&#128161; ' + ch.hint + '</p>' +
+    answerHTML +
+    '<div class="feedback ok" style="margin-top:10px">' + (ch.feedback && ch.feedback.correct ? ch.feedback.correct : '') + '</div>' +
+    '<div class="nav-row">' +
+      (_bankIdx > 0 ? '<button class="prev-btn" onclick="profBankJump(' + (_bankIdx - 1) + ')">&#8592; ANTERIOR</button>' : '') +
+      (_bankIdx < _bankAll.length - 1 ? '<button class="next-btn" onclick="profBankJump(' + (_bankIdx + 1) + ')">SIGUIENTE &#8594;</button>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+// === MODO PROFESOR (oculto) ===
+// PROF_ANSWERS es ahora DINAMICO: se lee del challenge activo
+// Ya no se necesita un objeto estatico con 19 entries
+function _profGetAnswer(step) {
+  // Obtener la respuesta correcta del challenge en el step dado
+  var s = step;
+  var ch;
+  if (s <= 2) ch = shared1[s];
+  else if (s <= 5) ch = shared2[s - 3];
+  else if (s <= 8) ch = (state.branch1 === 'A' ? branch1A : branch1B)[s - 7];
+  else if (s <= 10) ch = shared3[s - 9];
+  else if (s <= 13) ch = (state.branch2 === 'C' ? branch2C : branch2D)[s - 12];
+  else if (s <= 16) ch = shared4[s - 14];
+  return ch ? ch.correctAnswer : '';
+}
+
+function toggleProfMode() {
+  state.profMode = !state.profMode;
+  if (state.profMode) {
+    state.maxStep = 17;
+    state.lives = 99;
+    if (!state.branch1) state.branch1 = 'A';
+    if (!state.branch2) state.branch2 = 'C';
+    if (state.screen !== 'game') {
+      state.screen = 'game';
+      state.step = 0;
+      state.solved = false;
+      state.solvedQueries = {};
+      state.proof = [];
+      state.startTime = Date.now();
+      if (!state.name) state.name = 'Profesor';
+      selectQuestions(state.name);
+    }
+  }
+  render();
+}
+
+function profJumpToStep(step) {
+  if (step >= 7 && !state.branch1) state.branch1 = 'A';
+  if (step >= 12 && !state.branch2) state.branch2 = 'C';
+  state.maxStep = Math.max(state.maxStep, step + 1);
+  transitionTo(function() {
+    state.step = step;
+    state.solved = isStepSolved(step);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+
+function profJumpBranch(branchId, choice, step) {
+  if (branchId === 1) state.branch1 = choice;
+  else state.branch2 = choice;
+  if (step >= 12 && !state.branch2) state.branch2 = 'C';
+  state.maxStep = Math.max(state.maxStep, step + 1);
+  transitionTo(function() {
+    state.step = step;
+    state.solved = isStepSolved(step);
+    state.selectedAnswer = null;
+    render();
+  });
+}
+
+// Panel profesor con ramas inline + modo banco
+function renderProfPanel() {
+  var panel = document.getElementById('profPanel');
+  if (!panel) return;
+  if (!state.profMode) { panel.classList.remove('visible'); document.body.style.paddingBottom = ''; return; }
+  panel.classList.add('visible');
+  document.body.style.paddingBottom = '68px';
+
+  // MODO BANCO: panel con pestanas dinamicas por tema
+  if (state.bankMode) {
+    var bbtns = '';
+    var curTopic = _bankAll[_bankIdx] ? (_bankAll[_bankIdx].topic || '') : '';
+    // Pestanas de tema
+    for (var p = 0; p < _bankTopics.length; p++) {
+      var tName = _bankTopics[p];
+      var firstIdx = _bankByTopic[tName][0];
+      var isActive = (curTopic === tName);
+      var acls = isActive ? ' active' : '';
+      bbtns += '<button class="prof-q-btn' + acls + '" onclick="profBankJump(' + firstIdx + ')" style="font-size:.38em;padding:3px 5px">' + tName.substring(0, 12) + '</button>';
+    }
+    // Botones numerados dentro del tema activo
+    var topicIndices = _bankByTopic[curTopic] || [];
+    if (topicIndices.length > 0) {
+      bbtns += '<div class="prof-sep"></div>';
+      for (var qi = 0; qi < topicIndices.length; qi++) {
+        var qIdx = topicIndices[qi];
+        var qAct = (_bankIdx === qIdx) ? ' active' : '';
+        bbtns += '<button class="prof-q-btn' + qAct + '" onclick="profBankJump(' + qIdx + ')">' + (qi + 1) + '</button>';
+      }
+    }
+    panel.innerHTML = '<span class="prof-label">&#128218; BANCO (' + _bankAll.length + ')</span>' + bbtns +
+      '<button class="prof-exit-btn" onclick="toggleBankMode()">&#10005; CERRAR BANCO</button>';
+    return;
+  }
+
+  // MODO NORMAL: panel P1-P15 con ramas
+  var s = state.step;
+  var btns = '';
+  for (var i = 0; i <= 5; i++) {
+    var active = s === i ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active + '" onclick="profJumpToStep(' + i + ')">P' + (i+1) + '</button>';
+  }
+  btns += '<div class="prof-sep"></div>';
+  [7, 8].forEach(function(step) {
+    var q2 = step;
+    ['A','B'].forEach(function(br) {
+      var active2 = (s === step && state.branch1 === br) ? ' active' : '';
+      var cls = br === 'A' ? ' prof-br-a' : ' prof-br-b';
+      btns += '<button class="prof-q-btn' + cls + active2 + '" onclick="profJumpBranch(1,\'' + br + '\',' + step + ')">P' + q2 + br + '</button>';
+    });
+  });
+  btns += '<div class="prof-sep"></div>';
+  for (var i2 = 9; i2 <= 10; i2++) {
+    var active3 = s === i2 ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active3 + '" onclick="profJumpToStep(' + i2 + ')">P' + i2 + '</button>';
+  }
+  btns += '<div class="prof-sep"></div>';
+  [12, 13].forEach(function(step) {
+    var q3 = step - 1;
+    ['C','D'].forEach(function(br) {
+      var active4 = (s === step && state.branch2 === br) ? ' active' : '';
+      var cls2 = br === 'C' ? ' prof-br-c' : ' prof-br-d';
+      btns += '<button class="prof-q-btn' + cls2 + active4 + '" onclick="profJumpBranch(2,\'' + br + '\',' + step + ')">P' + q3 + br + '</button>';
+    });
+  });
+  btns += '<div class="prof-sep"></div>';
+  for (var step3 = 14; step3 <= 16; step3++) {
+    var q4 = step3 - 1;
+    var active5 = s === step3 ? ' active' : '';
+    btns += '<button class="prof-q-btn' + active5 + '" onclick="profJumpToStep(' + step3 + ')">P' + q4 + '</button>';
+  }
+  var seedInfo = state.seed ? ' <span style="font-size:.4em;opacity:.5;margin-left:8px">SEED:' + state.seed + '</span>' : '';
+  panel.innerHTML = '<span class="prof-label">&#128218; PROF' + seedInfo + '</span>' + btns +
+    '<button class="prof-q-btn" onclick="toggleBankMode()" style="margin-left:8px;background:#7c3aed;border-color:#a78bfa;color:#fff;font-size:.4em">BANCO</button>' +
+    '<button class="prof-exit-btn" onclick="toggleProfMode()">&#10005; SALIR</button>';
+}
+
+// Activacion oculta: escribir "PROFE" en pantalla de titulo
+var _pb = '';
+document.addEventListener('keydown', function(e) {
+  if (state.screen !== 'title') { _pb = ''; return; }
+  _pb += e.key.toUpperCase();
+  if (_pb.length > 5) _pb = _pb.slice(-5);
+  if (_pb === 'PROFE') { _pb = ''; toggleProfMode(); }
+});
+
+
+// === REFERENCE_TEXT (orientación, sin respuestas directas) ===
+var REFERENCE_TEXT = [
+  "===================================",
+  "  ARCHIVO DE REFERENCIA · TEMA 4",
+  "===================================",
+  "",
+  "4.1 REDES CONVOLUCIONALES (CNN)",
+  "  - Un filtro pequeño se desliza por la imagen y",
+  "    reutiliza los mismos pesos en cada posición.",
+  "  - Padding: rellenar bordes. Stride: tamaño del salto.",
+  "  - Pooling: resume bloques de la imagen; reduce tamaño.",
+  "  - Campo receptivo: zona de la entrada que «ve» una",
+  "    neurona; crece al apilar capas.",
+  "  - Parámetros de una convolución: dependen del tamaño",
+  "    del filtro, de los canales de entrada y del número",
+  "    de filtros (más un sesgo por filtro).",
+  "  - Trucos: aumentar los datos, reutilizar redes",
+  "    preentrenadas.",
+  "",
+  "4.2 MODELOS RECURRENTES (RNN / LSTM)",
+  "  - Una RNN lee la secuencia paso a paso y arrastra",
+  "    un estado que resume lo visto hasta entonces.",
+  "  - Retropropagar a través del tiempo multiplica muchos",
+  "    factores: el gradiente puede apagarse o dispararse.",
+  "  - LSTM: un estado de memoria y tres puertas que",
+  "    deciden qué se borra, qué se escribe y qué se",
+  "    muestra. Cuatro bloques de pesos por capa.",
+  "  - Keras: entrada 3-D (lote, pasos, características).",
+  "  - Bidireccional: necesita la secuencia completa.",
+  "  - Series temporales: ventanas deslizantes.",
+  "",
+  "4.3 ATENCIÓN Y TRANSFORMERS",
+  "  - Query (qué busco), Key (qué ofrezco), Value",
+  "    (qué aporto). Afinidad = producto escalar.",
+  "  - Las puntuaciones se escalan antes de la softmax",
+  "    para que no se sature.",
+  "  - Multi-cabeza: varias atenciones en paralelo que se",
+  "    reparten la dimensión del modelo.",
+  "  - El orden se inyecta aparte (codificación posicional).",
+  "  - Máscara: impide mirar posiciones prohibidas.",
+  "  - Familias: solo codificador, solo decodificador,",
+  "    codificador-decodificador.",
+  "  - Coste: todas las parejas de tokens se comparan.",
+  "  - Generar: voraz, muestreo, temperatura, top-k.",
+  "",
+].join("\n");
+
+// === QUESTION BANK: 4 temas x 12 (4 fácil + 4 medio + 4 difícil) ===
+var QUESTION_BANK = [
+  // ---------------- CNN ----------------
+  {
+    topic: "CNN",
+    tier: 1,
+    title: "El ojo de la IA",
+    type: "mc",
+    question: "¿Qué hace una capa convolucional con una imagen?",
+    options: [
+      "A) Desliza un mismo filtro pequeño por toda la imagen",
+      "B) Conecta cada píxel con todas las neuronas siguientes",
+      "C) Se queda con el máximo de cada bloque de la imagen",
+      "D) Ordena los píxeles por intensidad antes de clasificar",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "Piensa en por qué una CNN tiene tan pocos parámetros comparada con una red densa.",
+    feedback: {
+      correct:
+        "El mismo filtro se reutiliza en todas las posiciones: pesos compartidos y conexiones locales.",
+      incorrect:
+        "La convolución aplica un filtro pequeño, siempre el mismo, en cada posición de la imagen. Lo del máximo es el pooling.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 1,
+    title: "Capas sin memoria",
+    type: "tf",
+    question: "Una capa de max pooling 2×2 no tiene parámetros entrenables.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "¿Qué tendría que aprender una operación que solo elige el mayor de cuatro números?",
+    feedback: {
+      correct:
+        "El pooling solo resume (máximo o media): no tiene pesos que ajustar.",
+      incorrect:
+        "Es verdadero: el max pooling se limita a quedarse con el máximo de cada bloque, sin pesos.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 1,
+    title: "Bordes intactos",
+    type: "fill",
+    question:
+      'En Keras, con padding="___" la salida de una convolución con stride 1 conserva el alto y el ancho de la entrada.',
+    options: null,
+    correctAnswer: "same",
+    acceptedAnswers: ["same", '"same"', "padding same", 'padding="same"'],
+    hint: "Hay dos opciones de padding en Keras; la otra reduce el tamaño.",
+    feedback: {
+      correct:
+        '"same" rellena los bordes para conservar el tamaño; "valid" no rellena y lo reduce.',
+      incorrect:
+        'La respuesta es "same". Con "valid" la salida se encoge K − 1 píxeles.',
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 1,
+    title: "Datos multiplicados",
+    type: "short",
+    question:
+      "¿Cómo se llama la técnica que crea variantes de las imágenes de entrenamiento (giros, recortes, cambios de brillo) para reducir el sobreajuste?",
+    options: null,
+    correctAnswer: "data augmentation",
+    acceptedAnswers: [
+      "data augmentation",
+      "aumento de datos",
+      "aumentación de datos",
+      "augmentation",
+      "aumentado de datos",
+      "data augmentation (aumento de datos)",
+    ],
+    hint: "Se aplica solo durante el entrenamiento y no necesita etiquetar imágenes nuevas.",
+    feedback: {
+      correct:
+        "Data augmentation: la red ve versiones distintas de cada imagen y generaliza mejor.",
+      incorrect: "Es data augmentation (aumento de datos).",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 2,
+    title: "Medir la salida",
+    type: "mc",
+    question:
+      "Entrada 32×32, filtro 5×5, sin padding y con stride 1. ¿Qué tamaño tiene la salida?",
+    options: ["A) 32×32", "B) 27×27", "C) 28×28", "D) 30×30"],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Cuenta en cuántas posiciones distintas cabe el filtro entero a lo largo de una fila.",
+    feedback: {
+      correct: "(32 − 5)/1 + 1 = 28.",
+      incorrect: "Sin padding: (W − K)/S + 1 = (32 − 5)/1 + 1 = 28.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 2,
+    title: "Contar pesos",
+    type: "fill",
+    question:
+      "Una capa Conv2D con 16 filtros 3×3 aplicada a una imagen RGB tiene ___ parámetros (con sesgo).",
+    options: null,
+    correctAnswer: "448",
+    acceptedAnswers: ["448", "448 parametros", "448 parámetros"],
+    hint: "Cada filtro mira 3×3 píxeles en cada uno de los canales de color, y lleva un sesgo.",
+    feedback: {
+      correct: "(3·3·3 + 1)·16 = 28·16 = 448.",
+      incorrect:
+        "Cada filtro tiene 3·3·3 = 27 pesos + 1 sesgo = 28; por 16 filtros, 448.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 2,
+    title: "Ver más lejos",
+    type: "tf",
+    question:
+      "Dos convoluciones 3×3 apiladas (stride 1) tienen el mismo campo receptivo que una sola convolución 5×5.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Cada nueva capa 3×3 amplía la zona vista en un píxel por cada lado.",
+    feedback: {
+      correct: "3 → 5: cada capa 3×3 suma 2. Y con menos pesos y una ReLU más.",
+      incorrect:
+        "Es verdadero: la primera ve 3×3 y la segunda, 3×3 de esas, es decir 5×5 píxeles.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 2,
+    title: "Conocimiento prestado",
+    type: "mc",
+    question: "¿En qué consiste el transfer learning en visión por ordenador?",
+    options: [
+      "A) Copiar imágenes de otro dataset para tener más datos",
+      "B) Reutilizar una red preentrenada y ajustar sus últimas capas",
+      "C) Entrenar dos redes a la vez para que una corrija a la otra",
+      "D) Pasar los pesos de la capa de salida a la capa de entrada",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "Las primeras capas de una CNN aprenden bordes y texturas que sirven para casi cualquier imagen.",
+    feedback: {
+      correct:
+        "Se parte de una red entrenada (p. ej. en ImageNet), se congela la base y se entrena una cabeza nueva.",
+      incorrect:
+        "Transfer learning es reaprovechar lo que aprendió una red preentrenada y ajustar solo la parte final.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 3,
+    title: "La primera capa de ResNet",
+    type: "short",
+    question:
+      "Entrada 224×224, filtro 7×7, padding 3 y stride 2. ¿Qué ancho tiene la salida? (solo el número)",
+    options: null,
+    correctAnswer: "112",
+    acceptedAnswers: ["112", "112x112", "112×112", "112 x 112"],
+    hint: "Suma el relleno de los dos lados, resta el filtro, divide por el salto (redondeando hacia abajo) y no olvides la posición inicial.",
+    feedback: {
+      correct: "⌊(224 − 7 + 6)/2⌋ + 1 = 111 + 1 = 112.",
+      incorrect: "⌊(W − K + 2P)/S⌋ + 1 = ⌊223/2⌋ + 1 = 112.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 3,
+    title: "La capa más cara",
+    type: "mc",
+    question:
+      'Conv2D(32 filtros, 3×3, padding="same") sobre 28×28×1 → MaxPooling 2×2 → Flatten → Dense(10). ¿Cuántos parámetros tiene la capa Dense?',
+    options: ["A) 7.850", "B) 2.570", "C) 250.890", "D) 62.730"],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: 'Sigue la forma: "same" conserva 28×28, el pooling divide por 2, y Flatten multiplica alto × ancho × canales.',
+    feedback: {
+      correct: "14·14·32 = 6.272 entradas; (6.272 + 1)·10 = 62.730.",
+      incorrect:
+        "Tras el pooling queda 14×14×32 = 6.272 valores; la Dense tiene (6.272 + 1)·10 = 62.730.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 3,
+    title: "Filtros pequeños",
+    type: "fill",
+    question:
+      "Tres capas 3×3 con 64 canales de entrada y 64 de salida suman 110.592 pesos. Una única capa 7×7 con los mismos canales tiene ___ pesos (sin sesgos).",
+    options: null,
+    correctAnswer: "200704",
+    acceptedAnswers: ["200704", "200.704", "200 704", "200,704"],
+    hint: "Pesos de una capa = alto del filtro × ancho × canales de entrada × canales de salida.",
+    feedback: {
+      correct:
+        "7·7·64·64 = 200.704: casi el doble que las tres capas 3×3 con el mismo campo receptivo.",
+      incorrect: "7·7·64·64 = 49·4.096 = 200.704.",
+    },
+  },
+  {
+    topic: "CNN",
+    tier: 3,
+    title: "Imágenes más grandes",
+    type: "tf",
+    question:
+      "Si duplicas el tamaño de la imagen de entrada, el número de parámetros de una capa Conv2D también se duplica.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "Revisa de qué cosas depende la cuenta de parámetros de una convolución.",
+    feedback: {
+      correct:
+        "Falso: los parámetros solo dependen del filtro, de los canales y del número de filtros. Crece la salida, no los pesos.",
+      incorrect:
+        "Es falso: el mismo filtro se aplica en más posiciones, pero sigue siendo el mismo filtro.",
+    },
+  },
+
+  // ---------------- RNN y LSTM ----------------
+  {
+    topic: "RNN y LSTM",
+    tier: 1,
+    title: "La memoria del sistema",
+    type: "mc",
+    question: "¿Qué distingue a una red recurrente (RNN) de una red densa?",
+    options: [
+      "A) Usa filtros que se deslizan por la imagen",
+      "B) Procesa todos los elementos a la vez y sin orden",
+      "C) Arrastra un estado oculto de un paso al siguiente",
+      "D) Solo puede trabajar con entradas binarias",
+    ],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Piensa en cómo recuerda la red lo que leyó en los pasos anteriores.",
+    feedback: {
+      correct:
+        "El estado oculto hₜ resume lo visto y se pasa al siguiente paso.",
+      incorrect:
+        "Una RNN lee la secuencia paso a paso y pasa su estado oculto de un paso al siguiente.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 1,
+    title: "Pesos reciclados",
+    type: "tf",
+    question:
+      "Una RNN usa los mismos pesos en todos los pasos de la secuencia.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Recuerda la red «desenrollada» en el tiempo: ¿cuántas celdas distintas hay realmente?",
+    feedback: {
+      correct:
+        "Una sola celda aplicada en cada paso: pesos compartidos en el tiempo.",
+      incorrect:
+        "Es verdadero: por eso los parámetros no dependen de la longitud de la secuencia.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 1,
+    title: "Señal perdida",
+    type: "short",
+    question:
+      "¿Cómo se llama el problema por el que el gradiente se hace casi cero al retropropagar a través de muchos pasos de tiempo?",
+    options: null,
+    correctAnswer: "desvanecimiento del gradiente",
+    acceptedAnswers: [
+      "desvanecimiento del gradiente",
+      "gradiente que se desvanece",
+      "vanishing gradient",
+      "vanishing gradients",
+      "desvanecimiento de gradiente",
+      "gradiente desvanecido",
+      "el gradiente que se desvanece",
+    ],
+    hint: "Multiplicar muchos factores menores que 1 lleva a un número diminuto. ¿Cómo se llama eso en inglés o en castellano?",
+    feedback: {
+      correct:
+        "El gradiente que se desvanece (vanishing gradient): la red no aprende dependencias largas.",
+      incorrect: "Es el desvanecimiento del gradiente (vanishing gradient).",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 1,
+    title: "La puerta que borra",
+    type: "fill",
+    question:
+      "En una LSTM, la puerta de ___ decide qué parte del estado de memoria anterior se conserva.",
+    options: null,
+    correctAnswer: "olvido",
+    acceptedAnswers: ["olvido", "forget", "forget gate", "olvidar"],
+    hint: "Las tres puertas deciden qué se borra, qué se escribe y qué se muestra. Esta es la primera.",
+    feedback: {
+      correct:
+        "La puerta de olvido f multiplica a Cₜ₋₁: cerca de 1 conserva, cerca de 0 borra.",
+      incorrect: "Es la puerta de olvido (forget gate).",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 2,
+    title: "Actualizar la memoria",
+    type: "mc",
+    question:
+      "En una celda LSTM: f = 0,5, Cₜ₋₁ = 2, i = 1 y C̃ = 0,4. ¿Cuánto vale el nuevo estado Cₜ?",
+    options: ["A) 1,4", "B) 2,4", "C) 0,8", "D) 1,0"],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "Lo que se conserva de antes más lo que se escribe de nuevo.",
+    feedback: {
+      correct: "Cₜ = f·Cₜ₋₁ + i·C̃ = 0,5·2 + 1·0,4 = 1,4.",
+      incorrect: "Cₜ = f·Cₜ₋₁ + i·C̃ = 1 + 0,4 = 1,4.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 2,
+    title: "Apilar capas",
+    type: "fill",
+    question:
+      "En Keras, para apilar dos capas LSTM, la primera necesita return_sequences=___.",
+    options: null,
+    correctAnswer: "True",
+    acceptedAnswers: [
+      "true",
+      "verdadero",
+      "return_sequences=true",
+      "true (verdadero)",
+    ],
+    hint: "La segunda LSTM necesita recibir una secuencia, no un único vector.",
+    feedback: {
+      correct:
+        "return_sequences=True devuelve un hₜ por paso: una secuencia 3-D para la siguiente LSTM.",
+      incorrect:
+        "Es True: con False solo sale el último estado y la segunda LSTM no recibe secuencia.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 2,
+    title: "Leer en los dos sentidos",
+    type: "tf",
+    question:
+      "Una LSTM bidireccional es adecuada para predecir en tiempo real el siguiente valor de una serie mientras llegan los datos.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "Para leer «hacia atrás», ¿qué tiene que estar disponible?",
+    feedback: {
+      correct:
+        "Falso: una red bidireccional necesita la secuencia completa, y el futuro todavía no ha llegado.",
+      incorrect:
+        "Es falso: la dirección hacia atrás necesita ver el final de la secuencia antes de responder.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 2,
+    title: "Freno de emergencia",
+    type: "short",
+    question:
+      "¿Qué técnica contiene el gradiente explosivo recortando su norma cuando supera un umbral?",
+    options: null,
+    correctAnswer: "gradient clipping",
+    acceptedAnswers: [
+      "gradient clipping",
+      "clipping",
+      "recorte del gradiente",
+      "recorte de gradiente",
+      "clipnorm",
+      "recortar el gradiente",
+      "clipping del gradiente",
+    ],
+    hint: "Se configura en el optimizador y actúa antes de aplicar cada actualización de pesos.",
+    feedback: {
+      correct: "Gradient clipping: si la norma supera el umbral, se reescala.",
+      incorrect:
+        "Es gradient clipping (recorte del gradiente), por ejemplo clipnorm=1.0.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 3,
+    title: "Contar la celda",
+    type: "fill",
+    question:
+      "Una capa LSTM(32) que recibe 10 características por paso tiene ___ parámetros.",
+    options: null,
+    correctAnswer: "5504",
+    acceptedAnswers: ["5504", "5.504", "5 504", "5,504"],
+    hint: "Son cuatro bloques iguales; cada uno mira la entrada y el estado anterior, y lleva sesgos.",
+    feedback: {
+      correct: "4·[32·(32 + 10) + 32] = 4·1.376 = 5.504.",
+      incorrect: "4·[nₕ·(nₕ + nₓ) + nₕ] = 4·(32·42 + 32) = 5.504.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 3,
+    title: "Cortar la serie",
+    type: "mc",
+    question:
+      "Una serie de 100 valores se corta en ventanas de 10 pasos para predecir el valor siguiente. ¿Cuántos ejemplos salen y qué forma tiene X?",
+    options: [
+      "A) 100 ejemplos, X = (100, 10, 1)",
+      "B) 91 ejemplos, X = (91, 10, 1)",
+      "C) 90 ejemplos, X = (90, 1, 10)",
+      "D) 90 ejemplos, X = (90, 10, 1)",
+    ],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "La última ventana tiene que dejar sitio a su objetivo. Y Keras espera (ejemplos, pasos, características).",
+    feedback: {
+      correct:
+        "100 − 10 = 90 ventanas; X = (90, 10, 1): 10 pasos con 1 característica.",
+      incorrect:
+        "Salen 100 − 10 = 90 ejemplos, y la forma es (ejemplos, pasos, características) = (90, 10, 1).",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 3,
+    title: "Diez pasos atrás",
+    type: "mc",
+    question:
+      "En una RNN simple, cada paso hacia atrás multiplica el gradiente por 0,5. ¿Cuánto queda tras 10 pasos?",
+    options: ["A) 0,05", "B) ≈ 0,001", "C) 0,5", "D) ≈ 0,1"],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "No es una resta: es multiplicar diez veces por el mismo factor.",
+    feedback: {
+      correct: "0,5¹⁰ ≈ 0,001: el gradiente casi desaparece.",
+      incorrect: "0,5¹⁰ = 1/1.024 ≈ 0,001.",
+    },
+  },
+  {
+    topic: "RNN y LSTM",
+    tier: 3,
+    title: "Secuencias más largas",
+    type: "tf",
+    question:
+      "Si la entrada de una LSTM pasa de 50 a 500 pasos de tiempo, su número de parámetros se multiplica por 10.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "Revisa qué términos aparecen en la fórmula de parámetros de una LSTM.",
+    feedback: {
+      correct:
+        "Falso: la longitud no aparece en la cuenta. La misma celda se aplica en cada paso.",
+      incorrect:
+        "Es falso: los parámetros dependen de nₕ y nₓ, no del número de pasos.",
+    },
+  },
+
+  // ---------------- Atención y Transformers ----------------
+  {
+    topic: "Atención",
+    tier: 1,
+    title: "El cuello de botella",
+    type: "mc",
+    question:
+      "¿Qué problema resolvió la atención en los traductores seq2seq con LSTM?",
+    options: [
+      "A) Que las imágenes de entrada fueran demasiado grandes",
+      "B) Tener que resumir toda la frase en un único vector",
+      "C) La falta de datos etiquetados para poder traducir",
+      "D) La lentitud de la función softmax en la salida",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "Piensa en qué recibía el decodificador antes de la atención.",
+    feedback: {
+      correct:
+        "El decodificador solo recibía el último estado del codificador; la atención le deja mirar todas las posiciones.",
+      incorrect:
+        "El problema era el cuello de botella: toda la frase comprimida en un solo vector.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 1,
+    title: "La mezcla",
+    type: "tf",
+    question:
+      "En self-attention, la salida de cada token es una media ponderada de los vectores Value de los tokens a los que atiende.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Los pesos salen de una softmax, así que suman 1.",
+    feedback: {
+      correct:
+        "Pesos (softmax de Q·Kᵀ) × V: una mezcla ponderada de los valores.",
+      incorrect:
+        "Es verdadero: salida = pesos de atención · V, y los pesos suman 1.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 1,
+    title: "Escalado",
+    type: "fill",
+    question:
+      "En la atención, las puntuaciones Q·Kᵀ se dividen por la raíz cuadrada de ___ antes de la softmax.",
+    options: null,
+    correctAnswer: "dk",
+    acceptedAnswers: [
+      "dk",
+      "d_k",
+      "dₖ",
+      "d k",
+      "la dimension de las claves",
+      "dimension de las keys",
+      "la dimension de k",
+    ],
+    hint: "Es la dimensión de los vectores que se multiplican en el producto escalar.",
+    feedback: {
+      correct: "Se divide por √dₖ para que la softmax no se sature.",
+      incorrect: "Es √dₖ, la dimensión de las keys (y queries).",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 1,
+    title: "Solo decodificador",
+    type: "short",
+    question:
+      "¿Qué familia de modelos Transformer usa solo el decodificador, con máscara causal, para generar texto? (siglas)",
+    options: null,
+    correctAnswer: "GPT",
+    acceptedAnswers: [
+      "gpt",
+      "la familia gpt",
+      "modelos gpt",
+      "decoder-only",
+      "familia gpt",
+    ],
+    hint: "La «G» de sus siglas significa «generativo».",
+    feedback: {
+      correct: "GPT: Generative Pre-trained Transformer, solo decodificador.",
+      incorrect:
+        "Es la familia GPT. BERT usa solo el codificador y T5 los dos.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 2,
+    title: "No mirar el futuro",
+    type: "mc",
+    question: "¿Para qué sirve la máscara causal en un decodificador?",
+    options: [
+      "A) Para eliminar las palabras más frecuentes del texto",
+      "B) Para que las cabezas no compartan parámetros",
+      "C) Para que cada token solo vea a los anteriores y a sí mismo",
+      "D) Para igualar la longitud de todas las frases del lote",
+    ],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "Al entrenar a predecir la siguiente palabra, ¿qué sería hacer trampa?",
+    feedback: {
+      correct:
+        "Las posiciones futuras se ponen a −∞ antes de la softmax: peso 0.",
+      incorrect:
+        "La máscara causal impide que un token atienda a los que vienen después.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 2,
+    title: "Sin orden",
+    type: "tf",
+    question:
+      "Sin codificación posicional, la self-attention no tiene forma de saber en qué orden aparecen los tokens.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Si barajas las filas de Q, K y V, ¿cambia alguna afinidad?",
+    feedback: {
+      correct:
+        "La atención trata los tokens como un conjunto; el orden se inyecta con la codificación posicional.",
+      incorrect:
+        "Es verdadero: por eso se suman (o rotan) vectores de posición a los embeddings.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 2,
+    title: "Repartir cabezas",
+    type: "fill",
+    question:
+      "Con d_model = 512 y 8 cabezas de atención, cada cabeza trabaja con vectores de dimensión ___.",
+    options: null,
+    correctAnswer: "64",
+    acceptedAnswers: ["64", "d=64", "dk=64"],
+    hint: "Las cabezas se reparten la dimensión del modelo a partes iguales.",
+    feedback: {
+      correct: "512 / 8 = 64.",
+      incorrect: "dₖ = d_model / cabezas = 512 / 8 = 64.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 2,
+    title: "Creatividad",
+    type: "short",
+    question:
+      "¿Cómo se llama el parámetro de generación que, al subirlo, aplana la distribución y hace el texto más variado?",
+    options: null,
+    correctAnswer: "temperatura",
+    acceptedAnswers: ["temperatura", "temperature", "la temperatura", "t"],
+    hint: "Divide los logits antes de la softmax; el nombre viene de la física.",
+    feedback: {
+      correct: "La temperatura: T alta aplana, T baja afila.",
+      incorrect: "Es la temperatura (T).",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 3,
+    title: "Doble de texto",
+    type: "mc",
+    question:
+      "Una secuencia pasa de 1.000 a 2.000 tokens. ¿Cuánto crece el cálculo de las puntuaciones de atención?",
+    options: [
+      "A) Se duplica",
+      "B) No cambia",
+      "C) Crece un 50 %",
+      "D) Se multiplica por 4",
+    ],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "Cada token se compara con todos los demás.",
+    feedback: {
+      correct: "n² puntuaciones: (2n)² = 4n².",
+      incorrect:
+        "La matriz de puntuaciones es n × n: duplicar n multiplica por 4.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 3,
+    title: "Proyecciones",
+    type: "fill",
+    question:
+      "Las cuatro proyecciones W_Q, W_K, W_V y W_O, de 512×512 y con sesgo, suman ___ parámetros.",
+    options: null,
+    correctAnswer: "1050624",
+    acceptedAnswers: ["1050624", "1.050.624", "1 050 624", "1,050,624"],
+    hint: "Calcula una matriz con su sesgo y multiplica por cuatro.",
+    feedback: {
+      correct: "4·(512·512 + 512) = 4·262.656 = 1.050.624.",
+      incorrect:
+        "Cada proyección: 512·512 + 512 = 262.656; por cuatro, 1.050.624.",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 3,
+    title: "Enfriar el modelo",
+    type: "mc",
+    question:
+      "Con logits [2, 1, 0] y T = 1, la softmax da ≈ [0,67, 0,24, 0,09]. Con T = 0,5, ¿qué pasa con la probabilidad de la primera palabra?",
+    options: [
+      "A) Sube a ≈ 0,87",
+      "B) Baja a ≈ 0,51",
+      "C) Se queda en 0,67",
+      "D) Pasa a ser exactamente 1",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "Dividir por 0,5 duplica las diferencias entre logits. ¿Eso afila o aplana?",
+    feedback: {
+      correct: "Logits [4, 2, 0] → e⁴/(e⁴ + e² + 1) ≈ 0,87.",
+      incorrect:
+        "Con T = 0,5 los logits pasan a [4, 2, 0] y la primera sube a ≈ 0,87 (nunca llega a 1).",
+    },
+  },
+  {
+    topic: "Atención",
+    tier: 3,
+    title: "Más cabezas",
+    type: "tf",
+    question:
+      "Tener 8 cabezas de dimensión 64 cuesta más parámetros que tener 1 cabeza de dimensión 512.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "¿Qué tamaño tienen en total las matrices de proyección en los dos casos?",
+    feedback: {
+      correct: "Falso: las 8 cabezas se reparten las mismas matrices 512×512.",
+      incorrect:
+        "Es falso: el coste es el mismo, la proyección de 512 se parte en 8 trozos de 64.",
+    },
+  },
+
+  // ---------------- Integración ----------------
+  {
+    topic: "Integración",
+    tier: 1,
+    title: "Elegir el arma",
+    type: "mc",
+    question:
+      "¿Qué arquitectura usarías como punto de partida para clasificar radiografías?",
+    options: [
+      "A) Una LSTM unidireccional",
+      "B) Una CNN preentrenada en imágenes",
+      "C) Un perceptrón de una sola capa",
+      "D) Una red de base radial",
+    ],
+    correctAnswer: "B",
+    acceptedAnswers: null,
+    hint: "¿Qué estructura tienen los datos: secuencia, tabla o rejilla de píxeles?",
+    feedback: {
+      correct: "Datos en rejilla → CNN, idealmente con transfer learning.",
+      incorrect: "Para imágenes, una CNN (mejor aún, preentrenada).",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 1,
+    title: "Compartir",
+    type: "tf",
+    question:
+      "Las CNN comparten pesos en el espacio y las RNN los comparten en el tiempo.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Piensa en qué se reutiliza en cada caso: el filtro y la celda.",
+    feedback: {
+      correct: "El mismo filtro en cada posición; la misma celda en cada paso.",
+      incorrect: "Es verdadero: es la idea común que las hace eficientes.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 1,
+    title: "La revolución de 2017",
+    type: "short",
+    question:
+      "¿Qué arquitectura, basada solo en atención, sustituyó a las LSTM en traducción automática a partir de 2017?",
+    options: null,
+    correctAnswer: "Transformer",
+    acceptedAnswers: [
+      "transformer",
+      "transformers",
+      "el transformer",
+      "arquitectura transformer",
+    ],
+    hint: "El artículo se titulaba «Attention is all you need».",
+    feedback: { correct: "El Transformer.", incorrect: "Es el Transformer." },
+  },
+  {
+    topic: "Integración",
+    tier: 1,
+    title: "El hilo de la memoria",
+    type: "fill",
+    question:
+      "En una red recurrente, la información de los pasos anteriores viaja en el estado ___.",
+    options: null,
+    correctAnswer: "oculto",
+    acceptedAnswers: ["oculto", "hidden", "oculto (h)", "h", "oculto h"],
+    hint: "Se suele escribir hₜ.",
+    feedback: {
+      correct: "El estado oculto hₜ.",
+      incorrect: "Es el estado oculto (hidden state, hₜ).",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 2,
+    title: "Etiquetar un contrato",
+    type: "mc",
+    question:
+      "Quieres marcar cada palabra de un contrato ya redactado como «persona», «empresa» u «otro». ¿Qué configuración encaja?",
+    options: [
+      "A) seq → seq bidireccional, una salida por palabra",
+      "B) seq → 1 unidireccional, una salida por contrato",
+      "C) Una CNN 2D aplicada sobre el texto como imagen",
+      "D) seq → 1 bidireccional, una salida por contrato",
+    ],
+    correctAnswer: "A",
+    acceptedAnswers: null,
+    hint: "¿Cuántas etiquetas necesitas? ¿Está el texto completo disponible desde el principio?",
+    feedback: {
+      correct:
+        "Una etiqueta por palabra (return_sequences=True) y el texto completo permite leer en ambos sentidos.",
+      incorrect:
+        "Hace falta una salida por palabra, y como el contrato ya está escrito se puede usar bidireccional.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 2,
+    title: "Voz en directo",
+    type: "tf",
+    question:
+      "Para transcribir voz en directo, mientras la persona habla, una LSTM bidireccional es la mejor elección.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "F",
+    acceptedAnswers: null,
+    hint: "¿Puedes leer hacia atrás algo que todavía no se ha dicho?",
+    feedback: {
+      correct:
+        "Falso: en directo no existe el futuro de la secuencia; hace falta un modelo causal.",
+      incorrect: "Es falso: bidireccional exige tener la secuencia completa.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 2,
+    title: "Adaptar un gigante",
+    type: "short",
+    question:
+      "A un BERT preentrenado se le añade una capa de salida y se entrena unas pocas épocas con reseñas etiquetadas. ¿Cómo se llama esa fase?",
+    options: null,
+    correctAnswer: "fine-tuning",
+    acceptedAnswers: [
+      "fine-tuning",
+      "fine tuning",
+      "finetuning",
+      "ajuste fino",
+      "afinado",
+      "afinamiento",
+    ],
+    hint: "Es la segunda fase después del preentrenamiento; su nombre en inglés tiene dos palabras.",
+    feedback: {
+      correct: "Fine-tuning (ajuste fino).",
+      incorrect: "Es el fine-tuning (ajuste fino).",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 2,
+    title: "Lo que no cuenta",
+    type: "fill",
+    question:
+      "Una CNN y una LSTM tienen algo en común: su número de parámetros NO depende del ___ de la entrada (píxeles o pasos).",
+    options: null,
+    correctAnswer: "tamaño",
+    acceptedAnswers: [
+      "tamaño",
+      "tamano",
+      "longitud",
+      "tamaño de la entrada",
+      "size",
+      "largo",
+    ],
+    hint: "Recuerda los ejercicios de duplicar la imagen o alargar la secuencia.",
+    feedback: {
+      correct:
+        "Pesos compartidos: más píxeles o más pasos no añaden parámetros.",
+      incorrect: "Es el tamaño (o la longitud) de la entrada.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 3,
+    title: "La gran ventaja",
+    type: "mc",
+    question:
+      "¿Qué ventaja clave tiene un Transformer frente a una LSTM al entrenar?",
+    options: [
+      "A) Necesita menos memoria con secuencias largas",
+      "B) Su coste crece linealmente con la longitud",
+      "C) No necesita datos de entrenamiento etiquetados",
+      "D) Procesa todas las posiciones en paralelo",
+    ],
+    correctAnswer: "D",
+    acceptedAnswers: null,
+    hint: "La LSTM tiene que esperar al paso anterior. ¿Y la atención?",
+    feedback: {
+      correct:
+        "Todas las posiciones a la vez con productos de matrices: ideal para GPU. A cambio, coste n².",
+      incorrect:
+        "La ventaja es el paralelismo. A y B son, de hecho, sus puntos débiles.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 3,
+    title: "Primera capa mínima",
+    type: "short",
+    question:
+      "Una capa Conv2D con 8 filtros 3×3 se aplica a una imagen en escala de grises. ¿Cuántos parámetros tiene? (solo el número)",
+    options: null,
+    correctAnswer: "80",
+    acceptedAnswers: ["80", "80 parametros", "80 parámetros"],
+    hint: "Escala de grises significa un único canal. Y no olvides el sesgo.",
+    feedback: {
+      correct: "(3·3·1 + 1)·8 = 80.",
+      incorrect: "(3·3·1 + 1)·8 = 10·8 = 80.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 3,
+    title: "Costes comparados",
+    type: "tf",
+    question:
+      "El cálculo de la atención crece con el cuadrado de la longitud de la secuencia; el de una LSTM crece de forma lineal, pero paso a paso.",
+    options: ["VERDADERO", "FALSO"],
+    correctAnswer: "V",
+    acceptedAnswers: null,
+    hint: "Compara «todos con todos» con «uno detrás de otro».",
+    feedback: {
+      correct: "Atención: n² en paralelo. LSTM: n pasos en secuencia.",
+      incorrect:
+        "Es verdadero: ese es exactamente el intercambio entre las dos arquitecturas.",
+    },
+  },
+  {
+    topic: "Integración",
+    tier: 3,
+    title: "Lo que dice la celda",
+    type: "mc",
+    question:
+      "Una celda LSTM tiene Cₜ = 1,7 y puerta de salida o = 0,27. Sabiendo que tanh(1,7) ≈ 0,935, ¿cuánto vale hₜ?",
+    options: ["A) ≈ 1,70", "B) ≈ 0,46", "C) ≈ 0,25", "D) ≈ 0,94"],
+    correctAnswer: "C",
+    acceptedAnswers: null,
+    hint: "La salida es el estado pasado por tanh y filtrado por la puerta de salida.",
+    feedback: {
+      correct: "hₜ = o·tanh(Cₜ) = 0,27·0,935 ≈ 0,25.",
+      incorrect:
+        "hₜ = o·tanh(Cₜ) = 0,27·0,935 ≈ 0,25. Guarda mucho, pero dice poco.",
+    },
+  },
+];
+
+// === SALAS: se asignan por posición en la partida, no por pregunta ===
+var ROOMS = {
+  s1: {
+    room: "&#128421; TERMINAL DE ACCESO",
+    narrative:
+      "La consola parpadea. NEXUS, la IA del laboratorio, ha bloqueado el sistema y solo deja pasar a quien demuestre que entiende cómo piensa una red.",
+  },
+  s2: {
+    room: "&#128293; FIREWALL NIVEL 1",
+    narrative:
+      "Un muro de código verde se alza ante ti. Cada respuesta correcta abre una grieta en el cortafuegos.",
+  },
+  A: {
+    room: "&#128065; NÚCLEO DE VISIÓN",
+    narrative:
+      "Entras en las capas convolucionales de NEXUS: miles de filtros te observan desde las paredes.",
+  },
+  B: {
+    room: "&#129504; BANCO DE MEMORIA",
+    narrative:
+      "Celdas LSTM laten en hilera. Sus puertas se abren y se cierran recordando y olvidando.",
+  },
+  s3: {
+    room: "&#128451; BASE DE DATOS CENTRAL",
+    narrative:
+      "Los pesos de NEXUS fluyen por los racks. Un error aquí y la alarma despertará a todo el sistema.",
+  },
+  C: {
+    room: "&#128272; NODO ENCRIPTADO",
+    narrative:
+      "Las claves de cifrado giran en una espiral de tokens. Solo quien domine las cuentas podrá descifrarlas.",
+  },
+  D: {
+    room: "&#128225; MATRIZ DE ATENCIÓN",
+    narrative:
+      "Cada nodo mira a todos los demás. Las conexiones brillan según su afinidad: Query contra Key.",
+  },
+  s4: {
+    room: "&#9889; ROOT ACCESS",
+    narrative:
+      "Estás en el núcleo. Tres órdenes más y NEXUS volverá a obedecer a los humanos.",
+  },
+};
+function _withRoom(arr, key) {
+  return arr.map(function (q) {
+    var c = {};
+    for (var k in q) c[k] = q[k];
+    c.room = ROOMS[key].room;
+    c.narrative = ROOMS[key].narrative;
+    return c;
+  });
+}
+function _assignRooms() {
+  shared1 = _withRoom(shared1, "s1");
+  shared2 = _withRoom(shared2, "s2");
+  branch1A = _withRoom(branch1A, "A");
+  branch1B = _withRoom(branch1B, "B");
+  shared3 = _withRoom(shared3, "s3");
+  branch2C = _withRoom(branch2C, "C");
+  branch2D = _withRoom(branch2D, "D");
+  shared4 = _withRoom(shared4, "s4");
+}
+// En el modo banco, cada pregunta muestra su bloque temático
+QUESTION_BANK.forEach(function (q) {
+  q.room = "&#128190; " + q.topic.toUpperCase();
+  q.narrative = "Banco de preguntas · " + q.topic + " · nivel " + q.tier;
+});
+
+// === PHRASES (16 finales: hash(nombre) x ramas) ===
+var PHRASES = [
+  // índice = hash(nombre)*4 + ruta: 0 = Visión+Cifrado, 1 = Visión+Atención, 2 = Memoria+Cifrado, 3 = Memoria+Atención
+  "Cegaste sus filtros y descifraste sus claves: NEXUS ya no ve ni guarda secretos.",
+  "Del filtro 3×3 a la matriz Q·Kᵀ: has recorrido la historia del deep learning en una noche.",
+  "Vaciaste su memoria y rompiste su cifrado: la puerta de olvido de NEXUS se cerró para siempre.",
+  "Del estado oculto al Transformer: reconstruiste el camino que llevó a los grandes modelos de lenguaje.",
+  "Cada convolución fue una grieta en el cortafuegos y cada cuenta, una llave. Acceso root concedido.",
+  "Viste como una CNN y miraste como la atención: todo a la vez. NEXUS se rinde.",
+  "Recordaste lo que importaba y olvidaste lo que no. Las cuentas de NEXUS ya no tienen secretos.",
+  "Venciste a la memoria y a la atención: las secuencias ya no esconden nada.",
+  "Pesos compartidos contra pesos compartidos: ganaste tú. La visión de NEXUS vuelve a ser solo píxeles.",
+  "Ni el pooling ni la softmax pudieron contigo. El laboratorio vuelve a manos humanas.",
+  "Sus celdas LSTM laten por última vez: su gradiente se desvaneció; el tuyo no.",
+  "Con √dₖ, máscaras y cabezas múltiples desmontaste su memoria y su atención pieza a pieza.",
+  "Has demostrado que una imagen es estructura, no solo píxeles. El núcleo cifrado se abre.",
+  "Filtros y afinidades, rejillas y tokens: dominas las dos formas de mirar de NEXUS.",
+  "Tu memoria a largo plazo superó a la de NEXUS. Sus claves obedecen ahora tus órdenes.",
+  "Secuencia completa, atención total: escapas del laboratorio con todo el Tema 4 en la cabeza."
+];
+
+
+// === RENDER: pantallas temáticas ===
+function renderTitle(app) {
+  app.innerHTML =
+    '<div class="screen title-screen">' +
+    '<div class="swords">&#129302; &#9889; &#128187;</div>' +
+    "<h1>PROTOCOLO<br>NEXUS</h1>" +
+    '<p class="subtitle">— Escape Room · Tema 4 · Arquitecturas profundas —</p>' +
+    '<input type="text" id="nameInput" placeholder="Tu nombre y apellido" maxlength="40" autocomplete="off">' +
+    '<button onclick="startGame()">&#9654; CONECTAR</button>' +
+    '<p class="instructions">CNN · RNN / LSTM · Atención y Transformers<br>Aprendizaje Profundo · CUNEF</p>' +
+    "</div>";
+  var inp = document.getElementById("nameInput");
+  if (inp) {
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        startGame();
+      }
+    });
+  }
+}
+
+function renderIntro(app) {
+  app.innerHTML =
+    '<div class="screen intro-screen">' +
+    "<h2>&#9888; ALERTA DE SEGURIDAD</h2>" +
+    '<p>Operador/a <span class="name-display">' +
+    state.name +
+    "</span>: NEXUS, la IA experimental del laboratorio, se ha rebelado. Ha cerrado todas las puertas y solo obedece a quien demuestre que entiende cómo funciona por dentro.</p>" +
+    "<p>Para recuperar el control tendrás que atravesar <strong>15 pruebas</strong> sobre sus tres sistemas: la <em>visión</em> (redes convolucionales), la <em>memoria</em> (RNN y LSTM) y la <em>atención</em> (Transformers). Dos veces tendrás que elegir camino.</p>" +
+    '<p class="warning">&#9829;&#9829;&#9829; Tienes 3 vidas. Cada respuesta incorrecta resta una. Si las pierdes todas, NEXUS te expulsa.</p>' +
+    "<p>Selecciona una opción o escribe tu respuesta y pulsa <strong>CONFIRMAR</strong> (o Enter). El botón <strong>REFERENCIA</strong> abre un resumen del tema: te orienta, pero no te da las respuestas.</p>" +
+    '<p class="note">Las preguntas dependen de tu nombre y de la fecha: cada persona tiene su propia partida. Al terminar obtendrás un código de verificación para el profesor.</p>' +
+    '<button onclick="startAdventure()">&#9889; INICIAR INFILTRACIÓN</button>' +
+    "</div>";
+}
+
+function renderBranch(app, id) {
+  var html = '<div class="screen branch-screen">';
+  if (id === 1) {
+    html +=
+      "<h2>&#9888; BIFURCACIÓN EN LA RED</h2>" +
+      '<p class="narrative">El cortafuegos ha caído. Dos subsistemas protegen la base de datos central. Elige por dónde entrar.</p>' +
+      '<div class="branch-options">' +
+      '<div class="branch-card" onclick="chooseBranch(1,\'A\')"><div class="icon">&#128065;</div><h3>NÚCLEO DE VISIÓN</h3><p>Infíltrate por las capas convolucionales de NEXUS.</p></div>' +
+      '<div class="branch-card" onclick="chooseBranch(1,\'B\')"><div class="icon">&#129504;</div><h3>BANCO DE MEMORIA</h3><p>Cuélate entre las celdas LSTM y sus puertas.</p></div>' +
+      "</div>";
+  } else {
+    html +=
+      "<h2>&#9888; ÚLTIMA BIFURCACIÓN</h2>" +
+      '<p class="narrative">Ya tienes acceso a la base de datos. Antes del núcleo hay dos rutas, igual de peligrosas.</p>' +
+      '<div class="branch-options">' +
+      '<div class="branch-card" onclick="chooseBranch(2,\'C\')"><div class="icon">&#128272;</div><h3>NODO ENCRIPTADO</h3><p>Rompe las claves de cifrado de NEXUS.</p></div>' +
+      '<div class="branch-card" onclick="chooseBranch(2,\'D\')"><div class="icon">&#128225;</div><h3>MATRIZ DE ATENCIÓN</h3><p>Atraviesa la red donde cada nodo mira a todos los demás.</p></div>' +
+      "</div>";
+  }
+  html += "</div>";
+  app.innerHTML = html;
+}
+
+function renderGameOver(app) {
+  app.innerHTML =
+    '<div class="screen gameover-screen">' +
+    '<div class="skull">&#128128;</div>' +
+    "<h1>ACCESO DENEGADO</h1>" +
+    "<p>NEXUS ha detectado demasiados errores y te ha expulsado del sistema.<br>Repasa el Tema 4 y vuelve a intentarlo.</p>" +
+    '<button onclick="restartGame()">&#8635; REINTENTAR</button>' +
+    "</div>";
+}
+
+function renderVictory(app) {
+  var code = getCompletionCode();
+  var phrase = PHRASES[getFinalPhraseIndex()] || PHRASES[0];
+  var routes = { A: "Visión", B: "Memoria", C: "Cifrado", D: "Atención" };
+  app.innerHTML =
+    '<div class="screen victory-screen">' +
+    '<div class="trophy">&#127942;</div>' +
+    "<h1>ROOT ACCESS CONCEDIDO</h1>" +
+    '<p class="subtitle" style="font-size:.7em;margin-top:10px">NEXUS vuelve a estar bajo control humano.</p>' +
+    '<div class="phrase-box"><p class="phrase-text">&laquo; ' +
+    phrase +
+    " &raquo;</p></div>" +
+    '<div class="completion-info">' +
+    '<p>Operador/a: <span class="name-display">' +
+    state.name +
+    "</span></p>" +
+    "<p>Ruta: " +
+    (routes[state.branch1] || "?") +
+    " → " +
+    (routes[state.branch2] || "?") +
+    " · Vidas: " +
+    Math.min(state.lives, 3) +
+    "/3</p>" +
+    '<p style="margin-top:15px">CÓDIGO DE VERIFICACIÓN:</p>' +
+    '<div class="code-box">' +
+    code +
+    "</div>" +
+    '<p class="instructions">Copia este código y la frase final y entrégaselos al profesor.</p>' +
+    "</div>" +
+    '<button onclick="restartGame()">&#8635; NUEVA PARTIDA</button>' +
+    "</div>";
+}
+
+// === ESCENAS 3D (estética terminal / IA) ===
+var GREEN = 0x00ff41,
+  DGREEN = 0x0d3d1a,
+  CYAN = 0x22d3ee;
+function _baseScene(name, fogDensity) {
+  clearScene();
+  tjs.currentScene = name;
+  tjs.scene.fog = new THREE.FogExp2(0x0a0f0a, fogDensity || 0.05);
+  addLight("ambient", 0x335533, 0.5);
+}
+function _rain(count, color) {
+  // «Lluvia de código»: puntos que caen
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(count * 3);
+  for (var i = 0; i < count; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 20;
+    pos[i * 3 + 1] = Math.random() * 10;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 14 - 2;
+  }
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  var mat = new THREE.PointsMaterial({
+    color: color || GREEN,
+    size: 0.07,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  var pts = new THREE.Points(geo, mat);
+  tjs.scene.add(pts);
+  tjs.sceneObjects.push(pts);
+  tjs.animCallbacks.push(function () {
+    var p = pts.geometry.attributes.position.array;
+    for (var j = 0; j < count; j++) {
+      p[j * 3 + 1] -= 0.04 + (j % 5) * 0.01;
+      if (p[j * 3 + 1] < 0) p[j * 3 + 1] = 10;
+    }
+    pts.geometry.attributes.position.needsUpdate = true;
+  });
+  return pts;
+}
+function _glowMat(color, intensity) {
+  return new THREE.MeshStandardMaterial({
+    color: color,
+    emissive: color,
+    emissiveIntensity: intensity || 0.6,
+    roughness: 0.4,
+    metalness: 0.3,
+  });
+}
+function _wireMat(color, opacity) {
+  return new THREE.MeshBasicMaterial({
+    color: color,
+    wireframe: true,
+    transparent: true,
+    opacity: opacity || 0.5,
+  });
+}
+function _racks(n, z0) {
+  var rackMat = new THREE.MeshStandardMaterial({
+    color: 0x101a12,
+    roughness: 0.7,
+    metalness: 0.5,
+  });
+  var ledMat = _glowMat(GREEN, 1.2);
+  for (var i = 0; i < n; i++) {
+    var side = (i % 2) * 2 - 1,
+      z = z0 - Math.floor(i / 2) * 2.6;
+    addObj(new THREE.BoxGeometry(1.2, 3.2, 1.6), rackMat, [side * 3.2, 1.6, z]);
+    for (var k = 0; k < 6; k++)
+      addObj(new THREE.BoxGeometry(0.05, 0.05, 1.2), ledMat, [
+        side * 2.58,
+        0.5 + k * 0.45,
+        z,
+      ]);
+  }
+}
+function _cam(x, y, z, lx, ly, lz) {
+  tjs.camera.position.set(x, y, z);
+  tjs.camera.lookAt(lx, ly, lz);
+}
+
+function buildTitleScene() {
+  if (!tjs) return;
+  _baseScene("title", 0.04);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _wireMat(GREEN, 0.5),
+    [0, 2.2, -3],
+  );
+  var inner = addObj(
+    new THREE.SphereGeometry(0.45, 24, 24), _glowMat(GREEN, 0.5), [0, 2.2, -3],
+  );
+  addLight("point", GREEN, 3, [0, 2.2, 0], 9);
+  _rain(500);
+  _cam(0, 2.4, 8, 0, 2, 0);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.4;
+    core.rotation.x = t * 0.2;
+    inner.scale.setScalar(1 + Math.sin(t * 2) * 0.08);
+    tjs.camera.position.x = Math.sin(t * 0.15) * 2;
+    tjs.camera.lookAt(0, 2, 0);
+  });
+}
+function buildEntradaScene() {
+  if (!tjs) return;
+  _baseScene("entrada", 0.06);
+  addGround(0x050805);
+  _racks(10, 2);
+  var term = addObj(
+    new THREE.BoxGeometry(2.2, 1.3, 0.1),
+    _glowMat(GREEN, 0.5),
+    [0, 1.8, -8],
+  );
+  addLight("point", GREEN, 2, [0, 2.5, -6], 8);
+  _rain(250);
+  _cam(0, 2, 7, 0, 1.6, -6);
+  tjs.animCallbacks.push(function (t) {
+    tjs.camera.position.z = 7 + Math.sin(t * 0.3) * 0.6;
+    term.material.emissiveIntensity = 0.4 + Math.abs(Math.sin(t * 3)) * 0.4;
+  });
+}
+function buildArtefactosScene() {
+  // Firewall: muro de bloques
+  if (!tjs) return;
+  _baseScene("firewall", 0.05);
+  addGround(0x050805);
+  var blocks = [];
+  for (var x = -4; x <= 4; x++)
+    for (var y = 0; y < 5; y++) {
+      var b = addObj(
+        new THREE.BoxGeometry(0.9, 0.9, 0.3),
+        _glowMat(y % 2 ? 0x06361a : 0x084a22, 0.3),
+        [x, 0.5 + y, -3],
+      );
+      blocks.push(b);
+    }
+  addLight("point", 0xff3b3b, 1.5, [0, 3, 0], 8);
+  _rain(200);
+  _cam(0, 2.5, 6, 0, 2.3, -3);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < blocks.length; i++)
+      blocks[i].material.emissiveIntensity =
+        0.15 + 0.3 * Math.abs(Math.sin(t * 2 + i * 0.37));
+  });
+}
+function buildCriptaScene() {
+  // Rama A · visión: rejilla de píxeles y un filtro que se desliza
+  if (!tjs) return;
+  _baseScene("vision", 0.05);
+  var px = [];
+  for (var i = 0; i < 8; i++)
+    for (var j = 0; j < 8; j++) {
+      var v = Math.random();
+      px.push(
+        addObj(
+          new THREE.BoxGeometry(0.45, 0.45, 0.1),
+          _glowMat(new THREE.Color(0, 0.25 + v * 0.75, 0.2), 0.4),
+          [-1.75 + i * 0.5, 0.6 + j * 0.5, -2],
+        ),
+      );
+    }
+  var filt = addObj(
+    new THREE.BoxGeometry(1.5, 1.5, 0.12),
+    _wireMat(CYAN, 0.9),
+    [-1.25, 1.1, -1.8],
+  );
+  var eye = addObj(
+    new THREE.SphereGeometry(0.5, 24, 24),
+    _glowMat(CYAN, 1.2),
+    [0, 5.2, -2],
+  );
+  addLight("point", CYAN, 2, [0, 3, 1], 8);
+  _cam(0, 2.4, 5.5, 0, 2.3, -2);
+  tjs.animCallbacks.push(function (t) {
+    var k = Math.floor(t * 1.5) % 36,
+      cx = k % 6,
+      cy = Math.floor(k / 6);
+    filt.position.x = -1.25 + cx * 0.5;
+    filt.position.y = 1.1 + cy * 0.5;
+    eye.scale.setScalar(1 + Math.sin(t * 3) * 0.1);
+  });
+}
+function buildBibliotecaScene() {
+  // Rama B · memoria: celdas LSTM en fila con puertas
+  if (!tjs) return;
+  _baseScene("memoria", 0.05);
+  addGround(0x050805);
+  var cells = [];
+  for (var i = 0; i < 6; i++) {
+    var c = addObj(new THREE.BoxGeometry(1, 1, 1), _glowMat(0x0d7a30, 0.5), [
+      -5 + i * 2,
+      1.5,
+      -2,
+    ]);
+    cells.push(c);
+    if (i < 5)
+      addObj(
+        new THREE.CylinderGeometry(0.06, 0.06, 1, 8),
+        _glowMat(GREEN, 1),
+        [-4 + i * 2, 1.5, -2],
+        [0, 0, Math.PI / 2],
+      );
+  }
+  var belt = addObj(
+    new THREE.CylinderGeometry(0.05, 0.05, 12, 8),
+    _glowMat(CYAN, 1.2),
+    [0, 2.4, -2],
+    [0, 0, Math.PI / 2],
+  );
+  addLight("point", GREEN, 2, [0, 3, 1], 9);
+  _rain(150);
+  _cam(0, 2.6, 6, 0, 1.8, -2);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < cells.length; i++) {
+      var s = 0.5 + 0.5 * Math.sin(t * 2 - i * 0.8);
+      cells[i].material.emissiveIntensity = 0.2 + s * 0.8;
+      cells[i].rotation.y = t * 0.3 + i;
+    }
+    belt.material.emissiveIntensity = 0.8 + Math.sin(t * 4) * 0.3;
+  });
+}
+function buildPasajeScene() {
+  // Base de datos central: cilindros apilados
+  if (!tjs) return;
+  _baseScene("db", 0.05);
+  addGround(0x050805);
+  var disks = [];
+  for (var k = 0; k < 5; k++)
+    disks.push(
+      addObj(
+        new THREE.CylinderGeometry(1.4, 1.4, 0.45, 32),
+        _glowMat(0x0a5c25, 0.5),
+        [0, 0.4 + k * 0.6, -2],
+      ),
+    );
+  var ring = addObj(
+    new THREE.TorusGeometry(2.4, 0.04, 8, 64),
+    _glowMat(GREEN, 1.2),
+    [0, 1.6, -2],
+    [Math.PI / 2, 0, 0],
+  );
+  addLight("point", GREEN, 2.5, [0, 4, 0], 9);
+  _rain(300);
+  _cam(0, 3, 6.5, 0, 1.6, -2);
+  tjs.animCallbacks.push(function (t) {
+    ring.position.y = 0.4 + (Math.sin(t) + 1) * 1.3;
+    for (var i = 0; i < disks.length; i++)
+      disks[i].material.emissiveIntensity =
+        0.3 + 0.5 * Math.abs(Math.sin(t * 2 + i));
+  });
+}
+function buildFuegoScene() {
+  // Rama C · nodo encriptado: candado / espiral de tokens
+  if (!tjs) return;
+  _baseScene("cifrado", 0.05);
+  var knot = addObj(
+    new THREE.TorusKnotGeometry(1, 0.28, 120, 12),
+    _glowMat(0xd97706, 0.7),
+    [0, 2.2, -2],
+  );
+  var toks = [];
+  for (var i = 0; i < 30; i++)
+    toks.push(
+      addObj(
+        new THREE.BoxGeometry(0.18, 0.18, 0.18),
+        _glowMat(GREEN, 1),
+        [0, 0, 0],
+      ),
+    );
+  addLight("point", 0xfbbf24, 2.5, [0, 3, 1], 9);
+  _cam(0, 2.4, 6.5, 0, 2.2, -2);
+  tjs.animCallbacks.push(function (t) {
+    knot.rotation.y = t * 0.5;
+    knot.rotation.x = t * 0.25;
+    for (var i = 0; i < toks.length; i++) {
+      var a = t * 0.8 + i * 0.21;
+      toks[i].position.set(
+        Math.cos(a) * 2.6,
+        0.4 + (i / toks.length) * 3.6,
+        -2 + Math.sin(a) * 2.6,
+      );
+    }
+  });
+}
+function buildAguaScene() {
+  // Rama D · matriz de atención: nodos conectados todos con todos
+  if (!tjs) return;
+  _baseScene("atencion", 0.04);
+  var n = 8,
+    nodes = [],
+    P = [];
+  for (var i = 0; i < n; i++) {
+    var a = (i / n) * Math.PI * 2,
+      p = new THREE.Vector3(
+        Math.cos(a) * 2.5,
+        2.2 + Math.sin(a * 2) * 0.6,
+        -2 + Math.sin(a) * 2.5,
+      );
+    P.push(p);
+    nodes.push(
+      addObj(new THREE.SphereGeometry(0.18, 16, 16), _glowMat(CYAN, 1.2), [
+        p.x,
+        p.y,
+        p.z,
+      ]),
+    );
+  }
+  var lines = [];
+  for (var x = 0; x < n; x++)
+    for (var y = x + 1; y < n; y++) {
+      var g = new THREE.BufferGeometry().setFromPoints([P[x], P[y]]);
+      var l = new THREE.Line(
+        g,
+        new THREE.LineBasicMaterial({
+          color: GREEN,
+          transparent: true,
+          opacity: 0.3,
+        }),
+      );
+      tjs.scene.add(l);
+      tjs.sceneObjects.push(l);
+      lines.push(l);
+    }
+  addLight("point", CYAN, 2, [0, 3, 1], 9);
+  _rain(150, CYAN);
+  _cam(0, 3, 6.5, 0, 2.2, -2);
+  tjs.animCallbacks.push(function (t) {
+    for (var i = 0; i < lines.length; i++)
+      lines[i].material.opacity =
+        0.08 + 0.6 * Math.pow(Math.abs(Math.sin(t * 0.9 + i * 0.7)), 4);
+    tjs.camera.position.x = Math.sin(t * 0.2) * 1.5;
+    tjs.camera.lookAt(0, 2.2, -2);
+  });
+}
+function buildFinalScene() {
+  // Root access: núcleo de NEXUS
+  if (!tjs) return;
+  _baseScene("root", 0.04);
+  addGround(0x050805);
+  var core = addObj(
+    new THREE.OctahedronGeometry(1.3, 0),
+    _glowMat(0xff3b3b, 0.9),
+    [0, 2.4, -2],
+  );
+  var shell = addObj(
+    new THREE.IcosahedronGeometry(2.1, 1),
+    _wireMat(GREEN, 0.5),
+    [0, 2.4, -2],
+  );
+  addLight("point", 0xff3b3b, 3, [0, 2.4, -0.5], 8);
+  _rain(400);
+  _cam(0, 2.6, 6, 0, 2.3, -2);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t;
+    shell.rotation.y = -t * 0.3;
+    shell.rotation.x = t * 0.2;
+    core.material.emissiveIntensity = 0.6 + Math.abs(Math.sin(t * 3)) * 0.6;
+  });
+}
+function buildVictoryScene() {
+  if (!tjs) return;
+  _baseScene("victory", 0.03);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _glowMat(GREEN, 1.3),
+    [0, 2.4, -1],
+  );
+  addLight("point", GREEN, 3, [0, 3, 1], 10);
+  _rain(800, 0xffd700);
+  _cam(0, 2.6, 7, 0, 2.3, -1);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.8;
+    core.scale.setScalar(1 + Math.sin(t * 2) * 0.1);
+  });
+}
+function buildGameOverScene() {
+  if (!tjs) return;
+  _baseScene("gameover", 0.07);
+  addLight("point", 0xff2222, 2, [0, 3, 1], 8);
+  var core = addObj(
+    new THREE.IcosahedronGeometry(1.4, 1),
+    _wireMat(0xff2222, 0.7),
+    [0, 2.2, -1],
+  );
+  _rain(500, 0xff2222);
+  _cam(0, 2.4, 7, 0, 2, -1);
+  tjs.animCallbacks.push(function (t) {
+    core.rotation.y = t * 0.2;
+  });
+}
+function buildBranchScene() {
+  if (!tjs) return;
+  _baseScene("branch", 0.05);
+  addGround(0x050805);
+  addObj(
+    new THREE.BoxGeometry(0.4, 0.05, 10),
+    _glowMat(GREEN, 1),
+    [-1.6, 0.03, -3],
+    [0, 0.35, 0],
+  );
+  addObj(
+    new THREE.BoxGeometry(0.4, 0.05, 10),
+    _glowMat(CYAN, 1),
+    [1.6, 0.03, -3],
+    [0, -0.35, 0],
+  );
+  var l = addObj(
+    new THREE.SphereGeometry(0.4, 16, 16),
+    _glowMat(GREEN, 1.3),
+    [-3.2, 1.5, -7],
+  );
+  var r = addObj(
+    new THREE.SphereGeometry(0.4, 16, 16),
+    _glowMat(CYAN, 1.3),
+    [3.2, 1.5, -7],
+  );
+  addLight("point", GREEN, 2, [-3, 2, -6], 8);
+  addLight("point", CYAN, 2, [3, 2, -6], 8);
+  _rain(250);
+  _cam(0, 2.2, 5, 0, 1, -5);
+  tjs.animCallbacks.push(function (t) {
+    l.position.y = 1.5 + Math.sin(t * 2) * 0.2;
+    r.position.y = 1.5 + Math.cos(t * 2) * 0.2;
+  });
+}
+
+// === UPDATE SCENE: según pantalla y paso ===
+function updateThreeScene() {
+  if (!tjs || !threeEnabled) return;
+  var target;
+  if (state.screen === "title" || state.screen === "intro") target = "title";
+  else if (state.screen === "gameover") target = "gameover";
+  else {
+    var s = state.step;
+    if (s >= 17) target = "victory";
+    else if (s === 6 || s === 11) target = "branch";
+    else if (s <= 2) target = "entrada";
+    else if (s <= 5) target = "firewall";
+    else if (s <= 8) target = state.branch1 === "B" ? "memoria" : "vision";
+    else if (s <= 10) target = "db";
+    else if (s <= 13) target = state.branch2 === "D" ? "atencion" : "cifrado";
+    else target = "root";
+  }
+  if (tjs.currentScene === target) return;
+  var map = {
+    title: buildTitleScene,
+    entrada: buildEntradaScene,
+    firewall: buildArtefactosScene,
+    vision: buildCriptaScene,
+    memoria: buildBibliotecaScene,
+    db: buildPasajeScene,
+    cifrado: buildFuegoScene,
+    atencion: buildAguaScene,
+    root: buildFinalScene,
+    victory: buildVictoryScene,
+    gameover: buildGameOverScene,
+    branch: buildBranchScene,
+  };
+  map[target]();
+  var app = document.getElementById("app");
+  if (app) {
+    var glow = {
+      vision: "rgba(34,211,238,.25)",
+      atencion: "rgba(34,211,238,.25)",
+      cifrado: "rgba(217,119,6,.25)",
+      root: "rgba(255,59,59,.25)",
+      gameover: "rgba(255,34,34,.3)",
+      victory: "rgba(255,215,0,.25)",
+    };
+    app.style.boxShadow = "0 0 60px " + (glow[target] || "rgba(0,255,65,.18)");
+  }
+}
+
+</script>
+</body>
+</html>
